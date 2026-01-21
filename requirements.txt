@@ -1,0 +1,48 @@
+# SimpleMem Laboratory - Dependencies
+
+# Core Framework & Configuration
+mcp>=0.1.0
+pyyaml>=6.0
+pydantic>=2.0.0  # Input validation & schema enforcement
+redis>=5.0.0  # Distributed caching (optional, graceful fallback)
+
+# System Monitoring & Performance
+psutil>=5.9.0
+pynvml>=11.0.0
+ping3>=3.0.0
+
+# Database & Semantic Memory
+chromadb>=0.3.0
+wordnet>=2022.9.1  # Stand-alone WordNet API for semantic relationships
+
+# Text Processing & Analysis
+nltk>=3.8.0
+textblob>=0.17.0
+pandas>=1.5.0
+requests>=2.28.0
+
+# Web Scraping & Content Extraction (Layer 0: Harvester)
+crawl4ai>=0.4.0
+scrapling>=0.5.0
+playwright>=1.40.0
+beautifulsoup4>=4.12.0
+duckduckgo_search>=3.0.0
+
+# Visualization & Dashboard (Beacon)
+streamlit>=1.28.0
+plotly>=5.17.0
+matplotlib>=3.8.0
+
+# Media Processing (Echo)
+openai-whisper>=20230314
+yt-dlp>=2023.11.0
+ffmpeg-python>=0.2.1
+
+# File System Monitoring
+watchdog>=3.0.0
+
+# Type Checking & Development
+mypy>=1.7.0
+types-PyYAML>=6.0.0
+types-requests>=2.31.0
+types-watchdog>=2.3.0

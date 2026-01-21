@@ -1,0 +1,23 @@
+# SimpleMem Laboratory Configuration
+
+storage:
+  base_dir: "./data"
+  db_path: "./data/storage/laboratory.db"
+  log_dir: "./data/logs"
+  lexicon_dir: "./data/lexicons"
+
+analysis:
+  thresholds:
+    high_alert_sentiment: 0.4
+    similarity_threshold: 0.6
+  lookback_days: 7
+
+mcp:
+  host: "localhost"
+  port: 8000
+nltk:
+  data_dir: "./data/nltk_data"
+  auto_download: true
+  install_optional: false
+  languages:
+    - english

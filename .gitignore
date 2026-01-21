@@ -36,9 +36,15 @@ env/
 .coverage
 htmlcov/
 
-# SimpleMem Data and Dynamic Content
+# SimpleMem / SME GitIgnore
 data/
+data/*.db
+data/*.sqlite
+data/chroma/
+logs/*.log
 **/__pycache__/
+.env
+config/local_config.yaml
 
 # OS Specific
 Thumbs.db

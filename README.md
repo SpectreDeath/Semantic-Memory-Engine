@@ -1,8 +1,43 @@
-# 🧪 SimpleMem Laboratory: Upgraded Architecture
+# 🧠 Semantic Memory Engine (SME)
 
-Welcome to the refactored SimpleMem Laboratory. The system has been reorganized for better scalability, portability, and semantic depth.
+> **Solving the long-term memory problem for AI models through local, persistence-driven architecture.**
 
-## 📂 New Directory Structure
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Hardware Profile: Local First](https://img.shields.io/badge/Hardware%20Profile-Local%20First-blueviolet)
+![MCP Server](https://img.shields.io/badge/MCP%20Server-Integration-blue)
+
+Welcome to the **Semantic Memory Engine** (formerly SimpleMem Laboratory). This project provides a robust, scalable framework for building persistent, semantic memory systems for AI agents, optimized for local execution.
+
+## 📊 System Architecture
+
+```mermaid
+graph TD
+    subgraph Layer0 [Layer 0: Ingestion]
+        A[Harvester Spider] -->|Markdown| B[Raw Archive]
+    end
+
+    subgraph Layer1_2 [Layer 1 & 2: Core]
+        B -->|Stream| C[Centrifuge DB]
+        C -->|Context| D[Semantic Loom]
+    end
+
+    subgraph Layer3_6 [Layer 3 & 6: Intelligence]
+        D -->|Atomic Facts| E[Synapse Memory]
+        D -->|Stylometric Data| F[Scribe Forensic Engine]
+    end
+
+    subgraph Layer5_7 [Layer 5 & 7: Output]
+        E -->|Semantic Search| G[Adaptive Scout]
+        F -->|Authorship Score| H[Beacon Dashboard]
+        G -->|Verified Context| I[LLM Response]
+    end
+
+    %% Hardware Optimization Notes
+    classDef hardware fill:#f96,stroke:#333,stroke-width:2px;
+    class D,E,G hardware;
+```
+
+## 📂 Directory Structure
 
 - **`config/`**: Centralized configuration (`config.yaml`).
 - **`src/`**: Core tool logic organized by layer.

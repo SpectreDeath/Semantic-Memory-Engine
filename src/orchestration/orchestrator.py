@@ -21,10 +21,15 @@ import uuid
 import json
 import os
 
+from mcp.server.fastmcp import FastMCP
+from src.core.config import Config
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-DB_PATH = os.path.normpath("D:/mcp_servers/storage/laboratory.db")
+mcp = FastMCP("PipelineOrchestrator")
+
+DB_PATH = Config().get_path('storage.db_path')
 
 class JobStatus(Enum):
     PENDING = "pending"

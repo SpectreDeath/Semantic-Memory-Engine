@@ -14,8 +14,10 @@ from pathlib import Path
 
 mcp = FastMCP("MonitoringDiagnostics")
 
-DB_PATH = os.path.normpath("D:/mcp_servers/storage/laboratory.db")
-LOG_DIR = os.path.normpath("D:/mcp_servers/logs")
+from src.core.config import Config
+config = Config()
+DB_PATH = config.get_path('storage.db_path')
+LOG_DIR = config.get_path('storage.log_dir')
 
 class PerformanceProfiler:
     """Profiles system performance for 1660 Ti and CPU."""

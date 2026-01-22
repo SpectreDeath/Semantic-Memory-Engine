@@ -73,8 +73,10 @@ class Scout:
     """
 
     def __init__(self, harvester_path: str = None):
-        self.db_path = "d:\\mcp_servers\\storage\\scout_gaps.sqlite"
-        self.harvester_path = harvester_path or "d:\\mcp_servers\\harvester_spider.py"
+        from src.core.config import Config
+        config = Config()
+        self.db_path = str(config.get_path('storage.base_dir') / "storage" / "scout_gaps.sqlite")
+        self.harvester_path = harvester_path or str(Path(__file__).parent.parent.parent / "harvester_spider.py")
         self._initialize_db()
         
         # Initialize semantic graph for semantic gap detection

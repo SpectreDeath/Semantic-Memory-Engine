@@ -14,7 +14,8 @@ import re
 
 mcp = FastMCP("AdaptiveScout")
 
-DB_PATH = os.path.normpath("D:/mcp_servers/storage/laboratory.db")
+from src.core.config import Config
+DB_PATH = Config().get_path('storage.db_path')
 
 class QueryComplexityEstimator:
     """Estimates query complexity to determine retrieval depth."""

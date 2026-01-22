@@ -55,8 +55,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-DB_PATH = "d:\\mcp_servers\\storage\\centrifuge_db.sqlite"
-SCRIBE_DB_PATH = "d:\\mcp_servers\\storage\\scribe_profiles.sqlite"
+from src.core.config import Config
+config = Config()
+DB_PATH = str(config.get_path('storage.base_dir') / "storage" / "centrifuge_db.sqlite")
+SCRIBE_DB_PATH = str(config.get_path('storage.base_dir') / "storage" / "scribe_profiles.sqlite")
 
 # Linguistic thresholds for anomaly detection
 ANOMALY_THRESHOLDS = {

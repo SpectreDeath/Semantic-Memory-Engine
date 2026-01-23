@@ -1,0 +1,23 @@
+name: SME Forensic Lab CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+    - name: Install Dependencies
+      run: pip install -r requirements.txt
+    - name: Set up R
+      uses: r-lib/actions/setup-r@v2
+    - name: Install Stylo
+      run: Rscript -e "install.packages('stylo', repos='https://cloud.r-project.org')"
+    - name: Run Core Verifications
+      run: |
+        python verify_pystyl.py
+        python verify_adaptive.py

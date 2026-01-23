@@ -30,6 +30,29 @@ def init_db():
             compound REAL
         )
     ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS atomic_facts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            node_id TEXT UNIQUE,
+            content TEXT NOT NULL,
+            source_type TEXT DEFAULT 'AIFdb',
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS logical_links (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_node_id TEXT,
+            target_node_id TEXT,
+            link_type TEXT, -- RA (Inference), CA (Conflict)
+            scheme TEXT,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY(source_node_id) REFERENCES atomic_facts(node_id),
+            FOREIGN KEY(target_node_id) REFERENCES atomic_facts(node_id)
+        )
+    ''')
     conn.commit()
     conn.close()
 

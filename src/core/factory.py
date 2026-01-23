@@ -59,6 +59,153 @@ class ToolFactory:
         return cls._instances['scribe']
     
     @classmethod
+    def create_lexicon_importer(cls, reset: bool = False) -> 'LexiconImporter':
+        """
+        Create or retrieve the LexiconImporter instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            LexiconImporter instance
+        """
+        if reset or 'lexicon_importer' not in cls._instances:
+            try:
+                from src.scribe.lexicon_importer import LexiconImporter
+                cls._instances['lexicon_importer'] = LexiconImporter()
+                logger.info("Created LexiconImporter instance")
+            except Exception as e:
+                logger.error(f"Failed to create LexiconImporter: {e}")
+                raise
+        return cls._instances['lexicon_importer']
+    
+    @classmethod
+    def create_aifdb_connector(cls, reset: bool = False) -> 'AIFdbConnector':
+        """
+        Create or retrieve the AIFdbConnector instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            AIFdbConnector instance
+        """
+        if reset or 'aifdb' not in cls._instances:
+            try:
+                from src.query.aifdb_connector import AIFdbConnector
+                cls._instances['aifdb'] = AIFdbConnector()
+                logger.info("Created AIFdbConnector instance")
+            except Exception as e:
+                logger.error(f"Failed to create AIFdbConnector: {e}")
+                raise
+        return cls._instances['aifdb']
+    
+    @classmethod
+    def create_concept_resolver(cls, reset: bool = False) -> 'ConceptResolver':
+        """
+        Create or retrieve the ConceptResolver instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            ConceptResolver instance
+        """
+        if reset or 'concept_resolver' not in cls._instances:
+            try:
+                from src.query.concept_resolver import ConceptResolver
+                cls._instances['concept_resolver'] = ConceptResolver()
+                logger.info("Created ConceptResolver instance")
+            except Exception as e:
+                logger.error(f"Failed to create ConceptResolver: {e}")
+                raise
+        return cls._instances['concept_resolver']
+    
+    @classmethod
+    def create_stylo_wrapper(cls, reset: bool = False) -> 'StyloWrapper':
+        """
+        Create or retrieve the StyloWrapper instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            StyloWrapper instance
+        """
+        if reset or 'stylo_wrapper' not in cls._instances:
+            try:
+                from src.scribe.stylo_wrapper import StyloWrapper
+                cls._instances['stylo_wrapper'] = StyloWrapper()
+                logger.info("Created StyloWrapper instance")
+            except Exception as e:
+                logger.error(f"Failed to create StyloWrapper: {e}")
+                raise
+        return cls._instances['stylo_wrapper']
+    
+    @classmethod
+    def create_pystyl_wrapper(cls, reset: bool = False) -> 'PyStylWrapper':
+        """
+        Create or retrieve the PyStylWrapper instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            PyStylWrapper instance
+        """
+        if reset or 'pystyl' not in cls._instances:
+            try:
+                from src.scribe.pystyl_wrapper import PyStylWrapper
+                cls._instances['pystyl'] = PyStylWrapper()
+                logger.info("Created PyStylWrapper instance")
+            except Exception as e:
+                logger.error(f"Failed to create PyStylWrapper: {e}")
+                raise
+        return cls._instances['pystyl']
+    
+    @classmethod
+    def create_rolling_delta(cls, reset: bool = False) -> 'RollingDelta':
+        """
+        Create or retrieve the RollingDelta instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            RollingDelta instance
+        """
+        if reset or 'rolling_delta' not in cls._instances:
+            try:
+                from src.scribe.rolling_delta import RollingDelta
+                cls._instances['rolling_delta'] = RollingDelta()
+                logger.info("Created RollingDelta instance")
+            except Exception as e:
+                logger.error(f"Failed to create RollingDelta: {e}")
+                raise
+        return cls._instances['rolling_delta']
+    
+    @classmethod
+    def create_adaptive_learner(cls, reset: bool = False) -> 'AdaptiveLearner':
+        """
+        Create or retrieve the AdaptiveLearner instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            AdaptiveLearner instance
+        """
+        if reset or 'adaptive_learner' not in cls._instances:
+            try:
+                from src.scribe.adaptive_learner import AdaptiveLearner
+                cls._instances['adaptive_learner'] = AdaptiveLearner()
+                logger.info("Created AdaptiveLearner instance")
+            except Exception as e:
+                logger.error(f"Failed to create AdaptiveLearner: {e}")
+                raise
+        return cls._instances['adaptive_learner']
+    
+    @classmethod
     def create_scout(cls, reset: bool = False) -> 'Scout':
         """
         Create or retrieve the Scout instance.

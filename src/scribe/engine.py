@@ -24,7 +24,7 @@ import sqlite3
 import numpy as np
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass, asdict
 from scipy.spatial.distance import cosine
 from collections import Counter
@@ -307,6 +307,46 @@ class ScribeEngine:
         except Exception as e:
             logger.error(f"❌ Profile comparison failed: {str(e)}")
             raise
+
+    def get_stylo_attribution(self, text: str, corpus_path: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Performs secondary attribution using the R stylo package.
+        
+        Args:
+            text: Text to analyze
+            corpus_path: Path to directory of known author samples
+            
+        Returns:
+            Stylo attribution results or error status
+        """
+        try:
+            from src.core.factory import ToolFactory
+            stylo = ToolFactory.create_stylo_wrapper()
+            
+            status = stylo.get_status()
+            if not status["ready"]:
+                return {
+                    "status": "unavailable",
+                    "reason": "R or stylo package not found",
+                    "instructions": [
+                        "1. Download R from cran.r-project.org",
+                        "2. Run in R: install.packages('stylo')",
+                        "3. Run in terminal: pip install rpy2"
+                    ]
+                }
+            
+            if not corpus_path:
+                return {"status": "error", "reason": "No corpus path provided for Delta analysis"}
+            
+            results = stylo.analyze_distance(text, corpus_path)
+            return {
+                "status": "success",
+                "results": results,
+                "engine": "R-Stylo (Burrows Delta)"
+            }
+        except Exception as e:
+            logger.error(f"Stylo attribution failed: {e}")
+            return {"status": "error", "reason": str(e)}
 
     # ========================================================================
     # TOOL 3: CALCULATE ATTRIBUTION SCORE

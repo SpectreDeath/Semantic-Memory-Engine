@@ -206,6 +206,90 @@ class ToolFactory:
         return cls._instances['adaptive_learner']
     
     @classmethod
+    def create_forensic_scout(cls, reset: bool = False) -> 'ForensicScout':
+        """
+        Create or retrieve the ForensicScout instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            ForensicScout instance
+        """
+        if reset or 'forensic_scout' not in cls._instances:
+            try:
+                from src.harvester.forensic_scout import ForensicScout
+                cls._instances['forensic_scout'] = ForensicScout()
+                logger.info("Created ForensicScout instance")
+            except Exception as e:
+                logger.error(f"Failed to create ForensicScout: {e}")
+                raise
+        return cls._instances['forensic_scout']
+    
+    @classmethod
+    def create_contrastive_analyzer(cls, reset: bool = False) -> 'ContrastiveAnalyzer':
+        """
+        Create or retrieve the ContrastiveAnalyzer instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            ContrastiveAnalyzer instance
+        """
+        if reset or 'contrastive_analyzer' not in cls._instances:
+            try:
+                from src.scribe.contrastive_analyzer import ContrastiveAnalyzer
+                cls._instances['contrastive_analyzer'] = ContrastiveAnalyzer()
+                logger.info("Created ContrastiveAnalyzer instance")
+            except Exception as e:
+                logger.error(f"Failed to create ContrastiveAnalyzer: {e}")
+                raise
+        return cls._instances['contrastive_analyzer']
+    
+    @classmethod
+    def create_impostors_checker(cls, reset: bool = False) -> 'ImpostorsChecker':
+        """
+        Create or retrieve the ImpostorsChecker instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            ImpostorsChecker instance
+        """
+        if reset or 'impostors_checker' not in cls._instances:
+            try:
+                from src.scribe.impostors_checker import ImpostorsChecker
+                cls._instances['impostors_checker'] = ImpostorsChecker()
+                logger.info("Created ImpostorsChecker instance")
+            except Exception as e:
+                logger.error(f"Failed to create ImpostorsChecker: {e}")
+                raise
+        return cls._instances['impostors_checker']
+    
+    @classmethod
+    def create_network_generator(cls, reset: bool = False) -> 'NetworkGenerator':
+        """
+        Create or retrieve the NetworkGenerator instance.
+        
+        Args:
+            reset: Force creation of new instance
+            
+        Returns:
+            NetworkGenerator instance
+        """
+        if reset or 'network_generator' not in cls._instances:
+            try:
+                from src.visualization.network_generator import NetworkGenerator
+                cls._instances['network_generator'] = NetworkGenerator()
+                logger.info("Created NetworkGenerator instance")
+            except Exception as e:
+                logger.error(f"Failed to create NetworkGenerator: {e}")
+                raise
+        return cls._instances['network_generator']
+    
+    @classmethod
     def create_scout(cls, reset: bool = False) -> 'Scout':
         """
         Create or retrieve the Scout instance.

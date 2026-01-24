@@ -220,7 +220,14 @@ def main():
     # MAIN CONTENT
     st.title("🗼 The Beacon / Semantic Dashboard")
     
-    tab1, tab2, tab3 = st.tabs(["Intelligence Overview", "Forensic Deep-Dive", "Hardware Diagnostics"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+        "Intelligence Overview", 
+        "Forensic Deep-Dive", 
+        "⚖️ Author Versus",
+        "🛡️ Verification",
+        "🕸️ Stylistic Map",
+        "Hardware Diagnostics"
+    ])
     
     # TAB 1: Intelligence Overview
     with tab1:
@@ -372,8 +379,162 @@ def main():
         except Exception as e:
             st.error(f"Error rendering comparison: {e}")
 
-    # TAB 3: Hardware Diagnostics
+    # TAB 3: Author Versus (Contrastive Analysis)
     with tab3:
+        st.subheader("⚖️ Contrastive Analysis (Zeta-Scores)")
+        st.caption("Identify distinctive lexical markers that separate two authors.")
+        
+        # Get author list
+        try:
+            scribe_conns = get_db_connections()
+            if scribe_conns["scribe"]:
+                cursor = scribe_conns["scribe"].cursor()
+                cursor.execute("SELECT author_id, author_name FROM author_profiles")
+                authors = cursor.fetchall()
+                author_options = {f"{name} ({uid})": uid for uid, name in authors}
+                
+                if len(author_options) >= 2:
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        auth_a_label = st.selectbox("Select Author A", options=list(author_options.keys()), key="versus_a")
+                    with col2:
+                        auth_b_label = st.selectbox("Select Author B", options=list(author_options.keys()), key="versus_b")
+                    
+                    if st.button("Run Contrastive Analysis"):
+                        auth_a = author_options[auth_a_label]
+                        auth_b = author_options[auth_b_label]
+                        
+                        from src.core.factory import ToolFactory
+                        analyzer = ToolFactory.create_contrastive_analyzer()
+                        results = analyzer.get_contrastive_lexicon(auth_a, auth_b, top_n=10)
+                        
+                        st.divider()
+                        col_a, col_b = st.columns(2)
+                        
+                        with col_a:
+                            st.write(f"**{auth_a_label} Preferred Words**")
+                            if results['preferred_a']['words']:
+                                df_a = pd.DataFrame({
+                                    'Word': results['preferred_a']['words'],
+                                    'Zeta Score': results['preferred_a']['scores']
+                                })
+                                st.dataframe(df_a, use_container_width=True)
+                            else:
+                                st.info("Insufficient data for analysis")
+                        
+                        with col_b:
+                            st.write(f"**{auth_b_label} Preferred Words**")
+                            if results['preferred_b']['words']:
+                                df_b = pd.DataFrame({
+                                    'Word': results['preferred_b']['words'],
+                                    'Zeta Score': results['preferred_b']['scores']
+                                })
+                                st.dataframe(df_b, use_container_width=True)
+                            else:
+                                st.info("Insufficient data for analysis")
+                else:
+                    st.warning("Need at least 2 author profiles for contrastive analysis.")
+            else:
+                st.warning("Forensic database not connected.")
+        except Exception as e:
+            st.error(f"Error in contrastive analysis: {e}")
+
+    # TAB 4: Verification (Impostors Method)
+    with tab4:
+        st.subheader("🛡️ Authorship Verification (Impostors Method)")
+        st.caption("Probabilistic verification using reference impostor pool.")
+        
+        target_text = st.text_area(
+            "Target Text to Verify", 
+            height=200,
+            placeholder="Paste the document you want to verify..."
+        )
+        
+        try:
+            scribe_conns = get_db_connections()
+            if scribe_conns["scribe"]:
+                cursor = scribe_conns["scribe"].cursor()
+                cursor.execute("SELECT author_id, author_name FROM author_profiles")
+                authors = cursor.fetchall()
+                author_options = {f"{name} ({uid})": uid for uid, name in authors}
+                
+                if author_options:
+                    suspect_label = st.selectbox("Select Suspect Author", options=list(author_options.keys()))
+                    suspect_uid = author_options[suspect_label]
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        iterations = st.slider("Bootstrap Iterations", 50, 200, 100)
+                    with col2:
+                        impostor_count = st.slider("Impostor Pool Size", 5, 20, 10)
+                    
+                    if st.button("Run Probabilistic Audit"):
+                        if target_text:
+                            from src.core.factory import ToolFactory
+                            checker = ToolFactory.create_impostors_checker()
+                            report = checker.verify_authorship(
+                                target_text, 
+                                suspect_uid,
+                                iterations=iterations,
+                                impostor_count=impostor_count
+                            )
+                            
+                            st.divider()
+                            st.metric(
+                                "Confidence Score", 
+                                f"{report['confidence']*100:.2f}%",
+                                delta=f"{report['suspect_wins']}/{report['iterations']} wins"
+                            )
+                            
+                            if report['verified']:
+                                st.success(f"✅ **{report['verdict']}**: Text matches {suspect_label}'s style")
+                            else:
+                                st.error(f"⚠️ **{report['verdict']}**: Text does NOT match {suspect_label}'s style")
+                            
+                            with st.expander("Technical Details"):
+                                st.json(report)
+                        else:
+                            st.warning("Please provide text to verify.")
+                else:
+                    st.warning("No author profiles available for verification.")
+            else:
+                st.warning("Forensic database not connected.")
+        except Exception as e:
+            st.error(f"Error in verification: {e}")
+
+    # TAB 5: Stylistic Map (Network Visualization)
+    with tab5:
+        st.subheader("🕸️ Global Stylistic Consensus Network")
+        st.caption("Interactive graph showing similarity relationships between all authors.")
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            threshold = st.slider("Similarity Threshold (Delta)", 0.5, 2.0, 1.2, 0.1)
+        with col2:
+            max_nodes = st.slider("Max Nodes", 10, 100, 50)
+        
+        if st.button("Generate Author Network"):
+            try:
+                from src.core.factory import ToolFactory
+                import streamlit.components.v1 as components
+                
+                gen = ToolFactory.create_network_generator()
+                html_path = gen.generate_network(threshold=threshold, max_nodes=max_nodes)
+                
+                if html_path and os.path.exists(html_path):
+                    with open(html_path, 'r', encoding='utf-8') as f:
+                        components.html(f.read(), height=600, scrolling=True)
+                    st.success(f"✅ Network generated with threshold={threshold}")
+                else:
+                    st.error("Failed to generate network. Check database for author profiles.")
+            except Exception as e:
+                st.error(f"Error generating network: {e}")
+                import traceback
+                with st.expander("Error Details"):
+                    st.code(traceback.format_exc())
+
+    # TAB 6: Hardware Diagnostics
+    with tab6:
         st.subheader("🛠️ Detailed Hardware Stats")
         col_a, col_b = st.columns(2)
         

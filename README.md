@@ -1,4 +1,4 @@
-# 🧠 Semantic Memory Engine (SME)
+# 🧠 SME: Semantic Memory Engine & Forensic Toolkit
 
 > **Solving the long-term memory problem for AI models through local, persistence-driven architecture.**
 
@@ -6,7 +6,55 @@
 ![Hardware Profile: Local First](https://img.shields.io/badge/Hardware%20Profile-Local%20First-blueviolet)
 ![MCP Server](https://img.shields.io/badge/MCP%20Server-Integration-blue)
 
-Welcome to the **Semantic Memory Engine** (formerly SimpleMem Laboratory). This project provides a robust, scalable framework for building persistent, semantic memory systems for AI agents, optimized for local execution.
+---
+
+## 🖥️ Workstation Profile (Target Hardware)
+
+This project is optimized for a high-performance local forensic environment.
+
+- **GPU:** NVIDIA GeForce GTX 1660 Ti (6GB VRAM)
+- **RAM:** 32GB DDR4
+- **Storage:** Dedicated NVMe for large-scale SQLite indexing (10GB+ datasets)
+
+---
+
+## 🚀 Unified CLI Usage (`sme`)
+
+The project features a unified entry point for all forensic and indexing tasks.
+
+```powershell
+# Install the CLI in editable mode
+pip install -e .
+```
+
+### 🔍 System Diagnostics
+
+Run a health check on your data paths and hardware telemetry.
+
+```powershell
+sme verify
+```
+
+**Example Output:**
+```
+🔍 [SME SYSTEM DIAGNOSTICS]
+RAM Usage: 56.6% (19.4GB / 34.3GB)
+CPU Load:  70.5%
+
+--- Data Integrity ---
+ ✅ Knowledge DB... data/knowledge_core.sqlite (0.00 GB)
+ ✅ Assertions..... data/conceptnet-assertions-5.7.0.csv (10.16 GB)
+```
+
+### 🧠 Knowledge Distillation
+
+Process the raw 10GB ConceptNet CSV into the localized SQLite Reasoning Core.
+
+```powershell
+sme index
+```
+
+---
 
 ## 📊 System Architecture
 
@@ -32,57 +80,50 @@ graph TD
         G -->|Verified Context| I[LLM Response]
     end
 
-    %% Hardware Optimization Notes
     classDef hardware fill:#f96,stroke:#333,stroke-width:2px;
     class D,E,G hardware;
 ```
 
-## 📂 Directory Structure
+---
 
-- **`config/`**: Centralized configuration (`config.yaml`).
-- **`src/`**: Core tool logic organized by layer.
-  - `core/`: Foundation utilities, Centrifuge DB, and Loom distillation.
-  - `harvester/`: Web search and content extraction.
-  - `scribe/`: Forensic authorship engine.
-  - `synapse/`: Memory consolidation.
-  - `query/`: Semantic search and adaptive retrieval.
-  - `monitoring/`: System health and diagnostics.
-  - `orchestration/`: Pipeline management and automation.
-  - `analysis/`: Rhetoric and trend analysis.
-  - `visualization/`: Dashboards and feedback charts.
-  - `networking/`: Connection probes and network analysis.
-- **`data/`**: Unified storage for databases, logs, and lexicons.
-- **`docs/`**: Comprehensive guides (previously in root).
+## 📦 Project Structure
+
+- **`sme_cli/`**: Unified command-line interface logic.
+- **`src/logic/`**: Core reasoning and quantization engines.
+- **`src/core/`**: Foundation utilities, Centrifuge DB, and Loom distillation.
+- **`src/harvester/`**: Web search and content extraction.
+- **`src/scribe/`**: Forensic authorship engine.
+- **`src/synapse/`**: Memory consolidation.
+- **`src/query/`**: Semantic search and adaptive retrieval.
+- **`data/`**: Local storage for the 10GB knowledge graph (**Excluded from Git**).
+- **`docs/`**: Comprehensive guides.
 - **`tests/`**: Verification and validation suites.
-- **`legacy/`**: Archive of original flat-file structure (safe to remove after verification).
+
+---
 
 ## 🚀 Getting Started
 
 1. **Install Dependencies**:
-
    ```bash
    pip install -r requirements.txt
+   pip install -e .
    ```
 
-2. **Configure Paths**:
-   Edit `config/config.yaml` to adjust storage locations if necessary.
-
-3. **Run a Tool**:
-   Most tools are now importable as modules. To run a specific MCP server:
-
-   ```bash
-   python -m src.core.centrifuge
+2. **Run System Diagnostics**:
+   ```powershell
+   sme verify
    ```
 
-4. **Explore Documentation**:
+3. **Explore Documentation**:
    Check `docs/START_HERE.md` for a deep dive into the system capabilities.
 
-## ✨ New Features: Semantic Memory
+---
 
-This upgrade includes **ChromaDB** integration for true semantic search.
+## ✨ Features
 
-- See `src/core/semantic_db.py` for the implementation.
-- This allows the `Scout` and `Synapse` layers to associate facts by meaning rather than just keyword matches.
+- **ChromaDB** integration for true semantic search.
+- **Hardware-aware CLI** with real-time RAM/CPU telemetry via `psutil`.
+- **SQLite-based Knowledge Core** from 10GB+ ConceptNet distillation.
 
 ---
 

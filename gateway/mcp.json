@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "name": "Lawnmower Man Gateway",
+  "description": "MCP gateway to SME Forensic Toolkit - provides semantic memory, authorship analysis, and knowledge graph capabilities",
+  "version": "0.1.0",
+  "transport": {
+    "type": "stdio",
+    "command": "python",
+    "args": ["-m", "gateway.mcp_server"],
+    "cwd": "d:\\SME"
+  },
+  "tools": {
+    "verify_system": {
+      "description": "Check system health and hardware telemetry"
+    },
+    "semantic_search": {
+      "description": "Search knowledge base using semantic similarity",
+      "parameters": {
+        "query": "string",
+        "limit": "integer (optional, default 5)"
+      }
+    },
+    "query_knowledge": {
+      "description": "Query knowledge graph for related concepts",
+      "parameters": {
+        "concept": "string"
+      }
+    },
+    "save_memory": {
+      "description": "Persist a fact to long-term memory",
+      "parameters": {
+        "fact": "string",
+        "source": "string (optional)"
+      }
+    },
+    "get_memory_stats": {
+      "description": "Get knowledge base statistics"
+    },
+    "analyze_authorship": {
+      "description": "Extract linguistic fingerprint for authorship attribution",
+      "parameters": {
+        "text": "string",
+        "author_id": "string (optional)"
+      }
+    },
+    "analyze_sentiment": {
+      "description": "Detect emotions and sentiment in text",
+      "parameters": {
+        "text": "string"
+      }
+    },
+    "list_available_tools": {
+      "description": "List all available MCP tools"
+    }
+  }
+}

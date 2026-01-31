@@ -50,18 +50,68 @@ def verify():
             click.echo(f" ❌ {Fore.RED}{name:.<15} {Fore.WHITE}MISSING")
 
 @cli.command()
-def index():
-    """Execute Reasoning Quantizer Distillation."""
-    click.secho("\n🧠 [INITIATING KNOWLEDGE DISTILLATION]", fg='magenta', bold=True)
+@click.option('--force', is_flag=True, help="Force re-indexing even if data is current.")
+def index(force):
+    """Execute Smart Indexing with Data Lineage."""
+    from src.logic.manifest_manager import ManifestManager
     from src.logic.reasoning_quantizer import ReasoningQuantizer
     
-    csv_path = "data/conceptnet-assertions-5.7.0.csv"
-    if not os.path.exists(csv_path):
-        click.secho(f"🛑 Error: {csv_path} not found!", fg='red')
-        return
-        
+    mm = ManifestManager()
     quantizer = ReasoningQuantizer()
+    csv_path = "data/conceptnet-assertions-5.7.0.csv"
+
+    # Check for file existence first
+    if not os.path.exists(csv_path):
+        click.secho(f"❌ Error: {csv_path} not found!", fg='red')
+        return
+
+    # Lineage Check (The Colin Philosophy)
+    if not mm.is_stale(csv_path) and not force:
+        click.secho("✨ Data lineage is current. Skipping heavy distillation.", fg='green')
+        click.echo("Use --force to override.")
+        return
+
+    click.secho("🧠 Hash mismatch or --force detected. Starting distillation...", fg='yellow')
+    
+    # Run the existing distillation logic
     quantizer.distill_assertions(csv_path)
+    
+    # Update the manifest so we remember this version
+    mm.update_source(csv_path)
+    click.secho("✅ Indexing complete and manifest updated.", fg='green')
+
+@cli.command()
+def status():
+    """Display SME Workstation Health and Data Lineage."""
+    import psutil
+    from src.logic.manifest_manager import ManifestManager
+    import h5py
+    import os
+
+    mm = ManifestManager()
+    
+    # --- Hardware Telemetry ---
+    ram = psutil.virtual_memory()
+    click.secho(f"🖥️  Workstation: 32GB RAM ({ram.percent}% Used) | GTX 1660 Ti", fg='cyan', bold=True)
+
+    # --- Lineage Manifest ---
+    click.echo("\n📋 Data Lineage:")
+    if not mm.data["sources"]:
+        click.echo("  No data sources tracked in manifest.")
+    for path, info in mm.data["sources"].items():
+        name = os.path.basename(path)
+        click.echo(f"  - {name}: {info['timestamp']} (Hash: {info['hash'][:8]}...)")
+
+    # --- HDF5 Index Health ---
+    h5_path = "data/knowledge_core.h5"
+    if os.path.exists(h5_path):
+        with h5py.File(h5_path, 'r') as f:
+            size_gb = os.path.getsize(h5_path) / (1024**3)
+            click.echo(f"\n🧠 Knowledge Core (HDF5):")
+            click.echo(f"  - File: {h5_path} ({size_gb:.2f} GB)")
+            click.echo(f"  - Keys: {list(f.keys())}")
+    else:
+        click.secho("\n⚠️  Knowledge Core (HDF5) not found. Run 'sme index' to build.", fg='yellow')
 
 if __name__ == "__main__":
     cli()

@@ -1,0 +1,44 @@
+# Lawnmower Man Gateway - Docker Compose Configuration
+#
+# This configuration runs the MCP gateway that exposes SME's forensic
+# toolkit to LLM agents. It's designed to work with LM Studio's MCP client.
+#
+# Usage:
+#   docker-compose -f gateway/docker-compose.yml up -d
+#
+# Or from SME root with the unified compose:
+#   docker-compose up lawnmower-gateway
+
+services:
+  lawnmower-gateway:
+    build:
+      context: ..
+      dockerfile: gateway/Dockerfile
+    container_name: lawnmower_man_gateway
+    volumes:
+      # Mount the entire SME project for live development
+      - ..:/app
+      # Persist the data directory
+      - ../data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+      - SME_DB_PATH=/app/data/knowledge_core.sqlite
+      - LOG_LEVEL=INFO
+    # MCP servers typically use stdio, but we expose HTTP for flexibility
+    ports:
+      - "8765:8765"
+    command: python -m gateway.mcp_server
+    networks:
+      - lawnmower-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import gateway; print('ok')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+networks:
+  lawnmower-net:
+    driver: bridge
+    name: lawnmower_network

@@ -1,129 +1,99 @@
-# 🧠 SME: Semantic Memory Engine & Forensic Toolkit
+# 🌿 Lawnmower Man: Forensic MCP Gateway (v1.1.1)
 
-> **Solving the long-term memory problem for AI models through local, persistence-driven architecture.**
+> **The Semantic Memory Engine (SME) Bridge for Agentic AI.**
+> *Now featuring a Modular Extension Framework (Crucible Bridge).*
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Hardware Profile: Local First](https://img.shields.io/badge/Hardware%20Profile-Local%20First-blueviolet)
-![MCP Server](https://img.shields.io/badge/MCP%20Server-Integration-blue)
+![Version](https://img.shields.io/badge/Version-1.1.1_Tactical-green.svg)
+![Architecture](https://img.shields.io/badge/Architecture-Modular_Plugin-blueviolet.svg)
 
 ---
 
-## 🖥️ Workstation Profile (Target Hardware)
+## 🚀 Overview
 
-This project is optimized for a high-performance local forensic environment.
-
-- **GPU:** NVIDIA GeForce GTX 1660 Ti (6GB VRAM)
-- **RAM:** 32GB DDR4
-- **Storage:** Dedicated NVMe for large-scale SQLite indexing (10GB+ datasets)
-
----
-
-## 🚀 Unified CLI Usage (`sme`)
-
-The project features a unified entry point for all forensic and indexing tasks.
-
-```powershell
-# Install the CLI in editable mode
-pip install -e .
-```
-
-### 🔍 System Diagnostics
-
-Run a health check on your data paths and hardware telemetry.
-
-```powershell
-sme verify
-```
-
-**Example Output:**
-```
-🔍 [SME SYSTEM DIAGNOSTICS]
-RAM Usage: 56.6% (19.4GB / 34.3GB)
-CPU Load:  70.5%
-
---- Data Integrity ---
- ✅ Knowledge DB... data/knowledge_core.sqlite (0.00 GB)
- ✅ Assertions..... data/conceptnet-assertions-5.7.0.csv (10.16 GB)
-```
-
-### 🧠 Knowledge Distillation
-
-Process the raw 10GB ConceptNet CSV into the localized SQLite Reasoning Core.
-
-```powershell
-sme index
-```
+Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents (like LM Studio, Claude, or OpenAI). It anchors AI reasoning with:
+- **Hardware Security**: Simulated TPM enclave for evidence signing.
+- **Semantic Memory**: 10GB+ ConceptNet knowledge graph for entity grounding.
+- **Forensic Stylometry**: Authorship fingerprinting (Burrows' Delta).
+- **Tactical Intelligence**: Modular plugin system for specialized threat detection.
 
 ---
 
-## 📊 System Architecture
+## 🧱 Modular Architecture (v1.1.1)
+
+The system is split into the **Core Gateway** and **Hot-Swappable Extensions**.
 
 ```mermaid
 graph TD
-    subgraph Layer0 [Layer 0: Ingestion]
-        A[Harvester Spider] -->|Markdown| B[Raw Archive]
+    Client[AI Agent] <-->|MCP Protocol| Gateway[Lawnmower Gateway]
+    
+    subgraph Core [Core Services]
+        Gateway <--> Nexus[Nexus DB]
+        Gateway <--> TPM[Hardware Enclave]
+        Gateway <--> Scribe[Forensic Engine]
     end
-
-    subgraph Layer1_2 [Layer 1 & 2: Core]
-        B -->|Stream| C[Centrifuge DB]
-        C -->|Context| D[Semantic Loom]
+    
+    subgraph Extensions [Extension Layer]
+        Gateway -.->|Load| Plugin1[Forensic Echo]
+        Gateway -.->|Load| Plugin2[Tactical Pack]
     end
+```
 
-    subgraph Layer3_6 [Layer 3 & 6: Intelligence]
-        D -->|Atomic Facts| E[Synapse Memory]
-        D -->|Stylometric Data| F[Scribe Forensic Engine]
-    end
+### 📂 Project Structure
 
-    subgraph Layer5_7 [Layer 5 & 7: Output]
-        E -->|Semantic Search| G[Adaptive Scout]
-        F -->|Authorship Score| H[Beacon Dashboard]
-        G -->|Verified Context| I[LLM Response]
-    end
+- **`gateway/`**: The core MCP server, `ToolRegistry`, and `SessionManager`.
+- **`extensions/`**: Directory for drop-in plugins.
+  - **`ext_sample_echo/`**: Reference TPM-signing verification tool.
+  - **`ext_tactical_forensics/`**: Specialized IED/CBRN detection pack.
+- **`data/`**: Local storage for the 10GB knowledge graph (**Excluded from Git**).
+- **`sme_cli/`**: Legacy unified command-line interface.
 
-    classDef hardware fill:#f96,stroke:#333,stroke-width:2px;
-    class D,E,G hardware;
+---
+
+## 🛠️ Usage
+
+### 1. Run the Gateway (Production)
+```bash
+python -m gateway.mcp_server
+```
+*Exposes the MCP server on stdio for agent connection.*
+
+### 2. Verify System Health
+```bash
+python gateway/verify_sprint15_1.py
+```
+*Checks core subsystems and verifies plugin loading.*
+
+### 3. Docker Deployment
+```bash
+docker-compose up lawnmower-gateway
 ```
 
 ---
 
-## 📦 Project Structure
+## 🧩 Creating Extensions
 
-- **`sme_cli/`**: Unified command-line interface logic.
-- **`src/logic/`**: Core reasoning and quantization engines.
-- **`src/core/`**: Foundation utilities, Centrifuge DB, and Loom distillation.
-- **`src/harvester/`**: Web search and content extraction.
-- **`src/scribe/`**: Forensic authorship engine.
-- **`src/synapse/`**: Memory consolidation.
-- **`src/query/`**: Semantic search and adaptive retrieval.
-- **`data/`**: Local storage for the 10GB knowledge graph (**Excluded from Git**).
-- **`docs/`**: Comprehensive guides.
-- **`tests/`**: Verification and validation suites.
+Lawnmower Man v1.1.1 supports a standard boilerplate for new capabilities.
 
----
+1. Create a folder in `extensions/` (e.g., `ext_my_tool`).
+2. Add a `manifest.json`.
+3. Implement `plugin.py` with the standard hooks:
+   
+```python
+def register_extension(manifest, nexus_api):
+    return MyExtension(manifest, nexus_api)
+```
 
-## 🚀 Getting Started
-
-1. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   pip install -e .
-   ```
-
-2. **Run System Diagnostics**:
-   ```powershell
-   sme verify
-   ```
-
-3. **Explore Documentation**:
-   Check `docs/START_HERE.md` for a deep dive into the system capabilities.
+See **`d:\SME\extensions\ext_sample_echo\`** for a complete example.
 
 ---
 
-## ✨ Features
+## 📦 Requirements
 
-- **ChromaDB** integration for true semantic search.
-- **Hardware-aware CLI** with real-time RAM/CPU telemetry via `psutil`.
-- **SQLite-based Knowledge Core** from 10GB+ ConceptNet distillation.
+- Python 3.10+
+- `fastmcp`
+- `pydantic`
+- `faststylometry`
 
 ---
 

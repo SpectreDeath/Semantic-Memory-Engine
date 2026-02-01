@@ -53,6 +53,16 @@ def init_db():
             FOREIGN KEY(target_node_id) REFERENCES atomic_facts(node_id)
         )
     ''')
+    
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS source_provenance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source_id TEXT UNIQUE,
+            reliability_grade TEXT, -- Immutable_Log, System_Audit, Network_Capture, User_Input
+            trust_score REAL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
     conn.commit()
     conn.close()
 

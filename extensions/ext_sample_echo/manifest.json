@@ -1,0 +1,7 @@
+{
+    "name": "Forensic Echo",
+    "version": "0.1",
+    "description": "Standard sample extension for metadata echoing and TPM signature verification.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity"
+}

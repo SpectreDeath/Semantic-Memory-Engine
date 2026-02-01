@@ -17,6 +17,7 @@ Usage:
 """
 
 import os
+import asyncio
 import sys
 import json
 import logging
@@ -43,7 +44,7 @@ except ImportError:
     print("ERROR: FastMCP not installed. Run: pip install fastmcp")
     sys.exit(1)
 
-from gateway.tool_registry import get_registry, ToolRegistry, ScribeAuthorshipTool, ScribeProTool, InfluenceTool, EpistemicValidator
+from gateway.tool_registry import get_registry, ToolRegistry, ToolDefinition, ScribeAuthorshipTool, ScribeProTool, InfluenceTool, EpistemicValidator
 from gateway.scripts.report_generator import ReportGenerator
 from gateway.scripts.forensic_planner import ForensicPlanner
 from gateway.session_manager import get_session_manager, SessionManager
@@ -52,6 +53,8 @@ from gateway.auth import get_auth_manager, AuthManager
 from gateway.hardware_security import get_hsm
 from gateway.rate_limiter import get_rate_limiter, RateLimiter
 from gateway.nexus_db import get_nexus
+from gateway.extension_manager import ExtensionManager
+from gateway.tool_registry import EXTENSION_TOOLS
 
 # Configure logging with structured JSON format
 logging.basicConfig(
@@ -78,11 +81,33 @@ auth_manager = get_auth_manager()
 metrics_manager = get_metrics_manager()
 rate_limiter = get_rate_limiter()
 
+# v1.1.1 Extensions
+_extension_manager: Optional[ExtensionManager] = None
+
+def get_extension_manager(nexus_api: Any = None) -> ExtensionManager:
+    global _extension_manager
+    if _extension_manager is None:
+        _extension_manager = ExtensionManager(nexus_api=nexus_api)
+    return _extension_manager
+
 class SmeCoreBridge:
     """Bridges tools to the gateway's session and data layers."""
     def __init__(self, session_id: Optional[str] = None):
         self.session_id = session_id
-        self.nexus = get_nexus()
+        self._nexus = None
+        
+    @property
+    def nexus(self):
+        if self._nexus is None:
+            from gateway.nexus_db import get_nexus
+            self._nexus = get_nexus()
+        return self._nexus
+
+    def __getstate__(self):
+        # Prevent pickling of the sqlite3 connection
+        state = self.__dict__.copy()
+        state['_nexus'] = None
+        return state
         
     def get_session_entry(self, key: str) -> Any:
         """Retrieve data from the current session's scratchpad."""
@@ -179,6 +204,23 @@ class HarvestRequest(BaseModel):
 
 # Initialize and Register Custom Tools
 sme_core = SmeCoreBridge()
+
+# Load Extensions with the Core Bridge (v1.1.1)
+extension_manager = get_extension_manager(nexus_api=sme_core)
+asyncio.run(extension_manager.discover_and_load())
+
+# Register Extension Tools
+for tool_info in extension_manager.get_extension_tools():
+    # Register with global registry for tracking
+    registry.add_tool(tool_info["name"], tool_info["handler"], 
+                     description=tool_info["description"],
+                     parameters=tool_info.get("parameters", {}),
+                     handler=tool_info["handler"])
+    
+    # Register with FastMCP server
+    mcp.tool(name=tool_info["name"], description=tool_info["description"])(tool_info["handler"])
+    logger.info(f"ExtensionManager: Registered plugin tool '{tool_info['name']}' (Plugin: {tool_info['plugin_id']})")
+
 scribe_tool = ScribeAuthorshipTool(sme_core)
 scribe_pro_tool = ScribeProTool(sme_core)
 influence_tool = InfluenceTool(sme_core)
@@ -1171,12 +1213,12 @@ def list_available_tools() -> str:
     """
     tools = registry.list_tools()
     manifest = {
-        "version": "1.0.0",
-        "codename": "Crucible",
+        "version": "1.1.0",
+        "codename": "Crucible Bridge",
         "total_tools": len(tools),
         "registry": tools
     }
-    return json.dumps(manifest, indent=2)
+    return json.dumps(serialize_result(manifest), indent=2)
 
 
 # =============================================================================
@@ -1234,13 +1276,14 @@ def check_health() -> str:
     
     health = {
         "gateway": "Lawnmower Man",
-        "version": "1.0.0",
+        "version": "1.1.0",
         "status": status,
         "timestamp": datetime.now().isoformat(),
         "active_sessions": session_count,
         "sme_health": verify_result,
         "hardware": get_hsm().get_telemetry(),
-        "nexus": get_nexus().get_status()
+        "nexus": get_nexus().get_status(),
+        "extensions": extension_manager.get_status()
     }
     
     return json.dumps(health, indent=2)
@@ -1362,7 +1405,7 @@ def harvest_suspect_baseline(request: HarvestRequest, session_id: Optional[str] 
 # =============================================================================
 
 if __name__ == "__main__":
-    logger.info("Starting Lawnmower Man MCP Gateway v1.0.0 (Crucible)...")
+    logger.info("Starting Lawnmower Man MCP Gateway v1.1.0 (Crucible Bridge)...")
     logger.info(f"Available tools: {len(registry.TOOL_DEFINITIONS)}")
     logger.info(f"Categories: {registry.get_categories()}")
     

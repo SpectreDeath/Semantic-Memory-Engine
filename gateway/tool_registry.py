@@ -31,6 +31,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 logger = logging.getLogger(__name__)
 
+# v1.1.0 Extension Hook: List of ToolDefinition provided by external plugins
+EXTENSION_TOOLS: List[ToolDefinition] = []
+
 
 @dataclass
 class ToolDefinition:
@@ -40,6 +43,7 @@ class ToolDefinition:
     factory_method: Optional[str]
     category: str
     parameters: Dict[str, Any]
+    handler: Optional[Callable] = None
     is_manual: bool = False
 
 class ScribeAuthorshipTool:
@@ -570,9 +574,9 @@ class ToolRegistry:
         return {name: self._tool_instances.get(name, self.TOOL_DEFINITIONS.get(name)) 
                 for name in self.TOOL_DEFINITIONS}
 
-    def add_tool(self, name: str, instance: Any, description: str = "", parameters: Dict = None):
+    def add_tool(self, name: str, instance: Any, description: str = "", parameters: Dict = None, handler: Optional[Callable] = None):
         """
-        Manually register a tool instance.
+        Manually register a tool instance or handler.
         """
         self._tool_instances[name] = instance
         self.TOOL_DEFINITIONS[name] = ToolDefinition(
@@ -581,6 +585,7 @@ class ToolRegistry:
             factory_method=None,
             category=getattr(instance, 'category', 'general'),
             parameters=parameters or {},
+            handler=handler or (instance if callable(instance) else None),
             is_manual=True
         )
         logger.info(f"Manually registered tool: {name}")

@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_tactical_forensics",
+    "name": "Tactical Intelligence Pack",
+    "version": "1.0",
+    "description": "Specialized tools for analyzing tactical forensic evidence at terrorist sites.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "tactical"
+}

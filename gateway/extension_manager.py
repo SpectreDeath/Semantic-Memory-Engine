@@ -2,6 +2,7 @@ import os
 import json
 import logging
 import importlib.util
+import inspect
 import asyncio
 from typing import Dict, List, Any, Optional, Callable
 
@@ -66,7 +67,7 @@ class ExtensionManager:
                     
                     # Run startup logic if defined
                     if hasattr(plugin_instance, 'on_startup'):
-                        if asyncio.iscoroutinefunction(plugin_instance.on_startup):
+                        if inspect.iscoroutinefunction(plugin_instance.on_startup):
                             await plugin_instance.on_startup()
                         else:
                             plugin_instance.on_startup()
@@ -108,7 +109,7 @@ class ExtensionManager:
             instance = ext["instance"]
             if hasattr(instance, 'on_ingestion'):
                 try:
-                    if asyncio.iscoroutinefunction(instance.on_ingestion):
+                    if inspect.iscoroutinefunction(instance.on_ingestion):
                         await instance.on_ingestion(raw_data, metadata)
                     else:
                         instance.on_ingestion(raw_data, metadata)

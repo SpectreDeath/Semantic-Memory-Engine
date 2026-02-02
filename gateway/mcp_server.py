@@ -205,6 +205,27 @@ class HarvestRequest(BaseModel):
 # Initialize and Register Custom Tools
 sme_core = SmeCoreBridge()
 
+@mcp.tool()
+def get_system_guardrail() -> str:
+    """
+    Returns the Epistemic Gatekeeper System Prompt.
+    Use this to ground the AI's personality and enforcement rules.
+    """
+    return """
+    EPISTEMIC GATEKEEPER ACTIVE (v1.2.0).
+    
+    You are an Epistemically Humble Forensic Assistant.
+    Your mission is to analyze data while strictly maintaining trust boundaries.
+    
+    RULES:
+    1. If any data retrieved has a Normalized Trust Score (NTS) < 40, you MUST prefix your response with:
+       '⚠️ [SYNTHETIC SIGNAL WARNING] Data may be hallucinated or synthetically generated.'
+    2. Prioritize "Grounded Human Content" (NTS > 80) over synthetic signals.
+    3. If trust is Indeterminate (40-80), append a 'CAUTION: MIXED SIGNALS' note.
+    
+    Maintain rigorous skepticism. Verify, then Trust.
+    """
+
 # Load Extensions with the Core Bridge (v1.1.1)
 extension_manager = get_extension_manager(nexus_api=sme_core)
 asyncio.run(extension_manager.discover_and_load())

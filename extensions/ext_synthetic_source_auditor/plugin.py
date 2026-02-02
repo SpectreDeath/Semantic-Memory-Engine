@@ -1,0 +1,158 @@
+import os
+import json
+import logging
+import math
+import hashlib
+import statistics
+import re
+from collections import Counter
+from datetime import datetime
+from typing import Dict, Any, List
+
+from gateway.hardware_security import get_hsm
+# Import shared logic
+from gateway.gatekeeper_logic import calculate_trust_score, calculate_entropy, calculate_burstiness
+
+logger = logging.getLogger("LawnmowerMan.SSA")
+
+class AnalyticAuditor:
+    """
+    Synthetic Source Auditor (SSA) v1.0.
+    Detects low-entropy synthetic text and vaults it for counter-intelligence.
+    """
+    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+        self.manifest = manifest
+        self.nexus = nexus_api  # SmeCoreBridge
+        self.plugin_id = manifest.get("plugin_id")
+
+    async def on_startup(self):
+        """
+        Initialize the 'nexus_synthetic_baselines' table in the core DB.
+        """
+        sql = """
+            CREATE TABLE IF NOT EXISTS nexus_synthetic_baselines (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                source_id TEXT NOT NULL,
+                text_sample TEXT NOT NULL,
+                entropy_score REAL NOT NULL,
+                timestamp TEXT,
+                integrity_hash TEXT
+            )
+        """
+        try:
+            # We access the underlying sqlite connection via nexus_api.nexus.conn 
+            # or execute directly if exposed. SmeCoreBridge exposes .nexus (NexusDB).
+            # NexusDB has execute(sql, params).
+            self.nexus.nexus.execute(sql)
+            logger.info(f"[{self.plugin_id}] 'nexus_synthetic_baselines' table initialized.")
+        except Exception as e:
+            logger.error(f"[{self.plugin_id}] Failed to init DB table: {e}")
+
+    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+        """
+        Automatically audits ingestion stream for synthetic patterns.
+        """
+        if not raw_data or len(raw_data) < 50:
+            return {"status": "skipped", "reason": "too_short"}
+
+        # Calculate Entropy & Burstiness via Shared Logic
+        entropy = calculate_entropy(raw_data)
+        burstiness = calculate_burstiness(raw_data)
+        
+        # Threshold Check for Vaulting
+        # Vault if clearly synthetic (Low Entropy OR Low Burstiness)
+        if entropy < 4.0 or (burstiness < 2.0 and len(raw_data) > 100):
+            logger.warning(f"[{self.plugin_id}] SYNTHETIC SIGNAL (E:{entropy:.2f}, B:{burstiness:.2f}). Vaulting...")
+            await self.vault_synthetic_pattern(raw_data, entropy, "DETECTED_SYNTHETIC")
+            return {
+                "alert": "SYNTHETIC_DETECTED",
+                "entropy": entropy,
+                "burstiness": burstiness,
+                "action": "vaulted"
+            }
+        
+        return {"status": "cleared", "entropy": entropy, "burstiness": burstiness}
+
+    def get_tools(self) -> list:
+        return [self.audit_text_integrity, self.vault_synthetic_pattern, self.compare_to_synthetic_baseline]
+
+    async def audit_text_integrity(self, text: str) -> str:
+        """
+        Calculates Shannon Entropy and Burstiness to measure text naturalness.
+        """
+        entropy = calculate_entropy(text)
+        burstiness = calculate_burstiness(text)
+        
+        # Import Gatekeeper Logic (Dynamic to avoid circular imports during startup if logic not ready)
+        try:
+            from gateway.gatekeeper_logic import calculate_trust_score
+            trust_data = calculate_trust_score(entropy, burstiness)
+            verdict = trust_data["label"]
+            nts = trust_data["nts"]
+        except ImportError:
+            # Fallback if logic library missing
+            verdict = "Likely Human" if entropy >= 4.0 else "Likely Synthetic"
+            nts = "N/A"
+        
+        return json.dumps({
+            "entropy_bits": round(entropy, 4),
+            "burstiness": round(burstiness, 4),
+            "trust_score": nts,
+            "verdict": verdict,
+            "thresholds": {"entropy": 4.0, "trust": 40}
+        }, indent=2)
+
+    async def vault_synthetic_pattern(self, text: str, score: float, source_id: str = "MANUAL_SUBMISSION") -> str:
+        """
+        Vaults a confirmed synthetic text sample into the Nexus baseline.
+        """
+        timestamp = datetime.now().isoformat()
+        # Create integrity hash
+        data_hash = hashlib.sha256(text.encode()).hexdigest()
+        
+        sql = """
+            INSERT INTO nexus_synthetic_baselines (source_id, text_sample, entropy_score, timestamp, integrity_hash)
+            VALUES (?, ?, ?, ?, ?)
+        """
+        try:
+            self.nexus.nexus.execute(sql, (source_id, text[:5000], score, timestamp, data_hash)) # Limit text size
+            return json.dumps({"status": "vaulted", "id": data_hash, "score": score})
+        except Exception as e:
+            return json.dumps({"error": str(e)})
+
+    async def compare_to_synthetic_baseline(self, text: str) -> str:
+        """
+        Compares new text against the 'Synthetic Baseline Vault' to find stylistic matches.
+        """
+        entropy = self._shannon_entropy(text)
+        
+        # Find samples with similar entropy (+/- 0.1)
+        sql = """
+            SELECT source_id, entropy_score, text_sample FROM nexus_synthetic_baselines
+            WHERE entropy_score BETWEEN ? AND ?
+            LIMIT 5
+        """
+        try:
+            lower = entropy - 0.1
+            upper = entropy + 0.1
+            res = self.nexus.nexus.query(sql, (lower, upper))
+            
+            matches = []
+            if res:
+                for row in res:
+                    matches.append({
+                        "source": row["source_id"],
+                        "baseline_entropy": row["entropy_score"],
+                        "delta": abs(entropy - row["entropy_score"])
+                    })
+            
+            return json.dumps({
+                "input_entropy": entropy,
+                "matches_found": len(matches),
+                "closest_matches": sorted(matches, key=lambda x: x['delta'])
+            }, indent=2)
+            
+        except Exception as e:
+            return json.dumps({"error": str(e)})
+
+    return AnalyticAuditor(manifest, nexus_api)

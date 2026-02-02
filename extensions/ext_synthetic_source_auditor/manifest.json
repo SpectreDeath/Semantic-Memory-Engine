@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_synthetic_source_auditor",
+    "name": "Synthetic Source Auditor",
+    "version": "1.0",
+    "description": "Detects and vaults low-entropy synthetic text patterns (e.g., Grokipedia) using Shannon Entropy analysis.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "counter_intelligence"
+}

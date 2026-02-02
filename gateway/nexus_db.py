@@ -23,6 +23,12 @@ class ForensicNexus:
         self.conn = sqlite3.connect(self.primary_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         
+        # Patch v1.1.3: Enable Write-Ahead Logging for concurrent tool access
+        try:
+            self.conn.execute("PRAGMA journal_mode=WAL;")
+        except Exception as e:
+            logger.warning(f"Nexus: Failed to enable WAL mode: {e}")
+        
         # Attach subordinate databases
         self._attach_subordinates()
         

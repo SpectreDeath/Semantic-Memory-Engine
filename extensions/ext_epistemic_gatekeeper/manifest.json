@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_epistemic_gatekeeper",
+    "name": "Epistemic Gatekeeper",
+    "version": "1.0",
+    "description": "Visualizes trust scores (NTS) across datasets and enforces epistemic boundaries.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "governance"
+}

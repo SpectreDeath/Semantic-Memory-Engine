@@ -74,7 +74,17 @@ class AnalyticAuditor:
         return {"status": "cleared", "entropy": entropy, "burstiness": burstiness}
 
     def get_tools(self) -> list:
-        return [self.audit_text_integrity, self.vault_synthetic_pattern, self.compare_to_synthetic_baseline]
+        return [self.audit_text_integrity, self.vault_synthetic_pattern, self.compare_to_synthetic_baseline, self.calculate_burstiness_metric]
+
+    async def calculate_burstiness_metric(self, text: str) -> str:
+        """
+        Calculates the Standard Deviation of sentence lengths (Burstiness).
+        """
+        burstiness = calculate_burstiness(text)
+        return json.dumps({
+            "burstiness_score": round(burstiness, 4),
+            "interpretation": "High Variance (Human)" if burstiness > 5.0 else "Low Variance (Synthetic)"
+        })
 
     async def audit_text_integrity(self, text: str) -> str:
         """
@@ -85,8 +95,9 @@ class AnalyticAuditor:
         
         # Import Gatekeeper Logic (Dynamic to avoid circular imports during startup if logic not ready)
         try:
-            from gateway.gatekeeper_logic import calculate_trust_score
-            trust_data = calculate_trust_score(entropy, burstiness)
+            from gateway.gatekeeper_logic import calculate_trust_score, calculate_vault_proximity
+            proximity = calculate_vault_proximity(text)
+            trust_data = calculate_trust_score(entropy, burstiness, proximity)
             verdict = trust_data["label"]
             nts = trust_data["nts"]
         except ImportError:
@@ -99,7 +110,7 @@ class AnalyticAuditor:
             "burstiness": round(burstiness, 4),
             "trust_score": nts,
             "verdict": verdict,
-            "thresholds": {"entropy": 4.0, "trust": 40}
+            "thresholds": {"entropy": 4.0, "trust": 50}
         }, indent=2)
 
     async def vault_synthetic_pattern(self, text: str, score: float, source_id: str = "MANUAL_SUBMISSION") -> str:

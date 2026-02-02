@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Any, List
 
 # Import shared trust logic
-from gateway.gatekeeper_logic import calculate_trust_score, calculate_entropy, calculate_burstiness
+from gateway.gatekeeper_logic import calculate_trust_score, calculate_entropy, calculate_burstiness, calculate_vault_proximity
 
 logger = logging.getLogger("LawnmowerMan.Gatekeeper")
 
@@ -51,12 +51,14 @@ class EpistemicGatekeeper:
                         # Calculate Metrics
                         entropy = calculate_entropy(content)
                         burstiness = calculate_burstiness(content)
-                        trust_data = calculate_trust_score(entropy, burstiness)
+                        proximity = calculate_vault_proximity(content)
+                        trust_data = calculate_trust_score(entropy, burstiness, proximity)
                         
                         nts = trust_data["nts"]
                         verdict = trust_data["label"]
                         
-                        if nts < 40:
+                        # Updated Classifications for v1.2.0
+                        if nts < 50:
                             synthetic_count += 1
                         elif nts > 80:
                             human_count += 1
@@ -66,6 +68,7 @@ class EpistemicGatekeeper:
                             "path": file_path,
                             "entropy": entropy,
                             "burstiness": burstiness,
+                            "vault_proximity": proximity,
                             "nts": nts,
                             "verdict": verdict
                         })
@@ -74,20 +77,32 @@ class EpistemicGatekeeper:
                     except Exception as e:
                         logger.warning(f"Failed to audit {file}: {e}")
 
-        # Generate Heat Map Summary
-        heat_map = {
-            "target": folder_path,
-            "total_scanned": total_files,
-            "summary": {
-                "grounded_human": human_count,
-                "synthetic_hazard": synthetic_count,
-                "uncertain": total_files - (human_count + synthetic_count)
+        # Calculate Percentages
+        high_confidence_pct = (human_count / total_files * 100) if total_files > 0 else 0.0
+        synthetic_risk_pct = (synthetic_count / total_files * 100) if total_files > 0 else 0.0
+        uncertain_pct = 100.0 - (high_confidence_pct + synthetic_risk_pct)
+
+        # Generate Veracity Report
+        report = {
+            "veracity_report": {
+                "folder_path": folder_path,
+                "total_scanned": total_files,
+                "metrics": {
+                    "high_confidence_percentage": round(high_confidence_pct, 1),
+                    "synthetic_risk_percentage": round(synthetic_risk_pct, 1),
+                    "uncertain_percentage": round(uncertain_pct, 1)
+                },
+                "counts": {
+                    "human_grounded": human_count,
+                    "synthetic_hazard": synthetic_count,
+                    "uncertain": total_files - (human_count + synthetic_count)
+                },
+                "global_trust_ratio": round(human_count / total_files, 2) if total_files > 0 else 0
             },
-            "trust_ratio": round(human_count / total_files, 2) if total_files > 0 else 0,
             "detailed_map": sorted(file_stats, key=lambda x: x['nts']) # Sort by NTS (ascending - synthetic first)
         }
         
-        return json.dumps(heat_map, indent=2)
+        return json.dumps(report, indent=2)
 
 def register_extension(manifest: Dict[str, Any], nexus_api: Any):
     return EpistemicGatekeeper(manifest, nexus_api)

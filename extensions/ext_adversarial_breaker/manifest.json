@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_adversarial_breaker",
+    "name": "Adversarial Pattern Breaker",
+    "version": "1.0",
+    "description": "Detects linguistic camouflage and artificial entropy smoothing to identify high-confidence synthetic deception.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "adversarial_detection"
+}

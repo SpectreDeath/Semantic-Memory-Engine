@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_atlas",
+    "name": "Atlas",
+    "version": "1.0",
+    "description": "Forensic Visualizer that creates interactive 2D maps of fingerprint data using T-SNE.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "visualization"
+}

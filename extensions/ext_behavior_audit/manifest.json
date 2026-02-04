@@ -1,0 +1,24 @@
+{
+  "name": "ext_behavior_audit",
+  "version": "1.0.0",
+  "description": "Rhetorical Behavior Audit Extension - Analyzes text for sentiment volatility, synthetic repetitiveness, and deceptive language patterns",
+  "author": "SME",
+  "dependencies": [
+    "nltk"
+  ],
+  "tools": [
+    {
+      "name": "audit_rhetorical_behavior",
+      "description": "Analyzes text for rhetorical anomalies including sentiment volatility, synthetic repetitiveness, and deceptive language patterns",
+      "function": "rhetorical_behavior_audit.py"
+    },
+    {
+      "name": "profile_rhetorical_motive",
+      "description": "Profiles text for rhetorical motives including Ultimate Terms (God/Devil terms) density and Distance Markers to identify commercial policy-aligned LLM patterns",
+      "function": "provenance_profiler.py"
+    }
+  ],
+  "hooks": {
+    "governor_status_check": "governor_integration.py"
+  }
+}

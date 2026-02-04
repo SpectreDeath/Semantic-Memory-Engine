@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_immunizer",
+    "name": "Immunizer",
+    "version": "1.0",
+    "description": "Immunizes the system against detected vulnerabilities by creating hardened detection rules.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "security_hardening"
+}

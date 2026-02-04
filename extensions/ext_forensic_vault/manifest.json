@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_forensic_vault",
+    "name": "Forensic Vault",
+    "version": "1.0",
+    "description": "Manages forensic analysis and suspect ledger for detecting recurring adversarial patterns.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "forensic_analysis"
+}

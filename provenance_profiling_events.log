@@ -1,0 +1,3 @@
+2026-02-03 13:08:29,359 - behavior_audit.provenance_profiler - WARNING - [Rhetorical Profile: Commercial Policy-Aligned LLM]
+2026-02-03 13:08:40,948 - behavior_audit.provenance_profiler - INFO - Background profiling started for text length: 307 characters
+2026-02-03 13:08:40,954 - behavior_audit.provenance_profiler - WARNING - [Rhetorical Profile: Commercial Policy-Aligned LLM]

@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_governor",
+    "name": "Governor",
+    "version": "1.0",
+    "description": "Manages on_ingestion pipeline execution with resource monitoring and VRAM usage control.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "resource_management"
+}

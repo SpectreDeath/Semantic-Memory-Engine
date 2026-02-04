@@ -4,7 +4,7 @@ import logging
 from typing import Dict, Any, List
 
 # Import shared trust logic
-from gateway.gatekeeper_logic import calculate_trust_score, calculate_entropy, calculate_burstiness, calculate_vault_proximity
+from gateway.gatekeeper_logic import calculate_trust_score, calculate_entropy, calculate_burstiness, calculate_vault_proximity, analyze_model_origin
 
 logger = logging.getLogger("LawnmowerMan.Gatekeeper")
 
@@ -54,6 +54,12 @@ class EpistemicGatekeeper:
                         proximity = calculate_vault_proximity(content)
                         trust_data = calculate_trust_score(entropy, burstiness, proximity)
                         
+                        # SDA Profiler v1.3.0 Attribution
+                        attribution = analyze_model_origin(content)
+                        attr_msg = ""
+                        if attribution["family"] != "Unknown":
+                            attr_msg = f"High probability match: {attribution['family']} (Certainty: {attribution['confidence']}%)"
+
                         nts = trust_data["nts"]
                         verdict = trust_data["label"]
                         
@@ -70,7 +76,9 @@ class EpistemicGatekeeper:
                             "burstiness": burstiness,
                             "vault_proximity": proximity,
                             "nts": nts,
-                            "verdict": verdict
+                            "verdict": verdict,
+                            "attribution": str(attribution), # Include full object for detailed map
+                            "sda_warning": attr_msg # The requested string
                         })
                         total_files += 1
                         

@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_adversarial_tester",
+    "name": "Adversarial Tester",
+    "version": "1.0",
+    "description": "Tests adversarial evasion techniques by generating variants and analyzing detection rates.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "adversarial_testing"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "ext_ghost_trap",
+  "version": "1.0.0",
+  "description": "Ghost Trap Extension - Monitors for potential self-replication events and unauthorized file creation",
+  "author": "SME",
+  "dependencies": [],
+  "hooks": {
+    "governor_task_execution": "persistence_monitor.py"
+  },
+  "tools": [
+    {
+      "name": "scan_for_ghosts",
+      "description": "Scans project folder for unauthorized .bin or .json files larger than 100MB (hidden model weights)",
+      "function": "ghost_detector.py"
+    }
+  ]
+}

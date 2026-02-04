@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_logic_auditor",
+    "name": "Logic Auditor",
+    "version": "1.0",
+    "description": "Detects logical inconsistencies and hallucinations through round-robin claim contradiction analysis.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "logical_consistency"
+}

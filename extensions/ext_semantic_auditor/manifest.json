@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_semantic_auditor",
+    "name": "Semantic Auditor",
+    "version": "1.0",
+    "description": "Detects semantic drift in model outputs by comparing recent samples against master signatures.",
+    "entry_point": "plugin.py",
+    "author": "Antigravity",
+    "category": "semantic_analysis"
+}

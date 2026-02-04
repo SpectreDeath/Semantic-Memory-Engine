@@ -3,11 +3,14 @@ import statistics
 import re
 import os
 import glob
+import json
 from collections import Counter
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 VAULT_PATH = r"d:\SME\data\grok_vault"
+SIGNATURES_PATH = r"d:\SME\data\signatures.json"
 _VAULT_CACHE = None
+_SIGNATURES_CACHE = None
 
 def _get_ngrams(text: str, n: int = 3) -> set:
     """Generate n-grams from text."""
@@ -106,6 +109,86 @@ class TrustScorer:
                     
         return max_similarity
 
+    @staticmethod
+    def load_signatures() -> Dict[str, Any]:
+        """Load model signatures (cached)."""
+        global _SIGNATURES_CACHE
+        if _SIGNATURES_CACHE is not None:
+            return _SIGNATURES_CACHE
+        
+        if not os.path.exists(SIGNATURES_PATH):
+            _SIGNATURES_CACHE = {}
+            return _SIGNATURES_CACHE
+
+        try:
+            with open(SIGNATURES_PATH, 'r') as f:
+                _SIGNATURES_CACHE = json.load(f)
+        except Exception:
+            _SIGNATURES_CACHE = {}
+            
+        return _SIGNATURES_CACHE
+
+    @classmethod
+    def analyze_model_origin(cls, text: str) -> Dict[str, Any]:
+        """
+        Identify the likely model family (Grok/GPT/Claude) using Vector Cosine Similarity.
+        Returns attribution data.
+        """
+        signatures = cls.load_signatures()
+        if not signatures or "features" not in signatures or "families" not in signatures:
+            return {"family": "Unknown", "confidence": 0.0}
+
+        features = signatures["features"]
+        families = signatures["families"]
+
+        # 1. Vectorize Input Text (Relative Frequency of Feature Words)
+        # Tokenize simply
+        words = re.findall(r'\b\w+\b', text.lower())
+        total_words = len(words)
+        if total_words == 0:
+            return {"family": "Unknown", "confidence": 0.0}
+            
+        word_counts = Counter(words)
+        
+        # Build Vector A
+        vector_a = []
+        for feature in features:
+            f_count = word_counts.get(feature, 0)
+            vector_a.append(f_count / total_words)
+            
+        # 2. Compare against Family Vectors (Vector B) using Cosine Similarity
+        # Cos(theta) = (A . B) / (||A|| * ||B||)
+        
+        best_family = "Unknown"
+        max_similarity = 0.0
+        
+        norm_a = math.sqrt(sum(x*x for x in vector_a))
+        if norm_a == 0:
+             return {"family": "Unknown", "confidence": 0.0}
+
+        for family, data in families.items():
+            vector_b = data.get("vector")
+            if not vector_b or len(vector_b) != len(vector_a):
+                continue
+                
+            dot_product = sum(a * b for a, b in zip(vector_a, vector_b))
+            norm_b = math.sqrt(sum(x*x for x in vector_b))
+            
+            if norm_b > 0:
+                similarity = dot_product / (norm_a * norm_b)
+                if similarity > max_similarity:
+                    max_similarity = similarity
+                    best_family = family
+                    
+        # Threshold Check
+        confidence_pct = round(max_similarity * 100, 1)
+        attribution = {
+            "family": best_family if confidence_pct > 80 else "Unknown", # Threshold for attribution
+            "confidence": confidence_pct,
+            "raw_similarity": max_similarity
+        }
+        return attribution
+
     @classmethod
     def calculate_trust_score(cls, entropy: float, burstiness: float, vault_proximity: float = 0.0) -> Dict[str, Any]:
         """
@@ -152,6 +235,10 @@ class TrustScorer:
                 }
             }
         }
+
+# Backward Compatibility Wrappers
+def analyze_model_origin(text: str) -> Dict[str, Any]:
+    return TrustScorer.analyze_model_origin(text)
 
 # Backward Compatibility Wrappers
 def calculate_entropy(data: str) -> float:

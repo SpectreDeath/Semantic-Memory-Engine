@@ -1,0 +1,9 @@
+2026-02-03 10:12:08,530 - mirror_test.governor_integration - ERROR - Failed to get Governor status: unable to infer type for attribute "REGEX"
+2026-02-03 10:12:08,535 - mirror_test.governor_integration - WARNING - Governor status: UNKNOWN - Audit blocked for safety
+2026-02-03 10:12:08,537 - mirror_test.governor_integration - ERROR - Failed to get Governor status: 'src'
+2026-02-03 10:12:08,539 - mirror_test.governor_integration - WARNING - Governor status: UNKNOWN - Audit blocked for safety
+2026-02-03 10:12:08,540 - mirror_test.governor_integration - WARNING - [AUDIT BLOCKED - GOVERNOR STATUS: UNKNOWN] Cross-modal audit skipped for safety. Image: test.jpg
+2026-02-03 10:12:22,075 - mirror_test.governor_integration - ERROR - Failed to get Governor status: unable to infer type for attribute "REGEX"
+2026-02-03 10:12:22,080 - mirror_test.governor_integration - WARNING - Governor status: UNKNOWN - Audit blocked for safety
+2026-02-03 10:12:22,082 - mirror_test.governor_integration - ERROR - Failed to get Governor status: 'src'
+2026-02-03 10:12:22,084 - mirror_test.governor_integration - WARNING - Governor status: UNKNOWN - Audit blocked for safety

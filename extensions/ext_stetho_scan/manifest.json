@@ -1,0 +1,17 @@
+{
+  "name": "ext_stetho_scan",
+  "version": "1.0.0",
+  "description": "Statistical Watermark Decoder Extension - Detects invisible unicode markers and analyzes token frequency patterns",
+  "author": "SME",
+  "dependencies": [],
+  "tools": [
+    {
+      "name": "detect_watermark_pulse",
+      "description": "Analyzes text for invisible unicode markers and performs Z-Score token frequency analysis",
+      "function": "statistical_watermark_decoder.py"
+    }
+  ],
+  "hooks": {
+    "governor_status_check": "governor_integration.py"
+  }
+}

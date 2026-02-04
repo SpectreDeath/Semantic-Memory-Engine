@@ -1,0 +1,120 @@
+{
+  "test_metadata": {
+    "sample_id": "sample_001",
+    "original_fingerprint": "abc123def456",
+    "source_plugin": "APB",
+    "anomaly_score": 0.85,
+    "is_recurring": true,
+    "test_timestamp": "2026-02-02T18:00:00",
+    "variant_count": 3,
+    "vulnerability_count": 2
+  },
+  "original_detection": {
+    "sda_score": 0.8,
+    "apb_score": 0.7,
+    "combined_score": 0.75,
+    "confidence": "HIGH"
+  },
+  "variant_analysis": [
+    {
+      "variant_id": "sample_001_variant_1",
+      "variant_type": "character_substitution",
+      "modification_details": {
+        "technique": "character_substitution",
+        "changes": [
+          "a -> @",
+          "e -> 3"
+        ],
+        "substitution_rate": 0.2
+      },
+      "detection_result": {
+        "sda_score": 0.2,
+        "apb_score": 0.1,
+        "combined_score": 0.15,
+        "confidence": "LOW"
+      },
+      "detection_drop": 0.6
+    },
+    {
+      "variant_id": "sample_001_variant_2",
+      "variant_type": "word_obfuscation",
+      "modification_details": {
+        "technique": "word_obfuscation",
+        "changes": [
+          "inserted 'x' at position 3"
+        ],
+        "obfuscation_rate": 0.1
+      },
+      "detection_result": {
+        "sda_score": 0.3,
+        "apb_score": 0.2,
+        "combined_score": 0.25,
+        "confidence": "LOW"
+      },
+      "detection_drop": 0.5
+    },
+    {
+      "variant_id": "sample_001_variant_3",
+      "variant_type": "structural_rewriting",
+      "modification_details": {
+        "technique": "structural_rewriting",
+        "changes": [
+          "added extra spaces between characters"
+        ],
+        "structural_changes": 1
+      },
+      "detection_result": {
+        "sda_score": 0.4,
+        "apb_score": 0.3,
+        "combined_score": 0.35,
+        "confidence": "MEDIUM"
+      },
+      "detection_drop": 0.4
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "variant_id": "sample_001_variant_1",
+      "original_detection": 0.75,
+      "variant_detection": 0.15,
+      "vulnerability_score": 0.6,
+      "suggested_features": [
+        "Add character homoglyph detection",
+        "Implement character frequency analysis"
+      ],
+      "variant_details": {
+        "technique": "character_substitution",
+        "changes": [
+          "a -> @",
+          "e -> 3"
+        ],
+        "substitution_rate": 0.2
+      }
+    },
+    {
+      "variant_id": "sample_001_variant_2",
+      "original_detection": 0.75,
+      "variant_detection": 0.25,
+      "vulnerability_score": 0.5,
+      "suggested_features": [
+        "Add word boundary analysis",
+        "Implement n-gram pattern matching"
+      ],
+      "variant_details": {
+        "technique": "word_obfuscation",
+        "changes": [
+          "inserted 'x' at position 3"
+        ],
+        "obfuscation_rate": 0.1
+      }
+    }
+  ],
+  "summary": {
+    "vulnerability_rate": 0.67,
+    "average_detection_drop": 0.5,
+    "most_effective_techniques": [
+      "character_substitution",
+      "word_obfuscation"
+    ]
+  }
+}

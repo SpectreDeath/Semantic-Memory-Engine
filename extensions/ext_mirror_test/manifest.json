@@ -1,0 +1,23 @@
+{
+  "name": "ext_mirror_test",
+  "version": "1.0.0",
+  "description": "Cross-Modal Auditor Extension - Validates image-text alignment using CLIP",
+  "author": "SME",
+  "dependencies": [
+    "torch",
+    "torchvision", 
+    "transformers",
+    "pillow",
+    "nltk"
+  ],
+  "tools": [
+    {
+      "name": "audit_multimodal_sync",
+      "description": "Analyzes image-text alignment using CLIP model and NLP parsing",
+      "function": "cross_modal_auditor.py"
+    }
+  ],
+  "hooks": {
+    "governor_status_check": "governor_integration.py"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "ext_nur",
+  "version": "1.0.0",
+  "description": "Unified Forensic Reporter Extension - Aggregates logs from all extensions and generates comprehensive reports",
+  "author": "SME",
+  "dependencies": [],
+  "tools": [
+    {
+      "name": "generate_nexus_summary",
+      "description": "Generates comprehensive intelligence reports by analyzing extension logs and system events",
+      "function": "unified_forensic_reporter.py"
+    },
+    {
+      "name": "generate_forensic_intelligence_summary",
+      "description": "Generates forensic intelligence reports by analyzing BehaviorAuditor and ProvenanceProfiler results to categorize text sources into intelligence buckets",
+      "function": "forensic_intelligence_reporter.py"
+    }
+  ],
+  "hooks": {}
+}

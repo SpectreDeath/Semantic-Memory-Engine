@@ -161,6 +161,24 @@ try:
 except ImportError:
     SystemMonitor = None
 
+# Forensic Utilities
+try:
+    from src.utils import (
+        detect_outliers,
+        load_audit_data,
+        get_persona,
+        update_persona,
+        stream_project_mode,
+        stream_trust_mode,
+    )
+except ImportError:
+    detect_outliers = None
+    load_audit_data = None
+    get_persona = None
+    update_persona = None
+    stream_project_mode = None
+    stream_trust_mode = None
+
 # Orchestration
 try:
     from src.orchestration.orchestrator import PipelineCoordinator, PipelineJobQueue
@@ -242,6 +260,14 @@ __all__ = [
     
     # Monitoring
     "SystemMonitor",
+    
+    # Forensic Utilities
+    "detect_outliers",
+    "load_audit_data",
+    "get_persona",
+    "update_persona",
+    "stream_project_mode",
+    "stream_trust_mode",
     
     # Orchestration
     "PipelineCoordinator",

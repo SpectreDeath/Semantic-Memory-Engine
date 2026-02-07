@@ -27,7 +27,8 @@
 ## 30 Tools at a Glance
 
 ### 🧬 Loom (4)
-```
+
+```text
 distill_web_content()          → Atomic facts + compression metrics
 resolve_coreferences()         → Text with pronouns → entity names
 extract_atomic_facts()         → Granular facts with confidence
@@ -35,7 +36,8 @@ compress_semantic_data()       → 30x token reduction
 ```
 
 ### 💤 Synapse (4)
-```
+
+```text
 find_similar_memories()        → Clusters of related entries
 create_memory_concept()        → Abstract consolidation
 consolidate_during_idle()      → Background processing
@@ -43,14 +45,16 @@ build_behavioral_profile()     → Entity sentiment aggregation
 ```
 
 ### 🎯 Scout (3)
-```
+
+```text
 estimate_query_complexity()    → Complexity 0-10 score
 adaptive_retrieval()           → Auto-depth based on complexity
 deep_search()                  → Full temporal deep dive
 ```
 
 ### 📊 Data Processor (6)
-```
+
+```text
 list_available_lexicons()      → Browse semantic vocabularies
 load_lexicon_file()            → Index and load lexicon
 build_lexicon_index()          → Master cross-lexicon index
@@ -60,7 +64,8 @@ batch_semantic_compression()   → Archive with compression
 ```
 
 ### 📈 Monitoring (5)
-```
+
+```text
 profile_system_performance()   → CPU/GPU/Memory metrics
 check_database_health()        → DB integrity check
 optimize_database_performance()→ VACUUM/ANALYZE/PRAGMA
@@ -69,7 +74,8 @@ analyze_log_performance()      → Storage usage analysis
 ```
 
 ### 🔗 Orchestrator (7)
-```
+
+```text
 submit_batch_job()             → Queue task for execution
 get_job_status()               → Poll job progress
 get_pending_jobs()             → Retrieve pending batch
@@ -80,7 +86,8 @@ get_failed_jobs()              → Review failures
 ```
 
 ### 🔍 Retrieval (7)
-```
+
+```text
 semantic_search()              → Find by meaning similarity
 entity_search()                → All mentions of entity
 verify_sentiment_claim()       → Verify claim vs data
@@ -95,6 +102,7 @@ build_query_response()         → Structured response builder
 ## Quick Patterns
 
 ### Pattern 1: Web → Distill → Archive
+
 ```python
 results = search_duckduckgo(query)
 distilled = distill_web_content(results, source_url=url)
@@ -102,6 +110,7 @@ submit_batch_job("job_1", "distill", distilled)
 ```
 
 ### Pattern 2: Adaptive Query
+
 ```python
 complexity = estimate_query_complexity(user_query)
 retrieved = adaptive_retrieval(user_query)
@@ -110,6 +119,7 @@ response = build_query_response(user_query, optimized['selected_facts'])
 ```
 
 ### Pattern 3: Background Consolidation
+
 ```python
 consolidate_during_idle()  # Runs automatically
 # or manually:
@@ -119,6 +129,7 @@ for cluster in clusters:
 ```
 
 ### Pattern 4: Verification Workflow
+
 ```python
 verified = verify_sentiment_claim("compound > 0.5")
 profile = entity_search("Entity_A")
@@ -126,6 +137,7 @@ pattern = verify_entity_pattern("Entity_A", "consistently_negative")
 ```
 
 ### Pattern 5: Pipeline Execution
+
 ```python
 create_pipeline("analysis", [
     {"type": "search", "params": {...}},
@@ -155,6 +167,7 @@ execute_pipeline("analysis")
 **Location:** `D:/mcp_servers/storage/laboratory.db`
 
 **Tables:**
+
 - `sentiment_logs` (existing) - Core data
 - `memory_concepts` (new) - Consolidated concepts
 - `concept_members` (new) - Concept membership
@@ -165,7 +178,7 @@ execute_pipeline("analysis")
 
 ## System Requirements
 
-```
+```text
 Python: 3.8+
 Storage: ~100MB for initial data
 GPU: NVIDIA (1660 Ti tested, optional)
@@ -178,11 +191,13 @@ Memory: 4GB minimum
 ## Deployment Steps
 
 1. **Validate**
+
    ```bash
    python validate_toolbox.py
    ```
 
 2. **Test Individual Tools**
+
    ```bash
    python semantic_loom.py &
    python memory_synapse.py &
@@ -190,12 +205,14 @@ Memory: 4GB minimum
    ```
 
 3. **Monitor Health**
+
    ```bash
    check_database_health()
    profile_system_performance()
    ```
 
 4. **Run Full Workflow**
+
    ```python
    create_pipeline("full_test", [...])
    execute_pipeline("full_test")
@@ -215,11 +232,13 @@ Memory: 4GB minimum
 ## Support
 
 Each tool has comprehensive docstrings:
+
 ```python
 help(distill_web_content)  # Full documentation
 ```
 
 Database always accessible:
+
 ```python
 sqlite3.connect("D:/mcp_servers/storage/laboratory.db")
 ```

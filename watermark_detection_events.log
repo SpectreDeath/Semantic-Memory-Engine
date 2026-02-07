@@ -1,4 +1,0 @@
-2026-02-03 10:27:17,160 - stetho_scan.statistical_watermark_decoder - INFO - Invisible marker detected: '\u200b' - ZERO WIDTH SPACE
-2026-02-03 10:27:17,161 - stetho_scan.statistical_watermark_decoder - INFO - Invisible marker detected: '\u200c' - ZERO WIDTH NON-JOINER
-2026-02-03 10:27:17,161 - stetho_scan.statistical_watermark_decoder - INFO - Invisible marker detected: '\u200d' - ZERO WIDTH JOINER
-2026-02-03 10:27:17,161 - stetho_scan.statistical_watermark_decoder - WARNING - [PROVENANCE IDENTIFIED: META SIGNATURE FOUND]

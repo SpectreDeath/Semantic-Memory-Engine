@@ -5,15 +5,13 @@ Aggregates logs from all extensions and generates comprehensive forensic reports
 with AI-powered conclusions using rnj-1 for analysis.
 """
 
-import os
-import re
-import logging
-import json
 import datetime
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
+import logging
+import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, List, Optional, Any
 
 
 # Configure logging for the forensic reporter
@@ -451,6 +449,7 @@ The system maintains {'strong' if health_score >= 85 else 'adequate' if health_s
 **Last Scan**: {summary.last_scan_time.strftime('%Y-%m-%d %H:%M:%S')}
 
 ### Key Findings
+
 - **Detected Issues**: {len(summary.detected_issues)}
 - **Resolved Issues**: {len(summary.resolved_issues)}
 - **Active Extensions**: {len(summary.extension_activity)}

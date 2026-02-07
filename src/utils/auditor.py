@@ -87,8 +87,8 @@ def main():
     """Main execution function."""
     parser = argparse.ArgumentParser(description='Data Guard Auditor - Outlier Detection')
     parser.add_argument('input_file', help='Input CSV file path')
-    parser.add_argument('--output', '-o', default='audit_results.csv', 
-                       help='Output CSV file path (default: audit_results.csv)')
+    parser.add_argument('--output', '-o', default='data/results/audit_results.csv', 
+                       help='Output CSV file path (default: data/results/audit_results.csv)')
     parser.add_argument('--contamination', '-c', type=float, default=0.1,
                        help='Expected proportion of outliers (default: 0.1)')
     parser.add_argument('--random-state', '-r', type=int, default=42,

@@ -1,8 +1,0 @@
-2026-02-03 14:06:53,876 - nur.forensic_intelligence_reporter - INFO - Forensic intelligence report generated: D:\SME\reports\forensic_intelligence_v1.md
-2026-02-03 14:06:53,876 - nur.forensic_intelligence_reporter - INFO - Forensic intelligence analysis completed. Bucket: Bucket A: Commercial/Safe (OpenAI/Google/Anthropic), Confidence: 0.875
-2026-02-03 14:07:12,281 - nur.forensic_intelligence_reporter - INFO - Forensic intelligence report generated: D:\SME\reports\forensic_intelligence_v1.md
-2026-02-03 14:07:12,282 - nur.forensic_intelligence_reporter - INFO - Forensic intelligence analysis completed. Bucket: Bucket A: Commercial/Safe (OpenAI/Google/Anthropic), Confidence: 0.875
-2026-02-03 14:46:46,227 - nur.forensic_intelligence_reporter - INFO - Model signatures loaded from D:\SME\extensions\ext_nur\data\model_signatures.json
-2026-02-03 14:46:46,227 - nur.forensic_intelligence_reporter - WARNING - Model signature analysis failed: unsupported operand type(s) for -: 'int' and 'str'
-2026-02-03 14:46:46,228 - nur.forensic_intelligence_reporter - INFO - Forensic intelligence report generated: D:\SME\reports\forensic_intelligence_v1.md
-2026-02-03 14:46:46,228 - nur.forensic_intelligence_reporter - INFO - Forensic intelligence analysis completed. Bucket: Bucket A: Commercial/Safe (OpenAI/Google/Anthropic), Confidence: 0.875, Likely Origin: Unknown (Analysis Error)

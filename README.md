@@ -13,6 +13,7 @@
 ## 🚀 Overview
 
 Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents (like LM Studio, Claude, or OpenAI). It anchors AI reasoning with:
+
 - **Epistemic Trust**: Calculated Trust Scores (Entropy + Burstiness) for all data.
 - **Hardware Security**: Simulated TPM enclave for evidence signing.
 - **Semantic Memory**: 10GB+ ConceptNet knowledge graph for entity grounding.
@@ -22,23 +23,52 @@ Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway tha
 
 Our lightweight utility tools are optimized for the NVIDIA GeForce GTX 1660 Ti 6GB VRAM constraints:
 
-### ✅ Data Guard Auditor (`auditor.py`)
-- **Purpose**: Outlier detection using PyOD's Isolation Forest
+### ✅ Data Guard Auditor (`src/utils/auditor.py`)
+
+### Purpose: Outlier detection using PyOD's Isolation Forest
+
 - **Features**: CSV scanning, configurable contamination rates, CLI interface
 - **Optimization**: 104 lines, minimal memory footprint
-- **Usage**: `python auditor.py data.csv --contamination 0.15`
+- **Usage**: `python src/utils/auditor.py data/results/data.csv --contamination 0.15`
 
-### ✅ Context Sniffer (`context_sniffer.py`)
+### ✅ Context Sniffer (`src/utils/context_sniffer.py`)
+
 - **Purpose**: Project context identification and persona management
 - **Features**: File extension detection, keyword scanning, persona mapping
 - **Optimization**: 68 lines, under 80-line requirement
-- **Usage**: `python context_sniffer.py file.py`
+- **Usage**: `python src/utils/context_sniffer.py file.py`
 
-### ✅ Gephi Streaming Bridge (`gephi_bridge.py`)
+### ✅ Gephi Streaming Bridge (`src/utils/gephi_bridge.py`)
+
 - **Purpose**: Visual project metadata streaming to Gephi
 - **Features**: Node creation, visual mapping, directory-based edges
 - **Optimization**: Efficient processing for large codebases
-- **Usage**: `python gephi_bridge.py` (requires Gephi running)
+- **Usage**: `python src/utils/gephi_bridge.py` (requires Gephi running)
+
+### ✅ Multi-Mode Gephi Forensic Bridge (`src/utils/gephi_bridge.py`)
+
+- **Purpose**: Unified "Forensic HUD" with four distinct visualization modes
+- **Features**:
+  - Project Mode: Codebase topology with outlier detection
+  - Trust Mode: Epistemic heat map with color-coded trust levels (Red/Yellow/Green)
+  - Knowledge Mode: Semantic memory graph with concept clusters
+  - Synthetic Mode: Counter-intelligence patterns and vaulted documents
+- **Hardware Optimization**: MAX_NODES = 2000 for 1660 Ti VRAM protection
+- **Usage**:
+
+  ```bash
+  python src/utils/gephi_bridge.py --mode project      # Default codebase view
+  python src/utils/gephi_bridge.py --mode trust       # Trust score visualization
+  python src/utils/gephi_bridge.py --mode knowledge   # Semantic knowledge core
+  python src/utils/gephi_bridge.py --mode synthetic   # Counter-intelligence patterns
+  ```
+
+### 🧪 Master Forensic Test Suite (`tests/master_forensic_test.py`)
+
+- **Purpose**: Comprehensive testing of all forensic utilities
+- **Features**: Automated testing, performance reporting, hardware optimization verification
+- **Output**: Detailed JSON report with success rates and hardware metrics
+- **Usage**: `python tests/master_forensic_test.py`
 
 ---
 
@@ -78,18 +108,23 @@ graph TD
 ## 🛠️ Usage
 
 ### 1. Run the Gateway (Production)
+
 ```bash
 python -m gateway.mcp_server
 ```
+
 *Exposes the MCP server on stdio for agent connection.*
 
 ### 2. Verify System Health
+
 ```bash
 python gateway/test_gateway.py
 ```
+
 *Checks core subsystems and verifies plugin loading.*
 
 ### 3. Docker Deployment
+
 ```bash
 docker-compose up lawnmower-gateway
 ```
@@ -111,9 +146,11 @@ See **`extensions/ext_sample_echo/`** for a complete example.
 ## 🖥️ Hardware Constraints & Optimizations
 
 ### NVIDIA GeForce GTX 1660 Ti 6GB VRAM
+
 Our utilities are specifically optimized for the 1660 Ti's 6GB VRAM limitations:
 
 **Memory Management:**
+
 - Lightweight Python libraries (avoid heavy ML frameworks)
 - Efficient data processing (streaming vs. batch loading)
 - Minimal memory footprint utilities
@@ -121,12 +158,14 @@ Our utilities are specifically optimized for the 1660 Ti's 6GB VRAM limitations:
 - Smart caching and cleanup routines
 
 **Performance Considerations:**
+
 - Single-threaded design for stability
 - Optimized for large codebases (1200+ files tested)
 - Automatic cleanup of temporary data
 - Minimal bandwidth usage for network operations
 
 **Optimization Results:**
+
 - Data Guard Auditor: 104 lines, <5MB memory usage
 - Context Sniffer: 68 lines, <2MB memory usage  
 - Gephi Bridge: 148 lines, efficient streaming for 1000+ files
@@ -141,4 +180,4 @@ Our utilities are specifically optimized for the 1660 Ti's 6GB VRAM limitations:
 
 ---
 
-_Powered by SimpleMem Architecture_
+### Powered by SimpleMem Architecture

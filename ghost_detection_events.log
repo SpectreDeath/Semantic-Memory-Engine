@@ -1,5 +1,0 @@
-2026-02-03 10:05:25,864 - ghost_trap.ghost_detector - INFO - Starting ghost scan in: D:\SME
-2026-02-03 10:05:33,561 - ghost_trap.ghost_detector - WARNING - SUSPICIOUS FILE DETECTED - Path: D:\SME\frontend\node_modules\ngraph.forcelayout\demo\package-lock.json, Size: 1.00MB, Type: .json, Hidden: 0, Indicators: None
-2026-02-03 10:05:33,669 - ghost_trap.ghost_detector - WARNING - SUSPICIOUS FILE DETECTED - Path: D:\SME\.venv\Lib\site-packages\plotly\validators\_validators.json, Size: 3.60MB, Type: .json, Hidden: True, Indicators: hidden_directory
-2026-02-03 10:05:33,751 - ghost_trap.ghost_detector - WARNING - SUSPICIOUS FILE DETECTED - Path: D:\SME\.venv\Lib\site-packages\altair\vegalite\v6\schema\vega-lite-schema.json, Size: 1.79MB, Type: .json, Hidden: True, Indicators: hidden_directory
-2026-02-03 10:05:33,762 - ghost_trap.ghost_detector - INFO - Ghost scan completed. Found 3 suspicious files.

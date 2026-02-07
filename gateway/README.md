@@ -10,7 +10,7 @@ Project Lawnmower Man is the MCP (Model Context Protocol) gateway that exposes S
 
 ### Option 1: Direct Python
 
-```powershell
+```bash
 # From SME root directory
 cd d:\SME
 pip install fastmcp
@@ -19,7 +19,7 @@ python -m gateway.mcp_server
 
 ### Option 2: Docker
 
-```powershell
+```bash
 # Build and run the gateway container
 cd d:\SME\gateway
 docker-compose up -d
@@ -113,7 +113,7 @@ gateway/
 )
 ```
 
-2. Add the MCP handler in `mcp_server.py`:
+1. Add the MCP handler in `mcp_server.py`:
 
 ```python
 @mcp.tool()
@@ -124,7 +124,7 @@ def my_new_tool(param1: str) -> str:
     return json.dumps(result)
 ```
 
-3. Test with: `python -m gateway.mcp_server`
+1. Test with: `python -m gateway.mcp_server`
 
 ---
 
@@ -150,4 +150,4 @@ def my_new_tool(param1: str) -> str:
 
 ---
 
-*Powered by Project Lawnmower Man • Built on SME Forensic Toolkit*
+### Powered by Project Lawnmower Man • Built on SME Forensic Toolkit

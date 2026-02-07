@@ -1,5 +1,0 @@
-2026-02-03 10:27:00,402 - stetho_scan.governor_integration - ERROR - Failed to get Governor status: unable to infer type for attribute "REGEX"
-2026-02-03 10:27:01,408 - stetho_scan.governor_integration - WARNING - Detection blocked: Governor=UNKNOWN, CPU=LOW
-2026-02-03 10:27:01,409 - stetho_scan.governor_integration - ERROR - Failed to get Governor status: 'src'
-2026-02-03 10:27:02,411 - stetho_scan.governor_integration - WARNING - Detection blocked: Governor=UNKNOWN, CPU=LOW
-2026-02-03 10:27:02,412 - stetho_scan.governor_integration - WARNING - [DETECTION BLOCKED - GOVERNOR: UNKNOWN, CPU: LOW] Watermark detection skipped for safety.

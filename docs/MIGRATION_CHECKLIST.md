@@ -15,7 +15,7 @@ This document tracks the migration from flat structure to modular architecture.
   - [x] `pipeline_orchestrator.py` → `src.orchestration.orchestrator`
   - [x] `data_processor.py` → `src.core.processor`
 
-- [x] **Centralized Configuration** 
+- [x] **Centralized Configuration**
   - [x] `config/config.yaml` created and documented
   - [x] `src/core/config.py` - Configuration singleton class
   - [x] Type-safe config getters (get_int, get_path, etc.)
@@ -53,6 +53,7 @@ This document tracks the migration from flat structure to modular architecture.
 ## 📋 File-by-File Migration Status
 
 ### Scribe Engine (`src/scribe/`)
+
 - [x] Core module `engine.py` exists
 - [x] Backward compat shim created
 - [ ] Add type hints to ScribeEngine class
@@ -60,6 +61,7 @@ This document tracks the migration from flat structure to modular architecture.
 - [ ] Create unit tests
 
 ### Scout System (`src/query/`)
+
 - [x] Core module `scout_integration.py` exists
 - [x] Core module `scout.py` exists
 - [x] Backward compat shims created
@@ -68,6 +70,7 @@ This document tracks the migration from flat structure to modular architecture.
 - [ ] Create unit tests
 
 ### Semantic Search (`src/query/`)
+
 - [x] Core module `engine.py` exists
 - [x] Backward compat shim created
 - [ ] Add type hints
@@ -75,6 +78,7 @@ This document tracks the migration from flat structure to modular architecture.
 - [ ] Create unit tests
 
 ### Synapse (`src/synapse/`)
+
 - [x] Core module `synapse.py` exists
 - [x] Backward compat shim created
 - [ ] Add type hints
@@ -82,28 +86,33 @@ This document tracks the migration from flat structure to modular architecture.
 - [ ] Create unit tests
 
 ### Centrifuge (`src/core/`)
+
 - [x] Core module `centrifuge.py` exists
 - [ ] Add type hints
 - [ ] Add docstrings
 - [ ] Create unit tests
 
 ### Semantic DB (`src/core/`)
+
 - [x] Core module `semantic_db.py` exists
 - [ ] Add type hints
 - [ ] Verify ChromaDB integration
 - [ ] Create unit tests
 
 ### Monitoring (`src/monitoring/`)
+
 - [x] Module exists
 - [ ] Add type hints
 - [ ] Create unit tests
 
 ### Orchestration (`src/orchestration/`)
+
 - [x] Core modules exist
 - [ ] Add type hints
 - [ ] Create unit tests
 
 ### Visualization (`src/visualization/`)
+
 - [x] Core modules exist
 - [ ] Add type hints
 - [ ] Create unit tests
@@ -111,6 +120,7 @@ This document tracks the migration from flat structure to modular architecture.
 ## 🧪 Testing Checklist
 
 ### Unit Tests
+
 - [ ] Scribe engine tests
 - [ ] Scout system tests
 - [ ] Search engine tests
@@ -120,12 +130,14 @@ This document tracks the migration from flat structure to modular architecture.
 - [ ] Configuration tests
 
 ### Integration Tests
+
 - [x] Import structure tests (in `test_integration.py`)
 - [ ] End-to-end tool workflow tests
 - [ ] Factory initialization tests
 - [ ] Configuration loading tests
 
 ### Backward Compatibility Tests
+
 - [x] Old import paths work via shims
 - [ ] External scripts using old paths still work
 - [ ] Legacy files in `legacy/` directory can be safely removed
@@ -152,17 +164,20 @@ This document tracks the migration from flat structure to modular architecture.
 ## 🔧 Type Hints Progress
 
 ### Priority 1 (Core)
+
 - [ ] `src/core/config.py` - **IN PROGRESS** (partially done)
 - [ ] `src/core/factory.py` - **IN PROGRESS** (partially done)
 - [ ] `src/scribe/engine.py` - NOT STARTED
 - [ ] `src/query/engine.py` - NOT STARTED
 
 ### Priority 2 (Important)
+
 - [ ] `src/synapse/synapse.py` - NOT STARTED
 - [ ] `src/query/scout_integration.py` - NOT STARTED
 - [ ] `src/core/centrifuge.py` - NOT STARTED
 
 ### Priority 3 (Nice-to-have)
+
 - [ ] `src/monitoring/diagnostics.py` - NOT STARTED
 - [ ] `src/orchestration/orchestrator.py` - NOT STARTED
 - [ ] `src/visualization/dashboard.py` - NOT STARTED
@@ -195,10 +210,12 @@ OVERALL:               ████████░░░░░░░░░░░
 ## 🐛 Known Issues & Workarounds
 
 ### Issue 1: Old imports in external scripts
+
 - **Workaround**: Keep root-level shim modules until all scripts updated
 - **Timeline**: Can be removed after all external usage updated
 
 ### Issue 2: Type checking with mypy
+
 - **Workaround**: May need to add py.typed marker once type hints complete
 - **Timeline**: After type hints are comprehensive
 

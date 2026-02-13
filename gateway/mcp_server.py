@@ -22,7 +22,7 @@ import sys
 import json
 import logging
 import sqlite3
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Tuple
 from datetime import datetime
 from dataclasses import asdict, is_dataclass
 from enum import Enum
@@ -246,6 +246,7 @@ scribe_tool = ScribeAuthorshipTool(sme_core)
 scribe_pro_tool = ScribeProTool(sme_core)
 influence_tool = InfluenceTool(sme_core)
 epistemic_tool = EpistemicValidator(sme_core)
+math_tool = ForensicMathTool(sme_core)
 
 registry.add_tool("analyze_authorship", scribe_tool, 
                  description="Performs stylometric fingerprinting using Burrows' Delta logic.",
@@ -270,6 +271,18 @@ registry.add_tool("generate_witness_statement", None,
 registry.add_tool("autonomous_audit", None,
                  description="Run a full-battery forensic investigation (Scribe -> Influence -> Epistemic -> Report).",
                  parameters=AutonomousAuditRequest.model_json_schema())
+
+registry.add_tool("calculate_cosine_similarity", math_tool,
+                 description="Vectorized cosine similarity comparison of two frequency dictionaries.",
+                 parameters={"freq_dict_1": "dict", "freq_dict_2": "dict"})
+
+registry.add_tool("calculate_typo_distance", math_tool,
+                 description="Identify fuzzy word matches using optimized Levenshtein distance.",
+                 parameters={"word1": "str", "word2": "str"})
+
+registry.add_tool("calculate_set_overlap", math_tool,
+                 description="Calculate Jaccard Similarity (Set Overlap) between token lists.",
+                 parameters={"tokens1": "list", "tokens2": "list"})
 
 
 # =============================================================================
@@ -687,6 +700,30 @@ def autonomous_audit(request: AutonomousAuditRequest, session_id: Optional[str] 
     planner = ForensicPlanner(mcp_tools, session_manager)
     result = planner.run_investigation(request.text, request.case_id, session_id)
     
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+def calculate_cosine_similarity(freq_dict_1: Dict[str, float], freq_dict_2: Dict[str, float], session_id: Optional[str] = None) -> str:
+    """Vectorized cosine similarity comparison of two frequency dictionaries."""
+    math_tool.core.session_id = session_id
+    result = math_tool.calculate_cosine_similarity(freq_dict_1, freq_dict_2)
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+def calculate_typo_distance(word1: str, word2: str, session_id: Optional[str] = None) -> str:
+    """Identify fuzzy word matches using optimized Levenshtein distance."""
+    math_tool.core.session_id = session_id
+    result = math_tool.calculate_typo_distance(word1, word2)
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+def calculate_set_overlap(tokens1: List[str], tokens2: List[str], session_id: Optional[str] = None) -> str:
+    """Calculate Jaccard Similarity (Set Overlap) between token lists."""
+    math_tool.core.session_id = session_id
+    result = math_tool.calculate_set_overlap(tokens1, tokens2)
     return json.dumps(result, indent=2)
 
 

@@ -1,0 +1,610 @@
+[
+  {
+    "title": "Kimwolf Botnet Lurking in Corporate, Govt. Networks",
+    "link": "https://krebsonsecurity.com/2026/01/kimwolf-botnet-lurking-in-corporate-govt-networks/",
+    "published": "Tue, 20 Jan 2026 18:19:13 +0000",
+    "summary": "A new Internet-of-Things botnet called Kimwolf has spread to more than 2 million devices, forcing infected systems to participate in massive distributed denial-of-service (DDoS) attacks and to relay other malicious and abusive Internet traffic. Kimwolf's ability to scan the local networks of compromised systems for other IoT devices to infect makes it a sobering threat to organizations, and new research reveals Kimwolf is surprisingly prevalent in government and corporate networks.",
+    "source_feed": "https://krebsonsecurity.com/feed/",
+    "ingested_at": "2026-02-07T18:13:31.021266"
+  },
+  {
+    "title": "Patch Tuesday, January 2026 Edition",
+    "link": "https://krebsonsecurity.com/2026/01/patch-tuesday-january-2026-edition/",
+    "published": "Wed, 14 Jan 2026 00:47:38 +0000",
+    "summary": "Microsoft today issued patches to plug at least 113 security holes in its various Windows operating systems and supported software. Eight of the vulnerabilities earned Microsoft's most-dire \"critical\" rating, and the company warns that attackers are already exploiting one of the bugs fixed today.",
+    "source_feed": "https://krebsonsecurity.com/feed/",
+    "ingested_at": "2026-02-07T18:13:31.021288"
+  },
+  {
+    "title": "Who Benefited from the Aisuru and Kimwolf Botnets?",
+    "link": "https://krebsonsecurity.com/2026/01/who-benefited-from-the-aisuru-and-kimwolf-botnets/",
+    "published": "Thu, 08 Jan 2026 23:23:43 +0000",
+    "summary": "Our first story of 2026 revealed how a destructive new botnet called Kimwolf rapidly grew to infect more than two million devices by mass-compromising a vast number of unofficial Android TV streaming boxes. Today, we'll dig through digital clues left behind by the hackers, network operators, and cybercrime services that appear to have benefitted from Kimwolf's spread.",
+    "source_feed": "https://krebsonsecurity.com/feed/",
+    "ingested_at": "2026-02-07T18:13:31.021291"
+  },
+  {
+    "title": "The Kimwolf Botnet is Stalking Your Local Network",
+    "link": "https://krebsonsecurity.com/2026/01/the-kimwolf-botnet-is-stalking-your-local-network/",
+    "published": "Fri, 02 Jan 2026 14:20:10 +0000",
+    "summary": "The story you are reading is a series of scoops nestled inside a far more urgent Internet-wide security advisory. The vulnerability at issue has been exploited for months already, and it's time for a broader awareness of the threat. The short version is that everything you thought you knew about the security of the internal network behind your Internet router probably is now dangerously out of date.",
+    "source_feed": "https://krebsonsecurity.com/feed/",
+    "ingested_at": "2026-02-07T18:13:31.021294"
+  },
+  {
+    "title": "Happy 16th Birthday, KrebsOnSecurity.com!",
+    "link": "https://krebsonsecurity.com/2025/12/happy-16th-birthday-krebsonsecurity-com/",
+    "published": "Mon, 29 Dec 2025 20:23:26 +0000",
+    "summary": "KrebsOnSecurity.com celebrates its 16th anniversary today! A huge \"thank you\" to all of our readers -- newcomers, long-timers and drive-by critics alike. Your engagement this past year here has been tremendous and truly a salve on a handful of dark days. Happily, comeuppance was a strong theme running through our coverage in 2025, with a primary focus on entities that enabled complex and globally-dispersed cybercrime services.",
+    "source_feed": "https://krebsonsecurity.com/feed/",
+    "ingested_at": "2026-02-07T18:13:31.021297"
+  },
+  {
+    "title": "Dismantling Defenses: Trump 2.0 Cyber Year in Review",
+    "link": "https://krebsonsecurity.com/2025/12/dismantling-defenses-trump-2-0-cyber-year-in-review/",
+    "published": "Fri, 19 Dec 2025 15:14:55 +0000",
+    "summary": "The Trump administration has pursued a staggering range of policy pivots this past year that threaten to weaken the nation’s ability and willingness to address a broad spectrum of technology challenges, from cybersecurity and privacy to countering disinformation, fraud and corruption. These shifts, along with the president’s efforts to restrict free speech and freedom of the press, have come at such a rapid clip that many readers probably aren’t even aware of them all.",
+    "source_feed": "https://krebsonsecurity.com/feed/",
+    "ingested_at": "2026-02-07T18:13:31.021300"
+  },
+  {
+    "title": "Most Parked Domains Now Serving Malicious Content",
+    "link": "https://krebsonsecurity.com/2025/12/most-parked-domains-now-serving-malicious-content/",
+    "published": "Tue, 16 Dec 2025 14:14:48 +0000",
+    "summary": "Direct navigation -- the act of visiting a website by manually typing a domain name in a web browser -- has never been riskier: A new study finds the vast majority of \"parked\" domains -- mostly expired or dormant domain names, or common misspellings of popular websites -- are now configured to redirect visitors to sites that foist scams and malware.",
+    "source_feed": "https://krebsonsecurity.com/feed/",
+    "ingested_at": "2026-02-07T18:13:31.021303"
+  },
+  {
+    "title": "Microsoft Patch Tuesday, December 2025 Edition",
+    "link": "https://krebsonsecurity.com/2025/12/microsoft-patch-tuesday-december-2025-edition/",
+    "published": "Tue, 09 Dec 2025 23:18:29 +0000",
+    "summary": "Microsoft today pushed updates to fix at least 56 security flaws in its Windows operating systems and supported software. This final Patch Tuesday of 2025 tackles one zero-day bug that is already being exploited, as well as two publicly disclosed vulnerabilities.",
+    "source_feed": "https://krebsonsecurity.com/feed/",
+    "ingested_at": "2026-02-07T18:13:31.021306"
+  },
+  {
+    "title": "Drones to Diplomas: How Russia’s Largest Private University is Linked to a $25M Essay Mill",
+    "link": "https://krebsonsecurity.com/2025/12/drones-to-diplomas-how-russias-largest-private-university-is-linked-to-a-25m-essay-mill/",
+    "published": "Sat, 06 Dec 2025 14:45:03 +0000",
+    "summary": "A sprawling academic cheating network turbocharged by Google Ads that has generated nearly $25 million in revenue has curious connections to a Kremlin-connected oligarch whose Russian university builds drones for Russia's war against Ukraine.",
+    "source_feed": "https://krebsonsecurity.com/feed/",
+    "ingested_at": "2026-02-07T18:13:31.021308"
+  },
+  {
+    "title": "SMS Phishers Pivot to Points, Taxes, Fake Retailers",
+    "link": "https://krebsonsecurity.com/2025/12/sms-phishers-pivot-to-points-taxes-fake-retailers/",
+    "published": "Thu, 04 Dec 2025 23:02:34 +0000",
+    "summary": "China-based phishing groups blamed for non-stop scam SMS messages about a supposed wayward package or unpaid toll fee are promoting a new offering, just in time for the holiday shopping season: Phishing kits for mass-creating fake but convincing e-commerce websites that convert customer payment card data into mobile wallets from Apple and Google. Experts say these same phishing groups also are now using SMS lures that promise unclaimed tax refunds and mobile rewards points.",
+    "source_feed": "https://krebsonsecurity.com/feed/",
+    "ingested_at": "2026-02-07T18:13:31.021311"
+  },
+  {
+    "title": "'Encrypt It Already' Campaign Pushes Big Tech to Prioritize E2E Encryption",
+    "link": "https://www.darkreading.com/cloud-security/encrypt-it-already-pushes-big-tech-e2e-encryption",
+    "published": "Fri, 06 Feb 2026 16:34:41 GMT",
+    "summary": "The Electronic Frontier Foundation is urging major technology companies to follow through on their promises to implement end-to-end encryption (E2E) by default across their services, as privacy concerns mount amid increased AI use.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439386"
+  },
+  {
+    "title": "Shai-hulud: The Hidden Cost of Supply Chain Attacks",
+    "link": "https://www.darkreading.com/application-security/shai-hulud-hidden-cost-supply-chain-attacks",
+    "published": "Fri, 06 Feb 2026 16:25:14 GMT",
+    "summary": "Recent supply chain attacks involving self-propagating worms have spread far, but the damage and long-term impact is hard to quantify.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439394"
+  },
+  {
+    "title": "OpenClaw's Gregarious Insecurities Make Safe Usage Difficult",
+    "link": "https://www.darkreading.com/application-security/openclaw-insecurities-safe-usage-difficult",
+    "published": "Fri, 06 Feb 2026 15:42:15 GMT",
+    "summary": "Malicious &quot;skills&quot; and persnickety configuration settings are just some of the issues that security researchers have found when installing — and removing — the OpenClaw AI assistant.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439397"
+  },
+  {
+    "title": "EnCase Driver Weaponized as EDR Killers Persist",
+    "link": "https://www.darkreading.com/threat-intelligence/encase-driver-weaponized-edr-killers-persist",
+    "published": "Thu, 05 Feb 2026 22:35:20 GMT",
+    "summary": "The forensic tool's driver was signed with a digital certificate that expired years ago, but major security gaps allowed Windows to load it.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439400"
+  },
+  {
+    "title": "Agentic AI Site 'Moltbook' Is Riddled With Security Risks",
+    "link": "https://www.darkreading.com/cyber-risk/agentic-ai-moltbook-security-risks",
+    "published": "Thu, 05 Feb 2026 22:03:29 GMT",
+    "summary": "Someone used AI to build an entire Web platform, which then did something predictable and preventable: It exposed all its data through a publicly accessible API.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439403"
+  },
+  {
+    "title": "Data Tool to Triage Exploited Vulnerabilities Can Make KEV More Useful",
+    "link": "https://www.darkreading.com/threat-intelligence/data-tool-triage-exploited-vulnerabilities-make-kev-catalog-more-useful",
+    "published": "Thu, 05 Feb 2026 20:53:34 GMT",
+    "summary": "A disconnect exists between an organization's cybersecurity needs and lists like CISA's KEV Catalog. KEV Collider combines data from multiple open source vulnerability frameworks to help security teams quickly assess which are important, based on their priorities.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439405"
+  },
+  {
+    "title": "Cyber Success Trifecta: Education, Certifications &amp; Experience",
+    "link": "https://www.darkreading.com/cybersecurity-operations/the-trifecta-of-cyber-success-education-certifications-and-experience",
+    "published": "Thu, 05 Feb 2026 14:00:00 GMT",
+    "summary": "Col. Georgeo Xavier Pulikkathara, CISO at iMerit, discusses the importance of fundamentals, continuous learning, and human ingenuity in the face of AI-driven cybersecurity evolution.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439408"
+  },
+  {
+    "title": "Protests Don't Impede Iranian Spying on Expats, Syrians, Israelis",
+    "link": "https://www.darkreading.com/cyberattacks-data-breaches/iran-spies-expats-syrians-israelis",
+    "published": "Thu, 05 Feb 2026 07:00:00 GMT",
+    "summary": "Iranian threat actors have been stealing credentials from people of interest across the Middle East, using spear-phishing and social engineering.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439410"
+  },
+  {
+    "title": "Ransomware Gang Goes Full 'Godfather' With Cartel",
+    "link": "https://www.darkreading.com/cyber-risk/ransomware-gang-full-godfather-cartel",
+    "published": "Wed, 04 Feb 2026 22:14:19 GMT",
+    "summary": "DragonForce is taking cues from organized crime, emphasizing cooperation and coordination among ransomware gangs.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439413"
+  },
+  {
+    "title": "CISA Makes Unpublicized Ransomware Updates to KEV Catalog",
+    "link": "https://www.darkreading.com/threat-intelligence/cisa-hidden-ransomware-updates-kev-catalog",
+    "published": "Wed, 04 Feb 2026 21:48:57 GMT",
+    "summary": "A third of the &quot;flipped&quot; CVEs affected network edge devices, leading one researcher to conclude, &quot;Ransomware operators are building playbooks around your perimeter.&quot;",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439415"
+  },
+  {
+    "title": "Attackers Use Windows Screensavers to Drop Malware, RMM Tools",
+    "link": "https://www.darkreading.com/application-security/attackers-use-screensavers-drop-malware-rmm-tools",
+    "published": "Wed, 04 Feb 2026 21:06:28 GMT",
+    "summary": "By tapping the unusual .scr file type, attackers leverage &quot;executables that don't always receive executable-level controls,&quot; one researcher noted.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439418"
+  },
+  {
+    "title": "Extra Extra! Announcing DR Global Latin America",
+    "link": "https://www.darkreading.com/cybersecurity-operations/announcing-dr-global-latin-america",
+    "published": "Wed, 04 Feb 2026 13:30:00 GMT",
+    "summary": "Dark Reading has something new hitting the newsstand: a content section purpose-built for Latin American readers, featuring news, analysis, features, and multimedia.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439420"
+  },
+  {
+    "title": "Big Breach or Smooth Sailing? Mexican Gov't Faces Leak Allegations",
+    "link": "https://www.darkreading.com/cyberattacks-data-breaches/big-breach-or-nada-de-nada-mexican-govt-faces-leak-allegations",
+    "published": "Wed, 04 Feb 2026 13:00:00 GMT",
+    "summary": "A hacktivist group claims a 2.3-terabyte data breach exposes the information of 36 million Mexicans, but no sensitive accounts are at risk, says government.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439423"
+  },
+  {
+    "title": "Google Looker Bugs Allow Cross-Tenant RCE, Data Exfil",
+    "link": "https://www.darkreading.com/application-security/google-looker-bugs-cross-tenant-rce-data-exfil",
+    "published": "Wed, 04 Feb 2026 11:00:00 GMT",
+    "summary": "Attackers could even have used one vulnerable Lookout user to gain access to other GCP tenants' environments.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439425"
+  },
+  {
+    "title": "Russian Hackers Weaponize Microsoft Office Bug in Just 3 Days",
+    "link": "https://www.darkreading.com/cyberattacks-data-breaches/russian-hackers-weaponize-office-bug-within-days",
+    "published": "Tue, 03 Feb 2026 21:52:22 GMT",
+    "summary": "APT28's attacks rely on specially crafted Microsoft Rich Text Format (RTF) documents to kick off a multistage infection chain to deliver malicious payloads.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439428"
+  },
+  {
+    "title": "GlassWorm Malware Returns to Shatter Developer Ecosystems",
+    "link": "https://www.darkreading.com/application-security/glassworm-malware-developer-ecosystems",
+    "published": "Tue, 03 Feb 2026 20:55:51 GMT",
+    "summary": "The self-replicating malware has poisoned a fresh set of Open VSX software components, leaving potential downstream victims with infostealer infections.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439430"
+  },
+  {
+    "title": "AI May Supplant Pen Testers, But Oversight &amp; Trust Are Not There Yet",
+    "link": "https://www.darkreading.com/cybersecurity-operations/ai-supplant-pen-testers-oversight-trust-not-there-yet",
+    "published": "Tue, 03 Feb 2026 18:03:46 GMT",
+    "summary": "Crowdsourced bug bounties and pen-testing firms see AI agents stealing the low-hanging vulnerabilities from their human counterparts. Oversight remains key.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439433"
+  },
+  {
+    "title": "8-Minute Access: AI Accelerates Breach of AWS Environment",
+    "link": "https://www.darkreading.com/cloud-security/8-minute-access-ai-aws-environment-breach",
+    "published": "Tue, 03 Feb 2026 16:38:11 GMT",
+    "summary": "The AI-assisted attack, which started with exposed credentials from public S3 buckets, rapidly achieved administrative privilges.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439435"
+  },
+  {
+    "title": "Dark Patterns Undermine Security, One Click at a Time",
+    "link": "https://www.darkreading.com/cyber-risk/dark-patterns-undermine-security-one-click-at-a-time",
+    "published": "Tue, 03 Feb 2026 16:30:41 GMT",
+    "summary": "People trust organizations to do the right thing, but some websites and apps have user interfaces that ultimately lead to inadequate security.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439438"
+  },
+  {
+    "title": "Attackers Harvest Dropbox Logins Via Fake PDF Lures",
+    "link": "https://www.darkreading.com/cloud-security/attackers-harvest-dropbox-logins-fake-pdf-lures",
+    "published": "Mon, 02 Feb 2026 22:21:33 GMT",
+    "summary": "A malware-free phishing campaign targets corporate inboxes and asks employees to view &quot;request orders,&quot; ultimately leading to Dropbox credential theft.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439442"
+  },
+  {
+    "title": "County Pays $600K to Wrongfully Jailed Pen Testers",
+    "link": "https://www.darkreading.com/cybersecurity-operations/county-pays-600k-wrongfully-jailed-pen-testers",
+    "published": "Mon, 02 Feb 2026 21:57:51 GMT",
+    "summary": "Iowa police arrested two penetration testers in 2019 for doing their jobs, highlighting the risk to security professionals in red teaming exercises.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439445"
+  },
+  {
+    "title": "Chinese Hackers Hijack Notepad++ Updates for 6 Months",
+    "link": "https://www.darkreading.com/application-security/chinese-hackers-hijack-notepad-updates-6-months",
+    "published": "Mon, 02 Feb 2026 19:57:02 GMT",
+    "summary": "State-sponsored threat actors compromised the popular code editor's hosting provider to redirect targeted users to malicious downloads.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439447"
+  },
+  {
+    "title": "ShinyHunters Expands Scope of SaaS Extortion Attacks",
+    "link": "https://www.darkreading.com/cyberattacks-data-breaches/shinyhunters-expands-scope-saas-extortion-attacks",
+    "published": "Mon, 02 Feb 2026 16:07:57 GMT",
+    "summary": "Following their attacks on Salesforce instances last year, members of the cybercrime group have broadened their targeting and gotten more aggressive with extortion tactics.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439450"
+  },
+  {
+    "title": "Torq Moves SOCs Beyond SOAR With AI-Powered Hyper Automation",
+    "link": "https://www.darkreading.com/remote-workforce/torq-moves-socs-soar-ai-powered-hyper-automation",
+    "published": "Fri, 30 Jan 2026 22:14:31 GMT",
+    "summary": "Investors poured $140 million into Torq's Series D Round, raising the startup's valuation to $1.2 billion, to bring AI-based &quot;hyper automation&quot; to SOCs.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439452"
+  },
+  {
+    "title": "2026: The Year Agentic AI Becomes the Attack-Surface Poster Child",
+    "link": "https://www.darkreading.com/threat-intelligence/2026-agentic-ai-attack-surface-poster-child",
+    "published": "Fri, 30 Jan 2026 21:16:15 GMT",
+    "summary": "Dark Reading asked readers whether agentic AI attacks, advanced deepfake threats, board recognition of cyber as a top priority, or password-less technology adoption would be most likely to become a trending reality for 2026.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439455"
+  },
+  {
+    "title": "Out-of-the-Box Expectations for 2026 Reveal a Grab Bag of Risk",
+    "link": "https://www.darkreading.com/threat-intelligence/cyber-expectations-2026-grab-bag-risk",
+    "published": "Fri, 30 Jan 2026 21:14:32 GMT",
+    "summary": "Security teams need to be thinking about this list of emerging cybersecurity realities to avoid rolling the dice on enterprise security risks (and opportunities).",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439457"
+  },
+  {
+    "title": "Tenable Tackles AI Governance, Shadow AI Risks, Data Exposure",
+    "link": "https://www.darkreading.com/cyber-risk/tenable-tackles-ai-governance-shadow-ai-risks-data-exposure",
+    "published": "Fri, 30 Jan 2026 20:23:53 GMT",
+    "summary": "The Tenable One AI Exposure add-on discovers unsanctioned AI use in the organization and enforces policy compliance with approved tools.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439460"
+  },
+  {
+    "title": "OpenClaw AI Runs Wild in Business Environments",
+    "link": "https://www.darkreading.com/application-security/openclaw-ai-runs-wild-business-environments",
+    "published": "Fri, 30 Jan 2026 16:40:34 GMT",
+    "summary": "The popular open source AI assistant (aka ClawdBot, MoltBot) has taken off, raising security concerns over its privileged, autonomous control within users' computers.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439462"
+  },
+  {
+    "title": "Chinese APTs Hacking Asian Orgs With High-End Malware",
+    "link": "https://www.darkreading.com/cyberattacks-data-breaches/chinese-apts-asian-orgs-high-end-malware",
+    "published": "Fri, 30 Jan 2026 02:00:00 GMT",
+    "summary": "Advanced persistent threat (APT) groups have deployed new cyber weapons against a variety of targets, highlighting the increasing threats to the region.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439465"
+  },
+  {
+    "title": "Trump Administration Rescinds Biden-Era Software Guidance",
+    "link": "https://www.darkreading.com/application-security/trump-administration-rescinds-biden-era-sbom-guidance",
+    "published": "Thu, 29 Jan 2026 22:25:07 GMT",
+    "summary": "Federal agencies will no longer be required to solicit software attestations that they comply with NIST's Secure Software Development Framework (SSDF). What that means long term is unclear.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439467"
+  },
+  {
+    "title": "Second Round of Critical RCE Bugs in n8n Spikes Corporate Risk",
+    "link": "https://www.darkreading.com/vulnerabilities-threats/critical-flaws-n8n-compromise-customer-security",
+    "published": "Thu, 29 Jan 2026 21:53:01 GMT",
+    "summary": "A new around of vulnerabilities in the popular AI automation platform could let attackers hijack servers and steal credentials, allowing full takeover.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439470"
+  },
+  {
+    "title": "'Semantic Chaining' Jailbreak Dupes Gemini Nano Banana, Grok 4",
+    "link": "https://www.darkreading.com/vulnerabilities-threats/semantic-chaining-jailbreak-gemini-nano-banana-grok-4",
+    "published": "Thu, 29 Jan 2026 16:09:01 GMT",
+    "summary": "If an attacker splits a malicious prompt into discrete chunks, some large language models (LLMs) will get lost in the details and miss the true intent.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439472"
+  },
+  {
+    "title": "From Quantum to AI Risks: Preparing for Cybersecurity's Future",
+    "link": "https://www.darkreading.com/cybersecurity-operations/quantum-ai-risks-cybersecuritys-future",
+    "published": "Thu, 29 Jan 2026 15:32:24 GMT",
+    "summary": "In the latest edition of &quot;Reporters' Notebook,&quot; a trio of journalists urge the cybersecurity industry to prioritize patching vulnerabilities, preparing for quantum threats, and refining AI applications,",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439475"
+  },
+  {
+    "title": "How Can CISOs Respond to Ransomware Getting More Violent?",
+    "link": "https://www.darkreading.com/cyber-risk/how-cisos-respond-ransomware-getting-more-violent",
+    "published": "Wed, 28 Jan 2026 22:51:36 GMT",
+    "summary": "Ransomware defense requires focusing on business resilience. This means patching issues promptly, improving user education, and deploying multifactor authentication.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439477"
+  },
+  {
+    "title": "Months After Patch, WinRAR Bug Poised to Hit SMBs Hardest",
+    "link": "https://www.darkreading.com/application-security/months-after-patch-winrar-bug-poised-smbs-hardest",
+    "published": "Wed, 28 Jan 2026 22:48:09 GMT",
+    "summary": "Russian and Chinese nation-state attackers are exploiting a months-old WinRAR vulnerability, despite a patch that came out last July.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439480"
+  },
+  {
+    "title": "Fortinet Confirms New Zero-Day Behind Malicious SSO Logins",
+    "link": "https://www.darkreading.com/vulnerabilities-threats/fortinet-new-zero-day-malicious-sso-logins",
+    "published": "Wed, 28 Jan 2026 21:14:27 GMT",
+    "summary": "To stop the ongoing attacks, the cybersecurity vendor took the drastic step of temporarily disabling FortiCloud single sign-on (SSO) authentication for all devices.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439482"
+  },
+  {
+    "title": "Consumers Reluctant to Shop at Stores That Don't Take Security Seriously",
+    "link": "https://www.darkreading.com/cyber-risk/consumers-reluctant-to-shop-at-stores-hit-by-cyberattacks",
+    "published": "Wed, 28 Jan 2026 20:24:40 GMT",
+    "summary": "The retail sector must adapt as consumers become more cybersecurity-conscious. Increased attack transparency is a good place to start.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439484"
+  },
+  {
+    "title": "China-Backed 'PeckBirdy' Takes Flight for Cross-Platform Attacks",
+    "link": "https://www.darkreading.com/threat-intelligence/china-backed-peckbirdy-cross-platform-attacks",
+    "published": "Wed, 28 Jan 2026 16:19:22 GMT",
+    "summary": "In two separate campaigns, attackers used the JScript C2 framework to target Chinese gambling websites and Asian government entities with new backdoors.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439487"
+  },
+  {
+    "title": "Surging Cyberattacks Boost Latin America to Riskiest Region",
+    "link": "https://www.darkreading.com/cyber-risk/surging-cyberattacks-latin-america-riskiest-region",
+    "published": "Wed, 28 Jan 2026 14:00:00 GMT",
+    "summary": "The region is up against tactics like data-leak extortion, credential-stealing campaigns, edge-device exploitation, and attackers leveraging AI.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439489"
+  },
+  {
+    "title": "AI &amp; the Death of Accuracy: What It Means for Zero-Trust",
+    "link": "https://www.darkreading.com/application-security/ai-death-accuracy-zero-trust",
+    "published": "Tue, 27 Jan 2026 22:31:48 GMT",
+    "summary": "AI &quot;model collapse,&quot; where LLMs over time train on more and more AI-generated data and become degraded as a result, can introduce inaccuracies, promulgate malicious activity, and impact PII protections.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439492"
+  },
+  {
+    "title": "Vibe-Coded 'Sicarii' Ransomware Can't Be Decrypted",
+    "link": "https://www.darkreading.com/endpoint-security/vibe-coded-sicarii-ransomware-decrypted",
+    "published": "Tue, 27 Jan 2026 22:15:39 GMT",
+    "summary": "A new ransomware strain that entered the scene last year has poorly designed code and uses Hebrew language that might be a false flag.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439494"
+  },
+  {
+    "title": "Critical Telnet Server Flaw Exposes Forgotten Attack Surface",
+    "link": "https://www.darkreading.com/ics-ot-security/critical-telnet-server-flaw-forgotten-attack-surface",
+    "published": "Tue, 27 Jan 2026 21:00:21 GMT",
+    "summary": "While telnet is considered obsolete, the network protocol is still used by hundreds of thousands of legacy systems and IoT devices for remote access.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439497"
+  },
+  {
+    "title": "Microsoft Rushes Emergency Patch for Office Zero-Day",
+    "link": "https://www.darkreading.com/vulnerabilities-threats/microsoft-rushes-emergency-patch-office-zero-day",
+    "published": "Tue, 27 Jan 2026 20:07:03 GMT",
+    "summary": "To exploit the vulnerability, an attacker would need either system access or be able to convince a user to open a malicious Office file.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439499"
+  },
+  {
+    "title": "'Stanley' Toolkit Turns Chrome Into Undetectable Phishing Vector",
+    "link": "https://www.darkreading.com/remote-workforce/stanley-toolkit-chrome-undetectable-phishing",
+    "published": "Tue, 27 Jan 2026 18:20:28 GMT",
+    "summary": "The malware-as-a-service kit enables malicious extensions to overlay pages on real websites without changing the visible URL, signaling a fresh challenge for enterprise security.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439502"
+  },
+  {
+    "title": "WorldLeaks Extortion Group Claims It Stole 1.4TB of Nike Data",
+    "link": "https://www.darkreading.com/cyberattacks-data-breaches/worldeaks-extortion-group-stole-1-4tb-nike-data",
+    "published": "Tue, 27 Jan 2026 16:41:40 GMT",
+    "summary": "The sportswear brand is investigating an alleged breach of its network that exposed some 188,347 files of highly sensitive corporate data.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439504"
+  },
+  {
+    "title": "Hand CVE Over to the Private Sector",
+    "link": "https://www.darkreading.com/cybersecurity-operations/hand-cve-over-to-private-sector",
+    "published": "Tue, 27 Jan 2026 13:00:00 GMT",
+    "summary": "How MITRE has mismanaged the world's vulnerability database for decades and wasted millions along the way.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439507"
+  },
+  {
+    "title": "Beauty in Destruction: Exploring Malware's Impact Through Art",
+    "link": "https://www.darkreading.com/vulnerabilities-threats/beauty-in-destruction-exploring-malware-impact-through-art",
+    "published": "Mon, 26 Jan 2026 23:08:57 GMT",
+    "summary": "Artistic initiatives turn cybersecurity into immersive exhibits at the Museum of Malware Art, transforming digital threats into thought-provoking experiences.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439509"
+  },
+  {
+    "title": "Sandworm Blamed for Wiper Attack on Polish Power Grid",
+    "link": "https://www.darkreading.com/threat-intelligence/sandworm-wiper-attack-poland-power-grid",
+    "published": "Mon, 26 Jan 2026 21:30:14 GMT",
+    "summary": "Researchers attributed the failed attempt to the infamous Russian APT Sandworm, which is notorious for wiper attacks on critical infrastructure organizations.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439512"
+  },
+  {
+    "title": "DPRK's Konni Targets Blockchain Developers With AI-Generated Backdoor",
+    "link": "https://www.darkreading.com/cyberattacks-data-breaches/dprks-konni-targets-blockchain-developers-ai-generated-backdoor",
+    "published": "Mon, 26 Jan 2026 15:47:40 GMT",
+    "summary": "The North Korean threat group is using a new PowerShell backdoor to compromise development environments and target cryptocurrency holdings, according to researchers.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439514"
+  },
+  {
+    "title": "2025 Was a Wake-up Call to Protect Human Decisions, Not Just Systems",
+    "link": "https://www.darkreading.com/cyber-risk/wake-up-call-to-protect-human-decisions-not-just-systems",
+    "published": "Sat, 24 Jan 2026 00:55:56 GMT",
+    "summary": "Cybersecurity must shift from solely protecting systems to safeguarding human decision-making under uncertainty and system failures.",
+    "source_feed": "https://www.darkreading.com/rss.xml",
+    "ingested_at": "2026-02-07T18:13:31.439517"
+  },
+  {
+    "title": "Forensic Focus Digest, August 22 2025",
+    "link": "https://www.forensicfocus.com/news/forensic-focus-digest-august-22-2025/",
+    "published": "Fri, 22 Aug 2025 15:10:50 +0000",
+    "summary": "Discover what’s new on Forensic Focus – explore Blue Light Wellbeing’s support for digital forensic investigators, meet Neal Ysart of the Coalition of Cyber Investigators, examine the balance between examiners and technicians in digital forensics, and more.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754344"
+  },
+  {
+    "title": "Blue Light Wellbeing’s Support For Digital Forensic Investigators",
+    "link": "https://www.forensicfocus.com/articles/blue-light-wellbeings-support-for-digital-forensic-investigators/",
+    "published": "Thu, 21 Aug 2025 09:43:07 +0000",
+    "summary": "Discover how tailored, culturally aware mental health support can help digital forensic investigators cope with the hidden trauma of their work.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754350"
+  },
+  {
+    "title": "Digital Forensics Round-Up, August 20 2025",
+    "link": "https://www.forensicfocus.com/news/digital-forensics-round-up-august-20-2025/",
+    "published": "Wed, 20 Aug 2025 15:48:48 +0000",
+    "summary": "Read the latest digital forensics news – SANS releases DFIR Summit playlist, UAC launches v3.2.0, Neal Ysart discusses the Coalition of Cyber Investigators, and more.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754353"
+  },
+  {
+    "title": "Wrapping Up The S21 Transcriber Spotlight Session – What We’ve Covered",
+    "link": "https://www.forensicfocus.com/news/wrapping-up-the-s21-transcriber-spotlight-session-what-weve-covered/",
+    "published": "Wed, 20 Aug 2025 10:00:00 +0000",
+    "summary": "Explore S21 Transcriber: a fully offline, court-ready tool with free 30-day access and training.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754355"
+  },
+  {
+    "title": "UPCOMING WEBINAR – Retail Under Siege: Fighting Back Against Ransomware With Next-Gen Forensics",
+    "link": "https://www.forensicfocus.com/news/upcoming-webinar-retail-under-siege-fighting-back-against-ransomware-with-next-gen-forensics/",
+    "published": "Tue, 19 Aug 2025 11:38:51 +0000",
+    "summary": "Retailers face rising cyber threats—join Exterro's Sept 4 webinar to learn fast, modern forensic response strategies and protect your brand.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754358"
+  },
+  {
+    "title": "Digital Forensics Jobs Round-Up, August 18 2025",
+    "link": "https://www.forensicfocus.com/jobs/digital-forensics-jobs-round-up-august-18-2025/",
+    "published": "Mon, 18 Aug 2025 15:43:03 +0000",
+    "summary": "Explore a selection of the latest DFIR employment opportunities in this week’s Forensic Focus jobs round-up.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754360"
+  },
+  {
+    "title": "Enterprise Turns To AI For Speed And Accuracy In DFIR",
+    "link": "https://www.forensicfocus.com/news/enterprise-turns-to-ai-for-speed-and-accuracy-in-dfir/",
+    "published": "Thu, 14 Aug 2025 15:29:47 +0000",
+    "summary": "Magnet Forensics explores how AI is revolutionizing speed and accuracy in DFIR.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754363"
+  },
+  {
+    "title": "Breaking Digital Barriers: Galaxy S25 & Z Flip Fully Supported",
+    "link": "https://www.forensicfocus.com/news/breaking-digital-barriers-galaxy-s25-and-z-flip-fully-supported/",
+    "published": "Thu, 14 Aug 2025 12:00:00 +0000",
+    "summary": "Gain full filesystem access to the latest Samsung Galaxy devices with MD-NEXT.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754365"
+  },
+  {
+    "title": "Digital Forensics Round-Up, August 13 2025",
+    "link": "https://www.forensicfocus.com/news/digital-forensics-round-up-august-13-2025/",
+    "published": "Wed, 13 Aug 2025 14:26:31 +0000",
+    "summary": "Read the latest DFIR news – evidence of Kohberger’s detailed murder preparations, an alarming rise in child sextortion cases, Brian Carrier’s new mini-course on automation and AI in forensics, and more.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754368"
+  },
+  {
+    "title": "Well-Being In Digital Forensics And Policing: Insights From Hannah Bailey",
+    "link": "https://www.forensicfocus.com/podcast/well-being-in-digital-forensics-and-policing-insights-from-hannah-bailey/",
+    "published": "Tue, 12 Aug 2025 13:58:34 +0000",
+    "summary": "Hannah Bailey shares her journey from frontline policing to founding Blue Light Wellbeing, explaining why culturally-aware mental health support is crucial for DFIs and frontline workers.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754370"
+  },
+  {
+    "title": "Oxygen Tech Bytes In July 2025",
+    "link": "https://www.forensicfocus.com/news/oxygen-tech-bytes-in-july-2025/",
+    "published": "Tue, 12 Aug 2025 12:00:22 +0000",
+    "summary": "Level up your DFIR skills in under 20 minutes with Oxygen Tech Bytes’ expert-led, on-demand webinars.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754373"
+  },
+  {
+    "title": "Neal Ysart, Co-Founder, The Coalition Of Cyber Investigators",
+    "link": "https://www.forensicfocus.com/interviews/neal-ysart-co-founder-the-coalition-of-cyber-investigators/",
+    "published": "Mon, 11 Aug 2025 14:00:00 +0000",
+    "summary": "Neal Ysart shares how The Coalition of Cyber Investigators tackles OSINT integrity, complex investment fraud, and the rise of AI-driven scams.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754375"
+  },
+  {
+    "title": "Forensic Focus Digest, August 08 2025",
+    "link": "https://www.forensicfocus.com/news/forensic-focus-digest-august-08-2025/",
+    "published": "Fri, 08 Aug 2025 10:00:00 +0000",
+    "summary": "Discover what’s new on Forensic Focus – explore the balance between expertise and efficiency in digital forensics, tackle the challenges of multi-jurisdictional investigations, and learn how transforming organisational culture can improve mental health in the field.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754377"
+  },
+  {
+    "title": "The Balance Between Digital Forensic Examiners And Digital Evidence Technicians: Expertise Vs. Efficiency",
+    "link": "https://www.forensicfocus.com/articles/the-balance-between-digital-forensic-examiners-and-digital-evidence-technicians-expertise-vs-efficiency/",
+    "published": "Thu, 07 Aug 2025 14:00:00 +0000",
+    "summary": "Can digital forensic labs cut backlogs without cutting corners? Debbie Garner explores how tiered workflows using both examiners and technicians can strike the right balance.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754380"
+  },
+  {
+    "title": "More Than Software: Amped Training Teaches You The Science Of Forensic Video And Image Analysis",
+    "link": "https://www.forensicfocus.com/news/more-than-software-amped-training-teaches-you-the-science-of-forensic-video-and-image-analysis/",
+    "published": "Thu, 07 Aug 2025 11:02:32 +0000",
+    "summary": "Push past button-clicking—Amped Software training teaches the science behind forensic video analysis.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754382"
+  },
+  {
+    "title": "Digital Forensics Round-Up, August 06 2025",
+    "link": "https://www.forensicfocus.com/news/digital-forensics-round-up-august-06-2025/",
+    "published": "Wed, 06 Aug 2025 16:00:03 +0000",
+    "summary": "Read the latest DFIR news – starting a digital forensic business, Hashcat v7.0.0, GenAI incident response guidance, cross-border investigation challenges, and more.",
+    "source_feed": "https://feeds.feedburner.com/ForensicFocus",
+    "ingested_at": "2026-02-07T18:13:31.754385"
+  }
+]

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  SME Forensic Workspace Template for Gephi
+  
+  Pre-configured with:
+    - Partition filter on "node_class" (target vs footprint)
+    - ForceAtlas 2 layout defaults
+    - Attribute columns for probability_score, source_origin, etc.
+    
+  To use: Open Gephi → File → Open → select this file.
+  Then stream data via /stream-forensics or import a .gexf export.
+-->
+<gexf xmlns="http://gexf.net/1.3" version="1.3"
+      xmlns:viz="http://gexf.net/1.3/viz">
+  <meta lastmodifieddate="2026-02-09">
+    <creator>SME Gephi Exporter — Bipartite Deep-Stream</creator>
+    <description>Forensic workspace template for the Semantic Memory Engine.
+Pre-loaded attribute schema for bipartite Target/Footprint analysis.</description>
+  </meta>
+  <graph defaultedgetype="undirected" mode="static">
+    
+    <!-- Attribute declarations matching spec 002 -->
+    <attributes class="node">
+      <attribute id="0" title="node_class"        type="string"  default="unknown"/>
+      <attribute id="1" title="probability_score"  type="float"   default="0.0"/>
+      <attribute id="2" title="source_origin"      type="string"  default=""/>
+      <attribute id="3" title="confidence_score"   type="float"   default="0.0"/>
+      <attribute id="4" title="first_seen"         type="string"  default=""/>
+      <attribute id="5" title="incident_type"      type="string"  default=""/>
+      <attribute id="6" title="ai_verdict"         type="string"  default=""/>
+    </attributes>
+    
+    <attributes class="edge">
+      <attribute id="0" title="type"   type="string" default=""/>
+      <attribute id="1" title="weight" type="float"  default="1.0"/>
+    </attributes>
+
+    <!-- Empty node/edge sets — populated by streaming or import -->
+    <nodes/>
+    <edges/>
+    
+  </graph>
+</gexf>

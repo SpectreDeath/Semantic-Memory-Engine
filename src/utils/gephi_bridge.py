@@ -45,11 +45,15 @@ def read_active_persona():
 def connect_to_gephi(workspace="workspace0"):
     """Connect to Gephi with error handling."""
     try:
+        # Test if the endpoint is actually reachable first
+        import requests
+        requests.get(f"http://localhost:8080", timeout=2)
+        
         # Create the streamer with GephiREST backend
-        gephi = Streamer(GephiREST("http://localhost:8080", workspace=workspace))
+        gephi = Streamer(GephiREST(hostname="localhost", port=8080, workspace=workspace))
         return gephi, True
     except Exception as e:
-        print(f"Gephi connection failed: {e} - using mock mode")
+        # print(f"Gephi connection failed: {e} - using mock mode")
         return None, False
 
 

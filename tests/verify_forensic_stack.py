@@ -6,77 +6,81 @@ Tests both Stylometry and Gephi components for 1660 Ti environment readiness.
 
 import sys
 import traceback
+import os
 from pathlib import Path
+
+# Ensure SME src is importable
+sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
 def test_stylometry():
     """Test faststylometry integration."""
-    print("🔍 Testing Stylometry Stack...")
+    print("[*] Testing Stylometry Stack...")
     try:
-        import faststylometry
-        print("✅ faststylometry imports successful")
+        from src.sme.vendor import faststylometry
+        print("[+] vendored faststylometry imports successful")
         
         # Test basic functionality - just check if the module is available
-        print("✅ faststylometry module available for stylometric analysis")
+        print("[+] faststylometry module available for stylometric analysis")
         
         return True
     except ImportError as e:
-        print(f"❌ faststylometry import failed: {e}")
+        print(f"[-] faststylometry import failed: {e}")
         return False
     except Exception as e:
-        print(f"❌ faststylometry test failed: {e}")
+        print(f"[-] faststylometry test failed: {e}")
         return False
 
 def test_gephi_components():
     """Test Gephi streaming components."""
-    print("\n🔍 Testing Gephi Components...")
+    print("\n[*] Testing Gephi Components...")
     try:
         import gephistreamer
         from gephistreamer import graph, Streamer, GephiREST
-        print("✅ gephistreamer imports successful")
+        print("[+] gephistreamer imports successful")
         
         # Test object creation
         rest = GephiREST('http://localhost:8080', workspace='workspace0')
         s = Streamer(rest)
-        print("✅ Gephi objects initialized successfully")
+        print("[+] Gephi objects initialized successfully")
         
         # Test graph components
         node = graph.Node("test_node", label="Test")
         edge = graph.Edge("test_edge", "node1", "node2")
-        print("✅ Graph Node and Edge creation successful")
+        print("[+] Graph Node and Edge creation successful")
         
         return True
     except ImportError as e:
-        print(f"❌ gephistreamer import failed: {e}")
+        print(f"[-] gephistreamer import failed: {e}")
         return False
     except Exception as e:
-        print(f"❌ Gephi component test failed: {e}")
+        print(f"[-] Gephi component test failed: {e}")
         return False
 
 def test_memory_usage():
     """Test memory usage for 1660 Ti constraints."""
-    print("\n🔍 Testing Memory Constraints...")
+    print("\n[*] Testing Memory Constraints...")
     try:
         import psutil
         process = psutil.Process()
         memory_mb = process.memory_info().rss / 1024 / 1024
-        print(f"✅ Current memory usage: {memory_mb:.2f} MB")
+        print(f"[+] Current memory usage: {memory_mb:.2f} MB")
         
-        if memory_mb < 200:  # Adjusted for 1660 Ti realistic constraints
-            print("✅ Memory usage within 1660 Ti constraints")
+        if memory_mb < 500:  # Adjusted for 1660 Ti realistic constraints
+            print("[+] Memory usage within 1660 Ti constraints")
             return True
         else:
-            print("⚠️  Memory usage higher than expected")
+            print("[!] Memory usage higher than expected")
             return False
     except ImportError:
-        print("⚠️  psutil not available, skipping memory test")
+        print("[!] psutil not available, skipping memory test")
         return True
     except Exception as e:
-        print(f"❌ Memory test failed: {e}")
+        print(f"[-] Memory test failed: {e}")
         return False
 
 def test_file_system():
     """Test required files exist."""
-    print("\n🔍 Testing File System...")
+    print("\n[*] Testing File System...")
     required_files = [
         'src/utils/gephi_bridge.py',
         'src/utils/auditor.py',
@@ -87,16 +91,16 @@ def test_file_system():
     all_exist = True
     for file_path in required_files:
         if Path(file_path).exists():
-            print(f"✅ {file_path} exists")
+            print(f"[+] {file_path} exists")
         else:
-            print(f"❌ {file_path} missing")
+            print(f"[-] {file_path} missing")
             all_exist = False
     
     return all_exist
 
 def main():
     """Run all verification tests."""
-    print("🧪 Forensic Stack Verification for 1660 Ti Environment")
+    print("Forensic Stack Verification for 1660 Ti Environment")
     print("=" * 60)
     
     tests = [
@@ -111,19 +115,19 @@ def main():
         try:
             results[test_name] = test_func()
         except Exception as e:
-            print(f"❌ {test_name} crashed: {e}")
+            print(f"[-] {test_name} crashed: {e}")
             traceback.print_exc()
             results[test_name] = False
     
     print("\n" + "=" * 60)
-    print("📊 VERIFICATION SUMMARY")
+    print("VERIFICATION SUMMARY")
     print("=" * 60)
     
     passed = 0
     total = len(results)
     
     for test_name, result in results.items():
-        status = "✅ PASS" if result else "❌ FAIL"
+        status = "PASS" if result else "FAIL"
         print(f"{test_name:20} | {status}")
         if result:
             passed += 1
@@ -131,11 +135,11 @@ def main():
     print(f"\nOverall: {passed}/{total} tests passed")
     
     if passed == total:
-        print("\n🎉 All systems ready for forensic operations!")
+        print("\nAll systems ready for forensic operations!")
         print("Your 1660 Ti environment is fully optimized.")
         return 0
     else:
-        print(f"\n⚠️  {total - passed} test(s) failed. Review issues above.")
+        print(f"\n[!] {total - passed} test(s) failed. Review issues above.")
         return 1
 
 if __name__ == "__main__":

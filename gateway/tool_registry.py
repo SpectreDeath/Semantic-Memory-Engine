@@ -20,11 +20,13 @@ from dataclasses import dataclass, asdict, is_dataclass
 from nltk.tokenize import word_tokenize
 from collections import Counter
 import networkx as nx
-import faststylometry
-from faststylometry import Corpus
-from faststylometry.probability import predict_proba, calibrate
-from faststylometry.en import tokenise_remove_pronouns_en
+import src.sme.vendor.faststylometry as faststylometry
+from src.sme.vendor.faststylometry import Corpus
+from src.sme.vendor.faststylometry.probability import predict_proba, calibrate
+from src.sme.vendor.faststylometry.en import tokenise_remove_pronouns_en
 from gateway.hardware_security import get_hsm
+from src.sme.vendor import forensic_math
+from src.sme.vendor.forensic_math import dict_to_vectors
 
 # Ensure SME src is importable
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -471,6 +473,30 @@ class ToolRegistry:
             category="graph",
             parameters={"entity_name": "str"}
         ),
+        "calculate_cosine_similarity": ToolDefinition(
+            name="calculate_cosine_similarity",
+            description="Vectorized cosine similarity comparison of two frequency dictionaries.",
+            factory_method=None,
+            category="forensics",
+            parameters={"freq_dict_1": "dict", "freq_dict_2": "dict"},
+            is_manual=True
+        ),
+        "calculate_typo_distance": ToolDefinition(
+            name="calculate_typo_definition",
+            description="Identify fuzzy word matches using optimized Levenshtein distance.",
+            factory_method=None,
+            category="forensics",
+            parameters={"word1": "str", "word2": "str"},
+            is_manual=True
+        ),
+        "calculate_set_overlap": ToolDefinition(
+            name="calculate_set_overlap",
+            description="Calculate Jaccard Similarity (Set Overlap) between token lists.",
+            factory_method=None,
+            category="forensics",
+            parameters={"tokens1": "list", "tokens2": "list"},
+            is_manual=True
+        ),
     }
     
     def __init__(self):
@@ -659,6 +685,60 @@ class EpistemicValidator:
             "epistemic_stance": "Hardware-Anchored Reliabilism",
             "timestamp": datetime.now().isoformat()
         }
+
+
+class ForensicMathTool:
+    """
+    Exposes high-performance vectorized forensic math algorithms.
+    """
+    def __init__(self, core_bridge):
+        self.core = core_bridge
+        self.category = 'forensics'
+
+    def calculate_cosine_similarity(self, freq_dict_1: Dict[str, float], freq_dict_2: Dict[str, float]) -> Dict[str, Any]:
+        """
+        Compare two text vectors using vectorized cosine similarity.
+        """
+        try:
+            v1, v2 = dict_to_vectors(freq_dict_1, freq_dict_2)
+            similarity = forensic_math.calculate_cosine_similarity(v1, v2)
+            return {
+                "cosine_similarity": round(similarity, 4),
+                "vector_dimensions": len(v1),
+                "status": "Success"
+            }
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def calculate_typo_distance(self, word1: str, word2: str) -> Dict[str, Any]:
+        """
+        Detect typo distance between two words using optimized Levenshtein.
+        """
+        try:
+            distance = forensic_math.calculate_typo_distance(word1, word2)
+            # Typos are usually 1-2 chars different
+            likely_typo = distance <= 2 and distance > 0
+            return {
+                "levenshtein_distance": distance,
+                "likely_typo": likely_typo,
+                "status": "Success"
+            }
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def calculate_set_overlap(self, tokens1: List[str], tokens2: List[str]) -> Dict[str, Any]:
+        """
+        Identify shared jargon using Jaccard Similarity.
+        """
+        try:
+            overlap = forensic_math.calculate_set_overlap(tokens1, tokens2)
+            return {
+                "jaccard_index": round(overlap, 4),
+                "shared_token_count": len(set(tokens1) & set(tokens2)),
+                "status": "Success"
+            }
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
 
 
 # Global registry instance

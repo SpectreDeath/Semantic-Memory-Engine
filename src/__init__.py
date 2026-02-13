@@ -25,7 +25,7 @@ from src.core.factory import ToolFactory
 # Core Utilities
 try:
     from src.core.centrifuge import Centrifuge
-except (ImportError, AttributeError):
+except Exception:
     Centrifuge = None
 
 try:
@@ -71,7 +71,7 @@ except ImportError:
 
 try:
     from src.core.advanced_nlp import AdvancedNLPEngine, AdvancedNLPAnalyzer
-except ImportError:
+except Exception:
     AdvancedNLPEngine = None
     AdvancedNLPAnalyzer = None
 
@@ -110,7 +110,7 @@ except ImportError:
 
 try:
     from src.analysis.intelligence_reports import IntelligenceReports, IntelligenceReport
-except ImportError:
+except Exception:
     IntelligenceReports = None
     IntelligenceReport = None
 

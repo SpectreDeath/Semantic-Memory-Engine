@@ -1,0 +1,32 @@
+services:
+  gpu-exporter:
+    image: nvcr.io/nvidia/k8s/dcgm-exporter:latest
+    container_name: gpu_exporter
+    restart: unless-stopped
+    # No extra environment variables needed for basic stats
+    command: ["-k"]
+    ports:
+      - "9400:9400"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: sme_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sme_user
+      POSTGRES_PASSWORD: sme_password
+      POSTGRES_DB: sme_nexus
+    ports:
+      - "5432:5432"
+    volumes:
+      - sme_pg_data:/var/lib/postgresql/data
+
+volumes:
+  sme_pg_data:

@@ -1,0 +1,8 @@
+{
+  "name": "Archival Diff",
+  "version": "1.0.0",
+  "description": "Detects government data scrubbing by comparing live web pages against Wayback snapshots.",
+  "entry_point": "plugin.py",
+  "author": "Antigravity",
+  "plugin_id": "ext_archival_diff"
+}

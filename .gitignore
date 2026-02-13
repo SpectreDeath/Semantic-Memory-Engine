@@ -1,52 +1,24 @@
-# Python
+# --- Environment & Secrets ---
+.env
+config/*.json
+!config/default_settings.json  # Optional: keep a template if you want
+
+# --- Binaries & Large Files ---
+*.exe
+*.dll
+*.so
+bin/prometheus/
+bin/grafana/
+
+# --- Python & Virtual Environments ---
+.venv/
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
 
-# Virtual Environment
-.venv/
-venv/
-ENV/
-env/
-
-# IDEs
-.vscode/
-.idea/
-
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# SimpleMem / SME GitIgnore
-data/
-data/*.db
-data/*.sqlite
-data/chroma/
-logs/*.log
-**/__pycache__/
-.env
-config/local_config.yaml
-
-# OS Specific
-Thumbs.db
-Desktop.ini
-.DS_Store
+# --- AI & Data ---
+*.log
+data/raw/
+data/processed/
+models/*.bin
+models/*.pt

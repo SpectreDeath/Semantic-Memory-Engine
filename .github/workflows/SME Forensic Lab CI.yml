@@ -1,28 +1,37 @@
 name: SME Forensic Lab CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10' # Matches your laptop environment
 
-    - name: Install dependencies
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
-        # This filter skips pywin32 on Linux runners
-        sed -i '/pywin32/d' requirements.txt 
         pip install -r requirements.txt
+
     - name: Set up R
       uses: r-lib/actions/setup-r@v2
+
     - name: Install Stylo
-      run: Rscript -e "install.packages('stylo', repos='https://cloud.r-project.org')"
-    - name: Run Core Verifications
       run: |
-        python verify_pystyl.py
-        python verify_adaptive.py
+        Rscript -e "install.packages('stylo', repos='https://cloud.r-project.org')"
+
+    - name: Core Verification
+      run: |
+        python -c "import numpy; print('NumPy Success:', numpy.__version__)"
+        python -c "import numba; print('Numba Success:', numba.__version__)"

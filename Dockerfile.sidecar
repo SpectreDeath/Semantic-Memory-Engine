@@ -1,0 +1,31 @@
+# SME AI Sidecar - AI Heavyweights (Python 3.13)
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy source code (specific to AI requirements if they differ)
+# For now, using root requirements as baseline
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install AI specific heavyweights (e.g., Langflow, etc. if needed)
+# RUN pip install langflow
+
+COPY . .
+
+# Environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
+ENV SME_AI_PROVIDER=langflow
+
+# Expose Sidecar port
+EXPOSE 8089
+
+# Start the sidecar API
+CMD ["python", "-m", "src.ai.sidecar"]

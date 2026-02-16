@@ -90,8 +90,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Database configuration
-DB_PATH = "d:/mcp_servers/storage/laboratory.db"
-BASE_STORAGE = Path("d:/mcp_servers/storage")
+DB_PATH = os.getenv("SME_DB_PATH", "data/storage/laboratory.db")
+BASE_STORAGE = Path(os.getenv("SME_STORAGE_DIR", "data/storage"))
 
 class HarvesterCrawler:
     """

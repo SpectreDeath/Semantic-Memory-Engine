@@ -1,0 +1,22 @@
+# SME Frontend - Vite/React
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Copy package files
+COPY frontend/package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy source
+COPY frontend/ .
+
+# Build step (optional, but good for production)
+# RUN npm run build
+
+# Expose Vite dev port
+EXPOSE 5173
+
+# Start Vite
+CMD ["npm", "run", "dev", "--", "--host"]

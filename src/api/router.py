@@ -34,6 +34,15 @@ class BatchRequest(BaseModel):
     items: List[str]
     operation: str = "sentiment" # or "summarize", etc.
 
+class IngestRequest(BaseModel):
+    url: str
+    js_render: bool = False
+    deep_crawl: bool = False
+    max_pages: int = 5
+
+class ProviderUpdateRequest(BaseModel):
+    provider_type: str # 'langflow', 'mock', etc.
+
 # --- Analysis Endpoints ---
 
 @router.post("/analysis/graph")
@@ -173,3 +182,71 @@ async def get_batch_results(job_id: str, user: User = Depends(get_current_user))
     if not results:
         raise HTTPException(status_code=404, detail="Results not ready or job not found")
     return results
+
+# --- Connection Management ---
+
+@router.get("/connections/status")
+async def get_all_connections_status():
+    """Get summarized status of all infrastructure connections."""
+    try:
+        from src.ai.bridge import SIDECAR_URL
+        import httpx
+        
+        status = {
+            "api": "online",
+            "sidecar": "offline",
+            "database": "offline",
+            "tools": ToolFactory.health_check()
+        }
+        
+        # Check Sidecar
+        try:
+            async with httpx.AsyncClient(timeout=2.0) as client:
+                resp = await client.get(f"{SIDECAR_URL}/health")
+                if resp.status_code == 200:
+                    status["sidecar"] = resp.json()
+        except:
+            pass
+            
+        # Check Database (Check if we can query the factory's DB instance)
+        try:
+            db = ToolFactory.create_semantic_db()
+            if db: # placeholder for actual health check
+                status["database"] = "online"
+        except:
+            pass
+            
+        return status
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/connections/ai-provider")
+async def update_ai_provider(request: ProviderUpdateRequest):
+    """Update the global AI provider (persists to environment/settings)."""
+    # For now, we'll update the environment variable for the process
+    # In a more robust system, this would be written to a settings table
+    os.environ["SME_AI_PROVIDER"] = request.provider_type
+    return {"status": "success", "active_provider": request.provider_type}
+
+# --- Ingestion (Harvester) ---
+
+@router.post("/ingestion/crawl")
+async def ingest_from_url(request: IngestRequest):
+    """Ingest content from a URL using the Harvester engine."""
+    try:
+        from src.harvester.crawler import HarvesterCrawler
+        crawler = HarvesterCrawler()
+        
+        if request.deep_crawl:
+            # Running deep crawl in a background task would be better
+            # For simplicity in this demo endpoint, we'll do it sync with a low page count
+            result = crawler.deep_crawl_domain(request.url, max_pages=request.max_pages)
+        else:
+            result = crawler.fetch_semantic_markdown(request.url, js_render=request.js_render)
+            
+        if result.get("status") == "error":
+             raise HTTPException(status_code=422, detail=result.get("error"))
+             
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

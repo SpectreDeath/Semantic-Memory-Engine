@@ -1,9 +1,44 @@
 services:
+  sme-operator:
+    build:
+      context: .
+      dockerfile: Dockerfile.operator
+    container_name: sme_operator
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - SME_SIDECAR_URL=http://sme-sidecar:8089
+    depends_on:
+      - sme-sidecar
+      - postgres
+
+  sme-sidecar:
+    build:
+      context: .
+      dockerfile: Dockerfile.sidecar
+    container_name: sme_sidecar
+    restart: unless-stopped
+    ports:
+      - "8089:8089"
+    environment:
+      - SME_AI_PROVIDER=langflow
+
+  sme-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: sme_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    depends_on:
+      - sme-operator
+
   gpu-exporter:
     image: nvcr.io/nvidia/k8s/dcgm-exporter:latest
     container_name: gpu_exporter
     restart: unless-stopped
-    # No extra environment variables needed for basic stats
     command: ["-k"]
     ports:
       - "9400:9400"

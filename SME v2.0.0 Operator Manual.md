@@ -13,7 +13,7 @@ To launch the full suite using the pre-built images from the [GitHub Container R
    docker-compose pull && docker-compose up -d
    ```
 
-3. **Access the UI**: Open your browser to `http://localhost:3000`.
+3. **Access the UI**: Open your browser to `http://localhost:5173`.
 
 ---
 

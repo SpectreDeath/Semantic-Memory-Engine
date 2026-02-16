@@ -9,7 +9,8 @@
 ## 🎯 30-Second Overview
 
 | Tool | Purpose | Command |
-|------|---------|---------|
+| :--- | :--- | :--- |
+| **Control Room** | Unified Hub (Connections + Ingestion) | `docker-compose up` |
 | **Curator** | Learn from corrections | `calibrate_signal_term("term", "too_high")` |
 | **Beacon** | Visualize trends + alerts | `streamlit run beacon_dashboard.py` |
 | **Echo** | Transcribe YouTube/audio | `transcribe_youtube_url("https://...")` |
@@ -346,6 +347,26 @@ print(f"Writable: {os.access(signals_path, os.W_OK)}")
 - [ ] FFmpeg installed (for Echo)
 - [ ] MCP endpoints registered
 - [ ] Monitoring enabled
+
+---
+
+## 🕹️ The Control Room: Unified Hub (v2.0.0)
+
+**Launch the full stack:**
+
+```bash
+docker-compose up --build
+```
+
+**Accessing the Dashboard:**
+1. Open [http://localhost:5173](http://localhost:5173)
+2. **Connections Tab**: Monitor Sidecar and Database health. Switch AI providers dynamically.
+3. **Harvester Tab**: Ingest new web content by providing a URL.
+
+**Harvester Features:**
+- ✅ **JS Render**: Enable for React/Next.js sites.
+- ✅ **Deep Crawl**: Enable recursive mapping of domain subpages.
+- ✅ **Report**: View word count, quality scores, and raw markdown capture.
 
 ---
 

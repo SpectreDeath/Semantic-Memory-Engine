@@ -1,10 +1,10 @@
-# 🌿 Lawnmower Man: Forensic MCP Gateway (v1.2.0)
+# 🌿 Lawnmower Man: Forensic MCP Gateway (v2.0.0)
 
 > **The Semantic Memory Engine (SME) Bridge for Agentic AI.**
-> *Now featuring the Epistemic Gatekeeper & Trust Algorithms.*
+> *Now featuring the Interactive Control Room & Unified Ingestion.*
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Version](https://img.shields.io/badge/Version-1.2.0_Gatekeeper-green.svg)
+![Version](https://img.shields.io/badge/Version-2.0.0_Control_Room-green.svg)
 ![Architecture](https://img.shields.io/badge/Architecture-Modular_Plugin-blueviolet.svg)
 ![Hardware Optimized](https://img.shields.io/badge/Hardware-1660_Ti_6GB-green.svg)
 
@@ -12,14 +12,76 @@
 
 ## 🚀 Overview
 
-Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents (like LM Studio, Claude, or OpenAI). It anchors AI reasoning with:
+Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents. Version 2.0.0 introduces the **Control Room**, a unified web interface for managing service connections and web ingestion.
 
-- **Epistemic Trust**: Calculated Trust Scores (Entropy + Burstiness) for all data.
-- **Hardware Security**: Simulated TPM enclave for evidence signing.
-- **Semantic Memory**: 10GB+ ConceptNet knowledge graph for entity grounding.
-- **Synthetic Detection**: Vaults "Grok-style" low-entropy text for counter-intelligence.
+- **Interactive Control Room**: Real-time monitoring of AI Providers, Sidecars, and Databases.
+- **The Harvester**: One-click web ingestion converting URLs into semantic atomic facts.
+- **Epistemic Trust**: Calculated Trust Scores for all data signals.
+- **Containerized Stack**: Full Docker support for the Operator, Sidecar, and Frontend.
+
+---
+
+## 🕹️ The Control Room UI
+
+The v2.0.0 release introduces a professional "Glassmorphism" dashboard for managing your forensic lab.
+
+### 🔌 Connections Manager
+- **Dynamic AI Strategy**: Switch between Langflow (Hybrid), Ollama (Local), or Mock providers on the fly.
+- **Service Health**: Real-time status indicators for all infrastructure components.
+- **Hardware Telemetry**: Live CPU, RAM, and VRAM monitoring.
+
+### 🕸️ The Harvester Panel
+- **Semantic Scraper**: Convert any URL into LLM-ready markdown.
+- **Recursive Deep Crawl**: Map entire domains for forensic analysis.
+- **JS Rendering**: Support for heavy Single Page Applications (SPA).
+
+---
+
+## 🏗️ Technical Architecture
+
+Lawnmower Man utilizes a dual-Python "Sidecar" architecture to balance performance and compatibility.
+
+```mermaid
+graph TD
+    Client[AI Agent] <-->|MCP Protocol| Op[SME Operator - Py 3.14]
+    Op <-->|HTTP/JSON-RPC| Sidecar[AI Sidecar - Py 3.13]
+    Op <-->|Websocket| UI[Control Room Dashboard]
+    
+    subgraph Core [Logic Layer]
+        Op <--> Nexus[Postgres Nexus]
+        Op <--> Lab[Centrifuge SQLite]
+    end
+    
+    subgraph AI [Inference Layer]
+        Sidecar <--> Model[LLM / Langflow]
+    end
+```
+
+---
+
+## 🚀 Deployment
+
+### Docker (Recommended)
+The easiest way to get started is using the unified container stack:
+
+```bash
+docker-compose up --build
+```
+
+This starts:
+- `sme-operator`: Core logic (Port 8000)
+- `sme-sidecar`: AI bridge (Port 8089)
+- `sme-frontend`: Control Room UI (Port 5173)
+
+### Local Manual Start
+1. **Operator**: `python -m src.api.main`
+2. **Sidecar**: `python -m src.ai.sidecar`
+3. **Frontend**: `cd frontend && npm run dev`
+
+---
 
 ## 🛠️ Utility Suite
+...
 
 Our lightweight utility tools are optimized for the NVIDIA GeForce GTX 1660 Ti 6GB VRAM constraints:
 
@@ -139,7 +201,8 @@ Lawnmower Man supports a standard v1.1.1+ boilerplate for new capabilities.
 2. Add a `manifest.json`.
 3. Implement `plugin.py` with standard hooks (`on_startup`, `on_ingestion`).
 
-See **`extensions/ext_sample_echo/`** for a complete example.
+See **[Extensions Catalog](docs/EXTENSIONS_CATALOG.md)** for a complete list of available plugins.
+See **[SME Check Architecture](docs/SME_CHECK_ARCHITECTURE.md)** for validation and health check logic.
 
 ---
 

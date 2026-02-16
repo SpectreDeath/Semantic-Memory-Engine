@@ -26,11 +26,13 @@ Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway tha
 The v2.0.0 release introduces a professional "Glassmorphism" dashboard for managing your forensic lab.
 
 ### 🔌 Connections Manager
+
 - **Dynamic AI Strategy**: Switch between Langflow (Hybrid), Ollama (Local), or Mock providers on the fly.
 - **Service Health**: Real-time status indicators for all infrastructure components.
 - **Hardware Telemetry**: Live CPU, RAM, and VRAM monitoring.
 
 ### 🕸️ The Harvester Panel
+
 - **Semantic Scraper**: Convert any URL into LLM-ready markdown.
 - **Recursive Deep Crawl**: Map entire domains for forensic analysis.
 - **JS Rendering**: Support for heavy Single Page Applications (SPA).
@@ -62,6 +64,7 @@ graph TD
 ## 🚀 Deployment
 
 ### Docker (Recommended)
+
 The easiest way to get started is using the unified container stack:
 
 ```bash
@@ -69,11 +72,13 @@ docker-compose up --build
 ```
 
 This starts:
+
 - `sme-operator`: Core logic (Port 8000)
 - `sme-sidecar`: AI bridge (Port 8089)
 - `sme-frontend`: Control Room UI (Port 5173)
 
 ### Local Manual Start
+
 1. **Operator**: `python -m src.api.main`
 2. **Sidecar**: `python -m src.ai.sidecar`
 3. **Frontend**: `cd frontend && npm run dev`
@@ -81,6 +86,7 @@ This starts:
 ---
 
 ## 🛠️ Utility Suite
+
 ...
 
 Our lightweight utility tools are optimized for the NVIDIA GeForce GTX 1660 Ti 6GB VRAM constraints:

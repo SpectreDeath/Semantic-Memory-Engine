@@ -27,7 +27,8 @@ pip install -r requirements.txt
 python validate_toolbox.py
 ```
 
-**Optional: Verify specific dependencies**
+### Optional: Verify specific dependencies
+
 ```bash
 python -c "from echo_transcriber import check_transcription_dependencies"
 ```
@@ -121,7 +122,8 @@ streamlit run beacon_dashboard.py
 ```
 
 **Then:**
-1. Open http://localhost:8501 in browser
+
+1. Open <http://localhost:8501> in browser
 2. Use sidebar to select mode:
    - **Trends:** Sentiment over time
    - **Pharos:** Escalation prediction
@@ -129,6 +131,7 @@ streamlit run beacon_dashboard.py
    - **Alerts:** Real-time warnings
 
 **What to look for:**
+
 - 🔴 Red alert = escalation detected
 - 📈 Spikes > 1.5σ = rhetoric spike
 - Upward trend = concerning pattern
@@ -270,6 +273,7 @@ else:
 ## 🛠️ Troubleshooting
 
 ### Echo: FFmpeg not found
+
 ```bash
 # Windows: Download from https://ffmpeg.org/download.html
 # macOS: brew install ffmpeg
@@ -277,12 +281,14 @@ else:
 ```
 
 ### Echo: CUDA out of memory
+
 ```python
 # Use smaller model instead of medium
 transcribe_youtube_url(url, model_size="base")  # or "small"
 ```
 
 ### Beacon: Can't connect to dashboard
+
 ```bash
 # Make sure Streamlit is installed
 pip install streamlit
@@ -292,6 +298,7 @@ streamlit run beacon_dashboard.py --server.port 8501
 ```
 
 ### Curator: Signals not updating
+
 ```bash
 # Check file permissions
 import os
@@ -305,7 +312,7 @@ print(f"Writable: {os.access(signals_path, os.W_OK)}")
 ## 📊 Performance Expectations
 
 | Operation | Time | Notes |
-|-----------|------|-------|
+| :--- | :--- | :--- |
 | YouTube transcribe (1hr) | 5-10 min | Model: medium, 1660 Ti |
 | Loom distillation | <1 sec | For transcripts |
 | Beacon dashboard load | <5 sec | First time loads model |
@@ -317,18 +324,21 @@ print(f"Writable: {os.access(signals_path, os.W_OK)}")
 ## 🎯 Best Practices
 
 ### Curator
+
 - ✅ Start with `strength=0.5` (conservative)
 - ✅ Review suggestions before bulk calibration
 - ✅ Keep calibration log backed up
 - ✅ Check stats weekly
 
 ### Beacon
+
 - ✅ Monitor Pharos alerts for escalation
 - ✅ Export snapshots for reports
 - ✅ Adjust spike threshold if needed
 - ✅ Watch for foundation distribution changes
 
 ### Echo
+
 - ✅ Check dependencies before batch
 - ✅ Use `model_size="medium"` for balance
 - ✅ Transcribe during low-GPU periods
@@ -359,11 +369,13 @@ docker-compose up --build
 ```
 
 **Accessing the Dashboard:**
+
 1. Open [http://localhost:5173](http://localhost:5173)
 2. **Connections Tab**: Monitor Sidecar and Database health. Switch AI providers dynamically.
 3. **Harvester Tab**: Ingest new web content by providing a URL.
 
 **Harvester Features:**
+
 - ✅ **JS Render**: Enable for React/Next.js sites.
 - ✅ **Deep Crawl**: Enable recursive mapping of domain subpages.
 - ✅ **Report**: View word count, quality scores, and raw markdown capture.
@@ -381,6 +393,7 @@ docker-compose up --build
 ## 🎉 Summary
 
 **3 new advanced tools:**
+
 - 🎯 **Curator:** Closed-loop learning
 - 📊 **Beacon:** Predictive monitoring
 - 🎙️ **Echo:** Audio transcription

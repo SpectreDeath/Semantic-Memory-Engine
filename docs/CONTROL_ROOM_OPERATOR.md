@@ -5,6 +5,7 @@ Welcome to the **Command Center** of the Semantic Memory Engine. Version 2.0.0 t
 ---
 
 ## 🚀 Quick Launch
+
 The v2.0.0 stack is designed to run in **Docker** to bypass environment conflicts and optimize your GPU (1660 Ti) automatically.
 
 ```bash
@@ -31,7 +32,9 @@ Monitor the pulse of your infrastructure.
 - **Hardware Pulse**: Monitor VRAM usage to stay within the 6GB limit of the 1660 Ti.
 
 ### 2. The Harvester
+
 The entry point for all semantic data.
+
 - **Semantic Crawl**: Input a URL to convert it into atomic facts.
 - **Deep Domain Mapping**: Enable **Deep Crawl** to recursively map an entire domain.
 - **JS Rendering**: Toggle **JS Render** for modern SPAs (Next.js/React).

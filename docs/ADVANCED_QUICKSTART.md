@@ -256,7 +256,7 @@ python -c "
 from beacon_dashboard import RhetoricAnalyzer
 import json
 
-analyzer = RhetoricAnalyzer('D:/mcp_servers/storage/laboratory.db')
+analyzer = RhetoricAnalyzer('./storage/laboratory.db')
 df = analyzer.get_sentiment_timeline(days=7)
 prediction = analyzer.predict_escalation(df)
 
@@ -302,7 +302,7 @@ streamlit run beacon_dashboard.py --server.port 8501
 ```bash
 # Check file permissions
 import os
-signals_path = "D:/mcp_servers/storage/compiled_signals.json"
+signals_path = "./storage/compiled_signals.json"
 print(f"Exists: {os.path.exists(signals_path)}")
 print(f"Writable: {os.access(signals_path, os.W_OK)}")
 ```
@@ -384,8 +384,8 @@ docker-compose up --build
 
 ## 📚 Documentation
 
-- `ADVANCED_TOOLS_GUIDE.md` - Detailed guide for Curator, Beacon, Echo
-- `README_TOOLBOX.md` - Complete deployment guide
+- [CONTROL_ROOM_OPERATOR.md](CONTROL_ROOM_OPERATOR.md) - Definitive guide for v2.0.0
+- [RELEASE_STRATEGY.md](RELEASE_STRATEGY.md) - Release strategy guide
 - Inline docstrings: `help(calibrate_signal_term)`, etc.
 
 ---

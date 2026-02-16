@@ -21,9 +21,27 @@ Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway tha
 
 ---
 
+## 🚀 Get Started (30-Second Launch)
+
+The recommended way to run SME v2.0.0 is via **GHCR (GitHub Container Registry)** to bypass local dependency issues.
+
+```bash
+# 1. Download the blueprint
+curl -O https://raw.githubusercontent.com/SpectreDeath/Semantic-Memory-Engine/main/docker-compose.yaml
+
+# 2. Fire up the laboratory
+docker-compose up -d
+```
+
+**Visit [http://localhost:5173](http://localhost:5173) to begin.**
+
+---
+
 ## 🕹️ The Control Room UI
 
-The v2.0.0 release introduces a professional "Glassmorphism" dashboard for managing your forensic lab.
+![Control Room UI Placeholder](https://via.placeholder.com/800x400?text=SME+Control+Room+v2.0.0)
+
+Version 2.0.0 introduces a professional "Glassmorphism" dashboard for managing your forensic lab. For a detailed walkthrough, see the **[Control Room Operator Guide](docs/CONTROL_ROOM_OPERATOR.md)**.
 
 ### 🔌 Connections Manager
 

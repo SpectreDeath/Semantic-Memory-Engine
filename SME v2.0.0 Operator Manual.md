@@ -1,4 +1,4 @@
-# 🛰️ SME v2.0.0: The Control Room Operator Manual
+# 🛰️ SME v2.1.0: The Control Room Operator Manual
 
 This guide covers the deployment and operation of the **Semantic Memory Engine (SME)** forensic suite. By using the containerized v2.0.0 release, you bypass the [dependency conflicts](https://github.com/SpectreDeath/Semantic-Memory-Engine/blob/main/docs/DEPENDENCY_GRAPH.md) found in previous versions.
 
@@ -22,8 +22,9 @@ To launch the full suite using the pre-built images from the [GitHub Container R
 The v2.0.0 interface centralizes the forensic tools that were previously CLI-only:
 
 - **Connections Tab**: Monitor the status of the **Operator** and the **Sidecar**.
-- **Harvester Panel**: Trigger URL crawls and data ingestion without manual script execution.
+- **Harvester Panel**: Trigger URL crawls and structural conversion via **MarkItDown**. Supports PDF, DOCX, and HTML.
 - **Forensic Dashboard**: View real-time results from the **Adversarial Pattern Breaker (APB)** and linguistic signature scans.
+- **Entity Redaction**: Automated stripping of proper names, emails, and URLs before analysis to preserve identity neutrality.
 
 ---
 
@@ -31,9 +32,10 @@ The v2.0.0 interface centralizes the forensic tools that were previously CLI-onl
 
 Your environment is specialized to handle the 6GB VRAM limit of the 1660 Ti:
 
-- **The Sidecar Strategy**: High-load NLP tasks (like `faststylometry` analysis) are isolated in the `sme-sidecar` container.
+- **The Sidecar Strategy**: High-load NLP tasks are isolated in the `sme-sidecar` container. v2.1.0 introduces a **RetryStrategy** with exponential backoff for local inference resilience.
+- **Polars Integration**: Uses high-performance **Polars LazyFrames** for corpus comparison, keeping RAM usage low on 16GB systems.
 - **VRAM Guard**: The system implements an **800MB VRAM buffer**. If VRAM usage exceeds 90%, the Sidecar will queue forensic tasks to prevent a GPU crash.
-- **Node Limits**: Visualization tools like the [Gephi Streaming Bridge](https://github.com/SpectreDeath/Semantic-Memory-Engine/blob/main/docs/progress.md) are capped at **2,000 nodes** to ensure smooth performance on laptop hardware.
+- **Node Limits**: Visualization tools are capped at **2,000 nodes** to ensure smooth performance on laptop hardware.
 
 ---
 
@@ -41,10 +43,11 @@ Your environment is specialized to handle the 6GB VRAM limit of the 1660 Ti:
 
 To perform a standard identity verification run:
 
-1. **Ingest**: Use the Harvester UI to point at a transcript or dataset.
-2. **Analyze**: Select "Phase 12 Scan" to trigger the APB logic.
-3. **Audit**: Check the **Smoothing Score**. A score below **5.0** indicates potential AI-generated text or "smoothed" rhetoric.
-4. **Verify**: Compare the results against your existing "Miller Base" prints stored in the `laboratory.db`.
+1. **Ingest**: Use the Harvester UI/API to convert documents. Entities are redacted by default.
+2. **Analyze**: Trigger the **ForensicAgent** to extract rhetorical signatures.
+3. **Compare**: The system computes **Manhattan Distance** against the reference corpus using Polars.
+4. **Audit**: Check the **Smoothing Score**. A score below **5.0** indicates potential AI-generated text or "smoothed" rhetoric.
+5. **Verify**: Compare results against "Miller Base" prints in `laboratory.db`.
 
 ---
 

@@ -17,9 +17,10 @@ class LogicAnomalyDetector:
     """
     
     def __init__(self):
-        # Thresholds for detecting artificial smoothing
+        # Thresholds for detecting artificial smoothing (The Flatline Effect)
         self.entropy_smoothing_threshold = 0.15  # How much entropy variation is too little
-        self.burstiness_smoothing_threshold = 1.0  # How low is too low for burstiness variance
+        self.burstiness_smoothing_threshold = 5.0  # Burstiness < 5.0 indicates uniform AI rhythm
+        self.unique_ratio_threshold = 0.40  # Unique Token Ratio < 0.4 indicates high predictability
         self.pattern_uniformity_threshold = 0.85  # How uniform is too uniform
         self.confidence_deception_threshold = 0.80  # Confidence level for deception flag
         
@@ -43,6 +44,11 @@ class LogicAnomalyDetector:
         pattern_analysis = self._analyze_pattern_uniformity(text)
         lexical_analysis = self._analyze_lexical_smoothing(text)
         
+        # Determine if camouflage is detected (The Flatline Effect)
+        # AI-Cleaned = Low Burstiness (uniform) + High Predictability (unique ratio < 0.4)
+        is_ai_smoothed = burstiness_analysis.get("burstiness_score", 10.0) < self.burstiness_smoothing_threshold and \
+                         pattern_analysis.get("type_token_ratio", 1.0) < self.unique_ratio_threshold
+        
         # Calculate overall deception confidence
         deception_confidence = self._calculate_deception_confidence([
             entropy_analysis,
@@ -51,6 +57,10 @@ class LogicAnomalyDetector:
             lexical_analysis
         ])
         
+        # Override confidence if specific "Flatline Effect" detected
+        if is_ai_smoothed:
+            deception_confidence = max(deception_confidence, 0.95)
+        
         # Determine if camouflage is detected
         camouflage_detected = deception_confidence >= self.confidence_deception_threshold
         
@@ -58,6 +68,7 @@ class LogicAnomalyDetector:
             "camouflage_detected": camouflage_detected,
             "deception_confidence": round(deception_confidence, 4),
             "high_confidence_deception": deception_confidence >= 0.90,
+            "verdict": "AI_SMOOTHED_DETECTED" if is_ai_smoothed else "HUMAN_SIGNATURE",
             "analysis": {
                 "entropy_smoothing": entropy_analysis,
                 "burstiness_smoothing": burstiness_analysis,

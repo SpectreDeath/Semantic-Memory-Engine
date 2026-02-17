@@ -47,14 +47,62 @@ def connect_to_gephi(workspace="workspace0"):
     try:
         # Test if the endpoint is actually reachable first
         import requests
-        requests.get(f"http://localhost:8080", timeout=2)
+        requests.get(f"http://localhost:8080", timeout=0.5)
         
         # Create the streamer with GephiREST backend
-        gephi = Streamer(GephiREST(hostname="localhost", port=8080, workspace=workspace))
+        adapter = GephiREST(hostname="localhost", port=8080, workspace=workspace)
+        gephi = Streamer(adapter)
         return gephi, True
     except Exception as e:
         # print(f"Gephi connection failed: {e} - using mock mode")
         return None, False
+
+class GephiBatcher:
+    """
+    Batches Gephi streaming operations to avoid memory spikes.
+    Chunks nodes and edges into groups of 100.
+    """
+    def __init__(self, streamer, batch_size=100):
+        self.streamer = streamer
+        self.batch_size = batch_size
+        self._node_queue = []
+        self._edge_queue = []
+        self.nodes_sent = 0
+        self.edges_sent = 0
+
+    def add_node(self, node):
+        if not self.streamer:
+            return
+        self._node_queue.append(node)
+        if len(self._node_queue) >= self.batch_size:
+            self.flush_nodes()
+
+    def add_edge(self, edge):
+        if not self.streamer:
+            return
+        self._edge_queue.append(edge)
+        if len(self._edge_queue) >= self.batch_size:
+            self.flush_edges()
+
+    def flush_nodes(self):
+        if not self.streamer or not self._node_queue:
+            return
+        for node in self._node_queue:
+            self.streamer.add_node(node)
+        self.nodes_sent += len(self._node_queue)
+        self._node_queue = []
+
+    def flush_edges(self):
+        if not self.streamer or not self._edge_queue:
+            return
+        for edge in self._edge_queue:
+            self.streamer.add_edge(edge)
+        self.edges_sent += len(self._edge_queue)
+        self._edge_queue = []
+
+    def flush(self):
+        self.flush_nodes()
+        self.flush_edges()
 
 
 def get_file_metadata():
@@ -102,7 +150,8 @@ def stream_project_mode(workspace="workspace0"):
     """
     print("=== PROJECT MODE: Streaming project metadata ===")
     
-    gephi, connected = connect_to_gephi(workspace)
+    gephi_streamer, connected = connect_to_gephi(workspace)
+    batcher = GephiBatcher(gephi_streamer if connected else None)
     
     # Get data
     persona_data = read_active_persona()
@@ -112,10 +161,8 @@ def stream_project_mode(workspace="workspace0"):
     print(f"Found {len(files)} files to process...")
     print(f"Current persona: {persona_data['persona']}")
     
-    # Process nodes and edges
+    # Process nodes
     nodes_added = 0
-    edges_added = 0
-    
     for file_info in files:
         if nodes_added >= MAX_NODES:
             print(f"Reached maximum node limit of {MAX_NODES}")
@@ -137,23 +184,21 @@ def stream_project_mode(workspace="workspace0"):
         
         # Set visual properties
         if file_info['name'] in outliers and outliers[file_info['name']]:
-            node.r = 1.0  # Red for outliers
-            node.g = 0.0
-            node.b = 0.0
+            node.r, node.g, node.b = 1.0, 0.0, 0.0
         else:
-            node.r = 0.0  # Green for normal files
-            node.g = 1.0
-            node.b = 0.0
+            node.r, node.g, node.b = 0.0, 1.0, 0.0
         
-        # Set size based on line count (min 10, max 100)
-        size = max(10, min(100, file_info['lines'] // 10))
-        node.size = size
+        node.size = max(10, min(100, file_info['lines'] // 10))
         
-        if connected:
-            gephi.add_node(node)
+        batcher.add_node(node)
         nodes_added += 1
+        if nodes_added % 50 == 0:
+            print(f"  Processed {nodes_added} nodes...")
     
-    # Create edges between files in same directory
+    batcher.flush_nodes()
+    
+    # Create edges
+    edges_added = 0
     dir_groups = {}
     for file_info in files:
         dir_path = file_info['dir']
@@ -166,81 +211,61 @@ def stream_project_mode(workspace="workspace0"):
             for i in range(len(file_list)):
                 for j in range(i + 1, len(file_list)):
                     if edges_added >= MAX_NODES:
-                        print(f"Reached maximum edge limit of {MAX_NODES}")
                         break
                     edge_id = f"{file_list[i]}-{file_list[j]}"
                     edge = graph.Edge(edge_id, file_list[i], file_list[j])
-                    if connected:
-                        gephi.add_edge(edge)
+                    batcher.add_edge(edge)
                     edges_added += 1
+                    if edges_added % 100 == 0:
+                        print(f"  Processed {edges_added} edges...")
     
-    print(f"Processed {nodes_added} nodes and {edges_added} edges")
+    batcher.flush_edges()
+    
+    print(f"Total: {nodes_added} nodes, {edges_added} edges processed.")
     if connected:
         print("Project mode streaming complete!")
-    else:
-        print("Mock processing complete - Gephi not available")
 
 
 def stream_trust_mode(workspace="workspace0"):
     """
     Trust Mode (Epistemic View): Stream trust scores to Gephi.
-    Node size based on trust score, color based on trust level.
     """
     print("=== TRUST MODE: Streaming epistemic trust scores ===")
     
-    gephi, connected = connect_to_gephi(workspace)
+    gephi_streamer, connected = connect_to_gephi(workspace)
+    batcher = GephiBatcher(gephi_streamer if connected else None)
     
     try:
-        # Read trust scores
         df = pd.read_csv('data/results/trust_scores_results.csv')
-        print(f"Loaded {len(df)} trust scores from data/results/trust_scores_results.csv")
+        print(f"Loaded {len(df)} trust scores.")
         
         nodes_added = 0
-        
         for _, row in df.iterrows():
             if nodes_added >= MAX_NODES:
-                print(f"Reached maximum node limit of {MAX_NODES}")
                 break
                 
             node_id = row['node_id']
             trust_score = float(row['trust_score'])
             
-            # Create node
             node = graph.Node(
                 node_id,
                 label=f"{node_id} (Trust: {trust_score:.2f})",
-                attributes={
-                    'trust_score': trust_score,
-                    'mode': 'trust',
-                    'node_type': 'trust_node'
-                }
+                attributes={'trust_score': trust_score, 'mode': 'trust'}
             )
             
-            # Set size based on trust score (20-70 units as specified)
-            size = 20 + (trust_score * 50)  # Maps 0.0-1.0 to 20-70
-            node.size = size
+            node.size = 20 + (trust_score * 50)
             
-            # Set color based on trust level
             if trust_score < 0.5:
-                # Red for low trust
-                node.r = 1.0
-                node.g = 0.0
-                node.b = 0.0
+                node.r, node.g, node.b = 1.0, 0.0, 0.0
             elif trust_score < 0.8:
-                # Yellow for medium trust
-                node.r = 1.0
-                node.g = 1.0
-                node.b = 0.0
+                node.r, node.g, node.b = 1.0, 1.0, 0.0
             else:
-                # Green for high trust
-                node.r = 0.0
-                node.g = 1.0
-                node.b = 0.0
+                node.r, node.g, node.b = 0.0, 1.0, 0.0
             
-            if connected:
-                gephi.add_node(node)
+            batcher.add_node(node)
             nodes_added += 1
         
+        batcher.flush()
         print(f"Processed {nodes_added} trust nodes")
         if connected:
             print("Trust mode streaming complete!")
@@ -256,86 +281,58 @@ def stream_trust_mode(workspace="workspace0"):
 def stream_knowledge_mode(workspace="workspace0"):
     """
     Knowledge Mode (Semantic Memory): Stream knowledge graph from SQLite.
-    Samples 1,000 nodes and edges with weight > 0.5.
     """
     print("=== KNOWLEDGE MODE: Streaming semantic memory graph ===")
     
-    gephi, connected = connect_to_gephi(workspace)
+    gephi_streamer, connected = connect_to_gephi(workspace)
+    batcher = GephiBatcher(gephi_streamer if connected else None)
     
     conn = None
     try:
-        # Connect to SQLite database
         conn = sqlite3.connect('data/knowledge_core.sqlite')
         cursor = conn.cursor()
         
-        # Get concepts (limit to 1,000 nodes)
         cursor.execute("SELECT id, label FROM concepts LIMIT 1000")
         concepts = cursor.fetchall()
-        print(f"Loaded {len(concepts)} concepts from knowledge_core.sqlite")
+        print(f"Loaded {len(concepts)} concepts.")
         
         nodes_added = 0
-        edges_added = 0
-        
-        # Add concept nodes
         concept_ids = set()
         for concept_id, label in concepts:
             if nodes_added >= MAX_NODES:
-                print(f"Reached maximum node limit of {MAX_NODES}")
                 break
                 
             node = graph.Node(
                 f"concept_{concept_id}",
                 label=label,
-                attributes={
-                    'concept_id': concept_id,
-                    'mode': 'knowledge',
-                    'node_type': 'concept'
-                }
+                attributes={'concept_id': concept_id, 'mode': 'knowledge'}
             )
-            node.size = 30  # Standard size for concepts
-            node.r = 0.5    # Blue color for knowledge nodes
-            node.g = 0.5
-            node.b = 1.0
+            node.size = 30
+            node.r, node.g, node.b = 0.5, 0.5, 1.0
             
-            if connected:
-                gephi.add_node(node)
+            batcher.add_node(node)
             nodes_added += 1
             concept_ids.add(concept_id)
         
-        # Get assertions (edges) with weight > 0.5
-        cursor.execute("""
-            SELECT source_concept_id, target_concept_id, weight, relationship_type 
-            FROM assertions 
-            WHERE weight > 0.5
-        """)
-        assertions = cursor.fetchall()
-        print(f"Found {len(assertions)} assertions with weight > 0.5")
+        batcher.flush_nodes()
         
-        # Add assertion edges
+        cursor.execute("SELECT source_concept_id, target_concept_id, weight, relationship_type FROM assertions WHERE weight > 0.5")
+        assertions = cursor.fetchall()
+        print(f"Loaded {len(assertions)} assertions.")
+        
+        edges_added = 0
         for source_id, target_id, weight, rel_type in assertions:
             if edges_added >= MAX_NODES:
-                print(f"Reached maximum edge limit of {MAX_NODES}")
                 break
-                
             if source_id in concept_ids and target_id in concept_ids:
-                edge_id = f"assertion_{source_id}_{target_id}"
-                edge = graph.Edge(
-                    edge_id, 
-                    f"concept_{source_id}", 
-                    f"concept_{target_id}",
-                    attributes={
-                        'weight': weight,
-                        'relationship_type': rel_type,
-                        'mode': 'knowledge'
-                    }
-                )
+                edge = graph.Edge(f"assertion_{source_id}_{target_id}", f"concept_{source_id}", f"concept_{target_id}",
+                               attributes={'weight': weight, 'relationship_type': rel_type, 'mode': 'knowledge'})
                 edge.weight = weight
-                
-                if connected:
-                    gephi.add_edge(edge)
+                batcher.add_edge(edge)
                 edges_added += 1
         
-        print(f"Processed {nodes_added} concept nodes and {edges_added} assertion edges")
+        batcher.flush_edges()
+        print(f"Processed {nodes_added} nodes and {edges_added} edges")
         if connected:
             print("Knowledge mode streaming complete!")
         else:
@@ -357,12 +354,13 @@ def stream_synthetic_mode(workspace="workspace0"):
     """
     print("=== SYNTHETIC MODE: Streaming counter-intelligence data ===")
     
-    gephi, connected = connect_to_gephi(workspace)
+    gephi_streamer, connected = connect_to_gephi(workspace)
+    batcher = GephiBatcher(gephi_streamer if connected else None)
     
     try:
         # Read synthetic audit data
         df = pd.read_csv('data/results/synthetic_audit_results.csv')
-        print(f"Loaded {len(df)} synthetic audit records from data/results/synthetic_audit_results.csv")
+        print(f"Loaded {len(df)} synthetic audit records.")
         
         nodes_added = 0
         edges_added = 0
@@ -395,26 +393,18 @@ def stream_synthetic_mode(workspace="workspace0"):
                 }
             )
             
-            # Set size based on confidence score
-            size = 20 + (confidence_score * 60)  # Maps 0.0-1.0 to 20-80
-            node.size = size
+            node.size = 20 + (confidence_score * 60)
             
-            # Set color: Orange for patterns, Purple for vaulted
             if vaulted:
-                # Purple for vaulted documents
-                node.r = 0.5
-                node.g = 0.0
-                node.b = 0.5
+                node.r, node.g, node.b = 0.5, 0.0, 0.5
             else:
-                # Orange for pattern signatures
-                node.r = 1.0
-                node.g = 0.5
-                node.b = 0.0
+                node.r, node.g, node.b = 1.0, 0.5, 0.0
             
-            if connected:
-                gephi.add_node(node)
+            batcher.add_node(node)
             nodes_added += 1
             created_nodes[signature_id] = True
+        
+        batcher.flush_nodes()
         
         # Create edges between related patterns (same type)
         pattern_groups = {}
@@ -433,22 +423,12 @@ def stream_synthetic_mode(workspace="workspace0"):
                         if edges_added >= MAX_NODES:
                             print(f"Reached maximum edge limit of {MAX_NODES}")
                             break
-                        edge_id = f"{signatures[i]}-{signatures[j]}"
-                        edge = graph.Edge(
-                            edge_id, 
-                            signatures[i], 
-                            signatures[j],
-                            attributes={
-                                'relationship': 'same_pattern_type',
-                                'pattern_type': pattern_type,
-                                'mode': 'synthetic'
-                            }
-                        )
-                        
-                        if connected:
-                            gephi.add_edge(edge)
-                        edges_added += 1
+                        if signatures[i] in created_nodes and signatures[j] in created_nodes:
+                            edge = graph.Edge(f"{signatures[i]}-{signatures[j]}", signatures[i], signatures[j], attributes={'mode': 'synthetic'})
+                            batcher.add_edge(edge)
+                            edges_added += 1
         
+        batcher.flush_edges()
         print(f"Processed {nodes_added} synthetic nodes and {edges_added} edges")
         if connected:
             print("Synthetic mode streaming complete!")
@@ -459,6 +439,70 @@ def stream_synthetic_mode(workspace="workspace0"):
         print("Error: data/synthetic_audit.csv not found")
     except Exception as e:
         print(f"Error processing synthetic data: {e}")
+
+
+def stream_archival_data(url, snapshots, divergences, workspace="workspace0"):
+    """
+    Streams archival snapshot history and semantic drift to Gephi.
+    """
+    print(f"=== ARCHIVAL MODE: Streaming historical forensics for {url} ===")
+    gephi_streamer, connected = connect_to_gephi(workspace)
+    batcher = GephiBatcher(gephi_streamer if connected else None)
+
+    nodes_added = 0
+    
+    # 1. Create central URL node
+    url_node = graph.Node(url, label=url, size=50, r=0.0, g=0.5, b=1.0)
+    batcher.add_node(url_node)
+    nodes_added += 1
+
+    # 2. Add snapshots as temporal nodes
+    for snap in snapshots:
+        ts = snap['timestamp']
+        node = graph.Node(
+            ts, 
+            label=f"Snapshot: {snap['human_date']}",
+            attributes={
+                'timestamp': ts,
+                'digest': snap['digest'],
+                'mode': 'archival'
+            }
+        )
+        node.size = 30
+        
+        # Color based on whether it's part of a divergence
+        is_divergent = any(d['post_change']['timestamp'] == ts for d in divergences)
+        if is_divergent:
+            node.r, node.g, node.b = 1.0, 0.0, 0.0 # Red for divergent
+        else:
+            node.r, node.g, node.b = 0.0, 1.0, 0.0 # Green for stable
+            
+        batcher.add_node(node)
+        nodes_added += 1
+        
+        # Link to main URL
+        edge = graph.Edge(f"{url}-{ts}", url, ts, attributes={'mode': 'archival'})
+        batcher.add_edge(edge)
+
+    # 3. Add drift edges between divergent snapshots
+    for d in divergences:
+        e_id = f"drift-{d['pre_change']['timestamp']}-{d['post_change']['timestamp']}"
+        drift_score = d.get('semantic_drift', 0.0)
+        edge = graph.Edge(
+            e_id, 
+            d['pre_change']['timestamp'], 
+            d['post_change']['timestamp'],
+            label=f"Drift: {drift_score:.2%}",
+            attributes={
+                'semantic_drift': drift_score,
+                'mode': 'archival',
+                'relationship': 'temporal_divergence'
+            }
+        )
+        batcher.add_edge(edge)
+
+    batcher.flush()
+    print(f"Processed {nodes_added} archival nodes and related edges")
 
 
 def main():
@@ -478,9 +522,14 @@ Examples:
     
     parser.add_argument(
         '--mode',
-        choices=['project', 'trust', 'knowledge', 'synthetic'],
+        choices=['project', 'trust', 'knowledge', 'synthetic', 'archival'],
         default='project',
         help='Forensic mode to run (default: project)'
+    )
+    
+    parser.add_argument(
+        '--url',
+        help='Target URL for archival mode'
     )
     
     parser.add_argument(
@@ -506,6 +555,19 @@ Examples:
         stream_knowledge_mode(args.workspace)
     elif args.mode == 'synthetic':
         stream_synthetic_mode(args.workspace)
+    elif args.mode == 'archival':
+        if not args.url:
+            print("Error: --url is required for archival mode")
+            sys.exit(1)
+        # For CLI usage, we'd need to invoke WaybackScout here
+        # But since we're mostly using this as a library, we'll keep it simple
+        print("Archival mode via CLI: Please use the integration script or provide --url")
+        from src.extensions.ext_archival_diff.scout import WaybackScout
+        import asyncio
+        scout = WaybackScout()
+        history = asyncio.run(scout.get_snapshot_history(args.url))
+        divergences = scout.identify_divergent_points(history)
+        stream_archival_data(args.url, history, divergences, args.workspace)
 
 
 if __name__ == "__main__":

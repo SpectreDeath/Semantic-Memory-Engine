@@ -52,14 +52,20 @@ logger.addHandler(audit_handler)
 @dataclass
 class AuditResult:
     """Result of cross-modal synchronization audit."""
+    __slots__ = [
+        'sync_score', 'hallucination_detected', 'severity', 
+        'detected_keywords', 'missing_keywords', 'image_features', 
+        'text_features', 'timestamp'
+    ]
+    
     sync_score: float
     hallucination_detected: bool
     severity: str
     detected_keywords: List[str]
     missing_keywords: List[str]
-    image_features: Optional[np.ndarray] = None
-    text_features: Optional[np.ndarray] = None
-    timestamp: datetime = None
+    image_features: Optional[np.ndarray]
+    text_features: Optional[np.ndarray]
+    timestamp: datetime
 
 
 class CrossModalAuditor:

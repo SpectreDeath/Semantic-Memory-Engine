@@ -1,0 +1,11 @@
+node_id,trust_score,is_outlier
+file1.py,0.9,False
+file2.py,0.85,False
+file3.py,0.1,True
+file4.py,0.95,False
+file5.py,0.8,False
+file6.py,0.2,False
+file7.py,0.88,False
+file8.py,0.92,False
+file9.py,0.87,False
+file10.py,0.91,False

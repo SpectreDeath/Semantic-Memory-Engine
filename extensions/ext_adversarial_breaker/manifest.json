@@ -1,9 +1,11 @@
 {
-    "plugin_id": "ext_adversarial_breaker",
-    "name": "Adversarial Pattern Breaker",
-    "version": "1.0",
-    "description": "Detects linguistic camouflage and artificial entropy smoothing to identify high-confidence synthetic deception.",
-    "entry_point": "plugin.py",
-    "author": "Antigravity",
-    "category": "adversarial_detection"
+  "plugin_id": "ext_adversarial_breaker",
+  "name": "adversarial_pattern_breaker",
+  "version": "1.0.0",
+  "author": "Lawnmower Man",
+  "description": "Detects AI-smoothed text using Burstiness and Perplexity variance.",
+  "vram_requirement_mb": 800,
+  "entry_point": "plugin.py",
+  "category": "adversarial_detection",
+  "hooks": ["on_startup", "on_ingestion", "analyze_text"]
 }

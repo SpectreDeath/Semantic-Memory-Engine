@@ -31,8 +31,9 @@ class AdversarialPatternBreaker:
 
     async def on_startup(self):
         """
-        Initialize the 'nexus_adversarial_patterns' table in the core DB.
+        Initialize the 'nexus_adversarial_patterns' table and log startup.
         """
+        print("🛡️ Pattern Breaker Extension: Initialized. Ready to scan for linguistic camouflage.")
         sql = """
             CREATE TABLE IF NOT EXISTS nexus_adversarial_patterns (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,9 +48,6 @@ class AdversarialPatternBreaker:
             )
         """
         try:
-            # We access the underlying sqlite connection via nexus_api.nexus.conn 
-            # or execute directly if exposed. SmeCoreBridge exposes .nexus (NexusDB).
-            # NexusDB has execute(sql, params).
             self.nexus.nexus.execute(sql)
             logger.info(f"[{self.plugin_id}] 'nexus_adversarial_patterns' table initialized.")
         except Exception as e:
@@ -96,14 +94,28 @@ class AdversarialPatternBreaker:
                 "detected": camouflage_detected,
                 "deception_confidence": deception_confidence,
                 "high_confidence_deception": high_confidence_deception,
+                "verdict": camouflage_result.get("verdict", "UNKNOWN"),
                 "analysis": camouflage_result.get("analysis", {})
             }
         }
 
     def get_tools(self) -> list:
-        return [self.analyze_linguistic_camouflage, self.get_adversarial_statistics, self.compare_text_patterns]
+        return [self.analyze_text, self.analyze_linguistic_camouflage, self.get_adversarial_statistics, self.compare_text_patterns]
 
-    async def analyze_linguistic_camouflage(self, text: str) -> str:
+    async def analyze_text(self, text: str) -> str:
+        """
+        Detects AI-smoothed text using Burstiness and Perplexity variance.
+        """
+        try:
+            result = self.anomaly_detector.detect_linguistic_camouflage(text)
+            # Re-format to match requested output style if needed, but keeping the core analysis
+            return json.dumps({
+                "burstiness_score": result["analysis"]["burstiness_smoothing"].get("burstiness_score", 0),
+                "lexical_uniformity": result["analysis"]["pattern_uniformity"].get("type_token_ratio", 0),
+                "verdict": result.get("verdict", "HUMAN_SIGNATURE")
+            }, indent=2)
+        except Exception as e:
+            return json.dumps({"error": f"Pattern Breaker analysis failed: {str(e)}"})
         """
         Analyze text for linguistic camouflage and artificial entropy smoothing.
         """

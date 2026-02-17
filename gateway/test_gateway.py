@@ -75,8 +75,8 @@ def test_mcp_server():
     # Test list_available_tools
     print("\n--- list_available_tools() ---")
     tools = json.loads(list_callable())
-    print(f"   Gateway: {tools['gateway']} v{tools['version']}")
-    print(f"   Tool count: {tools['tool_count']}")
+    print(f"   Gateway: {tools.get('codename', 'N/A')} v{tools['version']}")
+    print(f"   Tool count: {tools['total_tools']}")
     
     return True
 

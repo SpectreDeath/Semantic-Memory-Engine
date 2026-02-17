@@ -1,7 +1,10 @@
 import os
 import json
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Set
+
+# Import optimized types
+from src.sme.epistemic_validator import DataNode
 
 # Import shared trust logic
 from gateway.gatekeeper_logic import calculate_trust_score, calculate_entropy, calculate_burstiness, calculate_vault_proximity, analyze_model_origin
@@ -22,7 +25,7 @@ class EpistemicGatekeeper:
         logger.info(f"[{self.plugin_id}] Gatekeeper Online. Trust algorithms active.")
 
     def get_tools(self) -> list:
-        return [self.audit_folder_veracity]
+        return [self.audit_folder_veracity, self.semantic_nexus_check]
 
     async def audit_folder_veracity(self, folder_path: str) -> str:
         """
@@ -69,17 +72,18 @@ class EpistemicGatekeeper:
                         elif nts > 80:
                             human_count += 1
                             
-                        file_stats.append({
-                            "file": file,
-                            "path": file_path,
-                            "entropy": entropy,
-                            "burstiness": burstiness,
-                            "vault_proximity": proximity,
-                            "nts": nts,
-                            "verdict": verdict,
-                            "attribution": str(attribution), # Include full object for detailed map
-                            "sda_warning": attr_msg # The requested string
-                        })
+                        node = DataNode(
+                            file=file,
+                            path=file_path,
+                            entropy=entropy,
+                            burstiness=burstiness,
+                            vault_proximity=proximity,
+                            nts=nts,
+                            verdict=verdict,
+                            attribution=str(attribution),
+                            sda_warning=attr_msg
+                        )
+                        file_stats.append(node)
                         total_files += 1
                         
                     except Exception as e:
@@ -107,10 +111,36 @@ class EpistemicGatekeeper:
                 },
                 "global_trust_ratio": round(human_count / total_files, 2) if total_files > 0 else 0
             },
-            "detailed_map": sorted(file_stats, key=lambda x: x['nts']) # Sort by NTS (ascending - synthetic first)
+            "detailed_map": [n.to_dict() for n in sorted(file_stats, key=lambda x: x.nts)]
         }
         
         return json.dumps(report, indent=2)
+
+    async def semantic_nexus_check(self, new_entities: List[str], nexus_entities: Set[str]) -> float:
+        """
+        Calculates a trust signal based on how well new data aligns 
+        with the established 'Nexus' memory.
+        """
+        logger.info("Executing Weighted Entity Overlap and Entropy Divergence Check")
+        if not nexus_entities:
+            return 1.0  # Default trust if Nexus is empty
+
+        new_set = set(new_entities)
+        intersection = new_set.intersection(nexus_entities)
+        
+        # Jaccard Similarity: Intersection over Union
+        union = new_set.union(nexus_entities)
+        similarity = len(intersection) / len(union) if union else 0
+        
+        # Divergence Penalty: If new data introduces too many 
+        # unknown variables, we flag it.
+        novelty_ratio = len(new_set - nexus_entities) / len(new_set) if new_set else 0
+        
+        # Final Trust Signal (0.0 to 1.0)
+        # We want high similarity and low novelty for "High Trust"
+        trust_signal = (similarity * 0.7) + ((1 - novelty_ratio) * 0.3)
+        
+        return round(trust_signal, 4)
 
 def register_extension(manifest: Dict[str, Any], nexus_api: Any):
     return EpistemicGatekeeper(manifest, nexus_api)

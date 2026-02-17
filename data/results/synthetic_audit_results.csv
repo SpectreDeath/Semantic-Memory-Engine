@@ -1,0 +1,11 @@
+signature_id,pattern_type,confidence_score,vaulted
+sig_001,Repetitive,0.92,True
+sig_002,Formal,0.85,False
+sig_003,Technical,0.95,True
+sig_004,Creative,0.12,False
+sig_005,Bureaucratic,0.88,True
+sig_006,Casual,0.05,False
+sig_007,Instructional,0.91,True
+sig_008,Argumentative,0.76,False
+sig_009,Narrative,0.82,True
+sig_010,Descriptive,0.89,False

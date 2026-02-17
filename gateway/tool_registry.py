@@ -25,7 +25,9 @@ from src.sme.vendor.faststylometry import Corpus
 from src.sme.vendor.faststylometry.probability import predict_proba, calibrate
 from src.sme.vendor.faststylometry.en import tokenise_remove_pronouns_en
 from gateway.hardware_security import get_hsm
-from src.sme.vendor import forensic_math
+from src.sme.vendor import forensic_math, forensic_files, forensic_behavior, forensic_graph, forensic_signal, forensic_entropy
+from src.sme.bridge import crawler_sling
+from bin import credibility_scorer
 from src.sme.vendor.forensic_math import dict_to_vectors
 
 # Ensure SME src is importable
@@ -497,6 +499,150 @@ class ToolRegistry:
             parameters={"tokens1": "list", "tokens2": "list"},
             is_manual=True
         ),
+        "calculate_tfidf": ToolDefinition(
+            name="calculate_tfidf",
+            description="Calculate term significance (TF-IDF) across a corpus of documents.",
+            factory_method=None,
+            category="forensics",
+            parameters={"tokenized_docs": "list"},
+            is_manual=True
+        ),
+        "calculate_kl_divergence": ToolDefinition(
+            name="calculate_kl_divergence",
+            description="Measure relative entropy (KL Divergence) between two distributions.",
+            factory_method=None,
+            category="forensics",
+            parameters={"p": "list", "q": "list"},
+            is_manual=True
+        ),
+        "calculate_phonetic_hash": ToolDefinition(
+            name="calculate_phonetic_hash",
+            description="Phonetic hashing using Double Metaphone for alias discovery.",
+            factory_method=None,
+            category="forensics",
+            parameters={"word": "str"},
+            is_manual=True
+        ),
+        "audit_benford_distribution": ToolDefinition(
+            name="audit_benford_distribution",
+            description="Fraud detection using Benford's Law distribution analysis.",
+            factory_method=None,
+            category="forensics",
+            parameters={"data": "list"},
+            is_manual=True
+        ),
+        "calculate_simhash": ToolDefinition(
+            name="calculate_simhash",
+            description="Locality Sensitive Hashing (SimHash) for near-duplicate detection.",
+            factory_method=None,
+            category="forensics",
+            parameters={"tokens": "list", "hash_size": "int"},
+            is_manual=True
+        ),
+        "calculate_entropy_divergence": ToolDefinition(
+            name="calculate_entropy_divergence",
+            description="Measure relative entropy (Data Drift) between two distributions.",
+            factory_method=None,
+            category="forensics",
+            parameters={"p": "list", "q": "list"},
+            is_manual=True
+        ),
+        "verify_file_signature": ToolDefinition(
+            name="verify_file_signature",
+            description="Verify file integrity by checking magic numbers.",
+            factory_method=None,
+            category="forensics",
+            parameters={"file_path": "str"},
+            is_manual=True
+        ),
+        "calculate_structural_complexity": ToolDefinition(
+            name="calculate_structural_complexity",
+            description="Calculate compression ratio as a proxy for structural entropy.",
+            factory_method=None,
+            category="forensics",
+            parameters={"file_path": "str"},
+            is_manual=True
+        ),
+        "calculate_burstiness": ToolDefinition(
+            name="calculate_burstiness",
+            description="Calculate temporal burstiness score from a list of timestamps.",
+            factory_method=None,
+            category="forensics",
+            parameters={"timestamps": "list"},
+            is_manual=True
+        ),
+        "validate_luhn_checksum": ToolDefinition(
+            name="validate_luhn_checksum",
+            description="Detect PII leakage (Cards/SSNs) using Luhn algorithm validation.",
+            factory_method=None,
+            category="forensics",
+            parameters={"numeric_string": "str"},
+            is_manual=True
+        ),
+        "calculate_node_path": ToolDefinition(
+            name="calculate_node_path",
+            description="Find the shortest path between nodes in a relationship graph.",
+            factory_method=None,
+            category="forensics",
+            parameters={"graph": "dict", "start_node": "str", "end_node": "str"},
+            is_manual=True
+        ),
+        "identify_central_hubs": ToolDefinition(
+            name="identify_central_hubs",
+            description="Identify influential nodes using Eigenvector Centrality.",
+            factory_method=None,
+            category="forensics",
+            parameters={"adjacency_matrix": "list", "node_labels": "list"},
+            is_manual=True
+        ),
+        "calculate_sequence_similarity": ToolDefinition(
+            name="calculate_sequence_similarity",
+            description="Find similarity between time-series sequences using DTW.",
+            factory_method=None,
+            category="forensics",
+            parameters={"seq1": "list", "seq2": "list"},
+            is_manual=True
+        ),
+        "detect_event_periodicity": ToolDefinition(
+            name="detect_event_periodicity",
+            description="Identify dominant periodicities in numerical event logs using DFT.",
+            factory_method=None,
+            category="forensics",
+            parameters={"data": "list"},
+            is_manual=True
+        ),
+        "map_stream_entropy": ToolDefinition(
+            name="map_stream_entropy",
+            description="Map Shannon entropy across a byte-stream using a sliding window.",
+            factory_method=None,
+            category="forensics",
+            parameters={"stream": "list", "window_size": "int"},
+            is_manual=True
+        ),
+        "analyze_obfuscation_score": ToolDefinition(
+            name="analyze_obfuscation_score",
+            description="Detect obfuscated scripts using Hamming Weight and Compression complexity.",
+            factory_method=None,
+            category="forensics",
+            parameters={"content": "str"},
+            is_manual=True
+        ),
+        "ingest_forensic_target": ToolDefinition(
+            name="ingest_forensic_target",
+            description="Fetch a URL, extract clean prose, and generate stylometric fingerprints.",
+            factory_method=None,
+            category="bridge",
+            parameters={"url": "str"},
+            is_manual=True
+        ),
+        "get_forensic_report": ToolDefinition(
+            name="get_forensic_report",
+            description="Generate a high-fidelity forensic credibility report with visualization data.",
+            factory_method=None,
+            category="forensics",
+            parameters={"target_text": "str"},
+            is_manual=True
+        ),
     }
     
     def __init__(self):
@@ -617,80 +763,15 @@ class ToolRegistry:
         logger.info(f"Manually registered tool: {name}")
 
 
-class EpistemicValidator:
-    """
-    Evaluates forensic claims based on Epistemic Reliabilism and source provenance.
-    """
-    def __init__(self, core_bridge):
-        self.core = core_bridge
-        self.category = 'forensics'
-
-    def evaluate_claim(self, claim: str, evidence_sources: list):
-        """
-        Assigns an 'Epistemic Certainty Score' (CQ) based on source provenance.
-        Now includes 'Hardware-Verified' integrity checks using the TPM simulator.
-        """
-        hsm = get_hsm()
-        score = 0.0
-        justifications = []
-        hardware_verified = True
-
-        for source in evidence_sources:
-            s_id = source.get('id', 'Unknown')
-            # Query the core for reliability metadata
-            provenance = self.core.get_source_reliability(s_id)
-            tier = provenance.get("tier", 1)  # 1 (Low) to 5 (High)
-            
-            # Hardware Integrity Check (Sprint 11)
-            hw_sig = source.get("hw_signature")
-            db_hash = provenance.get("hash")
-            
-            if db_hash and hw_sig:
-                if hsm.verify_integrity(s_id, db_hash, hw_sig):
-                    justifications.append(f"Source '{s_id}': Hardware Integrity Verified (TPM).")
-                else:
-                    justifications.append(f"CRITICAL: Source '{s_id}' TAMPER ALERT! Signature mismatch.")
-                    hardware_verified = False
-                    tier = 0 # invalidate the source
-            elif db_hash:
-                 justifications.append(f"Source '{s_id}': No Hardware Signature found. Relying on soft hash.")
-            
-            trust = tier / 5.0
-            score += trust
-            tamper_info = " [Tamper-Evident]" if provenance.get("tamper_evident") else ""
-            justifications.append(f"Source '{s_id}' provides Tier-{tier} grounding (Trust: {trust}){tamper_info}.")
-
-        # Normalize score between 0.0 and 1.0
-        cq = min(score, 1.0)
-        
-        # Severe penalty for any hardware tamper
-        if not hardware_verified:
-            cq *= 0.1
-            status = "Rejected (TAMPER DETECTED)"
-        else:
-            # v0.6.0 Gating Logic
-            if cq >= 0.7:
-                status = "Verified"
-            elif cq >= 0.4:
-                status = "Speculative"
-            else:
-                status = "Rejected"
-
-        return {
-            "claim": claim,
-            "certainty_quotient": round(cq, 4),
-            "status": status,
-            "hardware_verified": hardware_verified,
-            "audit_trail": justifications,
-            "epistemic_stance": "Hardware-Anchored Reliabilism",
-            "timestamp": datetime.now().isoformat()
-        }
+from src.sme.epistemic_validator import EpistemicValidator
 
 
 class ForensicMathTool:
     """
     Exposes high-performance vectorized forensic math algorithms.
     """
+    __slots__ = ('core', 'category')
+    
     def __init__(self, core_bridge):
         self.core = core_bridge
         self.category = 'forensics'
@@ -740,6 +821,56 @@ class ForensicMathTool:
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
+    def calculate_tfidf(self, tokenized_docs: List[List[str]]) -> Dict[str, Any]:
+        """Term significance mapping (TF-IDF)."""
+        try:
+            tfidf_matrix, vocabulary = forensic_math.calculate_tfidf(tokenized_docs)
+            return {
+                "tfidf_matrix": tfidf_matrix.tolist(),
+                "vocabulary": vocabulary,
+                "status": "Success"
+            }
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def calculate_kl_divergence(self, p: List[float], q: List[float]) -> Dict[str, Any]:
+        """Relative entropy measurement (KL Divergence)."""
+        try:
+            divergence = forensic_math.calculate_kl_divergence(np.array(p), np.array(q))
+            return {"kl_divergence": round(divergence, 6), "status": "Success"}
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def calculate_phonetic_hash(self, word: str) -> Dict[str, Any]:
+        """Double Metaphone phonetic hashing."""
+        try:
+            return forensic_math.calculate_phonetic_hash(word)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def audit_benford_distribution(self, data: List[float]) -> Dict[str, Any]:
+        """Benford's Law distribution analysis."""
+        try:
+            return forensic_math.audit_benford_distribution(data)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def calculate_simhash(self, tokens: List[str], hash_size: int = 64) -> Dict[str, Any]:
+        """SimHash calculation for near-duplicate detection."""
+        try:
+            simhash_val = forensic_math.calculate_simhash(tokens, hash_size)
+            return {"simhash": simhash_val, "status": "Success"}
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def calculate_entropy_divergence(self, p: List[float], q: List[float]) -> Dict[str, Any]:
+        """Relative entropy measurement (Data Drift)."""
+        try:
+            divergence = forensic_math.calculate_entropy_divergence(p, q)
+            return {"entropy_divergence": round(divergence, 6), "status": "Success"}
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
 
 # Global registry instance
 _registry: Optional[ToolRegistry] = None
@@ -751,3 +882,164 @@ def get_registry() -> ToolRegistry:
     if _registry is None:
         _registry = ToolRegistry()
     return _registry
+
+
+class ForensicFilesTool:
+    """
+    Exposes structural and integrity tools for files.
+    """
+    __slots__ = ('core', 'category')
+    
+    def __init__(self, core_bridge):
+        self.core = core_bridge
+        self.category = 'forensics'
+
+    def verify_file_signature(self, file_path: str) -> Dict[str, Any]:
+        """Verify file integrity by checking magic numbers."""
+        try:
+            return forensic_files.verify_file_signature(file_path)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def calculate_structural_complexity(self, file_path: str) -> Dict[str, Any]:
+        """Calculate compression ratio as structural entropy proxy."""
+        try:
+            return forensic_files.calculate_structural_complexity(file_path)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+
+class ForensicBehaviorTool:
+    """
+    Exposes behavioral and leakage analysis tools.
+    """
+    __slots__ = ('core', 'category')
+    
+    def __init__(self, core_bridge):
+        self.core = core_bridge
+        self.category = 'forensics'
+
+    def calculate_burstiness(self, timestamps: List[float]) -> Dict[str, Any]:
+        """Calculate temporal burstiness score."""
+        try:
+            return forensic_behavior.calculate_burstiness(timestamps)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def validate_luhn_checksum(self, numeric_string: str) -> Dict[str, Any]:
+        """Validate numeric leakage via Luhn algorithm."""
+        try:
+            return forensic_behavior.validate_luhn_checksum(numeric_string)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+
+class ForensicGraphTool:
+    """
+    Exposes graph pathfinding and centrality tools.
+    """
+    __slots__ = ('core', 'category')
+    
+    def __init__(self, core_bridge):
+        self.core = core_bridge
+        self.category = 'forensics'
+
+    def calculate_node_path(self, graph: Dict[str, List[Tuple[str, float]]], start_node: str, end_node: str) -> Dict[str, Any]:
+        """Find the shortest path between nodes."""
+        try:
+            return forensic_graph.calculate_node_path(graph, start_node, end_node)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def identify_central_hubs(self, adjacency_matrix: List[List[float]], node_labels: List[str]) -> Dict[str, Any]:
+        """Identify influential hubs via Eigenvector Centrality."""
+        try:
+            return forensic_graph.identify_central_hubs(adjacency_matrix, node_labels)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+
+class ForensicSignalTool:
+    """
+    Exposes signal sequence and frequency analysis tools.
+    """
+    __slots__ = ('core', 'category')
+    
+    def __init__(self, core_bridge):
+        self.core = core_bridge
+        self.category = 'forensics'
+
+    def calculate_sequence_similarity(self, seq1: List[float], seq2: List[float]) -> Dict[str, Any]:
+        """Find similarity between time-series sequences."""
+        try:
+            return forensic_signal.calculate_sequence_similarity(seq1, seq2)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def detect_event_periodicity(self, data: List[float]) -> Dict[str, Any]:
+        """Identify dominant periodicities via DFT."""
+        try:
+            return forensic_signal.detect_event_periodicity(data)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+
+class ForensicEntropyTool:
+    """
+    Exposes byte-level entropy mapping and obfuscation detection tools.
+    """
+    __slots__ = ('core', 'category')
+    
+    def __init__(self, core_bridge):
+        self.core = core_bridge
+        self.category = 'forensics'
+
+    def map_stream_entropy(self, stream: List[int], window_size: int = 256) -> Dict[str, Any]:
+        """Map Shannon entropy across a byte-stream."""
+        try:
+            return forensic_entropy.map_stream_entropy(stream, window_size)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def analyze_obfuscation_score(self, content: str) -> Dict[str, Any]:
+        """Detect obfuscated scripts via Hamming Weight and Complexity."""
+        try:
+            return forensic_entropy.analyze_obfuscation_score(content)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+
+class ForensicCrawlerTool:
+    """
+    Bridges automated crawling with SME forensic analysis.
+    """
+    __slots__ = ('core', 'category')
+    
+    def __init__(self, core_bridge):
+        self.core = core_bridge
+        self.category = 'bridge'
+
+    async def ingest_forensic_target(self, url: str) -> Dict[str, Any]:
+        """Automated ingestion and fingerprinting."""
+        try:
+            return await crawler_sling.ingest_forensic_target(url)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+
+class ForensicScorerTool:
+    """
+    Exposes high-level forensic scoring and visualization tools.
+    """
+    __slots__ = ('core', 'category')
+    
+    def __init__(self, core_bridge):
+        self.core = core_bridge
+        self.category = 'forensics'
+
+    def get_forensic_report(self, target_text: str) -> Dict[str, Any]:
+        """Generate a structured visualization report."""
+        try:
+            return credibility_scorer.get_forensic_report(target_text)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}

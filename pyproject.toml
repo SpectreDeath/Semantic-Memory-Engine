@@ -1,11 +1,14 @@
 [project]
 name = "sme-forensic-toolkit"
-version = "0.1.0"
+version = "2.1.0"
 description = "Hardware-aware semantic memory engine for 10GB datasets"
 dependencies = [
     "click>=8.0.0",
     "psutil>=5.9.0",
-    "h5py>=3.10.0",  # Added for binary HDF5 distillation
+    "h5py>=3.10.0",
+    "markitdown>=0.1.0",
+    "polars>=1.0.0",
+    "pydantic-ai>=0.1.0",
 ]
 
 [project.scripts]

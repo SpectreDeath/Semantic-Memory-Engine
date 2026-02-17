@@ -31,7 +31,13 @@ markitdown>=0.1.0
 polars>=1.0.0
 pydantic-ai>=0.1.0
 
+# --- v2.2.0: The Sentinel (Hardware-Aware AI) ---
+llama-cpp-python>=0.3.0
+pynvml>=11.5.0
+
+# --- v2.3.0: Agentic AI Framework ---
+smolagents>=1.0.0
+
 # --- Cross-Platform Compatibility ---
 # This ensures GitHub (Linux) ignores it but your Laptop (Windows) keeps it.
 pywin32==311; sys_platform == 'win32'
-

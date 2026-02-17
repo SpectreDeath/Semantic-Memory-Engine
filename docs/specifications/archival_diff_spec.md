@@ -1,0 +1,58 @@
+# WBM Archive Comparator Specification
+
+**Role:** Senior Python Engineer and Forensic Data Scientist assisting in building an extension for the SME (Semantic-Memory-Engine).
+
+## Environment Constraints
+
+- **Storage:** All project files, databases, and data must reside on `D:/SME/`.
+- **Infrastructure:** The system runs in WSL (Ubuntu). Databases (PostgreSQL) and monitoring (Prometheus) are containerized via DCM.
+- **Hardware:** The laptop uses a GTX 1660 Ti; code must be memory-efficient to leave VRAM for AI inference.
+
+## Project Objective
+
+Build a Python extension called `sme-archival-diff`. Its job is to detect "Data Scrubbing" by comparing live government web pages against their historical snapshots on the Wayback Machine.
+
+## Task
+
+Design and implement this extension across the following phases:
+
+### Phase 1: Archival Discovery Logic
+
+Implement a module using `waybackpy` or the Wayback CDX API to retrieve the snapshot history of a target URL.
+
+- Create a function to identify the two most recent "different" snapshots based on their SHA-1 hashes.
+- Ensure the tool can handle "Soft 404s" or "Page Not Found" redirects common in data deletions.
+
+### Phase 2: Forensic Content Diffing
+
+Use `BeautifulSoup4` to strip boilerplate (navbars, footers, scripts) so we only compare meaningful content.
+
+- Implement a "Semantic Diff" using Python’s `difflib`.
+- **Output Format:** Generate a JSON object detailing:
+  - `added_content`: New text found.
+  - `deleted_content`: Text removed since the last archive.
+  - `metadata`: Timestamp of archive, snapshot URL, and hash.
+
+### Phase 3: SME Bipartite Integration (PostgreSQL)
+
+Write the logic to transform "Deleted Content" into SME Nodes.
+
+- If a paragraph is deleted, create a `ContentNode` linked to a `SourceURLNode` with a relationship type of `SCRUBBED_FROM`.
+- Use `psycopg2` to commit these nodes to the existing Postgres instance on the D: drive.
+
+### Phase 4: Observability (Prometheus)
+
+Integrate the `prometheus_client` library.
+
+- Expose a gauge metric: `sme_archival_change_detected{url="target"}`.
+- Ensure the metrics endpoint is accessible by the Prometheus instance running in our Docker stack.
+
+## Deliverable Structure
+
+Provide the code in a modular format:
+
+- `scout.py` (API)
+- `analyst.py` (Diffing)
+- `exporter.py` (Database/Prometheus)
+
+Start by outlining the `requirements.txt` and the directory structure on the `D:/` drive.

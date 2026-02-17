@@ -21,3 +21,11 @@ nltk:
   install_optional: false
   languages:
     - english
+
+hardware:
+  vram_limit_mb: 6144
+  offload_threshold_mb: 5500
+  offload_strategy: "gguf_first"
+  lora_dir: "models/adapters"
+  gguf_dir: "models/gguf"
+  base_model: "models/gguf/mistral-7b-v0.1.Q4_K_M.gguf"

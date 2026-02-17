@@ -1,4 +1,4 @@
-# 🛰️ SME v2.1.0: The Control Room Operator Manual
+# 🛰️ SME v2.2.0: The Control Room Operator Manual
 
 This guide covers the deployment and operation of the **Semantic Memory Engine (SME)** forensic suite. By using the containerized v2.0.0 release, you bypass the [dependency conflicts](https://github.com/SpectreDeath/Semantic-Memory-Engine/blob/main/docs/DEPENDENCY_GRAPH.md) found in previous versions.
 
@@ -17,6 +17,17 @@ To launch the full suite using the pre-built images from the [GitHub Container R
 
 ---
 
+## 🛠️ Installation & Build Flags (v2.2.0)
+
+When deploying to a new environment (e.g., Python 3.14+), you MUST use specific build flags to enable CUDA acceleration for the **Sentinel Provider**:
+
+```bash
+# Enable CUDA for llama-cpp-python on Windows
+$env:FORCE_CMAKE="1"
+$env:CMAKE_ARGS="-DGGML_CUDA=on"
+pip install llama-cpp-python --no-cache-dir
+```
+
 ## 2. 🎮 The Control Room UI
 
 The v2.0.0 interface centralizes the forensic tools that were previously CLI-only:
@@ -32,9 +43,11 @@ The v2.0.0 interface centralizes the forensic tools that were previously CLI-onl
 
 Your environment is specialized to handle the 6GB VRAM limit of the 1660 Ti:
 
-- **The Sidecar Strategy**: High-load NLP tasks are isolated in the `sme-sidecar` container. v2.1.0 introduces a **RetryStrategy** with exponential backoff for local inference resilience.
-- **Polars Integration**: Uses high-performance **Polars LazyFrames** for corpus comparison, keeping RAM usage low on 16GB systems.
-- **VRAM Guard**: The system implements an **800MB VRAM buffer**. If VRAM usage exceeds 90%, the Sidecar will queue forensic tasks to prevent a GPU crash.
+- **The Sidecar Strategy**: v2.2.0 introduced the **Sentinel Monitor** and **Sentinel Provider**.
+- **GGUF-First Stability**: The Sentinel prioritizes stability by leverage system RAM (offloading GGUF layers) if VRAM pressure exceeds 5.5GB.
+- **LoRA Switching**: Forensic personas (Legal, Adversarial, etc.) are swapped in sub-seconds via LoRA adapters, avoiding PCIe bandwidth stalls.
+- **Polars Integration**: Uses high-performance **Polars LazyFrames** for corpus comparison.
+- **VRAM Guard**: The SentinelMonitor issues hardware signals to the sidecar to dynamically adjust offloading before a crash occurs.
 - **Node Limits**: Visualization tools are capped at **2,000 nodes** to ensure smooth performance on laptop hardware.
 
 ---

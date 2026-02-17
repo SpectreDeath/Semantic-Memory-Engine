@@ -20,10 +20,8 @@ Usage:
 """
 
 import logging
-import re
-from pathlib import Path
-
 from markitdown import MarkItDown
+from src.core.redactor import Redactor
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -38,27 +36,7 @@ _MAX_FILE_BYTES = 500 * 1024 * 1024  # 500 MB
 # ---------------------------------------------------------------------------
 # Entity Redaction Patterns
 # ---------------------------------------------------------------------------
-# These regex patterns catch common PII without requiring a heavy NER model,
-# keeping VRAM cost at zero.
-
-# Proper names: 2+ consecutive capitalized words (e.g. "John Smith",
-# "Barack Hussein Obama") — excludes sentence-start single caps
-_PATTERN_PROPER_NAME = re.compile(
-    r'\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b'
-)
-
-# Email addresses
-_PATTERN_EMAIL = re.compile(
-    r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-)
-
-# URLs (http/https/ftp)
-_PATTERN_URL = re.compile(
-    r'https?://[^\s\)\]>\"\']+|ftp://[^\s\)\]>\"\']+',
-    re.IGNORECASE,
-)
-
-_REDACTION_MARKER = "[REDACTED]"
+# Patterns moved to src.core.redactor
 
 
 class DocumentProcessor:
@@ -139,22 +117,9 @@ class DocumentProcessor:
     def _redact_entities(text: str) -> str:
         """
         Strip identifying metadata from Markdown text.
-
-        Redacts:
-            • Proper names (2+ consecutive capitalized words)
-            • Email addresses
-            • URLs (http/https/ftp)
-
-        Returns:
-            Sanitized text with entities replaced by [REDACTED].
+        Uses the centralized Redactor utility.
         """
-        # Order matters: URLs first (they may contain capitalized words),
-        # then emails, then proper names
-        redacted = _PATTERN_URL.sub(_REDACTION_MARKER, text)
-        redacted = _PATTERN_EMAIL.sub(_REDACTION_MARKER, redacted)
-        redacted = _PATTERN_PROPER_NAME.sub(_REDACTION_MARKER, redacted)
-
-        return redacted
+        return Redactor.redact(text, strict=False)
 
     # ------------------------------------------------------------------
     # Public API

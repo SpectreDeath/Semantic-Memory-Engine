@@ -63,6 +63,27 @@ async def run_flow(request: AIRequest):
         logger.exception("Error executing flow in sidecar")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/sentinel/offload")
+async def sentinel_offload(payload: dict):
+    """Signal from SentinelMonitor to reduce VRAM usage."""
+    if hasattr(provider, "offload_to_ram"):
+        logger.warning(f"SENTINEL SIGNAL: Offloading layers to RAM. Pressure: {payload.get('vram_pressure')}")
+        provider.offload_to_ram()
+        return {"status": "offloading_initiated"}
+    return {"status": "not_supported"}
+
+@app.post("/sentinel/switch_lens")
+async def sentinel_switch_lens(payload: dict):
+    """Switch forensic LoRA adapter."""
+    lens = payload.get("lens_name")
+    if not lens:
+        raise HTTPException(status_code=400, detail="Missing lens_name")
+    
+    if hasattr(provider, "switch_lens"):
+        provider.switch_lens(lens)
+        return {"status": "lens_shifted", "lens": lens}
+    return {"status": "not_supported"}
+
 @app.post("/forensics/nexus_verify")
 async def verify_nexus(payload: dict):
     """

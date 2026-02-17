@@ -1,0 +1,15 @@
+{
+  "total_decisions": 5,
+  "decisions_by_type": {
+    "review": 5
+  },
+  "corrections_received": 5,
+  "false_positives": 0,
+  "false_negatives": 0,
+  "true_positives": 0,
+  "true_negatives": 0,
+  "average_confidence": 0.0,
+  "model_accuracy": 0.0,
+  "last_training": null,
+  "last_updated": "2026-02-17T16:10:56.638554"
+}

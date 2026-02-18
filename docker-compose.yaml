@@ -12,6 +12,8 @@ services:
     depends_on:
       - sme-sidecar
       - postgres
+    volumes:
+      - ./src/sme/vendor:/app/src/sme/vendor
 
   sme-sidecar:
     build:
@@ -23,6 +25,21 @@ services:
       - "8089:8089"
     environment:
       - SME_AI_PROVIDER=langflow
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8089/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   sme-frontend:
     build:
@@ -32,6 +49,8 @@ services:
     restart: unless-stopped
     ports:
       - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
     depends_on:
       - sme-operator
 

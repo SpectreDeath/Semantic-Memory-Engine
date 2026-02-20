@@ -233,8 +233,21 @@ def get_system_guardrail() -> str:
     """
 
 # Load Extensions with the Core Bridge (v1.1.1)
+# ---------------------------------------------------------------------------
+# asyncio.run() creates a brand-new event loop and raises RuntimeError if one
+# is already running (e.g., when this module is imported inside uvicorn or a
+# Jupyter notebook).  We handle both cases gracefully.
+# ---------------------------------------------------------------------------
 extension_manager = get_extension_manager(nexus_api=sme_core)
-asyncio.run(extension_manager.discover_and_load())
+try:
+    asyncio.run(extension_manager.discover_and_load())
+except RuntimeError:
+    # A loop is already running — schedule the coroutine on it instead.
+    loop = asyncio.get_event_loop()
+    if loop.is_running():
+        loop.create_task(extension_manager.discover_and_load())
+    else:
+        loop.run_until_complete(extension_manager.discover_and_load())
 
 # Register Extension Tools
 for tool_info in extension_manager.get_extension_tools():
@@ -960,36 +973,54 @@ def get_forensic_report(target_text: str, session_id: Optional[str] = None) -> s
 def entity_extractor(text: str, session_id: Optional[str] = None) -> str:
     """
     Advanced entity cross-referencing against the 10GB ConceptNet knowledge graph.
-    
+
     Identifies mentions, retrieves candidates, and returns ranked matches
     with relationship types and relevance scores.
+    Delegates to the registered entity-linker tool; falls back to a
+    token-heuristic scan if the linker is unavailable.
     """
     logger.info(f"entity_extractor called: text_len={len(text)}")
-    
-    # 1. Register logic for ConceptNet extraction
-    # We leverage the concept_resolver tool but format it as requested
-    result = safe_tool_call("entity_extractor", "resolve", text)
-    
-    # If the underlying SME tool isn't fully implemented with this specific 
-    # ranked format, we simulate the structure based on ConceptNet availability.
-    # In a real scenario, this would call the 10GB core's HDF5/ConceptNet index.
-    
-    # For forensic accuracy, we ensure we return the requested JSON format
+
+    # 1. Try the real entity-linker from src/core/entity_linker.py
+    linker_result = safe_tool_call("link_entities", "link_entities", text)
+    raw_entities = []
+    if linker_result.get("success") and isinstance(linker_result.get("data"), dict):
+        raw_entities = linker_result["data"].get("entities", [])
+
+    # 2. If the linker isn't wired up yet, run a heuristic noun-phrase scan
+    if not raw_entities:
+        import string
+        stopwords = {
+            "the", "a", "an", "is", "are", "was", "were", "in", "on", "at",
+            "to", "of", "and", "or", "but", "for", "with", "that", "this",
+            "it", "he", "she", "they", "we", "i", "my", "your", "our",
+        }
+        tokens = text.translate(str.maketrans("", "", string.punctuation)).split()
+        candidate_names = list({
+            t for t in tokens
+            if len(t) > 3 and t[0].isupper() and t.lower() not in stopwords
+        })
+        raw_entities = [
+            {
+                "entity_name": name,
+                "relationship_type": "mentioned_in",
+                "relevance_score": round(0.5 + (len(name) / (2 * max(len(name), 10))), 2),
+            }
+            for name in candidate_names[:20]  # cap at 20 to keep output manageable
+        ]
+
     extracted = {
-        "text": text,
-        "entities": [
-            # Sample structure that would be returned by the core
-            {"entity_name": "Administrative Account", "relationship_type": "is_a", "relevance_score": 0.95},
-            {"entity_name": "Perimeter Breach", "relationship_type": "part_of", "relevance_score": 0.88}
-        ],
+        "text": text[:200] + ("..." if len(text) > 200 else ""),
+        "entity_count": len(raw_entities),
+        "entities": raw_entities,
         "core_version": "ConceptNet 5.7.0",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
-    
+
     # Session tracking
     session = session_manager.get_session(session_id)
     session.add_history("entity_extractor", extracted)
-    
+
     return json.dumps(extracted, indent=2)
 
 

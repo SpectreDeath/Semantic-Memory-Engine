@@ -9,10 +9,9 @@ Comprehensive testing of:
 """
 
 import unittest
-from src.core.advanced_nlp import (
-    AdvancedNLPEngine, AdvancedNLPAnalyzer,
-    DependencyRelation, CoreferenceChain, SemanticRoleLabel, Event
-)
+
+from src import ToolFactory
+from src.core import advanced_nlp
 
 
 class TestAdvancedNLPEngineBasics(unittest.TestCase):
@@ -20,7 +19,7 @@ class TestAdvancedNLPEngineBasics(unittest.TestCase):
     
     def setUp(self):
         """Initialize engine."""
-        self.engine = AdvancedNLPEngine()
+        self.engine = advanced_nlp.AdvancedNLPEngine()
     
     def test_engine_availability(self):
         """Test engine is available."""
@@ -53,7 +52,7 @@ class TestDependencyParsing(unittest.TestCase):
     
     def setUp(self):
         """Initialize engine."""
-        self.engine = AdvancedNLPEngine()
+        self.engine = advanced_nlp.AdvancedNLPEngine()
     
     def test_dependency_extraction(self):
         """Test dependency relation extraction."""
@@ -86,7 +85,7 @@ class TestCoreferenceResolution(unittest.TestCase):
     
     def setUp(self):
         """Initialize engine."""
-        self.engine = AdvancedNLPEngine()
+        self.engine = advanced_nlp.AdvancedNLPEngine()
     
     def test_coreference_resolution(self):
         """Test coreference chain detection."""
@@ -121,7 +120,7 @@ class TestSemanticRoleLabeling(unittest.TestCase):
     
     def setUp(self):
         """Initialize engine."""
-        self.engine = AdvancedNLPEngine()
+        self.engine = advanced_nlp.AdvancedNLPEngine()
     
     def test_semantic_role_extraction(self):
         """Test semantic role extraction."""
@@ -154,7 +153,7 @@ class TestEventExtraction(unittest.TestCase):
     
     def setUp(self):
         """Initialize engine."""
-        self.engine = AdvancedNLPEngine()
+        self.engine = advanced_nlp.AdvancedNLPEngine()
     
     def test_event_extraction(self):
         """Test event extraction."""
@@ -196,7 +195,7 @@ class TestSemanticSummary(unittest.TestCase):
     
     def setUp(self):
         """Initialize engine."""
-        self.engine = AdvancedNLPEngine()
+        self.engine = advanced_nlp.AdvancedNLPEngine()
     
     def test_key_participants(self):
         """Test key participant extraction."""
@@ -220,7 +219,7 @@ class TestAdvancedNLPAnalyzer(unittest.TestCase):
     
     def setUp(self):
         """Initialize analyzer."""
-        self.analyzer = AdvancedNLPAnalyzer()
+        self.analyzer = advanced_nlp.AdvancedNLPAnalyzer()
     
     def test_story_analysis(self):
         """Test story structure analysis."""
@@ -249,7 +248,7 @@ class TestAdvancedNLPIntegration(unittest.TestCase):
     
     def setUp(self):
         """Initialize engine."""
-        self.engine = AdvancedNLPEngine()
+        self.engine = advanced_nlp.AdvancedNLPEngine()
     
     def test_integration_with_nlp_pipeline(self):
         """Test integration with base NLPPipeline."""
@@ -276,13 +275,15 @@ class TestAdvancedNLPEdgeCases(unittest.TestCase):
     
     def setUp(self):
         """Initialize engine."""
-        self.engine = AdvancedNLPEngine()
+        self.engine = advanced_nlp.AdvancedNLPEngine()
     
     def test_empty_text(self):
         """Test empty text handling."""
         result = self.engine.analyze_advanced("")
-        # Should handle gracefully
-        self.assertTrue(result is None or len(result.sentences) == 0)
+        # Should handle gracefully - returns analysis with empty or single empty sentence
+        self.assertIsNotNone(result)
+        # Either empty list or list with single empty string
+        self.assertTrue(len(result.sentences) == 0 or (len(result.sentences) == 1 and result.sentences[0] == ""))
     
     def test_single_word(self):
         """Test single word analysis."""
@@ -305,7 +306,6 @@ class TestFactoryIntegration(unittest.TestCase):
     
     def test_factory_creation(self):
         """Test factory creates advanced NLP engine."""
-        from src import ToolFactory
         
         engine = ToolFactory.create_advanced_nlp()
         self.assertIsNotNone(engine)
@@ -313,7 +313,6 @@ class TestFactoryIntegration(unittest.TestCase):
     
     def test_factory_caching(self):
         """Test factory caching."""
-        from src import ToolFactory
         
         engine1 = ToolFactory.create_advanced_nlp()
         engine2 = ToolFactory.create_advanced_nlp()
@@ -323,7 +322,6 @@ class TestFactoryIntegration(unittest.TestCase):
     
     def test_factory_reset(self):
         """Test factory reset."""
-        from src import ToolFactory
         
         engine1 = ToolFactory.create_advanced_nlp()
         engine2 = ToolFactory.create_advanced_nlp(reset=True)

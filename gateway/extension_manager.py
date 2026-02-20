@@ -4,6 +4,7 @@ import logging
 import importlib.util
 import inspect
 import asyncio
+from pathlib import Path
 from typing import Dict, List, Any, Optional, Callable
 
 logger = logging.getLogger("lawnmower.extension_manager")
@@ -13,8 +14,14 @@ class ExtensionManager:
     Dynamic Plugin Loader for Lawnmower Man v1.1.1.
     Supports the class-based ForensicExtension boilerplate.
     """
-    def __init__(self, nexus_api: Any, extensions_dir: str = "d:/SME/extensions"):
-        self.extensions_dir = os.path.normpath(extensions_dir)
+    def __init__(self, nexus_api: Any, extensions_dir: Optional[str] = None):
+        self.extensions_dir = os.path.normpath(
+            extensions_dir
+            or os.environ.get(
+                "SME_EXTENSIONS_DIR",
+                str(Path(__file__).resolve().parent.parent / "extensions"),
+            )
+        )
         self.nexus_api = nexus_api
         self.extensions: Dict[str, Any] = {}
         

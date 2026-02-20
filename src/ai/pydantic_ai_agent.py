@@ -7,38 +7,41 @@ using Pydantic-AI for validated, type-safe AI responses.
 v2.1.0: Added Pydantic-AI integration for agentic forensic workflows.
 """
 
-from pydantic import BaseModel, Field
-from pydantic_ai import Agent
-from typing import List, Optional, Dict, Any
+# cSpell:ignore agentic ollama Ollama exfiltration
+
 import json
+from typing import Any, Dict, List, Optional
+
+import pydantic
+import pydantic_ai
 
 
 # ============================================================================
 # Pydantic Models for Type-Safe Responses
 # ============================================================================
 
-class EntityExtraction(BaseModel):
+class EntityExtraction(pydantic.BaseModel):
     """Extracted entity from forensic text."""
-    name: str = Field(..., description="Entity name")
-    entity_type: str = Field(..., description="Type: person, organization, location, etc.")
-    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score")
+    name: str = pydantic.Field(..., description="Entity name")
+    entity_type: str = pydantic.Field(..., description="Type: person, organization, location, etc.")
+    confidence: float = pydantic.Field(..., ge=0.0, le=1.0, description="Confidence score")
 
 
-class ForensicAnalysisResult(BaseModel):
+class ForensicAnalysisResult(pydantic.BaseModel):
     """Structured forensic analysis output."""
-    entities: List[EntityExtraction] = Field(default_factory=list)
-    sentiment: str = Field(..., description="Overall sentiment: positive, negative, neutral")
-    key_findings: List[str] = Field(default_factory=list)
-    risk_level: str = Field(..., description="Risk assessment: low, medium, high, critical")
-    recommended_actions: List[str] = Field(default_factory=list)
+    entities: List[EntityExtraction] = pydantic.Field(default_factory=list)
+    sentiment: str = pydantic.Field(..., description="Overall sentiment: positive, negative, neutral")
+    key_findings: List[str] = pydantic.Field(default_factory=list)
+    risk_level: str = pydantic.Field(..., description="Risk assessment: low, medium, high, critical")
+    recommended_actions: List[str] = pydantic.Field(default_factory=list)
 
 
-class ClaimVerification(BaseModel):
+class ClaimVerification(pydantic.BaseModel):
     """Epistemic verification result."""
-    claim: str = Field(..., description="The claim being verified")
-    is_verified: bool = Field(..., description="Whether the claim can be verified")
-    confidence: float = Field(..., ge=0.0, le=1.0)
-    evidence_sources: List[str] = Field(default_factory=list)
+    claim: str = pydantic.Field(..., description="The claim being verified")
+    is_verified: bool = pydantic.Field(..., description="Whether the claim can be verified")
+    confidence: float = pydantic.Field(..., ge=0.0, le=1.0)
+    evidence_sources: List[str] = pydantic.Field(default_factory=list)
     uncertainty_notes: Optional[str] = None
 
 
@@ -65,7 +68,7 @@ Guidelines:
 # to use other providers (ollama, anthropic, etc.)
 def get_forensic_agent():
     """Lazy initialization of the forensic agent."""
-    return Agent(
+    return pydantic_ai.Agent(
         model='openai:gpt-4o-mini',  # Configurable - can use Ollama, Anthropic, etc.
         result_type=ForensicAnalysisResult,
         system_prompt=FORENSIC_AGENT_SYSTEM_PROMPT,
@@ -155,7 +158,7 @@ def verify_claim(claim: str, evidence: List[str]) -> Dict[str, Any]:
     Returns:
         Verification result with confidence score
     """
-    verification_agent = Agent(
+    verification_agent = pydantic_ai.Agent(
         model='openai:gpt-4o-mini',
         result_type=ClaimVerification,
         system_prompt="""You are an epistemic verifier. 

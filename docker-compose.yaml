@@ -1,4 +1,21 @@
 services:
+
+  # ---------------------------------------------------------------------------
+  # autoheal: Monitors HEALTHCHECK status and restarts unhealthy containers.
+  # Docker's own restart policy only fires on container exit/crash, NOT when a
+  # container transitions to "unhealthy".  autoheal bridges that gap.
+  # ---------------------------------------------------------------------------
+  autoheal:
+    image: willfarrell/autoheal:latest
+    container_name: autoheal
+    restart: unless-stopped
+    environment:
+      - AUTOHEAL_CONTAINER_LABEL=all
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - backend-net
+
   sme-operator:
     build:
       context: .
@@ -9,11 +26,23 @@ services:
       - "8000:8000"
     environment:
       - SME_SIDECAR_URL=http://sme-sidecar:8089
+      - SME_DATA_DIR=/app/data
+      # Security — values must be set in a .env file (see .env.example)
+      - SME_GATEWAY_SECRET=${SME_GATEWAY_SECRET}
+      - SME_ADMIN_PASSWORD=${SME_ADMIN_PASSWORD}
+      - SME_HSM_SECRET=${SME_HSM_SECRET}
+      - SME_CORS_ORIGINS=${SME_CORS_ORIGINS:-http://localhost:80,http://localhost:5173}
     depends_on:
-      - sme-sidecar
-      - postgres
+      sme-sidecar:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
     volumes:
       - ./src/sme/vendor:/app/src/sme/vendor
+      - ./data:/app/data
+    networks:
+      - frontend-net
+      - backend-net
 
   sme-sidecar:
     build:
@@ -25,9 +54,17 @@ services:
       - "8089:8089"
     environment:
       - SME_AI_PROVIDER=langflow
+      - SME_OPERATOR_URL=http://sme-operator:8000
+      # Hardware config — passed through from config/config.yaml values
+      - SME_VRAM_LIMIT_MB=4096
+      - SME_OFFLOAD_THRESHOLD_MB=3584
+      - SME_DATA_DIR=/app/data
     deploy:
       resources:
         limits:
+          # Caps system RAM (not VRAM — Docker cannot cap GPU VRAM directly).
+          # True VRAM limiting requires application-level controls such as
+          # PYTORCH_CUDA_ALLOC_CONF or torch.cuda.set_per_process_memory_fraction().
           memory: 4G
         reservations:
           devices:
@@ -40,6 +77,8 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    networks:
+      - backend-net
 
   sme-frontend:
     build:
@@ -48,11 +87,11 @@ services:
     container_name: sme_frontend
     restart: unless-stopped
     ports:
-      - "5173:5173"
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+      - "80:80"
     depends_on:
       - sme-operator
+    networks:
+      - frontend-net
 
   gpu-exporter:
     image: nvcr.io/nvidia/k8s/dcgm-exporter:latest
@@ -68,19 +107,40 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
+    networks:
+      - monitoring-net
 
   postgres:
     image: postgres:15-alpine
     container_name: sme_postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: sme_user
-      POSTGRES_PASSWORD: sme_password
-      POSTGRES_DB: sme_nexus
+      POSTGRES_USER: ${POSTGRES_USER:-sme_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sme_password}
+      POSTGRES_DB: ${POSTGRES_DB:-sme_nexus}
     ports:
       - "5432:5432"
     volumes:
       - sme_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sme_user} -d ${POSTGRES_DB:-sme_nexus}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - backend-net
 
 volumes:
   sme_pg_data:
+
+# ---------------------------------------------------------------------------
+# Named networks for service isolation.
+# frontend-net : frontend ↔ operator only
+# backend-net  : operator ↔ sidecar ↔ postgres ↔ autoheal
+# monitoring-net: gpu-exporter (isolated from application traffic)
+# ---------------------------------------------------------------------------
+networks:
+  frontend-net:
+  backend-net:
+  monitoring-net:

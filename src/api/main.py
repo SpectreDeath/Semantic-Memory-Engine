@@ -9,6 +9,7 @@ import uvicorn
 import asyncio
 import psutil
 import time
+import os
 
 from src.api.router import router
 from src.api.rate_limiter import RateLimiter
@@ -37,14 +38,19 @@ async def broadcast_diagnostics(websocket: WebSocket):
             # Gather metrics
             cpu_usage = psutil.cpu_percent()
             mem_usage = psutil.virtual_memory().percent
-            
+
+            # Measure actual round-trip latency with a lightweight disk stat call
+            _t0 = time.perf_counter()
+            psutil.disk_io_counters()
+            latency_ms = round((time.perf_counter() - _t0) * 1000, 2)
+
             # Send payload
             await websocket.send_json({
                 "type": "diagnostics",
                 "data": {
                     "cpu": cpu_usage,
                     "memory": mem_usage,
-                    "latency": f"{int(time.time() % 100)}ms", # Simulated for now
+                    "latency_ms": latency_ms,
                     "timestamp": time.time()
                 }
             })
@@ -93,10 +99,15 @@ async def add_logging_and_tenant_context(request: Request, call_next):
     finally:
         TenantContext.reset(token)
 
-# Configure CORS for the frontend
+# Configure CORS for the frontend.
+# Origins are read from SME_CORS_ORIGINS (comma-separated).
+# Falls back to localhost only — never a wildcard in production.
+_raw_origins = os.environ.get("SME_CORS_ORIGINS", "http://localhost:80,http://localhost:5173")
+_allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify the actual frontend URL
+    allow_origins=_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

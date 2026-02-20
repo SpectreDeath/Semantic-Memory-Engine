@@ -7,10 +7,11 @@ using Polars as a faster alternative to Pandas.
 v2.1.0: Added Polars for accelerated data processing.
 """
 
-import polars as pl
-from typing import List, Dict, Any, Optional
-from pathlib import Path
 import json
+import pathlib
+from typing import Any, Dict, List
+
+import polars as pl
 
 
 # ============================================================================
@@ -53,7 +54,7 @@ def load_forensic_events(file_path: str) -> pl.DataFrame:
     Returns:
         Polars DataFrame with forensic events
     """
-    path = Path(file_path)
+    path = pathlib.Path(file_path)
     suffix = path.suffix.lower()
     
     if suffix == '.csv':

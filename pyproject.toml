@@ -1,21 +1,46 @@
 [project]
 name = "sme-forensic-toolkit"
-version = "2.1.0"
+# Keep this in sync with the latest CHANGELOG entry
+version = "2.3.2"
 description = "Hardware-aware semantic memory engine for 10GB datasets"
+requires-python = ">=3.10"
 dependencies = [
+    # Core utilities
     "click>=8.0.0",
     "psutil>=5.9.0",
     "h5py>=3.10.0",
+    # v2.1.0
     "markitdown>=0.1.0",
     "polars>=1.0.0",
     "pydantic-ai>=0.1.0",
+    # v2.2.0
+    "llama-cpp-python>=0.3.0",
+    "pynvml>=11.5.0",
+    # v2.3.0
+    "smolagents>=1.0.0",
+    # Gateway / MCP
+    "fastmcp<3.0.0",
+    "cryptography>=46.0.0",
+    "PyJWT>=2.0.0",
+    # Analysis
+    "scikit-learn>=1.3.0",
+    "pandas>=2.0.0,<3.0.0",
+    "numpy>=2.3.1,<2.4.0",
+    # API
+    "fastapi>=0.100.0",
+    "uvicorn>=0.20.0",
+    "httpx>=0.24.0",
 ]
 
 [project.scripts]
 sme = "sme_cli.main:cli"
 
-[tool.setuptools]
-packages = ["sme_cli", "src", "gateway"]
+# Use find: so setuptools auto-discovers all subpackages (src.ai, src.core, etc.)
+# The old explicit list ["sme_cli", "src", "gateway"] only registered top-level
+# packages and caused ImportErrors for src.ai, src.core, src.api, etc.
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["sme_cli*", "src*", "gateway*"]
 
 [build-system]
 requires = ["setuptools>=61.0"]

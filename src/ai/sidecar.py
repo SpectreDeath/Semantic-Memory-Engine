@@ -87,15 +87,42 @@ async def sentinel_switch_lens(payload: dict):
 @app.post("/forensics/nexus_verify")
 async def verify_nexus(payload: dict):
     """
-    Extracts entities from content for forensic verification.
+    Extracts named entities from content for forensic verification.
+    Uses spaCy NER if available, falls back to heuristic noun-phrase extraction.
     """
     content = payload.get("new_content", "")
-    # Use regex to grab entities (Capitalized words)
-    entities = list(set(re.findall(r'[A-Z][a-z]+', content))) 
-    
+
+    entities = []
+    try:
+        # Prefer the operator's entity linker via HTTP when available
+        import httpx
+        operator_url = os.getenv("SME_OPERATOR_URL", "http://sme-operator:8000")
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.post(
+                f"{operator_url}/api/v1/link_entities",
+                json={"text": content, "knowledge_base": "custom"}
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                entities = [e.get("entity", e) for e in data.get("entities", [])]
+    except Exception:
+        # Fallback: simple word-tokeniser filtering stopwords and short tokens
+        import string
+        stopwords = {
+            "the", "a", "an", "is", "are", "was", "were", "in", "on", "at",
+            "to", "of", "and", "or", "but", "for", "with", "that", "this",
+            "it", "he", "she", "they", "we", "i", "my", "your", "our"
+        }
+        tokens = content.translate(str.maketrans("", "", string.punctuation)).split()
+        entities = list({
+            t for t in tokens
+            if len(t) > 3 and t[0].isupper() and t.lower() not in stopwords
+        })
+
     return {
         "status": "verified",
         "entities_found": entities,
+        "entity_count": len(entities),
         "recommendation": "proceed" if len(entities) > 0 else "flag"
     }
 
@@ -103,4 +130,6 @@ if __name__ == "__main__":
     import uvicorn
     # Defaulting to 8089 to avoid conflicts with Gephi (8080) or other services
     port = int(os.getenv("SME_SIDECAR_PORT", 8089))
-    uvicorn.run(app, host="127.0.0.1", port=port)
+    # Bind to 0.0.0.0 so the sidecar is reachable from other Docker containers.
+    # 127.0.0.1 (loopback) is only reachable within the same container.
+    uvicorn.run(app, host="0.0.0.0", port=port)

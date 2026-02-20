@@ -9,23 +9,17 @@ v2.3.0: Added Smolagents for agentic AI workflows.
 
 import json
 import re
-from typing import List, Dict, Any, Optional
+from typing import List
 
-from smolagents import (
-    Agent, 
-    CodeAgent, 
-    ToolCallingAgent,
-    DuckDuckGoSearchTool,
-    VisitWebpageTool,
-)
-from smolagents.tools import tool
+import smolagents
+from smolagents import tools as tools_mod
 
 
 # ============================================================================
 # Custom SME Tools for Smolagents
 # ============================================================================
 
-@tool
+@tools_mod.tool
 def analyze_stylometry(text: str) -> str:
     """
     Analyze text for stylometric fingerprinting.
@@ -48,7 +42,7 @@ def analyze_stylometry(text: str) -> str:
     })
 
 
-@tool
+@tools_mod.tool
 def check_source_trust(url: str) -> str:
     """
     Check the trust score of a web source.
@@ -72,7 +66,7 @@ def check_source_trust(url: str) -> str:
     })
 
 
-@tool
+@tools_mod.tool
 def extract_entities(text: str) -> str:
     """
     Extract named entities from text.
@@ -92,7 +86,7 @@ def extract_entities(text: str) -> str:
     })
 
 
-@tool
+@tools_mod.tool
 def calculate_risk_score(indicators: List[str]) -> str:
     """
     Calculate risk score from behavioral indicators.
@@ -135,14 +129,14 @@ def calculate_risk_score(indicators: List[str]) -> str:
 # ============================================================================
 
 # Create a forensic investigation agent
-forensic_agent = Agent(
+forensic_agent = smolagents.ToolCallingAgent(
     model="ollama:llama3.2",  # Configurable - can use HF Inference API, OpenAI, etc.
     tools=[
         analyze_stylometry,
         check_source_trust,
         extract_entities,
         calculate_risk_score,
-        DuckDuckGoSearchTool(),
+        # smolagents.DuckDuckGoSearchTool(),  # Requires 'ddgs' package
     ],
     max_steps=10,
 )
@@ -152,14 +146,13 @@ forensic_agent = Agent(
 # Code Agent for Complex Analysis
 # ============================================================================
 
-code_agent = CodeAgent(
+code_agent = smolagents.CodeAgent(
     model="ollama:llama3.2",
     tools=[
         analyze_stylometry,
         extract_entities,
         calculate_risk_score,
     ],
-    additional_imports=["pandas", "numpy"],
     max_steps=15,
 )
 

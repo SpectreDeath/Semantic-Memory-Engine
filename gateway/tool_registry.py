@@ -14,8 +14,9 @@ Usage:
 import logging
 import sys
 import os
+import numpy as np
 from datetime import datetime
-from typing import Dict, Any, Callable, Optional, List
+from typing import Dict, Any, Callable, Optional, List, Tuple
 from dataclasses import dataclass, asdict, is_dataclass
 from nltk.tokenize import word_tokenize
 from collections import Counter
@@ -35,9 +36,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 logger = logging.getLogger(__name__)
 
-# v1.1.0 Extension Hook: List of ToolDefinition provided by external plugins
-EXTENSION_TOOLS: List[ToolDefinition] = []
-
 
 @dataclass
 class ToolDefinition:
@@ -49,6 +47,11 @@ class ToolDefinition:
     parameters: Dict[str, Any]
     handler: Optional[Callable] = None
     is_manual: bool = False
+
+
+# v1.1.0 Extension Hook: List of ToolDefinition provided by external plugins
+# NOTE: Must be declared AFTER ToolDefinition to avoid NameError at import time.
+EXTENSION_TOOLS: List[ToolDefinition] = []
 
 class ScribeAuthorshipTool:
     """

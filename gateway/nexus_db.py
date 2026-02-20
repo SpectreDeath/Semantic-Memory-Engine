@@ -1,87 +1,118 @@
 import sqlite3
 import os
+import threading
 import logging
+from pathlib import Path
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger("lawnmower.nexus")
+
+# ---------------------------------------------------------------------------
+# Resolve the data directory from env var → project-relative default.
+# The old hardcoded "d:/SME/data" broke inside Docker (Linux containers).
+# ---------------------------------------------------------------------------
+_DEFAULT_DATA_DIR = str(Path(__file__).resolve().parent.parent / "data")
+
 
 class ForensicNexus:
     """
     Unified database layer using SQLite ATTACH.
     Provides a single entry point for all forensic data across laboratory,
     provenance, and analytics databases.
+
+    TODO: The SQLite Nexus is intended as a local-dev / single-node store.
+    The postgres service in docker-compose.yaml should be promoted to the
+    primary store for multi-container writes; SQLite WAL mode does not scale
+    well when multiple Docker containers share the same file over a volume.
     """
-    def __init__(self, base_dir: str = "d:/SME/data"):
-        self.base_dir = base_dir
-        self.primary_path = os.path.normpath(os.path.join(base_dir, "forensic_nexus.db"))
-        
+
+    def __init__(self, base_dir: Optional[str] = None):
+        # Prefer explicit arg → env var → project-relative default
+        self.base_dir = (
+            base_dir
+            or os.environ.get("SME_DATA_DIR")
+            or _DEFAULT_DATA_DIR
+        )
+        self.primary_path = os.path.normpath(
+            os.path.join(self.base_dir, "forensic_nexus.db")
+        )
+
         # Ensure directories exist
         os.makedirs(os.path.dirname(self.primary_path), exist_ok=True)
-        
+
         # Connect to master DB
         self.conn = sqlite3.connect(self.primary_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
-        
-        # Patch v1.1.3: Enable Write-Ahead Logging for concurrent tool access
+
+        # Enable Write-Ahead Logging for concurrent tool access
         try:
             self.conn.execute("PRAGMA journal_mode=WAL;")
         except Exception as e:
             logger.warning(f"Nexus: Failed to enable WAL mode: {e}")
-        
+
         # Attach subordinate databases
         self._attach_subordinates()
-        
+
     def _attach_subordinates(self):
         databases = {
-            "lab": os.path.normpath(os.path.join(self.base_dir, "storage", "laboratory.db")),
-            "prov": os.path.normpath(os.path.join(self.base_dir, "provenance.db")),
-            "core": os.path.normpath(os.path.join(self.base_dir, "knowledge_core.sqlite"))
+            "lab": os.path.normpath(
+                os.path.join(self.base_dir, "storage", "laboratory.db")
+            ),
+            "prov": os.path.normpath(
+                os.path.join(self.base_dir, "provenance.db")
+            ),
+            "core": os.path.normpath(
+                os.path.join(self.base_dir, "knowledge_core.sqlite")
+            ),
         }
-        
-        # Ensure lab dir exists or ATTACH will fail if path doesn't exist at all
+
+        # Ensure lab storage dir exists
         os.makedirs(os.path.join(self.base_dir, "storage"), exist_ok=True)
-        
+
         for schema, path in databases.items():
             abs_path = os.path.abspath(path)
-            # SQLite ATTACH works even if file doesn't exist (it creates it), 
-            # but we want to know if we are attaching existing data.
             try:
-                # Use a separate connector to ensure the file exists so ATTACH doesn't fail on missing dirs
+                # Touch the file so ATTACH doesn't fail on a missing path
                 if not os.path.exists(abs_path):
-                    with sqlite3.connect(abs_path) as tmp:
+                    with sqlite3.connect(abs_path):
                         pass
-                
-                # Check if already attached
+
                 cursor = self.conn.cursor()
                 cursor.execute("PRAGMA database_list")
                 attached = [row[1] for row in cursor.fetchall()]
-                
+
                 if schema not in attached:
-                    self.conn.execute(f"ATTACH DATABASE '{abs_path}' AS {schema}")
+                    self.conn.execute(
+                        f"ATTACH DATABASE '{abs_path}' AS {schema}"
+                    )
                     logger.info(f"Nexus: Attached {schema} from {abs_path}")
             except Exception as e:
-                logger.warning(f"Nexus: Failed to attach {schema} ({abs_path}): {e}")
+                logger.warning(
+                    f"Nexus: Failed to attach {schema} ({abs_path}): {e}"
+                )
 
     def attach_db(self, db_path: str, schema_name: str):
         """Dynamically attach a new database to the nexus."""
         abs_path = os.path.normpath(os.path.abspath(db_path))
         if not os.path.exists(abs_path):
-            # Ensure file exists
             os.makedirs(os.path.dirname(abs_path), exist_ok=True)
-            with sqlite3.connect(abs_path) as tmp:
+            with sqlite3.connect(abs_path):
                 pass
-        
+
         try:
-            # Check if schema_name is valid (alphanumeric or underscore)
-            if not all(c.isalnum() or c == '_' for c in schema_name):
+            if not all(c.isalnum() or c == "_" for c in schema_name):
                 raise ValueError(f"Invalid schema name: {schema_name}")
-                
-            self.conn.execute(f"ATTACH DATABASE '{abs_path}' AS {schema_name}")
-            logger.info(f"Nexus: Dynamically attached {schema_name} from {abs_path}")
+
+            self.conn.execute(
+                f"ATTACH DATABASE '{abs_path}' AS {schema_name}"
+            )
+            logger.info(
+                f"Nexus: Dynamically attached {schema_name} from {abs_path}"
+            )
         except Exception as e:
             if "already in use" in str(e):
-                return # Already attached
+                return  # Already attached — not an error
             logger.error(f"Nexus Attach Error: {e}")
             raise
 
@@ -111,11 +142,11 @@ class ForensicNexus:
         Cross-DB JOIN example: Link forensic events to their source reliability.
         """
         sql = """
-            SELECT 
-                e.timestamp, 
-                e.tool_name, 
-                e.event_type, 
-                e.target, 
+            SELECT
+                e.timestamp,
+                e.tool_name,
+                e.event_type,
+                e.target,
                 e.confidence,
                 p.reliability_tier,
                 p.acquisition_method
@@ -132,14 +163,20 @@ class ForensicNexus:
         cursor.execute("PRAGMA database_list")
         return {
             "primary": self.primary_path,
-            "attached": [dict(row) for row in cursor.fetchall()]
+            "attached": [dict(row) for row in cursor.fetchall()],
         }
 
-# Global Nexus instance
-_nexus = None
 
-def get_nexus(base_dir: str = "d:/SME/data") -> ForensicNexus:
+# ---------------------------------------------------------------------------
+# Thread-safe global singleton
+# ---------------------------------------------------------------------------
+_nexus: Optional[ForensicNexus] = None
+_nexus_lock = threading.Lock()
+
+
+def get_nexus(base_dir: Optional[str] = None) -> ForensicNexus:
     global _nexus
-    if _nexus is None:
-        _nexus = ForensicNexus(base_dir)
+    with _nexus_lock:
+        if _nexus is None:
+            _nexus = ForensicNexus(base_dir)
     return _nexus

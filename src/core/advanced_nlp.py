@@ -28,38 +28,25 @@ Usage:
     analysis = advanced.analyze_advanced(text)
 """
 
+# Standard library imports
+import dataclasses
+import enum
 import logging
-from typing import List, Dict, Optional, Tuple, Set
-from dataclasses import dataclass
-from enum import Enum
+from typing import Dict, List, Optional, Set, Tuple
 
-try:
-    import nltk
-    from nltk import sent_tokenize, word_tokenize
-    from nltk.tree import Tree
-    from nltk.parse import DependencyGraph
-except ImportError:
-    nltk = None
+import spacy
 
-try:
-    import spacy
-    from spacy import displacy
-except ImportError:
-    spacy = None
-
-from src.core.nlp_pipeline import NLPPipeline, NLPAnalysis
-from src.core.data_manager import DataManager
-from src.core.semantic_graph import SemanticGraph
+from src.core import data_manager, nlp_pipeline, semantic_graph
 
 logger = logging.getLogger(__name__)
 
 
-class DependencyType(Enum):
+class DependencyType(enum.Enum):
     """Dependency relationship types."""
-    SUBJECT = "nsubj"
-    OBJECT = "dobj"
-    INDIRECT_OBJECT = "iobj"
-    MODIFIER = "mod"
+    SUBJECT = "nsubj"  # Nominal subject
+    OBJECT = "dobj"    # Direct object
+    INDIRECT_OBJECT = "iobj"  # Indirect object
+    MODIFIER = "mod"   # Modifier
     PREPOSITION = "prep"
     CONJUNCTION = "conj"
     NEGATION = "neg"
@@ -67,7 +54,7 @@ class DependencyType(Enum):
     OTHER = "other"
 
 
-class CorefType(Enum):
+class CorefType(enum.Enum):
     """Coreference resolution types."""
     PRONOUN = "pronoun"
     DEFINITE_NP = "definite_np"
@@ -76,7 +63,7 @@ class CorefType(Enum):
     RELATIVE = "relative"
 
 
-class SemanticRole(Enum):
+class SemanticRole(enum.Enum):
     """Semantic role types (PropBank-style)."""
     AGENT = "A0"              # Who is doing the action
     PATIENT = "A1"            # What is being acted upon
@@ -89,7 +76,7 @@ class SemanticRole(Enum):
     OTHER = "OTHER"
 
 
-@dataclass
+@dataclasses.dataclass
 class DependencyRelation:
     """Dependency parse relation."""
     head: str                  # Head word
@@ -101,7 +88,7 @@ class DependencyRelation:
     dependent_idx: int        # Dependent position
 
 
-@dataclass
+@dataclasses.dataclass
 class CoreferenceChain:
     """Linked mentions of same entity."""
     entity_id: int            # Unique entity ID
@@ -111,7 +98,7 @@ class CoreferenceChain:
     representative: str       # Main/first mention
 
 
-@dataclass
+@dataclasses.dataclass
 class SemanticRoleLabel:
     """Semantic role for predicate argument."""
     predicate: str            # The action/state verb
@@ -121,7 +108,7 @@ class SemanticRoleLabel:
     argument_span: Tuple[int, int] # Character positions
 
 
-@dataclass
+@dataclasses.dataclass
 class Event:
     """Extracted event with participants."""
     event_trigger: str        # Main verb/action
@@ -132,12 +119,12 @@ class Event:
     confidence: float         # Extraction confidence
 
 
-@dataclass
+@dataclasses.dataclass
 class AdvancedAnalysis:
     """Complete advanced NLP analysis."""
     text: str
     sentences: List[str]
-    base_analysis: Optional[NLPAnalysis] # From NLPPipeline
+    base_analysis: Optional[nlp_pipeline.NLPAnalysis] # From NLPPipeline
     
     # Dependency parsing
     dependencies: List[DependencyRelation]
@@ -175,15 +162,14 @@ class AdvancedNLPEngine:
             use_spacy: Try to use spaCy if available (better parsing)
         """
         self.use_spacy = use_spacy
-        self.nlp_pipeline = NLPPipeline()
-        self.data_manager = DataManager()
-        self.semantic_graph = SemanticGraph()
+        self.nlp_pipeline = nlp_pipeline.NLPPipeline()
+        self.data_manager = data_manager.DataManager()
+        self.semantic_graph = semantic_graph.SemanticGraph()
         
         # Try spacy
         self.spacy_model = None
         if use_spacy:
             try:
-                import spacy
                 self.spacy_model = spacy.load("en_core_web_sm")
                 logger.info("spaCy model loaded for advanced parsing")
             except Exception as e:
@@ -318,6 +304,29 @@ class AdvancedNLPEngine:
     
     # Private helper methods
     
+    def _extract_dependencies(self, text: str, sentences: List[str]) -> List[DependencyRelation]:
+        """Extract dependencies using spaCy."""
+        if not self.spacy_model:
+            return []
+        
+        dependencies = []
+        doc = self.spacy_model(text)
+        
+        for token in doc:
+            if token.head != token:
+                dep = DependencyRelation(
+                    head=token.head.text,
+                    head_pos=token.head.pos_,
+                    dependent=token.text,
+                    dependent_pos=token.pos_,
+                    relation_type=token.dep_,
+                    head_idx=token.head.i,
+                    dependent_idx=token.i
+                )
+                dependencies.append(dep)
+        
+        return dependencies
+
     def _extract_dependencies_spacy(self, text: str) -> List[DependencyRelation]:
         """Extract dependencies using spaCy."""
         if not self.spacy_model:

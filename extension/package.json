@@ -8,26 +8,17 @@
     "vscode": "^1.75.0"
   },
   "categories": [
-    "AI",
     "Developer Tools",
     "Other"
   ],
   "keywords": [
     "forensic",
-    "AI",
     "intelligence",
     "semantic",
     "memory",
     "analysis"
   ],
-  "activationEvents": [
-    "onCommand:sme.analyze",
-    "onCommand:sme.query",
-    "onCommand:sme.status",
-    "onCommand:sme.startServer",
-    "onCommand:sme.stopServer"
-  ],
-  "main": "./out/extension.js",
+  "main": "./extension.js",
   "contributes": {
     "commands": [
       {
@@ -92,20 +83,5 @@
       "name": "SME Status",
       "priority": 100
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "test": "node ./out/test/runTest.js"
-  },
-  "devDependencies": {
-    "@types/node": "^18.0.0",
-    "@types/vscode": "^1.75.0",
-    "@vscode/test-electron": "^2.3.0",
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "vscode": "^1.1.37"
   }
 }

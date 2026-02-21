@@ -1,0 +1,111 @@
+{
+  "name": "sme-forensic-toolkit",
+  "displayName": "SME Forensic Toolkit",
+  "description": "Semantic Memory Engine - AI-powered forensic analysis and intelligence gathering",
+  "version": "2.3.4",
+  "publisher": "sme",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "AI",
+    "Developer Tools",
+    "Other"
+  ],
+  "keywords": [
+    "forensic",
+    "AI",
+    "intelligence",
+    "semantic",
+    "memory",
+    "analysis"
+  ],
+  "activationEvents": [
+    "onCommand:sme.analyze",
+    "onCommand:sme.query",
+    "onCommand:sme.status",
+    "onCommand:sme.startServer",
+    "onCommand:sme.stopServer"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "sme.analyze",
+        "title": "SME: Analyze File or Directory",
+        "description": "Run forensic analysis on selected file or directory"
+      },
+      {
+        "command": "sme.query",
+        "title": "SME: Query Knowledge Base",
+        "description": "Query the SME knowledge base with natural language"
+      },
+      {
+        "command": "sme.status",
+        "title": "SME: Show Status",
+        "description": "Show SME server status and statistics"
+      },
+      {
+        "command": "sme.startServer",
+        "title": "SME: Start Server",
+        "description": "Start the SME MCP server"
+      },
+      {
+        "command": "sme.stopServer",
+        "title": "SME: Stop Server",
+        "description": "Stop the SME MCP server"
+      }
+    ],
+    "configuration": {
+      "title": "SME Forensic Toolkit",
+      "properties": {
+        "sme.serverPort": {
+          "type": "number",
+          "default": 8089,
+          "description": "Port for SME server"
+        },
+        "sme.aiProvider": {
+          "type": "string",
+          "default": "ollama",
+          "enum": ["ollama", "openai", "anthropic", "langflow"],
+          "description": "AI provider to use"
+        },
+        "sme.ollamaUrl": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "Ollama server URL"
+        },
+        "sme.openaiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API key (leave empty to use environment)"
+        },
+        "sme.dataDir": {
+          "type": "string",
+          "default": "${workspaceFolder}/data",
+          "description": "SME data directory"
+        }
+      }
+    },
+    "statusBar": {
+      "id": "sme-status",
+      "name": "SME Status",
+      "priority": 100
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/vscode": "^1.75.0",
+    "@vscode/test-electron": "^2.3.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "vscode": "^1.1.37"
+  }
+}

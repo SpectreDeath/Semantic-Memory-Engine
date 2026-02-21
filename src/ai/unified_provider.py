@@ -145,10 +145,14 @@ class UnifiedAIProvider:
                 "default_model": os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
             }
         
-        # Ollama (local)
+        # Ollama (local or Docker container)
+        # Use Docker service URL if set (e.g., http://ollama:11434)
+        # Otherwise fallback to localhost for development
+        ollama_base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
         self.providers[ProviderType.OLLAMA] = {
-            "base_url": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434"),
-            "default_model": os.getenv("OLLAMA_MODEL", "llama3.2")
+            "base_url": ollama_base_url,
+            "default_model": os.getenv("OLLAMA_MODEL", "llama3.2"),
+            "is_docker": ollama_base_url.startswith("http://ollama:")
         }
         
         # Langflow

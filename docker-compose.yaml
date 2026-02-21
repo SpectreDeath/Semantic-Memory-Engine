@@ -53,12 +53,18 @@ services:
     ports:
       - "8089:8089"
     environment:
-      - SME_AI_PROVIDER=langflow
+      - SME_AI_PROVIDER=ollama
       - SME_OPERATOR_URL=http://sme-operator:8000
+      # AI Provider URLs - use Docker service names
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - LANGFLOW_BASE_URL=http://langflow:7860
       # Hardware config — passed through from config/config.yaml values
       - SME_VRAM_LIMIT_MB=4096
       - SME_OFFLOAD_THRESHOLD_MB=3584
       - SME_DATA_DIR=/app/data
+    depends_on:
+      ollama:
+        condition: service_healthy
     deploy:
       resources:
         limits:
@@ -131,8 +137,47 @@ services:
     networks:
       - backend-net
 
+  # ---------------------------------------------------------------------------
+  # Ollama - Local LLM runtime (Docker-based)
+  # Accessible at ollama:11434 from other containers
+  # Models stored in persistent volume
+  # ---------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: sme_ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    volumes:
+      - ollama_models:/root/.ollama
+    # Pull default model on first startup (comment out to skip)
+    # To add more models: docker exec sme_ollama ollama pull <model>
+    command: >
+      sh -c "ollama pull llama3.2 || true && ollama serve"
+    deploy:
+      resources:
+        limits:
+          # Allocate sufficient memory for larger models
+          memory: 8G
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      - backend-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
 volumes:
   sme_pg_data:
+  ollama_models:
 
 # ---------------------------------------------------------------------------
 # Named networks for service isolation.

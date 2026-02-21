@@ -22,3 +22,16 @@ data/raw/
 data/processed/
 models/*.bin
 models/*.pt
+
+# --- Build Artifacts & IDE ---
+*.egg-info/
+.cocoindex_code/
+.cursor/
+
+# --- SME Specific Data ---
+data/forensic_nexus.db
+data/provenance.db
+data/storage/
+
+# --- Uppercase SME (duplicate or temp) ---
+SME/

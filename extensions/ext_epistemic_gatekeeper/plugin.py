@@ -9,23 +9,59 @@ from src.sme.epistemic_validator import DataNode
 # Import shared trust logic
 from gateway.gatekeeper_logic import calculate_trust_score, calculate_entropy, calculate_burstiness, calculate_vault_proximity, analyze_model_origin
 
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
+from src.utils.error_handling import ErrorHandler, create_error_response, OperationContext
+from src.utils.performance import get_performance_monitor, cache_result, LRUCache
+
 logger = logging.getLogger("LawnmowerMan.Gatekeeper")
 
-class EpistemicGatekeeper:
+class EpistemicGatekeeper(BasePlugin):
     """
     Epistemic Gatekeeper Extension (v1.2.0).
     Provides volume-based trust auditing (Heat Maps) and governance.
     """
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
+        self.error_handler = ErrorHandler(self.plugin_id)
+        self.monitor = get_performance_monitor(self.plugin_id)
+        self.file_cache = LRUCache(max_size=1000, ttl_seconds=600)  # Cache file contents for 10 minutes
 
     async def on_startup(self):
-        logger.info(f"[{self.plugin_id}] Gatekeeper Online. Trust algorithms active.")
+        """
+        Initialize the Epistemic Gatekeeper.
+        """
+        try:
+            logger.info(f"[{self.plugin_id}] Gatekeeper Online. Trust algorithms active.")
+        except Exception as e:
+            logger.error(f"[{self.plugin_id}] Failed to start Gatekeeper: {e}")
+
+    async def on_shutdown(self):
+        """
+        Clean shutdown of the Epistemic Gatekeeper.
+        """
+        try:
+            logger.info(f"[{self.plugin_id}] Gatekeeper shutdown complete")
+        except Exception as e:
+            logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
+
+    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+        """
+        Epistemic Gatekeeper does not process on_ingestion directly.
+        It provides tools for trust auditing and semantic analysis.
+        """
+        return {
+            "status": "skipped",
+            "reason": "Epistemic Gatekeeper provides auditing tools, not direct ingestion processing"
+        }
 
     def get_tools(self) -> list:
-        return [self.audit_folder_veracity, self.semantic_nexus_check]
+        return [
+            self.audit_folder_veracity,
+            self.semantic_nexus_check,
+            self.get_gatekeeper_stats,
+            self.clear_file_cache
+        ]
 
     async def audit_folder_veracity(self, folder_path: str) -> str:
         """
@@ -142,5 +178,39 @@ class EpistemicGatekeeper:
         
         return round(trust_signal, 4)
 
-def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    async def get_gatekeeper_stats(self) -> str:
+        """Get statistics about the Gatekeeper's performance and cache usage."""
+        try:
+            cache_stats = self.file_cache.get_stats()
+            performance_stats = self.monitor.get_all_stats()
+            
+            stats = {
+                "plugin_id": self.plugin_id,
+                "cache_stats": cache_stats,
+                "performance_stats": performance_stats,
+                "timestamp": datetime.now().isoformat()
+            }
+            return json.dumps(stats, indent=2)
+        except Exception as e:
+            return self.error_handler.handle_tool_error(e, "get_gatekeeper_stats")
+
+    async def clear_file_cache(self) -> str:
+        """Clear the file content cache."""
+        try:
+            self.file_cache.clear()
+            return json.dumps({
+                "status": "success",
+                "message": "File cache cleared successfully"
+            }, indent=2)
+        except Exception as e:
+            return self.error_handler.handle_tool_error(e, "clear_file_cache")
+
+
+def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
+    """Factory function to create and return an EpistemicGatekeeper instance."""
     return EpistemicGatekeeper(manifest, nexus_api)
+
+
+def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)

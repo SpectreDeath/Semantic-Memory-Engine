@@ -245,7 +245,7 @@ class VectorSyncer:
                 print(f"[Aether.VectorSyncer] Loaded {len(self._local_df)} vectors from IPC")
             else:
                 # Create empty DataFrame - store embeddings as JSON strings
-                self._local_df = pl.DataFrame({
+                self._local_df = pl.DataFrame(schema={
                     "id": pl.Utf8,
                     "embedding": pl.Utf8,  # Store as JSON string
                     "text": pl.Utf8,
@@ -338,7 +338,17 @@ class VectorSyncer:
             "last_accessed": entry.last_accessed.isoformat(),
             "created_at": entry.created_at.isoformat(),
             "sync_status": entry.sync_status
-        }])
+        }], schema={
+            "id": pl.Utf8,
+            "embedding": pl.Utf8,
+            "text": pl.Utf8,
+            "signature_hash": pl.Utf8,
+            "metadata": pl.Utf8,
+            "priority": pl.Int8,
+            "last_accessed": pl.Utf8,
+            "created_at": pl.Utf8,
+            "sync_status": pl.Utf8
+        })
         
         if len(self._local_df) == 0:
             self._local_df = new_row
@@ -599,7 +609,7 @@ class VectorSyncer:
                     
                     new_row = pl.DataFrame([{
                         "id": entry.id,
-                        "embedding": entry.embedding,
+                        "embedding": json.dumps(entry.embedding),
                         "text": entry.text,
                         "signature_hash": entry.signature_hash,
                         "metadata": json.dumps(entry.metadata),
@@ -607,7 +617,17 @@ class VectorSyncer:
                         "last_accessed": entry.last_accessed.isoformat(),
                         "created_at": entry.created_at.isoformat(),
                         "sync_status": entry.sync_status
-                    }])
+                    }], schema={
+                        "id": pl.Utf8,
+                        "embedding": pl.Utf8,
+                        "text": pl.Utf8,
+                        "signature_hash": pl.Utf8,
+                        "metadata": pl.Utf8,
+                        "priority": pl.Int8,
+                        "last_accessed": pl.Utf8,
+                        "created_at": pl.Utf8,
+                        "sync_status": pl.Utf8
+                    })
                     
                     self._local_df = pl.concat([self._local_df, new_row])
                     pulled += 1

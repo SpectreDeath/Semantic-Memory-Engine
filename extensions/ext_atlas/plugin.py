@@ -29,8 +29,8 @@ except ImportError:
     PLOTLY_AVAILABLE = False
     logging.warning("[Atlas] plotly not available, interactive visualization will be limited")
 
-from gateway.hardware_security import get_hsm
-from gateway.nexus_db import get_nexus
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.Atlas")
 
@@ -46,7 +46,7 @@ class FingerprintRecord:
     recurring_with: Optional[str]
     metadata: Dict[str, Any]
 
-class Atlas:
+class Atlas(BasePlugin):
     """
     Atlas v1.0
     Forensic Visualizer that creates interactive 2D maps of fingerprint data using T-SNE.
@@ -54,9 +54,7 @@ class Atlas:
     """
     
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
         
         # Configuration
         self.tsne_perplexity = 30
@@ -631,3 +629,8 @@ class Atlas:
 def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
     """Factory function to create and return an Atlas instance."""
     return Atlas(manifest, nexus_api)
+
+
+def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)

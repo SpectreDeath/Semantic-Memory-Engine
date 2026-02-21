@@ -18,8 +18,8 @@ except ImportError:
     NUMPY_AVAILABLE = False
     logging.warning("[Immunizer] numpy not available, some features may be limited")
 
-from gateway.hardware_security import get_hsm
-from gateway.nexus_db import get_nexus
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.Immunizer")
 
@@ -58,7 +58,7 @@ class BaselineTestResult:
     flagged_texts: List[str]
     safety_status: str  # "SAFE", "WARNING", "UNSAFE"
 
-class Immunizer:
+class Immunizer(BasePlugin):
     """
     Immunizer v1.0
     Immunizes the system against detected vulnerabilities by creating hardened detection rules.
@@ -67,9 +67,7 @@ class Immunizer:
     """
     
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
         
         # Configuration
         self.high_impact_threshold = 0.30  # Vulnerability score threshold for high impact
@@ -749,3 +747,8 @@ class Immunizer:
 def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
     """Factory function to create and return an Immunizer instance."""
     return Immunizer(manifest, nexus_api)
+
+
+def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)

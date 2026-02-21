@@ -1,10 +1,18 @@
+"""
+HDF5-based drift analysis: compares claims against the knowledge core.
+Wired to CLI: sme drift --claims path/to.json or sme drift --inline '[{"subject":"A","predicate":"is","object":"B"}]'
+"""
 import h5py
 import numpy as np
+import os
 from typing import List, Dict
 
 class AuditEngine:
-    def __init__(self, h5_path="data/knowledge_core.h5"):
-        self.h5_path = h5_path
+    def __init__(self, h5_path: str = None):
+        if h5_path is None:
+            self.h5_path = os.getenv("KNOWLEDGE_CORE_PATH", "data/knowledge_core.h5")
+        else:
+            self.h5_path = h5_path
 
     def analyze_drift(self, claims: List[Dict]) -> Dict:
         """

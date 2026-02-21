@@ -5,17 +5,18 @@ import hashlib
 from datetime import datetime
 from typing import Dict, Any
 
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
+
 logger = logging.getLogger("LawnmowerMan.ForensicEcho")
 
-class ForensicEchoExtension:
+class ForensicEchoExtension(BasePlugin):
     """
     Migrated Forensic Echo Extension (v1.1.1).
     Standard Boilerplate for Lawnmower Man Extensions.
     """
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id", "ext_sample_echo")
+        super().__init__(manifest, nexus_api)
 
     async def on_startup(self):
         logger.info(f"[{self.plugin_id}] Forensic Echo activation sequence complete.")
@@ -44,17 +45,8 @@ class ForensicEchoExtension:
             "plugin": "Forensic Echo v1.1.1"
         }
         
-        # Access the TPM via the Nexus API (SmeCoreBridge)
-        # SmeCoreBridge doesn't directly expose get_hsm(), but mcp_server.py imports it.
-        # Actually, in mcp_server.py, we pass sme_core as nexus_api.
-        # SmeCoreBridge has access to get_nexus(), but not directly HSM.
-        # However, the user's template implies nexus_api contains TPM access.
-        # I should probably update SmeCoreBridge to expose HSM or pass HSM separately.
-        
-        # For now, let's use the gateway's hardware_security directly as before, 
-        # or assume nexus_api has a way to get it.
-        from gateway.hardware_security import get_hsm
-        hsm = get_hsm()
+        # NexusAPI: use nexus_api.get_hsm() — no gateway imports
+        hsm = self.nexus.get_hsm()
         
         data_hash = hashlib.sha256(json.dumps(metadata, sort_keys=True).encode()).hexdigest()
         signature = hsm.sign_evidence("ForensicEcho", data_hash)

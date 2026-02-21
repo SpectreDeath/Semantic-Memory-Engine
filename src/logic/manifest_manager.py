@@ -4,8 +4,11 @@ import os
 from datetime import datetime
 
 class ManifestManager:
-    def __init__(self, manifest_path="data/manifest.json"):
-        self.path = manifest_path
+    def __init__(self, manifest_path: str = None):
+        if manifest_path is None:
+            self.path = os.getenv("MANIFEST_PATH", "data/manifest.json")
+        else:
+            self.path = manifest_path
         self.data = self._load()
 
     def _load(self):

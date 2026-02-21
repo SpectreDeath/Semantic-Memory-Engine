@@ -6,8 +6,7 @@ import numpy as np
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 
-from gateway.hardware_security import get_hsm
-from gateway.nexus_db import get_nexus
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
 
 logger = logging.getLogger("LawnmowerMan.SemanticAuditor")
 
@@ -307,3 +306,8 @@ class SemanticAuditor:
 def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
     """Factory function to create and return a SemanticAuditor instance."""
     return SemanticAuditor(manifest, nexus_api)
+
+
+def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)

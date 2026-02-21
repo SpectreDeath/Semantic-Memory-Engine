@@ -9,10 +9,34 @@ from typing import Dict, List, Any, Optional, Callable
 
 logger = logging.getLogger("lawnmower.extension_manager")
 
+
+class DefaultExtensionContext:
+    """
+    Minimal NexusAPI implementation for when nexus_api is None (e.g. tests).
+    Provides nexus (DB) and get_hsm() without extensions importing gateway.
+    """
+    def __init__(self):
+        self._nexus = None
+
+    @property
+    def nexus(self):
+        if self._nexus is None:
+            from gateway.nexus_db import get_nexus
+            self._nexus = get_nexus()
+        return self._nexus
+
+    def get_hsm(self):
+        from gateway.hardware_security import get_hsm
+        return get_hsm()
+
+
 class ExtensionManager:
     """
     Dynamic Plugin Loader for Lawnmower Man v1.1.1.
-    Supports the class-based ForensicExtension boilerplate.
+    Discovers extensions via manifest.json and loads entry_point (default plugin.py).
+    Each module must define register_extension(manifest, nexus_api) returning the plugin instance.
+    Instance contract: get_tools() required; on_startup/on_ingestion optional.
+    See docs/EXTENSION_CONTRACT.md for full vs minimal (BasePlugin) contract.
     """
     def __init__(self, nexus_api: Any, extensions_dir: Optional[str] = None):
         self.extensions_dir = os.path.normpath(
@@ -22,7 +46,7 @@ class ExtensionManager:
                 str(Path(__file__).resolve().parent.parent / "extensions"),
             )
         )
-        self.nexus_api = nexus_api
+        self.nexus_api = nexus_api if nexus_api is not None else DefaultExtensionContext()
         self.extensions: Dict[str, Any] = {}
         
         if not os.path.exists(self.extensions_dir):
@@ -98,19 +122,29 @@ class ExtensionManager:
             instance = ext["instance"]
             if hasattr(instance, 'get_tools'):
                 tools = instance.get_tools()
-                for tool_func in tools:
-                    # Introspect the tool function for metadata
-                    all_tools.append({
-                        "name": tool_func.__name__,
-                        "description": tool_func.__doc__ or "No description provided.",
-                        "handler": tool_func,
-                        "plugin_id": plugin_id
-                    })
+                if isinstance(tools, dict):
+                    for name, tool_func in tools.items():
+                        all_tools.append({
+                            "name": name,
+                            "description": getattr(tool_func, "__doc__", None) or "No description provided.",
+                            "handler": tool_func,
+                            "plugin_id": plugin_id
+                        })
+                else:
+                    for tool_func in tools:
+                        all_tools.append({
+                            "name": tool_func.__name__,
+                            "description": tool_func.__doc__ or "No description provided.",
+                            "handler": tool_func,
+                            "plugin_id": plugin_id
+                        })
         return all_tools
 
     async def notify_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
         """
         Notify all plugins of a new ingestion event.
+        Calls on_ingestion(raw_data, metadata) for each plugin that defines it.
+        Return values are not aggregated; fire-and-forget.
         """
         for ext in self.extensions.values():
             instance = ext["instance"]

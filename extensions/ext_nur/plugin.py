@@ -7,21 +7,39 @@ with the SME system.
 
 import os
 import sys
+import json
+import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
+from datetime import datetime
 
-# Import our components
-from .unified_forensic_reporter import generate_nexus_summary, UnifiedForensicReporter, ForensicSummary
-from .forensic_intelligence_reporter import generate_forensic_intelligence_summary, ForensicIntelligenceReporter, ForensicAnalysis, IntelligenceBucket
+try:
+    from .unified_forensic_reporter import generate_nexus_summary, UnifiedForensicReporter, ForensicSummary
+    from .forensic_intelligence_reporter import generate_forensic_intelligence_summary, ForensicIntelligenceReporter, ForensicAnalysis, IntelligenceBucket
+except ImportError:
+    _dir = Path(__file__).resolve().parent
+    if str(_dir) not in sys.path:
+        sys.path.insert(0, str(_dir))
+    from unified_forensic_reporter import generate_nexus_summary, UnifiedForensicReporter, ForensicSummary
+    from forensic_intelligence_reporter import generate_forensic_intelligence_summary, ForensicIntelligenceReporter, ForensicAnalysis, IntelligenceBucket
+
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
+from src.utils.error_handling import ErrorHandler, create_error_response, OperationContext
+from src.utils.performance import get_performance_monitor, cache_result, LRUCache
+
+logger = logging.getLogger("SME.UnifiedForensicReporter")
 
 
-class UnifiedForensicReporterPlugin:
+class UnifiedForensicReporterPlugin(BasePlugin):
     """Main plugin class for the Unified Forensic Reporter extension."""
     
-    def __init__(self):
-        self.name = "Unified Forensic Reporter Extension"
-        self.version = "1.0.0"
-        self.description = "Aggregates logs from all extensions and generates comprehensive forensic reports with AI-powered conclusions"
+    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+        super().__init__(manifest, nexus_api)
+        self.error_handler = ErrorHandler(self.plugin_id)
+        self.monitor = get_performance_monitor(self.plugin_id)
+        self.reporter = UnifiedForensicReporter()
+        self.forensic_reporter = ForensicIntelligenceReporter()
         
         # Plugin configuration
         self.config = {
@@ -33,201 +51,133 @@ class UnifiedForensicReporterPlugin:
             'log_parsing_enabled': True   # Enable log file parsing
         }
         
-        # State tracking
-        self.is_active = False
-        self.reporter = UnifiedForensicReporter()
+        logger.info(f"[{self.plugin_id}] Unified Forensic Reporter initialized")
         
-    def activate(self) -> bool:
-        """Activate the Unified Forensic Reporter plugin."""
+    async def on_startup(self):
+        """
+        Initialize the Unified Forensic Reporter.
+        """
         try:
-            print(f"🔍 Activating {self.name} v{self.version}")
-            print(f"Description: {self.description}")
-            
-            # Ensure reports directory exists
-            reports_dir = Path("D:/SME/reports")
-            reports_dir.mkdir(parents=True, exist_ok=True)
-            print(f"✅ Reports directory ready: {reports_dir}")
-            
-            # Verify CPU-bound operation
-            if self.config.get('cpu_bound_only', True):
-                print("✅ CPU-bound operation enforced (VRAM constraint compliant)")
-            
-            self.is_active = True
-            print(f"✅ {self.name} activated successfully")
-            return True
-            
+            logger.info(f"[{self.plugin_id}] Unified Forensic Reporter started successfully")
         except Exception as e:
-            print(f"❌ Failed to activate {self.name}: {e}")
-            return False
-    
-    def deactivate(self) -> bool:
-        """Deactivate the Unified Forensic Reporter plugin."""
+            logger.error(f"[{self.plugin_id}] Failed to start Unified Forensic Reporter: {e}")
+
+    async def on_shutdown(self):
+        """
+        Clean shutdown of the Unified Forensic Reporter.
+        """
         try:
-            print(f"🔍 Deactivating {self.name}")
-            
-            self.is_active = False
-            print(f"✅ {self.name} deactivated successfully")
-            return True
-            
+            logger.info(f"[{self.plugin_id}] Unified Forensic Reporter shutdown complete")
         except Exception as e:
-            print(f"❌ Failed to deactivate {self.name}: {e}")
-            return False
-    
-    def get_status(self) -> Dict[str, Any]:
-        """Get current plugin status."""
+            logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
+
+    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+        """
+        Unified Forensic Reporter does not process on_ingestion directly.
+        It provides tools for report generation and analysis.
+        """
         return {
-            'name': self.name,
-            'version': self.version,
-            'is_active': self.is_active,
-            'config': self.config,
-            'reports_directory': str(self.reporter.report_dir),
-            'last_report_generated': None  # Could be tracked if needed
+            "status": "skipped",
+            "reason": "Unified Forensic Reporter provides reporting tools, not direct ingestion processing"
         }
-    
-    def configure(self, **kwargs) -> bool:
-        """Configure the plugin."""
-        try:
-            # Update configuration
-            for key, value in kwargs.items():
-                if key in self.config:
-                    self.config[key] = value
-            
-            print(f"✅ {self.name} configuration updated")
-            return True
-            
-        except Exception as e:
-            print(f"❌ Failed to configure {self.name}: {e}")
-            return False
-    
-    def get_tools(self) -> Dict[str, Callable]:
-        """Get available tools provided by this plugin."""
-        return {
-            'generate_nexus_summary': self._create_nexus_summary_tool(),
-            'generate_forensic_intelligence_summary': self._create_forensic_intelligence_tool()
-        }
-    
-    def _create_nexus_summary_tool(self) -> Callable:
-        """Create the nexus summary generation tool."""
-        def nexus_summary_tool() -> Dict[str, Any]:
-            """
-            Generate unified nexus intelligence report.
-            
-            Returns:
-                Dictionary containing report generation results.
-            """
-            print(f"🔍 Unified Forensic Reporter: Generating nexus summary")
-            
-            # Verify CPU-bound operation
-            if self.config.get('cpu_bound_only', True):
-                print("🧠 Using CPU-bound processing (VRAM constraint compliant)")
-            
-            # Generate the report
-            result = generate_nexus_summary()
-            
-            # Update status
-            if result.get('status') == 'SUCCESS':
-                print(f"✅ Nexus summary generated successfully")
-            else:
-                print(f"❌ Failed to generate nexus summary")
-            
-            return result
-        
-        return nexus_summary_tool
-    
-    def get_hooks(self) -> Dict[str, Callable]:
-        """Get available hooks provided by this plugin."""
-        return {}
-    
-    def get_events(self) -> List[str]:
-        """Get list of events this plugin can handle."""
+
+    def get_tools(self) -> list:
         return [
-            'report_generated',
-            'log_analysis_started',
-            'log_analysis_completed',
-            'forensic_conclusion_generated',
-            'forensic_intelligence_started',
-            'forensic_intelligence_completed',
-            'intelligence_bucket_detected'
+            self.generate_nexus_summary,
+            self.generate_forensic_intelligence_summary,
+            self.get_unified_stats,
+            self.clear_reporter_cache
         ]
     
-    def handle_event(self, event_name: str, **kwargs) -> Any:
-        """Handle plugin-specific events."""
-        if event_name == 'report_generated':
-            report_path = kwargs.get('report_path', '')
-            print(f"📄 Report generated: {report_path}")
-            return {'report_handled': True, 'path': report_path}
-        
-        elif event_name == 'log_analysis_started':
-            print("🔍 Log analysis started")
-            return {'analysis_started': True}
-        
-        elif event_name == 'log_analysis_completed':
-            log_count = kwargs.get('log_count', 0)
-            print(f"✅ Log analysis completed. Processed {log_count} entries")
-            return {'analysis_completed': True, 'log_count': log_count}
-        
-        elif event_name == 'forensic_conclusion_generated':
-            conclusion = kwargs.get('conclusion', '')
-            print(f"🧠 Forensic conclusion generated")
-            return {'conclusion_handled': True}
-        
-        elif event_name == 'forensic_intelligence_started':
-            print("🔍 Forensic intelligence analysis started")
-            return {'intelligence_started': True}
-        
-        elif event_name == 'forensic_intelligence_completed':
-            result = kwargs.get('result', {})
-            print(f"✅ Forensic intelligence analysis completed. Bucket: {result.get('intelligence_bucket', 'unknown')}")
-            return {'intelligence_completed': True}
-        
-        elif event_name == 'intelligence_bucket_detected':
-            bucket_info = kwargs.get('bucket_info', {})
-            print(f"🎯 Intelligence bucket detected: {bucket_info}")
-            return {'bucket_handled': True}
-        
-        return {'event_handled': False}
-    
-    def _create_forensic_intelligence_tool(self) -> Callable:
-        """Create the forensic intelligence summary generation tool."""
-        def forensic_intelligence_tool(text_sample: str) -> Dict[str, Any]:
-            """
-            Generate forensic intelligence summary from text sample.
-            
-            Args:
-                text_sample: Text sample to analyze and categorize.
+    async def generate_nexus_summary(self) -> str:
+        """
+        Generate unified nexus intelligence report.
+        """
+        try:
+            with self.monitor.time_operation("nexus_summary_generation"):
+                # Verify CPU-bound operation
+                if self.config.get('cpu_bound_only', True):
+                    logger.info("Using CPU-bound processing (VRAM constraint compliant)")
                 
-            Returns:
-                Dictionary containing forensic analysis results and report path.
-            """
-            print(f"🔍 Unified Forensic Reporter: Generating forensic intelligence summary")
+                # Generate the report
+                result = generate_nexus_summary()
+                
+                # Update status
+                if result.get('status') == 'SUCCESS':
+                    logger.info("Nexus summary generated successfully")
+                else:
+                    logger.warning("Failed to generate nexus summary")
+                
+                return json.dumps(result, indent=2)
+                
+        except Exception as e:
+            return self.error_handler.handle_tool_error(e, "generate_nexus_summary")
+
+    async def generate_forensic_intelligence_summary(self, text_sample: str) -> str:
+        """
+        Generate forensic intelligence summary from text sample.
+        """
+        try:
+            with self.monitor.time_operation("forensic_intelligence_generation"):
+                # Verify CPU-bound operation
+                if self.config.get('cpu_bound_only', True):
+                    logger.info("Using CPU-bound processing (VRAM constraint compliant)")
+                
+                # Generate the forensic intelligence report
+                result = generate_forensic_intelligence_summary(text_sample)
+                
+                # Update status
+                if result.get('status') == 'FORENSIC_ANALYSIS_COMPLETED':
+                    logger.info("Forensic intelligence analysis completed")
+                    logger.info(f"Intelligence Bucket: {result.get('intelligence_bucket', 'unknown')}")
+                    logger.info(f"Confidence Score: {result.get('confidence_score', 0.0)}")
+                    logger.info(f"Report saved to: {result.get('report_path', 'unknown')}")
+                else:
+                    logger.warning("Failed to generate forensic intelligence summary")
+                
+                return json.dumps(result, indent=2)
+                
+        except Exception as e:
+            return self.error_handler.handle_tool_error(e, "generate_forensic_intelligence_summary", {"text_sample_length": len(text_sample)})
+
+    async def get_unified_stats(self) -> str:
+        """Get statistics about the Unified Forensic Reporter's performance."""
+        try:
+            stats = {
+                "plugin_id": self.plugin_id,
+                "config": self.config,
+                "reporter_stats": {
+                    "report_dir": str(self.reporter.report_dir),
+                    "analysis_period_hours": self.config.get('analysis_period_hours', 24),
+                    "max_events_displayed": self.config.get('max_events_displayed', 20)
+                },
+                "forensic_reporter_stats": {
+                    "cpu_bound_only": self.config.get('cpu_bound_only', True),
+                    "log_parsing_enabled": self.config.get('log_parsing_enabled', True)
+                },
+                "performance_stats": self.monitor.get_all_stats(),
+                "timestamp": datetime.now().isoformat()
+            }
+            return json.dumps(stats, indent=2)
+        except Exception as e:
+            return self.error_handler.handle_tool_error(e, "get_unified_stats")
+
+    async def clear_reporter_cache(self) -> str:
+        """Clear any cached data in the reporter instances."""
+        try:
+            # Clear any internal caches if they exist
+            if hasattr(self.reporter, 'clear_cache'):
+                self.reporter.clear_cache()
+            if hasattr(self.forensic_reporter, 'clear_cache'):
+                self.forensic_reporter.clear_cache()
             
-            # Verify CPU-bound operation
-            if self.config.get('cpu_bound_only', True):
-                print("🧠 Using CPU-bound processing (VRAM constraint compliant)")
-            
-            # Generate the forensic intelligence report
-            result = generate_forensic_intelligence_summary(text_sample)
-            
-            # Update status
-            if result.get('status') == 'FORENSIC_ANALYSIS_COMPLETED':
-                print(f"✅ Forensic intelligence analysis completed")
-                print(f"🎯 Intelligence Bucket: {result.get('intelligence_bucket', 'unknown')}")
-                print(f"📊 Confidence Score: {result.get('confidence_score', 0.0)}")
-                print(f"📄 Report saved to: {result.get('report_path', 'unknown')}")
-            else:
-                print(f"❌ Failed to generate forensic intelligence summary")
-            
-            return result
-        
-        return forensic_intelligence_tool
-    
-    def get_reporter_instance(self) -> UnifiedForensicReporter:
-        """Get an instance of the UnifiedForensicReporter for advanced usage."""
-        return self.reporter
-    
-    def get_forensic_reporter_instance(self) -> ForensicIntelligenceReporter:
-        """Get an instance of the ForensicIntelligenceReporter for advanced usage."""
-        return ForensicIntelligenceReporter()
+            return json.dumps({
+                "status": "success",
+                "message": "Reporter caches cleared successfully"
+            }, indent=2)
+        except Exception as e:
+            return self.error_handler.handle_tool_error(e, "clear_reporter_cache")
+
 
 
 # Create global plugin instance
@@ -239,5 +189,15 @@ def get_plugin() -> UnifiedForensicReporterPlugin:
     return unified_forensic_reporter_plugin
 
 
+def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
+    """Factory function to create and return a UnifiedForensicReporterPlugin instance."""
+    return UnifiedForensicReporterPlugin(manifest, nexus_api)
+
+
+def register_extension(manifest: dict, nexus_api: Any) -> UnifiedForensicReporterPlugin:
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)
+
+
 # Export for use by the extension system
-__all__ = ['UnifiedForensicReporterPlugin', 'get_plugin', 'unified_forensic_reporter_plugin']
+__all__ = ['UnifiedForensicReporterPlugin', 'get_plugin', 'unified_forensic_reporter_plugin', 'register_extension']

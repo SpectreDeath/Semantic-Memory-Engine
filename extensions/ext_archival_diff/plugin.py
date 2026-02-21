@@ -1,21 +1,33 @@
 import logging
 import json
+import sys
+from pathlib import Path
 from typing import Dict, Any, List
-from .scout import WaybackScout
-from .analyst import ForensicAnalyst
-from .exporter import SmeExporter
+
+try:
+    from .scout import WaybackScout
+    from .analyst import ForensicAnalyst
+    from .exporter import SmeExporter
+except ImportError:
+    _dir = Path(__file__).resolve().parent
+    if str(_dir) not in sys.path:
+        sys.path.insert(0, str(_dir))
+    from scout import WaybackScout
+    from analyst import ForensicAnalyst
+    from exporter import SmeExporter
+
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.ArchivalDiff")
 
-class ArchivalDiffExtension:
+class ArchivalDiffExtension(BasePlugin):
     """
     SME Extension: Detect Data Scrubbing via Wayback Machine Comparison.
     """
     
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus_api = nexus_api
-        self.plugin_id = manifest.get("plugin_id", "ext_archival_diff")
+        super().__init__(manifest, nexus_api)
         
         # Initialize modules
         self.scout = WaybackScout()

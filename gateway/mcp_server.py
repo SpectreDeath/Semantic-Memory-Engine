@@ -97,10 +97,19 @@ def get_extension_manager(nexus_api: Any = None) -> ExtensionManager:
     return _extension_manager
 
 class SmeCoreBridge:
-    """Bridges tools to the gateway's session and data layers."""
+    """
+    Bridges tools to the gateway's session and data layers.
+    Implements NexusAPI: extensions use nexus_api.nexus and nexus_api.get_hsm()
+    instead of importing gateway.hardware_security or gateway.nexus_db.
+    """
     def __init__(self, session_id: Optional[str] = None):
         self.session_id = session_id
         self._nexus = None
+
+    def get_hsm(self):
+        """Return the HardwareSecurity module for evidence signing. Part of NexusAPI."""
+        from gateway.hardware_security import get_hsm
+        return get_hsm()
         
     @property
     def nexus(self):

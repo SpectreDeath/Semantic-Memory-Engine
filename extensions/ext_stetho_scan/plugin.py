@@ -10,15 +10,27 @@ import sys
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
 
-# Import our components
-from .statistical_watermark_decoder import detect_watermark_pulse, StatisticalWatermarkDecoder, WatermarkDetection
-from .governor_integration import (
-    safe_detect_watermark_pulse, 
-    StethoGovernorIntegration, 
-    GovernorStatus,
-    CPUUsageLevel,
-    create_stetho_governor_hook
-)
+try:
+    from .statistical_watermark_decoder import detect_watermark_pulse, StatisticalWatermarkDecoder, WatermarkDetection
+    from .governor_integration import (
+        safe_detect_watermark_pulse,
+        StethoGovernorIntegration,
+        GovernorStatus,
+        CPUUsageLevel,
+        create_stetho_governor_hook
+    )
+except ImportError:
+    _dir = Path(__file__).resolve().parent
+    if str(_dir) not in sys.path:
+        sys.path.insert(0, str(_dir))
+    from statistical_watermark_decoder import detect_watermark_pulse, StatisticalWatermarkDecoder, WatermarkDetection
+    from governor_integration import (
+        safe_detect_watermark_pulse,
+        StethoGovernorIntegration,
+        GovernorStatus,
+        CPUUsageLevel,
+        create_stetho_governor_hook
+    )
 
 
 class StatisticalWatermarkDecoderPlugin:
@@ -236,5 +248,10 @@ def get_plugin() -> StatisticalWatermarkDecoderPlugin:
     return statistical_watermark_decoder_plugin
 
 
+def register_extension(manifest: dict, nexus_api: Any) -> StatisticalWatermarkDecoderPlugin:
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return statistical_watermark_decoder_plugin
+
+
 # Export for use by the extension system
-__all__ = ['StatisticalWatermarkDecoderPlugin', 'get_plugin', 'statistical_watermark_decoder_plugin']
+__all__ = ['StatisticalWatermarkDecoderPlugin', 'get_plugin', 'statistical_watermark_decoder_plugin', 'register_extension']

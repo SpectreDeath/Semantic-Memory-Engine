@@ -5,17 +5,18 @@ import hashlib
 from datetime import datetime
 from typing import Dict, Any, List
 
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
+
 logger = logging.getLogger("LawnmowerMan.TacticalPack")
 
-class TacticalForensicExtension:
+class TacticalForensicExtension(BasePlugin):
     """
     Tactical Intelligence Pack for Lawnmower Man v1.1.1.
     Specialized for analyzing physical evidence patterns at critical sites.
     """
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus_api = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
         self.threat_signatures = {
             "IED_Component": ["nitrate", "detonator", "timer", "circuit"],
             "CBRN_Precursor": ["hazardous", "chemical", "radiation", "biological"],
@@ -83,9 +84,8 @@ class TacticalForensicExtension:
         }
         
         # Hardware signature via SmeCoreBridge (through the bridge's nexus access)
-        # Note: In a real scenario, we'd ensure hsm is reachable through nexus_api
-        from gateway.hardware_security import get_hsm
-        hsm = get_hsm()
+        # NexusAPI: use nexus_api.get_hsm() — no gateway imports
+        hsm = self.nexus_api.get_hsm()
         data_hash = hashlib.sha256(json.dumps(report, sort_keys=True).encode()).hexdigest()
         signature = hsm.sign_evidence(self.plugin_id, data_hash)
         

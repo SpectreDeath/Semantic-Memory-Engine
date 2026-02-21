@@ -81,6 +81,68 @@ def index(force):
     click.secho("✅ Indexing complete and manifest updated.", fg='green')
 
 @cli.command()
+@click.option('--claims', '-c', type=click.Path(exists=True), default=None,
+              help='Path to JSON file with claims. Format: [{"subject": "X", "predicate": "is", "object": "Y"}, ...]')
+@click.option('--inline', '-i', default=None,
+              help='Inline JSON array of claims (alternative to --claims file)')
+def drift(claims, inline):
+    """Compare claims against the HDF5 knowledge core (drift analysis)."""
+    import json
+    try:
+        from src.logic.audit_engine import AuditEngine
+    except ImportError as e:
+        if 'h5py' in str(e):
+            click.secho("❌ h5py required. Install with: pip install h5py", fg='red')
+        else:
+            click.secho(f"❌ Import error: {e}", fg='red')
+        return
+
+    if claims and inline:
+        click.secho("❌ Use either --claims or --inline, not both.", fg='red')
+        return
+    if not claims and not inline:
+        click.secho("Provide claims via --claims path/to.json or --inline '[{\"subject\":\"A\",\"predicate\":\"is\",\"object\":\"B\"}]'", fg='yellow')
+        return
+
+    try:
+        if claims:
+            with open(claims, 'r') as f:
+                claims_list = json.load(f)
+        else:
+            # Handle inline JSON with proper escaping
+            claims_list = json.loads(inline)
+        if not isinstance(claims_list, list):
+            claims_list = [claims_list]
+    except (json.JSONDecodeError, TypeError) as e:
+        click.secho(f"❌ Invalid JSON: {e}", fg='red')
+        click.secho("Example usage: --inline '[{\"subject\":\"FastMCP\",\"predicate\":\"is\",\"object\":\"plumbing\"}]'", fg='yellow')
+        return
+
+    engine = AuditEngine()
+    result = engine.analyze_drift(claims_list)
+    drift_score = result["drift_score"]
+    verified = result["verified"]
+    anomalies = result["anomalies"]
+
+    click.secho(f"\n📊 [DRIFT ANALYSIS]", fg='cyan', bold=True)
+    click.echo(f"  Drift Score: {drift_score:.2%} ({len(anomalies)} anomalies / {len(claims_list)} claims)")
+    if verified:
+        click.echo(f"\n  ✅ Verified ({len(verified)}):")
+        for c in verified[:5]:
+            click.echo(f"     - {c.get('subject', '?')} {c.get('predicate', '?')} {c.get('object', '?')}")
+        if len(verified) > 5:
+            click.echo(f"     ... and {len(verified) - 5} more")
+    if anomalies:
+        click.echo(f"\n  ⚠️  Anomalies ({len(anomalies)}):")
+        for c in anomalies[:5]:
+            click.echo(f"     - {c.get('subject', '?')} {c.get('predicate', '?')} {c.get('object', '?')}")
+        if len(anomalies) > 5:
+            click.echo(f"     ... and {len(anomalies) - 5} more")
+    if not verified and not anomalies:
+        click.echo("  (No claims processed)")
+    click.echo()
+
+@cli.command()
 def status():
     """Display SME Workstation Health and Data Lineage."""
     import psutil

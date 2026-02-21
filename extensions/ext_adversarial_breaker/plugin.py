@@ -9,13 +9,22 @@ from collections import Counter
 from datetime import datetime
 from typing import Dict, Any, List
 
-from gateway.hardware_security import get_hsm
-from gateway.nexus_db import get_nexus
-from .logic_anomaly_detector import LogicAnomalyDetector
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+try:
+    from .logic_anomaly_detector import LogicAnomalyDetector
+except ImportError:
+    # Loaded as standalone module by ExtensionManager (no parent package)
+    import sys
+    from pathlib import Path
+    _dir = Path(__file__).resolve().parent
+    if str(_dir) not in sys.path:
+        sys.path.insert(0, str(_dir))
+    from logic_anomaly_detector import LogicAnomalyDetector
+from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.APB")
 
-class AdversarialPatternBreaker:
+class AdversarialPatternBreaker(BasePlugin):
     """
     Adversarial Pattern Breaker (APB) v1.0
     Detects 'Linguistic Camouflage' - artificial entropy smoothing used to hide synthetic origin.
@@ -23,9 +32,7 @@ class AdversarialPatternBreaker:
     """
     
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
         # Initialize Logic Anomaly Detector
         self.anomaly_detector = LogicAnomalyDetector()
 
@@ -100,7 +107,7 @@ class AdversarialPatternBreaker:
         }
 
     def get_tools(self) -> list:
-        return [self.analyze_text, self.analyze_linguistic_camouflage, self.get_adversarial_statistics, self.compare_text_patterns]
+        return [self.analyze_text, self.get_adversarial_statistics, self.compare_text_patterns]
 
     async def analyze_text(self, text: str) -> str:
         """
@@ -116,14 +123,6 @@ class AdversarialPatternBreaker:
             }, indent=2)
         except Exception as e:
             return json.dumps({"error": f"Pattern Breaker analysis failed: {str(e)}"})
-        """
-        Analyze text for linguistic camouflage and artificial entropy smoothing.
-        """
-        try:
-            result = self.anomaly_detector.detect_linguistic_camouflage(text)
-            return json.dumps(result, indent=2)
-        except Exception as e:
-            return json.dumps({"error": f"Linguistic camouflage analysis failed: {str(e)}"})
 
     async def get_adversarial_statistics(self) -> str:
         """
@@ -276,3 +275,8 @@ class AdversarialPatternBreaker:
 def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
     """Factory function to create and return an AdversarialPatternBreaker instance."""
     return AdversarialPatternBreaker(manifest, nexus_api)
+
+
+def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)

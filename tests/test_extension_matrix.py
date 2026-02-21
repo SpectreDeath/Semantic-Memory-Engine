@@ -13,6 +13,7 @@ Run with:
 
 import asyncio
 import importlib
+import inspect
 import os
 import sys
 from pathlib import Path
@@ -73,7 +74,8 @@ def test_extension_dirs_found():
 def test_all_extensions_discovered(extension_manager):
     """Every extension folder must appear in the manager's loaded registry."""
     loaded = extension_manager.get_status()
-    loaded_ids = set(loaded.get("loaded_extensions", []))
+    # get_status() returns List[Dict] with "id" per extension
+    loaded_ids = {s["id"] for s in loaded} if isinstance(loaded, list) else set(loaded.get("loaded_extensions", []))
 
     missing = [name for name in EXTENSION_NAMES if name not in loaded_ids]
     assert not missing, (
@@ -132,7 +134,10 @@ def test_extension_handler_returns_string(extension_manager, ext_name):
     for tool in ext_tools:
         handler = tool["handler"]
         try:
-            result = handler("")
+            if inspect.iscoroutinefunction(handler):
+                result = asyncio.run(handler(""))
+            else:
+                result = handler("")
             # If it returns something, it must be a string (JSON or plain text)
             if result is not None:
                 assert isinstance(result, str), (

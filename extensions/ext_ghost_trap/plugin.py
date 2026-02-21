@@ -10,13 +10,23 @@ import sys
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
 
-# Import our components
-from .persistence_monitor import (
-    hook_governor_task_execution, 
-    ghost_monitor, 
-    get_monitoring_status
-)
-from .ghost_detector import scan_for_ghosts, GhostDetector, GhostFile
+try:
+    from .persistence_monitor import (
+        hook_governor_task_execution,
+        ghost_monitor,
+        get_monitoring_status
+    )
+    from .ghost_detector import scan_for_ghosts, GhostDetector, GhostFile
+except ImportError:
+    _dir = Path(__file__).resolve().parent
+    if str(_dir) not in sys.path:
+        sys.path.insert(0, str(_dir))
+    from persistence_monitor import (
+        hook_governor_task_execution,
+        ghost_monitor,
+        get_monitoring_status
+    )
+    from ghost_detector import scan_for_ghosts, GhostDetector, GhostFile
 
 
 class GhostTrapPlugin:
@@ -209,5 +219,10 @@ def get_plugin() -> GhostTrapPlugin:
     return ghost_trap_plugin
 
 
+def register_extension(manifest: dict, nexus_api: Any) -> GhostTrapPlugin:
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return ghost_trap_plugin
+
+
 # Export for use by the extension system
-__all__ = ['GhostTrapPlugin', 'get_plugin', 'ghost_trap_plugin']
+__all__ = ['GhostTrapPlugin', 'get_plugin', 'ghost_trap_plugin', 'register_extension']

@@ -11,8 +11,10 @@ from collections import deque
 from dataclasses import dataclass
 from enum import Enum
 
-from gateway.hardware_security import get_hsm
-from gateway.nexus_db import get_nexus
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
+from src.utils.error_handling import ErrorHandler, create_error_response, OperationContext
+from src.utils.performance import get_performance_monitor, cache_result, LRUCache
 
 logger = logging.getLogger("LawnmowerMan.Governor")
 
@@ -137,7 +139,7 @@ class ResourceMonitor:
             ]
         }
 
-class Governor:
+class Governor(BasePlugin):
     """
     Governor v1.0
     Manages on_ingestion pipeline execution with resource monitoring and VRAM usage control.
@@ -145,9 +147,7 @@ class Governor:
     """
     
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
         
         # Configuration
         self.vram_threshold_gb = 5.8
@@ -531,3 +531,8 @@ class Governor:
 def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
     """Factory function to create and return a Governor instance."""
     return Governor(manifest, nexus_api)
+
+
+def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)

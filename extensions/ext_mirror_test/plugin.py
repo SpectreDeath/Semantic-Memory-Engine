@@ -10,14 +10,25 @@ import sys
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
 
-# Import our components
-from .cross_modal_auditor import audit_multimodal_sync, CrossModalAuditor, AuditResult
-from .governor_integration import (
-    safe_audit_multimodal_sync, 
-    GovernorIntegration, 
-    GovernorStatus,
-    create_governor_aware_hook
-)
+try:
+    from .cross_modal_auditor import audit_multimodal_sync, CrossModalAuditor, AuditResult
+    from .governor_integration import (
+        safe_audit_multimodal_sync,
+        GovernorIntegration,
+        GovernorStatus,
+        create_governor_aware_hook
+    )
+except ImportError:
+    _dir = Path(__file__).resolve().parent
+    if str(_dir) not in sys.path:
+        sys.path.insert(0, str(_dir))
+    from cross_modal_auditor import audit_multimodal_sync, CrossModalAuditor, AuditResult
+    from governor_integration import (
+        safe_audit_multimodal_sync,
+        GovernorIntegration,
+        GovernorStatus,
+        create_governor_aware_hook
+    )
 
 
 class CrossModalAuditorPlugin:
@@ -230,5 +241,10 @@ def get_plugin() -> CrossModalAuditorPlugin:
     return cross_modal_auditor_plugin
 
 
+def register_extension(manifest: dict, nexus_api: Any) -> CrossModalAuditorPlugin:
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return cross_modal_auditor_plugin
+
+
 # Export for use by the extension system
-__all__ = ['CrossModalAuditorPlugin', 'get_plugin', 'cross_modal_auditor_plugin']
+__all__ = ['CrossModalAuditorPlugin', 'get_plugin', 'cross_modal_auditor_plugin', 'register_extension']

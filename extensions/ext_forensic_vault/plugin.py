@@ -10,8 +10,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from collections import defaultdict
 
-from gateway.hardware_security import get_hsm
-from gateway.nexus_db import get_nexus
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
 
 logger = logging.getLogger("LawnmowerMan.ForensicVault")
 
@@ -503,3 +502,8 @@ class ForensicVault:
 def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
     """Factory function to create and return a ForensicVault instance."""
     return ForensicVault(manifest, nexus_api)
+
+
+def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)

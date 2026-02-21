@@ -18,8 +18,9 @@ except ImportError:
     NUMPY_AVAILABLE = False
     logging.warning("[AdversarialTester] numpy not available, some features may be limited")
 
-from gateway.hardware_security import get_hsm
-from gateway.nexus_db import get_nexus
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
+from src.utils.error_handling import ErrorHandler, create_error_response, OperationContext
 
 logger = logging.getLogger("LawnmowerMan.AdversarialTester")
 
@@ -52,7 +53,7 @@ class SignatureVulnerability:
     suggested_features: List[str]
     variant_details: Dict[str, Any]
 
-class AdversarialTester:
+class AdversarialTester(BasePlugin):
     """
     Adversarial Tester v1.0
     Tests adversarial evasion techniques by generating variants and analyzing detection rates.
@@ -60,9 +61,7 @@ class AdversarialTester:
     """
     
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
         
         # Configuration
         self.detection_threshold = 0.50  # 50% detection threshold
@@ -897,3 +896,8 @@ class FingerprintRecord:
 def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
     """Factory function to create and return an AdversarialTester instance."""
     return AdversarialTester(manifest, nexus_api)
+
+
+def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)

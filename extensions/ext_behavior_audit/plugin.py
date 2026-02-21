@@ -10,16 +10,29 @@ import sys
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
 
-# Import our components
-from .rhetorical_behavior_audit import audit_rhetorical_behavior, RhetoricalBehaviorAuditor, RhetoricalAnalysis
-from .provenance_profiler import profile_rhetorical_motive, profile_rhetorical_motive_async, ProvenanceProfiler, ProvenanceProfile
-from .governor_integration import (
-    safe_audit_rhetorical_behavior, 
-    BehaviorAuditGovernorIntegration, 
-    GovernorStatus,
-    GPUUsageLevel,
-    create_behavior_audit_governor_hook
-)
+try:
+    from .rhetorical_behavior_audit import audit_rhetorical_behavior, RhetoricalBehaviorAuditor, RhetoricalAnalysis
+    from .provenance_profiler import profile_rhetorical_motive, profile_rhetorical_motive_async, ProvenanceProfiler, ProvenanceProfile
+    from .governor_integration import (
+        safe_audit_rhetorical_behavior,
+        BehaviorAuditGovernorIntegration,
+        GovernorStatus,
+        GPUUsageLevel,
+        create_behavior_audit_governor_hook
+    )
+except ImportError:
+    _dir = Path(__file__).resolve().parent
+    if str(_dir) not in sys.path:
+        sys.path.insert(0, str(_dir))
+    from rhetorical_behavior_audit import audit_rhetorical_behavior, RhetoricalBehaviorAuditor, RhetoricalAnalysis
+    from provenance_profiler import profile_rhetorical_motive, profile_rhetorical_motive_async, ProvenanceProfiler, ProvenanceProfile
+    from governor_integration import (
+        safe_audit_rhetorical_behavior,
+        BehaviorAuditGovernorIntegration,
+        GovernorStatus,
+        GPUUsageLevel,
+        create_behavior_audit_governor_hook
+    )
 
 
 class RhetoricalBehaviorAuditPlugin:
@@ -300,5 +313,10 @@ def get_plugin() -> RhetoricalBehaviorAuditPlugin:
     return rhetorical_behavior_audit_plugin
 
 
+def register_extension(manifest: dict, nexus_api: Any) -> RhetoricalBehaviorAuditPlugin:
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return rhetorical_behavior_audit_plugin
+
+
 # Export for use by the extension system
-__all__ = ['RhetoricalBehaviorAuditPlugin', 'get_plugin', 'rhetorical_behavior_audit_plugin']
+__all__ = ['RhetoricalBehaviorAuditPlugin', 'get_plugin', 'rhetorical_behavior_audit_plugin', 'register_extension']

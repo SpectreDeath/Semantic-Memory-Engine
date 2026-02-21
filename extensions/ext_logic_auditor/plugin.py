@@ -7,12 +7,12 @@ from typing import Dict, Any, List, Tuple, Optional
 from datetime import datetime
 from collections import defaultdict
 
-from gateway.hardware_security import get_hsm
-from gateway.nexus_db import get_nexus
+# NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.LogicAuditor")
 
-class LogicAuditor:
+class LogicAuditor(BasePlugin):
     """
     Logic Auditor v1.0
     Detects logical inconsistencies and hallucinations through round-robin claim contradiction analysis.
@@ -20,9 +20,7 @@ class LogicAuditor:
     """
     
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
         
         # Claim extraction patterns
         self.claim_patterns = [
@@ -667,3 +665,8 @@ class LogicAuditor:
 def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
     """Factory function to create and return a LogicAuditor instance."""
     return LogicAuditor(manifest, nexus_api)
+
+
+def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)

@@ -9,11 +9,19 @@ from collections import Counter
 from datetime import datetime
 from typing import Dict, Any, List
 
-from gateway.hardware_security import get_hsm
+# NexusAPI: use self.nexus.get_hsm() — no gateway imports
 # Import shared logic
 from gateway.gatekeeper_logic import calculate_trust_score, calculate_entropy, calculate_burstiness
 # Import SDA engine
-from .sda_engine import SourceDeAnonymizationEngine
+try:
+    from .sda_engine import SourceDeAnonymizationEngine
+except ImportError:
+    import sys
+    from pathlib import Path
+    _dir = Path(__file__).resolve().parent
+    if str(_dir) not in sys.path:
+        sys.path.insert(0, str(_dir))
+    from sda_engine import SourceDeAnonymizationEngine
 
 logger = logging.getLogger("LawnmowerMan.SSA")
 
@@ -223,3 +231,8 @@ class AnalyticAuditor:
 def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
     """Factory function to create and return an AnalyticAuditor instance."""
     return AnalyticAuditor(manifest, nexus_api)
+
+
+def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)

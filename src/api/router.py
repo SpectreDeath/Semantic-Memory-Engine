@@ -12,6 +12,7 @@ from src.core.cache import cached
 from src.core.resilience import CircuitBreaker, CircuitBreakerError
 from src.core.auth import get_current_user, User
 from src.core.batch_processor import get_batch_processor
+from src.logic.audit_engine import AuditEngine
 from fastapi import Depends
 
 # Define circuit breakers for major components
@@ -227,6 +228,37 @@ async def update_ai_provider(request: ProviderUpdateRequest):
     # In a more robust system, this would be written to a settings table
     os.environ["SME_AI_PROVIDER"] = request.provider_type
     return {"status": "success", "active_provider": request.provider_type}
+
+# --- Drift Analysis (AuditEngine) ---
+
+class DriftAnalysisRequest(BaseModel):
+    claims: List[Dict[str, str]]
+    format_type: str = "auto"  # "conceptnet", "custom", "auto"
+
+@router.post("/drift/analyze")
+async def analyze_drift(request: DriftAnalysisRequest):
+    """Compare claims against the HDF5 knowledge core (drift analysis)."""
+    try:
+        # Validate input
+        if not request.claims:
+            raise HTTPException(status_code=400, detail="Claims list cannot be empty")
+        
+        # Initialize AuditEngine
+        engine = AuditEngine()
+        
+        # Run drift analysis
+        result = engine.analyze_drift(request.claims)
+        
+        return {
+            "drift_score": result["drift_score"],
+            "verified_count": len(result["verified"]),
+            "anomaly_count": len(result["anomalies"]),
+            "verified_claims": result["verified"],
+            "anomalous_claims": result["anomalies"],
+            "analysis_timestamp": result.get("analysis_timestamp", "N/A")
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Drift analysis failed: {str(e)}")
 
 # --- Ingestion (Harvester) ---
 

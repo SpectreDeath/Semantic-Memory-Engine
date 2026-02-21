@@ -4,11 +4,13 @@
     "words": [
         "coreference",
         "Coreference",
-        "sents"
+        "sents",
+        "Ollama"
     ],
     "ignorePaths": [
         "**/node_modules/**",
         "**/dist/**",
-        "**/.git/**"
+        "**/.git/**",
+        "extension/**"
     ]
 }

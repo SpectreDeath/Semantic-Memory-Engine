@@ -1,3 +1,22 @@
+# =============================================================================
+# IMPORTANT: VENDORED PACKAGES
+# =============================================================================
+# The following packages are VENDORED in src/sme/vendor/ and take precedence
+# over any pip-installed versions. Do NOT add them to requirements.txt as pip
+# updates may overwrite the working 1660 Ti configuration.
+#
+# Vendored packages:
+#   - faststylometry: src/sme/vendor/faststylometry/
+#   - forensic_behavior: src/sme/vendor/forensic_behavior/
+#   - forensic_files: src/sme/vendor/forensic_files/
+#   - forensic_signal: src/sme/vendor/forensic_signal/
+#   - forensic_entropy: src/sme/vendor/forensic_entropy/
+#   - forensic_graph: src/sme/vendor/forensic_graph/
+#   - forensic_math: src/sme/vendor/forensic_math/
+#
+# These versions are optimized for the NVIDIA GeForce GTX 1660 Ti 6GB VRAM.
+# =============================================================================
+
 # --- SME Logic & Forensics (Python 3.10 Optimized) ---
 numba==0.63.1
 numpy>=2.3.1, <2.4.0

@@ -17,27 +17,21 @@ This extension integrates the Semantic Memory Engine (SME) into VS Code / Cline 
 
 ## Installation
 
-### From Source (Development)
+### Option 1: Build .vsix Package
 
 ```bash
-cd extension
-npm install
-npm run compile
-code --install-extension out/*.vsix
-```
+# Install vsce if needed
+npm install -g vsce
 
-### Building the .vsix Package
-
-```bash
 cd extension
-npm install
-npm run vscode:prepublish
 vsce package
+code --install-extension sme-forensic-toolkit-*.vsix
 ```
 
-This creates a `.vsix` file that can be installed via:
+### Option 2: Load Unpacked (Development)
+
 ```bash
-code --install-extension sme-forensic-toolkit-2.3.4.vsix
+code --extension-development extension/
 ```
 
 ## Configuration
@@ -47,7 +41,7 @@ After installation, configure the extension in VS Code settings:
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `sme.serverPort` | 8089 | MCP server port |
-| `sme.aiProvider` | ollama | AI provider (ollama/openai/anthropic/langflow) |
+| `sme.aiProvider` | ollama | AI provider |
 | `sme.ollamaUrl` | http://localhost:11434 | Ollama server URL |
 | `sme.dataDir` | ${workspaceFolder}/data | Data directory |
 
@@ -75,7 +69,6 @@ The extension can connect to SME running in Docker:
 # docker-compose.yaml
 services:
   sme-sidecar:
-    # ... existing config
     ports:
       - "8089:8089"
 ```
@@ -85,19 +78,19 @@ Set `sme.serverPort` to match your Docker port.
 ## Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│           VS Code / Cline              │
-├─────────────────────────────────────────┤
-│  SME Extension                         │
-│  ├── Command Palette Integration       │
-│  ├── Status Bar                        │
-│  └── MCP Client                        │
-├─────────────────────────────────────────┤
-│  SME MCP Server (Python)               │
-│  ├── Forensic Analysis                 │
-│  ├── Knowledge Query                   │
-│  └── AI Integration (Ollama/OpenAI)   │
-└─────────────────────────────────────────┘
++------------------------------------------+
+|           VS Code / Cline               |
++------------------------------------------+
+|  SME Extension                          |
+|  +-- Command Palette Integration        |
+|  +-- Status Bar                        |
+|  +-- MCP Client                        |
++------------------------------------------+
+|  SME MCP Server (Python)               |
+|  +-- Forensic Analysis                 |
+|  +-- Knowledge Query                   |
+|  +-- AI Integration (Ollama/OpenAI)    |
++------------------------------------------+
 ```
 
 ## License

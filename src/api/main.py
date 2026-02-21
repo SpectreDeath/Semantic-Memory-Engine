@@ -24,7 +24,10 @@ logger = get_logger(__name__)
 app = FastAPI(
     title="SimpleMem Laboratory Control Room API",
     description="Backend API for real-time memory management and intelligence synthesis.",
-    version="2.0.0"
+    version="2.0.0",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json"
 )
 
 # Initialize Rate Limiter

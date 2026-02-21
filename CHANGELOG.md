@@ -1,6 +1,44 @@
 
 # Changelog
 
+## [v2.3.4] - Cloud Storage Integration - 2026-02-21
+
+### Summary
+
+Added capability to access shared cloud storage links for ingesting content from various cloud providers.
+
+### Added
+
+- **Cloud Fetcher** (`src/gathering/cloud_fetcher.py`):
+  - Fetch content from Google Drive shared links
+  - Fetch content from Dropbox shared links
+  - Fetch content from OneDrive shared links
+  - Fetch content from S3 presigned URLs
+  - Generic HTTP/HTTPS URL support
+  - Built-in caching to `data/cloud_cache/`
+  - Automatic provider detection via URL patterns
+  - Synchronous wrapper for easier usage
+
+### Usage
+
+```python
+from src.gathering.cloud_fetcher import CloudFetcher, fetch_sync
+
+# Async usage
+fetcher = CloudFetcher()
+result = await fetcher.fetch("https://drive.google.com/file/...")
+print(result["content"])
+
+# Sync usage
+result = fetch_sync("https://dropbox.com/s/...")
+```
+
+### Dependencies
+
+- Added `httpx>=0.24.0` for HTTP requests
+
+---
+
 ## [v2.3.3] - Project Cleanup & Gap Resolution - 2026-02-21
 
 ### Summary

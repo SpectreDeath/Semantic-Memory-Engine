@@ -35,3 +35,7 @@ data/storage/
 
 # --- Uppercase SME (duplicate or temp) ---
 SME/
+
+# --- Aether Data Files (runtime generated) ---
+data/aether/gate_stats.json
+data/aether/signature_index.ipc

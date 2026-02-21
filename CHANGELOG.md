@@ -1,6 +1,53 @@
 
 # Changelog
 
+## [v2.3.3] - Project Cleanup & Gap Resolution - 2026-02-21
+
+### Summary
+
+Addressed identified project gaps and cleaned up git working directory. This release includes production-ready infrastructure components and enhanced documentation.
+
+### Added
+
+- **PostgreSQL Nexus** (`src/database/postgres_nexus.py`):
+  - Production-grade database layer for multi-container deployments
+  - Thread-safe connection pooling with psycopg2
+  - Factory function for SQLite/PostgreSQL switching via `SME_USE_POSTGRES` env var
+  - Full schema initialization with indexes
+
+- **Governor Client** (`src/monitoring/governor_client.py`):
+  - Real-time system resource monitoring
+  - CPU, RAM, Disk I/O tracking via psutil
+  - GPU monitoring via pynvml (NVIDIA)
+  - Threshold checking for automated alerts
+  - Snapshot history for trend analysis
+
+- **GhostTrap Client** (`extensions/ext_ghost_trap/ghost_trap_client.py`):
+  - Integration module for persistence event detection
+  - Query recent events and alerts
+  - Check specific paths for flagging
+  - Persistence mechanism detection
+
+- **API Documentation**:
+  - Added Swagger/OpenAPI endpoints to FastAPI
+  - Available at `/api/docs` and `/api/redoc`
+  - OpenAPI schema at `/api/openapi.json`
+
+- **Extension Specifications**:
+  - `docs/specifications/ghost_trap_spec.md` - Ghost Trap architecture
+  - `docs/specifications/epistemic_gatekeeper_spec.md` - Trust scoring algorithm
+
+### Changed
+
+- **.gitignore**: Added entries for build artifacts, IDE folders, and data files
+- **Extensions**: Updated all 18 extensions with BasePlugin architecture
+
+### Dependencies
+
+- Added `psycopg2-binary>=2.9.0` for PostgreSQL support
+
+---
+
 ## [v2.3.2] - Social Intelligence Crawler & Maintenance - 2026-02-20
 
 ### Summary

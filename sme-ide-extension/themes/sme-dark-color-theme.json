@@ -1,0 +1,41 @@
+{
+  "name": "SME Dark",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#0d0d0d",
+    "editor.foreground": "#e0e0e0",
+    "activityBar.background": "#050505",
+    "activityBar.foreground": "#00ffcc",
+    "sideBar.background": "#080808",
+    "sideBar.foreground": "#a0a0a0",
+    "statusBar.background": "#001a14",
+    "statusBar.foreground": "#00ffcc",
+    "editorGroupHeader.tabsBackground": "#050505",
+    "tab.activeBackground": "#0d0d0d",
+    "tab.activeForeground": "#00ffcc",
+    "tab.inactiveBackground": "#050505",
+    "tab.border": "#00332b"
+  },
+  "tokenColors": [
+    {
+      "scope": "comment",
+      "settings": {
+        "foreground": "#505050",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": "keyword",
+      "settings": {
+        "foreground": "#00ffcc",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": "string",
+      "settings": {
+        "foreground": "#00cca3"
+      }
+    }
+  ]
+}

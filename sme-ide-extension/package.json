@@ -1,0 +1,103 @@
+{
+  "name": "sme-ide-extension",
+  "displayName": "SME IDE Engine",
+  "description": "The 'Brain' of the Semantic Memory Engine IDE",
+  "version": "3.0.0",
+  "publisher": "spectre",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "sme-explorer",
+          "title": "SME Explorer",
+          "icon": "media/sme-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "sme-explorer": [
+        {
+          "id": "smeMemoryNodes",
+          "name": "Memory Nodes",
+          "visibility": "visible",
+          "icon": "$(brain)"
+        },
+        {
+          "id": "smeRelationships",
+          "name": "Relationships",
+          "visibility": "visible",
+          "icon": "$(link)"
+        },
+        {
+          "id": "smeSearchView",
+          "name": "Semantic Search",
+          "visibility": "visible",
+          "icon": "$(search)"
+        }
+      ]
+    },
+    "themes": [
+      {
+        "label": "SME Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/sme-dark-color-theme.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "sme-ide.indexMemory",
+        "title": "SME: Index Current Project",
+        "category": "SME"
+      },
+      {
+        "command": "sme-ide.retrieveMemory",
+        "title": "SME: Search Semantic Memory",
+        "category": "SME"
+      },
+      {
+        "command": "sme-ide.showGraph",
+        "title": "SME: Open Relationship Graph",
+        "category": "SME",
+        "icon": "$(graph)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "sme-ide.showGraph",
+          "when": "view == smeMemoryNodes",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "18.x",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "typescript": "^5.3.3",
+    "@vscode/test-electron": "^2.3.8"
+  }
+}

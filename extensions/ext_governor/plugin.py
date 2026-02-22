@@ -329,12 +329,13 @@ class Governor(BasePlugin):
     async def set_vram_threshold(self, threshold_gb: float) -> str:
         """Set VRAM threshold for delaying ingestion."""
         try:
-            self.vram_threshold_gb = threshold_gb
-            self.resource_monitor.vram_threshold_gb = threshold_gb
+            val = float(threshold_gb)
+            self.vram_threshold_gb = val
+            self.resource_monitor.vram_threshold_gb = val
             return json.dumps({
                 "status": "success",
-                "new_threshold_gb": threshold_gb,
-                "message": f"VRAM threshold set to {threshold_gb}GB"
+                "new_threshold_gb": val,
+                "message": f"VRAM threshold set to {val}GB"
             }, indent=2)
         except Exception as e:
             return json.dumps({"error": f"Failed to set VRAM threshold: {str(e)}"})

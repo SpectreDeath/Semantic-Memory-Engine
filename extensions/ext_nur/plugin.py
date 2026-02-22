@@ -180,13 +180,8 @@ class UnifiedForensicReporterPlugin(BasePlugin):
 
 
 
-# Create global plugin instance
-unified_forensic_reporter_plugin = UnifiedForensicReporterPlugin()
-
-
-def get_plugin() -> UnifiedForensicReporterPlugin:
-    """Get the global Unified Forensic Reporter plugin instance."""
-    return unified_forensic_reporter_plugin
+# The extension is instantiated via register_extension(manifest, nexus_api) 
+# which calls create_plugin. Module-level instantiation without args is invalid.
 
 
 def create_plugin(manifest: Dict[str, Any], nexus_api: Any):

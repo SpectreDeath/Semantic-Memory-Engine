@@ -7,6 +7,7 @@ with the SME system.
 
 import os
 import sys
+import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
 
@@ -143,7 +144,8 @@ class StatisticalWatermarkDecoderPlugin:
             print(f"🔍 Statistical Watermark Decoder: Starting safe detection")
             
             # Use safe wrapper that checks Governor and CPU status
-            return safe_detect_watermark_pulse(text, self.governor_integration)
+            result = safe_detect_watermark_pulse(text, self.governor_integration)
+            return json.dumps(result)
         
         return safe_detection_tool
     
@@ -162,7 +164,8 @@ class StatisticalWatermarkDecoderPlugin:
             print(f"🔍 Statistical Watermark Decoder: Starting direct detection")
             
             # Use direct detection function
-            return detect_watermark_pulse(text)
+            result = detect_watermark_pulse(text)
+            return json.dumps(result)
         
         return direct_detection_tool
     

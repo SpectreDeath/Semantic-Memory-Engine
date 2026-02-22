@@ -10,6 +10,16 @@ Usage:
   4. Review the AI Detection Report
 """
 
+import sys
+import os
+from pathlib import Path
+
+# Setup paths
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+LEGACY_DIR = PROJECT_ROOT / "legacy"
+if str(LEGACY_DIR) not in sys.path:
+    sys.path.insert(0, str(LEGACY_DIR))
+
 from scribe_authorship import ScribeEngine
 import json
 

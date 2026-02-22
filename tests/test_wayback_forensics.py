@@ -13,7 +13,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.extensions.ext_archival_diff.scout import WaybackScout
+from extensions.ext_archival_diff.scout import WaybackScout
 from src.utils.gephi_bridge import stream_archival_data
 from extensions.ext_epistemic_gatekeeper.plugin import EpistemicGatekeeper
 

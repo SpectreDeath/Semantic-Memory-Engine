@@ -18,13 +18,13 @@ from src.utils.performance import get_performance_monitor, cache_result, LRUCach
 
 logger = logging.getLogger("LawnmowerMan.Governor")
 
-# Try to import GPUtil, fallback to CPU monitoring if not available
+# Try to import pynvml, fallback to CPU monitoring if not available
 try:
-    import GPUtil
-    HAS_GPU_UTIL = True
+    import pynvml
+    HAS_NVML = True
 except ImportError:
-    HAS_GPU_UTIL = False
-    logger.warning("[Governor] GPUtil not available, falling back to CPU memory monitoring")
+    HAS_NVML = False
+    logger.warning("[Governor] pynvml not available, falling back to CPU memory monitoring")
 
 class VRAMState(Enum):
     NORMAL = "normal"
@@ -57,7 +57,13 @@ class ResourceMonitor:
             self.monitoring = True
             self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
             self.monitor_thread.start()
-            logger.info(f"[Governor] Resource monitoring started (VRAM threshold: {self.vram_threshold_gb}GB)")
+            if HAS_NVML:
+                try:
+                    pynvml.nvmlInit()
+                except Exception as e:
+                    logger.warning(f"[Governor] NVML init failed: {e}")
+                
+        logger.info(f"[Governor] Resource monitoring started (VRAM threshold: {self.vram_threshold_gb}GB)")
     
     def stop_monitoring(self):
         """Stop background VRAM monitoring."""
@@ -91,14 +97,16 @@ class ResourceMonitor:
     def get_vram_usage_gb(self) -> float:
         """Get current VRAM usage in GB."""
         try:
-            gpus = GPUtil.getGPUs()
-            if gpus:
-                # Use the first GPU (assuming single GPU system)
-                gpu = gpus[0]
-                return gpu.memoryUsed / 1024.0  # Convert MB to GB
-            else:
-                # Fallback to CPU memory if no GPU
-                return psutil.virtual_memory().used / (1024**3)  # Convert bytes to GB
+            if HAS_NVML:
+                try:
+                    handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+                    info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+                    return info.used / (1024 * 1024 * 1024)  # Convert bytes to GB
+                except Exception as e:
+                    logger.debug(f"[Governor] GPU query failed: {e}")
+            
+            # Fallback to CPU memory
+            return psutil.virtual_memory().used / (1024**3)
         except Exception as e:
             logger.warning(f"[Governor] Could not get VRAM usage: {e}")
             return 0.0

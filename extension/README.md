@@ -39,10 +39,10 @@ code --extension-development extension/
 After installation, configure the extension in VS Code settings:
 
 | Setting | Default | Description |
-|---------|---------|-------------|
+| --- | --- | --- |
 | `sme.serverPort` | 8089 | MCP server port |
 | `sme.aiProvider` | ollama | AI provider |
-| `sme.ollamaUrl` | http://localhost:11434 | Ollama server URL |
+| `sme.ollamaUrl` | <http://localhost:11434> | Ollama server URL |
 | `sme.dataDir` | ${workspaceFolder}/data | Data directory |
 
 ## Usage
@@ -54,7 +54,7 @@ After installation, configure the extension in VS Code settings:
 ## Commands
 
 | Command | Description |
-|---------|-------------|
+| ------- | ----------- |
 | `sme.analyze` | Analyze selected file/directory |
 | `sme.query` | Query knowledge base |
 | `sme.status` | Show server status |
@@ -77,7 +77,7 @@ Set `sme.serverPort` to match your Docker port.
 
 ## Architecture
 
-```
+```text
 +------------------------------------------+
 |           VS Code / Cline               |
 +------------------------------------------+

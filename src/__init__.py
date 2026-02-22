@@ -1,22 +1,61 @@
 """
 SimpleMem Laboratory - Core Package
-
-Provides convenient access to commonly-used classes and functions
-from the SimpleMem toolkit.
-
-Quick Start:
-    from src import ScribeEngine, Scout, SemanticSearchEngine
-    from src import ToolFactory, Config
-    
-    # Access configuration
-    config = Config()
-    db_path = config.get('storage.db_path')
-    
-    # Use factory for dependency injection
-    scribe = ToolFactory.create_scribe()
-    scout = ToolFactory.create_scout()
-    search = ToolFactory.create_search_engine()
 """
+
+import sys
+import logging
+import typing
+
+# --- PYDANTIC V1 PATCH FOR PYTHON 3.14 ---
+# Required for spacy and other Pydantic v1-dependent libraries on Python 3.14
+def _patch_pydantic_v1():
+    try:
+        import pydantic.v1.main as pydantic_main
+        from pydantic.v1.errors import ConfigError
+        
+        original_new = pydantic_main.ModelMetaclass.__new__
+        
+        def patched_new(mcs, name, bases, namespace, **kwargs):
+            try:
+                return original_new(mcs, name, bases, namespace, **kwargs)
+            except (ConfigError, TypeError, Exception) as e:
+                err_msg = str(e)
+                if 'unable to infer type' in err_msg:
+                    import re
+                    match = re.search(r'attribute "([^"]+)"', err_msg)
+                    if match:
+                        attr_name = match.group(1)
+                        if '__annotations__' not in namespace:
+                            namespace['__annotations__'] = {}
+                        namespace['__annotations__'][attr_name] = typing.Any
+                        try:
+                            return original_new(mcs, name, bases, namespace, **kwargs)
+                        except: pass
+                raise
+        
+        pydantic_main.ModelMetaclass.__new__ = patched_new
+        
+        # Also mock spacy.schemas if spacy is not yet imported
+        # to prevent it from failing during later imports
+        if 'spacy' not in sys.modules:
+            class MockModel:
+                def __init__(self, **kwargs): pass
+                @classmethod
+                def validate(cls, v): return v
+            
+            # Create a mock spacy.schemas module
+            from types import ModuleType
+            spacy_mock = ModuleType('spacy')
+            schemas_mock = ModuleType('spacy.schemas')
+            spacy_mock.schemas = schemas_mock
+            
+            # This is a bit risky but might help collection
+            # sys.modules['spacy.schemas'] = schemas_mock
+            
+    except: pass
+
+_patch_pydantic_v1()
+# -----------------------------------------
 
 # Configuration & Factory
 from src.core.config import Config, get_config, ConfigError

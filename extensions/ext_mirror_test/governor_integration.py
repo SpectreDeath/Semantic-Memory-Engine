@@ -6,6 +6,7 @@ when Governor status is NORMAL (Green) to avoid OOM conditions.
 """
 
 import logging
+import json
 from typing import Dict, Any, Optional, Callable
 from enum import Enum
 from datetime import datetime
@@ -203,6 +204,14 @@ def safe_audit_multimodal_sync(image_path: str, prompt: str,
         }
 
 
+def safe_audit_multimodal_sync_tool(image_path: str, prompt: str, 
+                                 threshold: float = 65.0,
+                                 governor_check: Optional[GovernorIntegration] = None) -> str:
+    """Tool wrapper that returns a JSON string."""
+    result = safe_audit_multimodal_sync(image_path, prompt, threshold, governor_check)
+    return json.dumps(result, indent=2)
+
+
 def create_governor_aware_hook() -> Callable:
     """
     Create a hook function that can be used by the Governor system.
@@ -268,7 +277,8 @@ def create_governor_aware_hook() -> Callable:
 
 # Export the main functions for use by the extension system
 __all__ = [
-    'safe_audit_multimodal_sync', 
+    'safe_audit_multimodal_sync',
+    'safe_audit_multimodal_sync_tool',
     'GovernorIntegration', 
     'GovernorStatus',
     'create_governor_aware_hook'

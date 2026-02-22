@@ -6,6 +6,7 @@ run on CPU to keep the GPU free for rnj-1 operations.
 """
 
 import logging
+import json
 from typing import Dict, Any, Optional, Callable
 from enum import Enum
 from datetime import datetime
@@ -253,6 +254,13 @@ def safe_audit_rhetorical_behavior(text: str,
         }
 
 
+def safe_audit_rhetorical_behavior_tool(text: str, 
+                                     governor_check: Optional[BehaviorAuditGovernorIntegration] = None) -> str:
+    """Tool wrapper that returns a JSON string."""
+    result = safe_audit_rhetorical_behavior(text, governor_check)
+    return json.dumps(result, indent=2)
+
+
 def create_behavior_audit_governor_hook() -> Callable:
     """
     Create a hook function that can be used by the Governor system.
@@ -318,7 +326,8 @@ def create_behavior_audit_governor_hook() -> Callable:
 
 # Export the main functions for use by the extension system
 __all__ = [
-    'safe_audit_rhetorical_behavior', 
+    'safe_audit_rhetorical_behavior',
+    'safe_audit_rhetorical_behavior_tool',
     'BehaviorAuditGovernorIntegration', 
     'GovernorStatus',
     'GPUUsageLevel',

@@ -431,7 +431,7 @@ class VectorSyncer:
                 if similarity >= min_similarity:
                     entry = VectorEntry(
                         id=row["id"],
-                        embedding=embedding,
+                        embedding=emb,
                         text=row["text"],
                         signature_hash=row["signature_hash"],
                         metadata=json.loads(row["metadata"]),

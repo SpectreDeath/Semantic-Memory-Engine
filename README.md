@@ -1,10 +1,10 @@
-# 🌿 Lawnmower Man: Forensic MCP Gateway (v2.0.0)
+# 🌿 Lawnmower Man: Forensic MCP Gateway (v2.3.4)
 
 > **The Semantic Memory Engine (SME) Bridge for Agentic AI.**
 > *Now featuring the Interactive Control Room & Unified Ingestion.*
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Version](https://img.shields.io/badge/Version-2.0.0_Control_Room-green.svg)
+![Version](https://img.shields.io/badge/Version-2.3.4_Cloud_Storage-green.svg)
 ![Architecture](https://img.shields.io/badge/Architecture-Modular_Plugin-blueviolet.svg)
 ![Hardware Optimized](https://img.shields.io/badge/Hardware-1660_Ti_6GB-green.svg)
 
@@ -15,9 +15,12 @@
 Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents. Version 2.0.0 introduces the **Control Room**, a unified web interface for managing service connections and web ingestion.
 
 - **Interactive Control Room**: Real-time monitoring of AI Providers, Sidecars, and Databases.
+- **Cloud Storage Integration**: Ingest content from Google Drive, Dropbox, OneDrive, and S3.
+- **Social Intelligence Crawler**: Multi-platform social media monitoring and bot detection.
+- **PostgreSQL Nexus**: Production-grade database layer with connection pooling.
 - **The Harvester**: One-click web ingestion converting URLs into semantic atomic facts.
 - **Epistemic Trust**: Calculated Trust Scores for all data signals.
-- **Containerized Stack**: Full Docker support for the Operator, Sidecar, and Frontend.
+- **Containerized Stack**: Full Docker support with auto-healing and health checks.
 
 ---
 
@@ -41,7 +44,7 @@ docker-compose up -d
 
 ![Control Room UI Placeholder](https://via.placeholder.com/800x400?text=SME+Control+Room+v2.0.0)
 
-Version 2.0.0 introduces a professional "Glassmorphism" dashboard for managing your forensic lab. For a detailed walkthrough, see the **[Control Room Operator Guide](docs/CONTROL_ROOM_OPERATOR.md)**.
+Version 2.3.4 introduces a professional "Glassmorphism" dashboard for managing your forensic lab, now with advanced cloud ingestion and social intelligence monitoring. For a detailed walkthrough, see the **[Control Room Operator Guide](docs/CONTROL_ROOM_OPERATOR.md)**.
 
 ### 🔌 Connections Manager
 
@@ -51,8 +54,9 @@ Version 2.0.0 introduces a professional "Glassmorphism" dashboard for managing y
 
 ### 🕸️ The Harvester Panel
 
+- **Cloud Fetcher**: Fetch content from shared links (Drive, Dropbox, S3) with automatic provider detection.
+- **Social Media Scraper**: Multi-platform monitoring (Twitter/X, Reddit, TikTok, etc.) with sentiment analysis.
 - **Semantic Scraper**: Convert any URL into LLM-ready markdown.
-- **Recursive Deep Crawl**: Map entire domains for forensic analysis.
 - **JS Rendering**: Support for heavy Single Page Applications (SPA).
 
 ---
@@ -70,6 +74,7 @@ graph TD
     subgraph Core [Logic Layer]
         Op <--> Nexus[Postgres Nexus]
         Op <--> Lab[Centrifuge SQLite]
+        Op <--> Cloud[Cloud Storage]
     end
     
     subgraph AI [Inference Layer]
@@ -187,7 +192,8 @@ graph TD
   - **`ext_tactical_forensics/`**: Specialized IED/CBRN detection pack.
   - **`ext_epistemic_gatekeeper/`**: Folder auditor with Trust Score Heat Maps.
   - **`ext_synthetic_source_auditor/`**: Auto-vaulting for synthetic patterns.
-- **`data/`**: Local storage for the 10GB knowledge graph (**Excluded from Git**).
+  - **`ext_social_intel/`**: Social Media Intelligence monitoring and bot detection.
+- **`data/`**: Local storage for the 10GB knowledge graph.
 
 ---
 

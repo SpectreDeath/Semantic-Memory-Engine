@@ -273,35 +273,36 @@ def test_epistemic_gate():
         shutil.rmtree(test_dir, ignore_errors=True)
 
 
-# Run all tests
-print("\n" + "=" * 60)
-print("Running All Tests...")
-print("=" * 60)
-
-results = {
-    "VectorSyncer": test_vector_syncer(),
-    "SignatureLibrary": test_signature_library(),
-    "EpistemicGate": test_epistemic_gate()
-}
-
-# Summary
-print("\n" + "=" * 60)
-print("Test Summary")
-print("=" * 60)
-
-all_passed = True
-for test_name, passed in results.items():
-    status = "✓ PASSED" if passed else "✗ FAILED"
-    print(f"{test_name}: {status}")
-    if not passed:
-        all_passed = False
-
-if all_passed:
-    print("\n✓ All Phase 3 tests PASSED")
-    print("\nTechnical Targets Verified:")
-    print("  • VRAM: Uses lightweight sklearn (works on 4GB)")
-    print("  • Latency: <1s for signature extraction")
-    print("  • Scalability: Polars IPC for 1M+ signatures")
-else:
-    print("\n✗ Some tests FAILED")
-    sys.exit(1)
+if __name__ == "__main__":
+    # Run all tests
+    print("\n" + "=" * 60)
+    print("Running All Tests...")
+    print("=" * 60)
+    
+    results = {
+        "VectorSyncer": test_vector_syncer(),
+        "SignatureLibrary": test_signature_library(),
+        "EpistemicGate": test_epistemic_gate()
+    }
+    
+    # Summary
+    print("\n" + "=" * 60)
+    print("Test Summary")
+    print("=" * 60)
+    
+    all_passed = True
+    for test_name, passed in results.items():
+        status = "✓ PASSED" if passed else "✗ FAILED"
+        print(f"{test_name}: {status}")
+        if not passed:
+            all_passed = False
+    
+    if all_passed:
+        print("\n✓ All Phase 3 tests PASSED")
+        print("\nTechnical Targets Verified:")
+        print("  • VRAM: Uses lightweight sklearn (works on 4GB)")
+        print("  • Latency: <1s for signature extraction")
+        print("  • Scalability: Polars IPC for 1M+ signatures")
+    else:
+        print("\n✗ Some tests FAILED")
+        sys.exit(1)

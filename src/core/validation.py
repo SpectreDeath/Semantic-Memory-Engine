@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 # Try to import Pydantic, fallback to simple validation
 try:
-    from pydantic import BaseModel, Field, validator, ValidationError as PydanticValidationError
+    from pydantic import BaseModel, Field, field_validator, ValidationError as PydanticValidationError, ConfigDict
     PYDANTIC_AVAILABLE = True
 except ImportError:
     PYDANTIC_AVAILABLE = False
@@ -82,16 +82,16 @@ if PYDANTIC_AVAILABLE:
         )
         offset: int = Field(default=0, ge=0, description="Result offset for pagination")
 
-        @validator("text")
+        @field_validator("text")
+        @classmethod
         def text_not_empty(cls, v: str) -> str:
             """Validate text is not empty or just whitespace."""
             if not v.strip():
                 raise ValueError("Text cannot be empty or whitespace only")
             return v.strip()
 
-        class Config:
-            """Pydantic config."""
-            json_schema_extra = {
+        model_config = ConfigDict(
+            json_schema_extra={
                 "example": {
                     "text": "machine learning",
                     "limit": 20,
@@ -99,6 +99,7 @@ if PYDANTIC_AVAILABLE:
                     "offset": 0,
                 }
             }
+        )
 
     class DocumentInput(BaseModel):
         """Schema for document input."""
@@ -108,23 +109,24 @@ if PYDANTIC_AVAILABLE:
         metadata: Dict[str, Any] = Field(default_factory=dict, description="Optional metadata")
         tags: List[str] = Field(default_factory=list, description="Document tags")
 
-        @validator("content")
+        @field_validator("content")
+        @classmethod
         def content_not_empty(cls, v: str) -> str:
             """Validate content is not empty."""
             if not v.strip():
                 raise ValueError("Content cannot be empty")
             return v.strip()
 
-        @validator("tags")
+        @field_validator("tags")
+        @classmethod
         def tags_limit(cls, v: List[str]) -> List[str]:
             """Limit number of tags."""
             if len(v) > 20:
                 raise ValueError("Maximum 20 tags allowed")
             return v
 
-        class Config:
-            """Pydantic config."""
-            json_schema_extra = {
+        model_config = ConfigDict(
+            json_schema_extra={
                 "example": {
                     "title": "AI Research",
                     "content": "Recent advances in machine learning...",
@@ -132,6 +134,7 @@ if PYDANTIC_AVAILABLE:
                     "tags": ["ai", "ml", "research"],
                 }
             }
+        )
 
     class AnalysisRequest(BaseModel):
         """Schema for text analysis requests."""
@@ -142,7 +145,8 @@ if PYDANTIC_AVAILABLE:
         )
         language: str = Field(default="en", min_length=2, max_length=5, description="Language code")
 
-        @validator("analysis_types")
+        @field_validator("analysis_types")
+        @classmethod
         def validate_analysis_types(cls, v: List[str]) -> List[str]:
             """Validate analysis types."""
             valid_types = {"sentiment", "entities", "summary", "keywords"}
@@ -153,15 +157,15 @@ if PYDANTIC_AVAILABLE:
                 )
             return v
 
-        class Config:
-            """Pydantic config."""
-            json_schema_extra = {
+        model_config = ConfigDict(
+            json_schema_extra={
                 "example": {
                     "text": "This product is amazing!",
                     "analysis_types": ["sentiment", "keywords"],
                     "language": "en",
                 }
             }
+        )
 
     class CacheConfig(BaseModel):
         """Cache configuration schema."""
@@ -173,9 +177,8 @@ if PYDANTIC_AVAILABLE:
         redis_host: Optional[str] = Field(default="localhost", description="Redis host")
         redis_port: int = Field(default=6379, ge=1, le=65535, description="Redis port")
 
-        class Config:
-            """Pydantic config."""
-            json_schema_extra = {
+        model_config = ConfigDict(
+            json_schema_extra={
                 "example": {
                     "enabled": True,
                     "backend": "redis",
@@ -185,13 +188,14 @@ if PYDANTIC_AVAILABLE:
                     "redis_port": 6379,
                 }
             }
+        )
 
     def validate_input(
         data: Any, schema_class: Type[T], strict: bool = False
     ) -> Optional[T]:
         """Validate input against Pydantic schema."""
         try:
-            return schema_class.parse_obj(data)
+            return schema_class.model_validate(data)
         except PydanticValidationError as e:
             errors = []
             for error in e.errors():

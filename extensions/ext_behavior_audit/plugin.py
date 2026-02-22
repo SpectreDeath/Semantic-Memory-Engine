@@ -14,7 +14,7 @@ try:
     from .rhetorical_behavior_audit import audit_rhetorical_behavior, RhetoricalBehaviorAuditor, RhetoricalAnalysis
     from .provenance_profiler import profile_rhetorical_motive, profile_rhetorical_motive_async, ProvenanceProfiler, ProvenanceProfile
     from .governor_integration import (
-        safe_audit_rhetorical_behavior,
+        safe_audit_rhetorical_behavior_tool,
         BehaviorAuditGovernorIntegration,
         GovernorStatus,
         GPUUsageLevel,
@@ -27,7 +27,7 @@ except ImportError:
     from rhetorical_behavior_audit import audit_rhetorical_behavior, RhetoricalBehaviorAuditor, RhetoricalAnalysis
     from provenance_profiler import profile_rhetorical_motive, profile_rhetorical_motive_async, ProvenanceProfiler, ProvenanceProfile
     from governor_integration import (
-        safe_audit_rhetorical_behavior,
+        safe_audit_rhetorical_behavior_tool,
         BehaviorAuditGovernorIntegration,
         GovernorStatus,
         GPUUsageLevel,
@@ -153,7 +153,7 @@ class RhetoricalBehaviorAuditPlugin:
             print(f"🔍 Rhetorical Behavior Audit: Starting safe analysis")
             
             # Use safe wrapper that checks Governor and GPU status
-            return safe_audit_rhetorical_behavior(text, self.governor_integration)
+            return safe_audit_rhetorical_behavior_tool(text, self.governor_integration)
         
         return safe_audit_tool
     
@@ -172,7 +172,7 @@ class RhetoricalBehaviorAuditPlugin:
             print(f"🔍 Rhetorical Behavior Audit: Starting direct analysis")
             
             # Use direct audit function
-            return audit_rhetorical_behavior(text)
+            return json.dumps(audit_rhetorical_behavior(text), indent=2)
         
         return direct_audit_tool
     
@@ -291,7 +291,7 @@ class RhetoricalBehaviorAuditPlugin:
                 }
             else:
                 # Run synchronously
-                return profile_rhetorical_motive(text)
+                return json.dumps(profile_rhetorical_motive(text), indent=2)
         
         return provenance_profiler_tool
     

@@ -7,13 +7,14 @@ with the SME system.
 
 import os
 import sys
+import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional, Callable
 
 try:
     from .cross_modal_auditor import audit_multimodal_sync, CrossModalAuditor, AuditResult
     from .governor_integration import (
-        safe_audit_multimodal_sync,
+        safe_audit_multimodal_sync_tool,
         GovernorIntegration,
         GovernorStatus,
         create_governor_aware_hook
@@ -24,7 +25,7 @@ except ImportError:
         sys.path.insert(0, str(_dir))
     from cross_modal_auditor import audit_multimodal_sync, CrossModalAuditor, AuditResult
     from governor_integration import (
-        safe_audit_multimodal_sync,
+        safe_audit_multimodal_sync_tool,
         GovernorIntegration,
         GovernorStatus,
         create_governor_aware_hook
@@ -145,7 +146,7 @@ class CrossModalAuditorPlugin:
             }
             
             print(f"🔍 Cross-Modal Auditor: Starting safe audit with config: {audit_config}")
-            return safe_audit_multimodal_sync(**audit_config)
+            return safe_audit_multimodal_sync_tool(**audit_config)
         
         return safe_audit_tool
     
@@ -172,7 +173,7 @@ class CrossModalAuditorPlugin:
             }
             
             print(f"🔍 Cross-Modal Auditor: Starting direct audit with config: {audit_config}")
-            return audit_multimodal_sync(**audit_config)
+            return json.dumps(audit_multimodal_sync(**audit_config), indent=2)
         
         return direct_audit_tool
     

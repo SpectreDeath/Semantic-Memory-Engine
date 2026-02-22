@@ -55,8 +55,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-DB_PATH = "d:\\mcp_servers\\storage\\centrifuge_db.sqlite"
-SCRIBE_DB_PATH = "d:\\mcp_servers\\storage\\scribe_profiles.sqlite"
+DB_PATH = "d:\\SME\\data\\centrifuge_db.sqlite"
+SCRIBE_DB_PATH = "d:\\SME\\data\\scribe_profiles.sqlite"
 
 # Linguistic thresholds for anomaly detection
 ANOMALY_THRESHOLDS = {

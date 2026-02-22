@@ -16,7 +16,7 @@ Usage:
 """
 
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 import logging
 
 logger = logging.getLogger(__name__)
@@ -52,7 +52,8 @@ class AnalysisRequest(BaseModel):
         description="Summary compression ratio (0.1-0.9)"
     )
     
-    @validator('text')
+    @field_validator('text')
+    @classmethod
     def text_not_empty(cls, v):
         if not v.strip():
             raise ValueError('Text cannot be empty or whitespace-only')
@@ -85,8 +86,8 @@ class ClusteringRequest(BaseModel):
     
     documents: List[str] = Field(
         ...,
-        min_items=2,
-        max_items=1000,
+        min_length=2,
+        max_length=1000,
         description="Documents to cluster"
     )
     num_clusters: Optional[int] = Field(
@@ -106,8 +107,8 @@ class BatchAnalysisRequest(BaseModel):
     
     documents: List[str] = Field(
         ...,
-        min_items=1,
-        max_items=1000,
+        min_length=1,
+        max_length=1000,
         description="Documents to analyze"
     )
     analysis_type: str = Field(

@@ -32,6 +32,8 @@ models/*.pt
 data/forensic_nexus.db
 data/provenance.db
 data/storage/
+data/scribe_profiles.sqlite
+data/signatures.json
 
 # --- Uppercase SME (duplicate or temp) ---
 SME/
@@ -39,3 +41,7 @@ SME/
 # --- Aether Data Files (runtime generated) ---
 data/aether/gate_stats.json
 data/aether/signature_index.ipc
+
+# --- Agent & RL4 Tools ---
+.agent/
+.rl4/

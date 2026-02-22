@@ -1,9 +1,10 @@
 import os
 import json
 import logging
-import importlib.util
+import importlib
 import inspect
 import asyncio
+import sys
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Callable
 
@@ -85,33 +86,45 @@ class ExtensionManager:
 
     async def _load_module(self, plugin_id: str, path: str, manifest: Dict[str, Any]):
         """
-        Dynamically import the module and call register_extension().
+        Dynamically import the module as a package and call register_extension().
+        This enables standard relative imports within extensions.
         """
-        spec = importlib.util.spec_from_file_location(plugin_id, path)
-        if spec and spec.loader:
-            module = importlib.util.module_from_spec(spec)
-            try:
-                spec.loader.exec_module(module)
-                if hasattr(module, 'register_extension'):
-                    # Call registration hook to get the plugin instance
-                    plugin_instance = module.register_extension(manifest, self.nexus_api)
-                    
-                    # Run startup logic if defined
-                    if hasattr(plugin_instance, 'on_startup'):
-                        if inspect.iscoroutinefunction(plugin_instance.on_startup):
-                            await plugin_instance.on_startup()
-                        else:
-                            plugin_instance.on_startup()
-                    
-                    self.extensions[plugin_id] = {
-                        "manifest": manifest,
-                        "instance": plugin_instance
-                    }
-                    logger.info(f"Successfully loaded plugin: {plugin_id} (v{manifest.get('version', '0.1')})")
-                else:
-                    logger.warning(f"Plugin {plugin_id}: register_extension() function not found.")
-            except Exception as e:
-                logger.error(f"Execution error in plugin {plugin_id}: {e}")
+        # Ensure the project root is in sys.path for package imports
+        root_dir = str(Path(self.extensions_dir).parent)
+        if root_dir not in sys.path:
+            sys.path.insert(0, root_dir)
+
+        # Calculate module name (e.g., 'extensions.ext_social_intel.plugin')
+        ext_folder = Path(path).parent.name
+        entry_point = Path(path).stem
+        module_name = f"extensions.{ext_folder}.{entry_point}"
+
+        try:
+            # Import as a proper package module
+            if module_name in sys.modules:
+                module = importlib.reload(sys.modules[module_name])
+            else:
+                module = importlib.import_module(module_name)
+
+            if hasattr(module, 'register_extension'):
+                plugin_instance = module.register_extension(manifest, self.nexus_api)
+                
+                if hasattr(plugin_instance, 'on_startup'):
+                    if inspect.iscoroutinefunction(plugin_instance.on_startup):
+                        await plugin_instance.on_startup()
+                    else:
+                        plugin_instance.on_startup()
+                
+                self.extensions[plugin_id] = {
+                    "manifest": manifest,
+                    "instance": plugin_instance
+                }
+                logger.info(f"Successfully loaded plugin via package: {module_name} (v{manifest.get('version', '0.1')})")
+            else:
+                logger.warning(f"Plugin {plugin_id}: register_extension() not found in {module_name}")
+        except Exception as e:
+            logger.error(f"Failed to load package-based plugin {plugin_id}: {e}")
+            # Fallback to old loading method if needed, but the goal is to shift to packages
 
     def get_extension_tools(self) -> List[Dict[str, Any]]:
         """
@@ -156,6 +169,25 @@ class ExtensionManager:
                         instance.on_ingestion(raw_data, metadata)
                 except Exception as e:
                     logger.error(f"Error in on_ingestion hook for plugin: {e}")
+
+    async def fire_event(self, event_id: str, payload: Dict[str, Any]):
+        """
+        Broadcast an event to all plugins that implement on_event.
+        """
+        tasks = []
+        for plugin_id, ext in self.extensions.items():
+            instance = ext["instance"]
+            if hasattr(instance, 'on_event'):
+                try:
+                    if inspect.iscoroutinefunction(instance.on_event):
+                        tasks.append(instance.on_event(event_id, payload))
+                    else:
+                        instance.on_event(event_id, payload)
+                except Exception as e:
+                    logger.error(f"Error firing event {event_id} to {plugin_id}: {e}")
+        
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
 
     def get_status(self) -> List[Dict[str, Any]]:
         """

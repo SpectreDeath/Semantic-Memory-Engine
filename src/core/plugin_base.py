@@ -19,26 +19,24 @@ class BasePlugin(ABC):
         self.nexus = nexus_api
         self.plugin_id = manifest.get("plugin_id", self.__class__.__name__)
 
-    @abstractmethod
     async def on_startup(self) -> None:
         """
         Lifecycle hook executed when the plugin is first loaded.
-        Use this to initialize database tables, cache data, or warm up models.
+        Default implementation is a no-op.
         """
         pass
 
-    @abstractmethod
     async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
         """
         Lifecycle hook executed when new data is ingested into the system.
-        
-        Args:
-            raw_data (str): The text content being ingested.
-            metadata (Dict[str, Any]): Source metadata (e.g., origin, timestamp, source_id).
-            
-        Returns:
-            Dict[str, Any]: The analysis results to be appended or merged. 
-                            Must contain a "status" key.
+        Default implementation returns a 'skipped' status.
+        """
+        return {"status": "skipped", "reason": "No ingestion handler implemented."}
+
+    async def on_event(self, event_id: str, payload: Dict[str, Any]) -> None:
+        """
+        V3.0 Event Bus Hook: Responds to system-wide events.
+        Default implementation does nothing (override in subclasses).
         """
         pass
 
@@ -46,8 +44,5 @@ class BasePlugin(ABC):
     def get_tools(self) -> List[Callable[..., Any]]:
         """
         Declares the functions this plugin exposes to the AI Agent (e.g., via MCP).
-        
-        Returns:
-            List[Callable[..., Any]]: A list of (optionally async) functions that act as tools.
         """
         pass

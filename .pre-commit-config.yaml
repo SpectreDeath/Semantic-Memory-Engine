@@ -1,0 +1,93 @@
+# =============================================================================
+# Pre-commit hooks for SME Forensic Toolkit
+# =============================================================================
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+# =============================================================================
+
+repos:
+  # -------------------------------------------------------------------------
+  # Code Formatting
+  # -------------------------------------------------------------------------
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        language_version: python3.10
+        exclude: ^legacy/|^docs/
+
+  # -------------------------------------------------------------------------
+  # Import Sorting
+  # -------------------------------------------------------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.1
+    hooks:
+      - id: ruff
+        args: [--fix]
+        exclude: ^legacy/|^docs/
+
+  # -------------------------------------------------------------------------
+  # Security Scanning
+  # -------------------------------------------------------------------------
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.8.0
+    hooks:
+      - id: bandit
+        args: [-r, src/, gateway/, extensions/]
+        exclude: tests/,legacy/
+
+  # -------------------------------------------------------------------------
+  # Type Checking (mypy is slow, optional)
+  # -------------------------------------------------------------------------
+  # Uncomment if you want mypy as a pre-commit hook
+  # (Note: This can be slow on large codebases)
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.14.1
+  #   hooks:
+  #     - id: mypy
+  #       additional_dependencies: [types-all]
+  #       args: [--ignore-missing-imports, --no-error-summary]
+  #       exclude: ^legacy/|^tests/
+
+  # -------------------------------------------------------------------------
+  # General Quality
+  # -------------------------------------------------------------------------
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.(md|txt|json|yaml|yml)$
+      - id: end-of-file-fixer
+        exclude: \.(md|txt|json|yaml|yml)$
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-toml
+
+  # -------------------------------------------------------------------------
+  # Secret Detection (optional - requires git-secrets or similar)
+  # -------------------------------------------------------------------------
+  # - repo: https://github.com/pre-commit/pre-commit-hooks
+  #   rev: v5.0.0
+  #   hooks:
+  #     - id: detect-private-key
+
+# =============================================================================
+# Configuration
+# =============================================================================
+default_stages: [commit, push]
+
+# Skip slow checks for quick commits
+# Usage: SKIP=bandit,mypy git commit -m "quick fix"
+ci:
+  skip: [bandit, mypy]
+</parameter>
+<task_progress>- [x] Consolidate dependency management (pyproject.toml as source of truth)
+- [x] Add ruff, bandit, mypy configuration to pyproject.toml
+- [x] Add pre-commit configuration
+- [ ] Fix SQL injection in forensic vault
+- [ ] Refactor pipeline.py - extract late imports
+- [ ] Address legacy code - audit and plan
+- [ ] Create CI/CD workflow configuration

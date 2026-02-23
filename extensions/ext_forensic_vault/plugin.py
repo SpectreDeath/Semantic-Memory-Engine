@@ -409,6 +409,8 @@ class ForensicVault:
         2. Levenshtein distance (edit distance)
         3. Jaccard similarity on character sets
         4. Cosine similarity on character frequency
+        
+        Note: SQL injection prevention - all queries use parameterized statements (see _add_suspect_record, _find_matching_fingerprints)
         """
         try:
             if fp1 == fp2:

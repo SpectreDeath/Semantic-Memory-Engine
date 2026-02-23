@@ -2,10 +2,13 @@
     "version": "0.2",
     "language": "en",
     "words": [
+        "cocoindex",
         "coreference",
         "Coreference",
         "sents",
-        "Ollama"
+        "Ollama",
+        "venv",
+        "pycache"
     ],
     "ignorePaths": [
         "**/node_modules/**",

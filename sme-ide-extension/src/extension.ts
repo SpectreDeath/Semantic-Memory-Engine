@@ -7,6 +7,13 @@ import { ForensicController } from './forensics/ForensicController';
 import { ForensicCodeLensProvider } from './forensics/ForensicCodeLensProvider';
 import { SMEGraphWebview } from './webviews/SMEGraphWebview';
 import { SMESearchView } from './webviews/SMESearchView';
+// @ts-ignore
+import { enableHotReload } from '@hediet/node-reload';
+
+// 1. Evolutionary Hot-Reloading Support
+if (process.env.NODE_ENV !== 'production') {
+    enableHotReload({ entryModule: module });
+}
 
 export function activate(context: vscode.ExtensionContext) {
     console.log('SME IDE Engine is now active');
@@ -64,9 +71,19 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
-        vscode.commands.registerCommand('sme-ide.inspectEntity', (entity: string) => {
+        vscode.commands.registerCommand('sme-ide.inspectEntity', async (entity: string) => {
             vscode.window.showInformationMessage(`Inspecting forensic entity: ${entity}`);
-            // Future: Open semantic graph or details view for this entity
+            
+            // Evolutionary Loop: Log trace to Nexus
+            try {
+                await bridge.sendRequest('log_telemetry', { 
+                    action: 'inspect_entity', 
+                    target: entity,
+                    context: 'graph_view'
+                });
+            } catch (e) {
+                console.warn('Telemetry sync failed:', e);
+            }
         })
     );
 
@@ -97,6 +114,13 @@ export function activate(context: vscode.ExtensionContext) {
                 try {
                     const results = await bridge.sendRequest('search_memory', { query });
                     vscode.window.showInformationMessage(`Found ${results.length} results for: ${query}`);
+                    
+                    // Evolutionary Loop: Log search trace to Nexus
+                    await bridge.sendRequest('log_telemetry', { 
+                        action: 'search_memory', 
+                        query: query,
+                        results_count: results.length
+                    });
                 } catch (e) {
                     vscode.window.showErrorMessage(`Search failed: ${e}`);
                 }

@@ -204,13 +204,4 @@ exclude_lines = [
     "if __name__ == .__main__.:",
     "if TYPE_CHECKING:",
     "@abstractmethod",
-    "@abc.abstractmethod",
 ]
-</parameter>
-<task_progress>- [x] Consolidate dependency management (pyproject.toml as source of truth)
-- [x] Add ruff, bandit, mypy configuration to pyproject.toml
-- [ ] Add pre-commit configuration
-- [ ] Fix SQL injection in forensic vault
-- [ ] Refactor pipeline.py - extract late imports
-- [ ] Address legacy code - audit and plan
-- [ ] Create CI/CD workflow configuration

@@ -44,6 +44,8 @@ class SMEBridge:
                 result = self.analyze_document(params)
             elif method == "get_semantic_graph":
                 result = self.get_semantic_graph(params)
+            elif method == "log_telemetry":
+                result = self.log_telemetry(params)
             else:
                 return self.error_response(request_id, -32601, "Method not found")
 
@@ -132,6 +134,13 @@ class SMEBridge:
                 "summary": "This semantic node represents a core memory fragment of the SME Odyssey modernization."
             }, indent=2)
         }
+
+    def log_telemetry(self, params: Dict) -> Any:
+        # Pseudo-code to write to Nexus or simply log it.
+        action = params.get("action", "unknown")
+        logger.info(f"TELEMETRY: User action captured -> {action}, params: {params}")
+        # In the future, this will connect to self.nexus.execute("INSERT INTO telemetry ...")
+        return {"status": "success", "logged": True}
 
     def success_response(self, request_id: Any, result: Any) -> Dict:
         return {"jsonrpc": "2.0", "result": result, "id": request_id}

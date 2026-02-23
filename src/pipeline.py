@@ -20,6 +20,10 @@ from src.orchestration.tasks import (
     extract_targets,
     run_forensic_summary,
 )
+from tests.verify_forensic_stack import main as run_verification
+from src.utils.loaders import load_intel_data
+from src.utils.alerts import check_for_threat_collision
+
 
 
 @task(name="Verify Forensic Stack")
@@ -27,7 +31,6 @@ def verify_stack():
     """Run the forensic stack verification logic."""
     logger = get_run_logger()
     logger.info("Starting forensic stack verification...")
-    from tests.verify_forensic_stack import main as run_verification
     exit_code = run_verification()
     return exit_code == 0
 
@@ -55,9 +58,8 @@ def s_m_e_full_intel_run():
         # Bipartite streaming
         stream_bipartite(osint_hits)
     
-    # 4. Agentic Intelligence & Alerts
+    # Agentic Intelligence & Alerts
     # Load raw data for packaging
-    from src.utils.loaders import load_intel_data
     intel_package = {
         "osint": load_intel_data("data/raw/osint_results.json"),
         "news": load_intel_data("data/raw/forensic_news.json")
@@ -68,7 +70,6 @@ def s_m_e_full_intel_run():
     
     # Trigger Active Defense Alerts
     try:
-        from src.utils.alerts import check_for_threat_collision
         check_for_threat_collision(intel_package)
     except Exception as e:
         logger.warning(f"Alert System Error: {e}")

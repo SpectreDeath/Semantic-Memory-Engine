@@ -1,6 +1,0 @@
-sample_id,model_fingerprint,combined_anomaly_score,timestamp,source_plugin,is_recurring,recurring_with,metadata
-sample_001,abc123def456,0.85,2026-02-02T18:00:00,APB,True,sample_002,"{""test"": ""data""}"
-sample_002,abc123def456,0.9,2026-02-02T17:00:00,APB,False,,"{""test"": ""data""}"
-sample_003,xyz789uvw012,0.45,2026-02-02T16:00:00,SDA,False,,"{""test"": ""data""}"
-sample_004,def456ghi789,0.75,2026-02-02T15:00:00,LTA,True,sample_005,"{""test"": ""data""}"
-sample_005,def456ghi789,0.8,2026-02-02T14:00:00,LogicAuditor,False,,"{""test"": ""data""}"

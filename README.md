@@ -4,7 +4,7 @@
 > *Now featuring the Interactive Control Room & Unified Ingestion.*
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Version](https://img.shields.io/badge/Version-2.3.4_Cloud_Storage-green.svg)
+![Version](https://img.shields.io/badge/Version-3.0.0_Cloud_Storage-green.svg)
 ![Architecture](https://img.shields.io/badge/Architecture-Modular_Plugin-blueviolet.svg)
 ![Hardware Optimized](https://img.shields.io/badge/Hardware-1660_Ti_6GB-green.svg)
 
@@ -42,9 +42,9 @@ docker-compose up -d
 
 ## 🕹️ The Control Room UI
 
-![Control Room UI Placeholder](https://via.placeholder.com/800x400?text=SME+Control+Room+v2.0.0)
+Version 3.0.0 introduces a professional "Glassmorphism" dashboard for managing your forensic lab, now with advanced cloud ingestion and social intelligence monitoring. For a detailed walkthrough, see the **[Control Room Operator Guide](docs/CONTROL_ROOM_OPERATOR.md)**.
 
-Version 2.3.4 introduces a professional "Glassmorphism" dashboard for managing your forensic lab, now with advanced cloud ingestion and social intelligence monitoring. For a detailed walkthrough, see the **[Control Room Operator Guide](docs/CONTROL_ROOM_OPERATOR.md)**.
+> **Screenshot**: See [docs/CONTROL_ROOM_OPERATOR.md](docs/CONTROL_ROOM_OPERATOR.md) for UI walkthroughs and annotated screenshots of the Control Room dashboard.
 
 ### 🔌 Connections Manager
 
@@ -102,9 +102,10 @@ This starts:
 
 ### Local Manual Start
 
-1. **Operator**: `python -m src.api.main`
-2. **Sidecar**: `python -m src.ai.sidecar`
-3. **Frontend**: `cd frontend && npm run dev`
+1. **Copy environment config**: `cp .env.example .env` then fill in your secrets
+2. **Operator**: `python -m src.api.main`
+3. **Sidecar**: `python -m src.ai.sidecar`
+4. **Frontend**: `cd frontend && npm run dev`
 
 ---
 
@@ -129,22 +130,6 @@ Our lightweight utility tools are optimized for the NVIDIA GeForce GTX 1660 Ti 6
 - **Optimization**: 68 lines, under 80-line requirement
 - **Usage**: `python src/utils/context_sniffer.py file.py`
 
-### ✅ Gephi Streaming Bridge (`src/utils/gephi_bridge.py`)
-
-- **Purpose**: Visual project metadata streaming to Gephi
-- **Features**: Node creation, visual mapping, directory-based edges
-- **Optimization**: Efficient processing for large codebases
-- **Usage**: `python src/utils/gephi_bridge.py` (requires Gephi running)
-
-### ✅ Multi-Mode Gephi Forensic Bridge (`src/utils/gephi_bridge.py`)
-
-- **Purpose**: Unified "Forensic HUD" with four distinct visualization modes
-- **Features**:
-  - Project Mode: Codebase topology with outlier detection
-  - Trust Mode: Epistemic heat map with color-coded trust levels (Red/Yellow/Green)
-  - Knowledge Mode: Semantic memory graph with concept clusters
-  - Synthetic Mode: Counter-intelligence patterns and vaulted documents
-- **Hardware Optimization**: MAX_NODES = 2000 for 1660 Ti VRAM protection
 - **Usage**:
 
   ```bash
@@ -232,7 +217,7 @@ Lawnmower Man supports a standard v1.1.1+ boilerplate for new capabilities.
 3. Implement `plugin.py` with standard hooks (`on_startup`, `on_ingestion`).
 
 See **[Extensions Catalog](docs/EXTENSIONS_CATALOG.md)** for a complete list of available plugins.
-See **[SME Check Architecture](docs/SME_CHECK_ARCHITECTURE.md)** for validation and health check logic.
+See **[SME Check Architecture](docs/archive/SME_CHECK_ARCHITECTURE.md)** for validation and health check logic.
 
 ---
 

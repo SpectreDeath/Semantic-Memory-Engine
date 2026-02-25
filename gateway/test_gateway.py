@@ -1,13 +1,15 @@
-"""Quick test script for the Lawnmower Man Gateway."""
-import sys
-import os
+"""Quick test script for the Lawnmower Man Gateway — Router Architecture."""
+
 import json
+import os
+import sys
 
 # Ensure SME is importable
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-def test_registry():
-    """Test the tool registry."""
+
+def test_registry() -> bool:
+    """Test that the ToolRegistry loads and lists tools correctly."""
     print("=" * 50)
     print("Testing Tool Registry")
     print("=" * 50)

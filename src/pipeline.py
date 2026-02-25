@@ -5,11 +5,9 @@
 # =============================================================================
 
 import sys
-import os
-from prefect import task, flow, get_run_logger
 
-# Add the project root to sys.path to allow imports from tests and src
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from prefect import flow, get_run_logger, task
+
 
 # Import extracted tasks modules
 from src.orchestration.tasks import (

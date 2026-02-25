@@ -1,57 +1,53 @@
-import os
+import dataclasses
 import json
 import logging
-import asyncio
+import pathlib
 import sys
-from pathlib import Path
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, List
+
+import pydantic
+from pydantic import types
+from scrapegraphai import graphs
+from scrapegraphai import config as config_mod
+
+from gateway import hardware_security, nexus_db, session_manager
+from src.core import chroma_indexer
 
 # Ensure SME is importable
-PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 # Import SME core components
-from gateway.hardware_security import get_hsm
-from gateway.nexus_db import get_nexus
-from gateway.session_manager import get_session_manager
-from gateway.extension_manager import DefaultExtensionContext
 
 # Configure logging
 logger = logging.getLogger("scrapegraph_harvester")
 
 # Try to import ScrapeGraphAI and dependencies
 try:
-    import scrapegraphai
-    from scrapegraphai.graphs import SmartScraperGraph, SearchGraph, MarkdownifyGraph
-    from scrapegraphai.config import GraphConfig
-    from playwright.async_api import async_playwright
     SCRAPEGRAPH_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"ScrapeGraphAI dependencies not available: {e}")
     SCRAPEGRAPH_AVAILABLE = False
 
-from pydantic import BaseModel, Field
-from pydantic.types import constr
 
 # Pydantic schemas for tool validation
-class ScrapeRequest(BaseModel):
-    url: constr(min_length=1) = Field(..., description="URL to scrape")
-    prompt: str = Field(default="Extract all forensic evidence", description="Extraction prompt")
-    model: str = Field(default="ollama/llama3.2", description="LLM model to use")
+class ScrapeRequest(pydantic.BaseModel):
+    url: types.constr(min_length=1) = pydantic.Field(..., description="URL to scrape")
+    prompt: str = pydantic.Field(default="Extract all forensic evidence", description="Extraction prompt")
+    model: str = pydantic.Field(default="ollama/llama3.2", description="LLM model to use")
 
-class ResearchRequest(BaseModel):
-    query: constr(min_length=1) = Field(..., description="Search query")
-    results_count: int = Field(default=10, ge=1, le=20, description="Number of results to synthesize")
-    model: str = Field(default="ollama/llama3.2", description="LLM model to use")
+class ResearchRequest(pydantic.BaseModel):
+    query: types.constr(min_length=1) = pydantic.Field(..., description="Search query")
+    results_count: int = pydantic.Field(default=10, ge=1, le=20, description="Number of results to synthesize")
+    model: str = pydantic.Field(default="ollama/llama3.2", description="LLM model to use")
 
-class MarkdownifyRequest(BaseModel):
-    url: constr(min_length=1) = Field(..., description="URL to convert to Markdown")
-    model: str = Field(default="ollama/llama3.2", description="LLM model to use")
+class MarkdownifyRequest(pydantic.BaseModel):
+    url: types.constr(min_length=1) = pydantic.Field(..., description="URL to convert to Markdown")
+    model: str = pydantic.Field(default="ollama/llama3.2", description="LLM model to use")
 
-@dataclass
+@dataclasses.dataclass
 class MemoryNode:
     id: str
     content: str
@@ -69,13 +65,13 @@ class ScrapeGraphHarvester:
     def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
         self.manifest = manifest
         self.nexus_api = nexus_api
-        self.hsm = get_hsm()
-        self.nexus = get_nexus()
-        self.session_manager = get_session_manager()
+        self.hsm = hardware_security.get_hsm()
+        self.nexus = nexus_db.get_nexus()
+        self.session_manager = session_manager.get_session_manager()
         self.category = "forensics"
         
         # VRAM-optimized model configuration
-        self.default_config = GraphConfig(
+        self.default_config = config_mod.GraphConfig(
             llm={
                 "model": "ollama/llama3.2",
                 "temperature": 0.0,
@@ -107,7 +103,7 @@ class ScrapeGraphHarvester:
             )
 
             # Create and run the SmartScraperGraph
-            graph = SmartScraperGraph(
+            graph = graphs.SmartScraperGraph(
                 prompt=request.prompt,
                 source=request.url,
                 config=config
@@ -147,7 +143,7 @@ class ScrapeGraphHarvester:
             )
 
             # Create and run the SearchGraph
-            graph = SearchGraph(
+            graph = graphs.SearchGraph(
                 query=request.query,
                 config=config
             )
@@ -186,7 +182,7 @@ class ScrapeGraphHarvester:
             )
 
             # Create and run the MarkdownifyGraph
-            graph = MarkdownifyGraph(
+            graph = graphs.MarkdownifyGraph(
                 source=request.url,
                 config=config
             )
@@ -379,8 +375,7 @@ class ScrapeGraphHarvester:
 
                 # Index in ChromaDB (if available)
                 try:
-                    from src.core.chroma_indexer import ChromaIndexer
-                    indexer = ChromaIndexer()
+                    indexer = chroma_indexer.ChromaIndexer()
                     indexer.index_node(node.id, node.content)
                 except Exception:
                     pass

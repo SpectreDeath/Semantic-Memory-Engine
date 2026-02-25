@@ -32,11 +32,17 @@ dependencies = [
     "fastapi>=0.100.0",
     "uvicorn>=0.20.0",
     "httpx>=0.24.0",
-    # Dev tools - linting & quality
+]
+
+[project.optional-dependencies]
+# Install with: pip install -e ".[dev]"
+dev = [
+    # Linting & formatting
     "ruff>=0.1.0",
     "bandit>=1.7.0",
     "black>=23.0.0",
     "mypy>=1.0.0",
+    # Testing
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
 ]

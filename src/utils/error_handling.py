@@ -5,11 +5,12 @@ Provides standardized error handling patterns, logging, and error responses
 across all SME extensions for consistency and maintainability.
 """
 
-import logging
+import functools
 import json
+import logging
 import traceback
-from typing import Any, Dict, Optional, Callable, Union
 from datetime import datetime
+from typing import Any, Callable, Dict, Optional, Union
 
 
 class SMEError(Exception):
@@ -124,23 +125,21 @@ class ErrorHandler:
         except Exception as e:
             return self.handle_extension_error(e, operation)
     
-    def safe_async_execute(self, coro, operation: str, 
+    async def safe_async_execute(self, coro, operation: str,
                           *args, **kwargs) -> Any:
         """
         Safely execute an async function with error handling.
-        
+
         Args:
-            coro: Coroutine function to execute
-            operation: Description of the operation
-            *args, **kwargs: Arguments to pass to the coroutine
-        
+            coro: Coroutine function to execute.
+            operation: Description of the operation.
+            *args, **kwargs: Arguments to pass to the coroutine.
+
         Returns:
-            Coroutine result or error response
+            Awaited coroutine result or error response.
         """
         try:
-            # This would be called within an async context
-            # The actual await would happen in the calling code
-            return coro(*args, **kwargs)
+            return await coro(*args, **kwargs)
         except Exception as e:
             return self.handle_extension_error(e, operation)
     
@@ -261,16 +260,17 @@ class OperationContext:
 def handle_errors(plugin_id: str, operation_name: Optional[str] = None):
     """
     Decorator to automatically handle errors in functions.
-    
+
     Args:
-        plugin_id: Plugin identifier for logging
-        operation_name: Optional operation name (defaults to function name)
+        plugin_id: Plugin identifier for logging.
+        operation_name: Optional operation name (defaults to function name).
     """
     def decorator(func):
+        @functools.wraps(func)
         def wrapper(*args, **kwargs):
             op_name = operation_name or func.__name__
             error_handler = ErrorHandler(plugin_id)
-            
+
             try:
                 return func(*args, **kwargs)
             except Exception as e:
@@ -285,10 +285,11 @@ def handle_async_errors(plugin_id: str, operation_name: Optional[str] = None):
     Decorator to automatically handle errors in async functions.
     
     Args:
-        plugin_id: Plugin identifier for logging
-        operation_name: Optional operation name (defaults to function name)
+        plugin_id: Plugin identifier for logging.
+        operation_name: Optional operation name (defaults to function name).
     """
     def decorator(func):
+        @functools.wraps(func)
         async def wrapper(*args, **kwargs):
             op_name = operation_name or func.__name__
             error_handler = ErrorHandler(plugin_id)

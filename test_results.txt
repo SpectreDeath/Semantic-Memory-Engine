@@ -1,0 +1,1805 @@
+
+[HOOK] Pydantic v1 monkey-patch applied
+============================= test session starts =============================
+platform win32 -- Python 3.14.2, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\SME
+configfile: pytest.ini (WARNING: ignoring pytest config in pyproject.toml!)
+testpaths: tests
+plugins: anyio-4.12.1, hydra-core-1.3.2, logfire-4.22.0, cov-7.0.0
+collected 389 items
+
+tests\test_advanced_nlp.py ....................FF......                  [  7%]
+tests\test_aether.py ...                                                 [  7%]
+tests\test_apb_logic.py .                                                [  8%]
+tests\test_archival_diff.py ...                                          [  8%]
+tests\test_crawler_sling.py F                                            [  9%]
+tests\test_events.py .......F........F.FFFF...FF                         [ 16%]
+tests\test_extension_matrix.py ......................................... [ 26%]
+...F..F.......F...                                                       [ 31%]
+tests\test_forensic_math.py .                                            [ 31%]
+tests\test_gatekeeper_v1_2.py ..F                                        [ 32%]
+tests\test_gephi_bridge.py E                                             [ 32%]
+tests\test_integration.py F.........ss...FF                              [ 37%]
+tests\test_logging.py ........................................           [ 47%]
+tests\test_nlp_pipeline.py F.FFFFFFF..F.FFFFFFF..FFF                     [ 53%]
+tests\test_omcs_integration.py .                                         [ 53%]
+tests\test_phase5_analytics.py ............................F............ [ 64%]
+........--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: I/O operation on closed file.
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Scripts\pytest.exe\__main__.py", line 5, in <module>
+    sys.exit(console_main())
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 223, in console_main
+    code = main()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 199, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\main.py", line 365, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\main.py", line 360, in wrap_session
+    config._ensure_unconfigure()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 1171, in _ensure_unconfigure
+    self._cleanup_stack.close()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 627, in close
+    self.__exit__(None, None, None)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 604, in __exit__
+    if cb(*exc_details):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 482, in _exit_wrapper
+    callback(*args, **kwds)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\unraisableexception.py", line 94, in cleanup
+    gc_collect_harder(gc_collect_iterations)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\unraisableexception.py", line 33, in gc_collect_harder
+    gc.collect()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\aiohttp\client.py", line 461, in __del__
+    self._loop.call_exception_handler(context)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 1903, in call_exception_handler
+    self.default_exception_handler(context)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 1875, in default_exception_handler
+    logger.error('\n'.join(log_lines), exc_info=exc_info)
+Message: 'Unclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x0000025097AAF0E0>'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: I/O operation on closed file.
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Scripts\pytest.exe\__main__.py", line 5, in <module>
+    sys.exit(console_main())
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 223, in console_main
+    code = main()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 199, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\main.py", line 365, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\main.py", line 360, in wrap_session
+    config._ensure_unconfigure()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 1171, in _ensure_unconfigure
+    self._cleanup_stack.close()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 627, in close
+    self.__exit__(None, None, None)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 604, in __exit__
+    if cb(*exc_details):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 482, in _exit_wrapper
+    callback(*args, **kwds)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\unraisableexception.py", line 94, in cleanup
+    gc_collect_harder(gc_collect_iterations)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\unraisableexception.py", line 33, in gc_collect_harder
+    gc.collect()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\aiohttp\client.py", line 461, in __del__
+    self._loop.call_exception_handler(context)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 1903, in call_exception_handler
+    self.default_exception_handler(context)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 1875, in default_exception_handler
+    logger.error('\n'.join(log_lines), exc_info=exc_info)
+Message: 'Unclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x0000025097AAF770>'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: I/O operation on closed file.
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Scripts\pytest.exe\__main__.py", line 5, in <module>
+    sys.exit(console_main())
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 223, in console_main
+    code = main()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 199, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\main.py", line 365, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\main.py", line 360, in wrap_session
+    config._ensure_unconfigure()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 1171, in _ensure_unconfigure
+    self._cleanup_stack.close()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 627, in close
+    self.__exit__(None, None, None)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 604, in __exit__
+    if cb(*exc_details):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 482, in _exit_wrapper
+    callback(*args, **kwds)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\unraisableexception.py", line 94, in cleanup
+    gc_collect_harder(gc_collect_iterations)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\unraisableexception.py", line 33, in gc_collect_harder
+    gc.collect()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\aiohttp\client.py", line 461, in __del__
+    self._loop.call_exception_handler(context)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 1903, in call_exception_handler
+    self.default_exception_handler(context)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 1875, in default_exception_handler
+    logger.error('\n'.join(log_lines), exc_info=exc_info)
+Message: 'Unclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x0000025097AAF8C0>'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: I/O operation on closed file.
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Scripts\pytest.exe\__main__.py", line 5, in <module>
+    sys.exit(console_main())
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 223, in console_main
+    code = main()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 199, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\main.py", line 365, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\main.py", line 360, in wrap_session
+    config._ensure_unconfigure()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 1171, in _ensure_unconfigure
+    self._cleanup_stack.close()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 627, in close
+    self.__exit__(None, None, None)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 604, in __exit__
+    if cb(*exc_details):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 482, in _exit_wrapper
+    callback(*args, **kwds)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\unraisableexception.py", line 94, in cleanup
+    gc_collect_harder(gc_collect_iterations)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\unraisableexception.py", line 33, in gc_collect_harder
+    gc.collect()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\aiohttp\client.py", line 461, in __del__
+    self._loop.call_exception_handler(context)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 1903, in call_exception_handler
+    self.default_exception_handler(context)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 1875, in default_exception_handler
+    logger.error('\n'.join(log_lines), exc_info=exc_info)
+Message: 'Unclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x0000025097AAFA10>'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: I/O operation on closed file.
+Call stack:
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Scripts\pytest.exe\__main__.py", line 5, in <module>
+    sys.exit(console_main())
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 223, in console_main
+    code = main()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 199, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_hooks.py", line 512, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\pluggy\_callers.py", line 121, in _multicall
+    res = hook_impl.function(*args)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\main.py", line 365, in pytest_cmdline_main
+    return wrap_session(config, _main)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\main.py", line 360, in wrap_session
+    config._ensure_unconfigure()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\config\__init__.py", line 1171, in _ensure_unconfigure
+    self._cleanup_stack.close()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 627, in close
+    self.__exit__(None, None, None)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 604, in __exit__
+    if cb(*exc_details):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 482, in _exit_wrapper
+    callback(*args, **kwds)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\unraisableexception.py", line 94, in cleanup
+    gc_collect_harder(gc_collect_iterations)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\unraisableexception.py", line 33, in gc_collect_harder
+    gc.collect()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\aiohttp\client.py", line 461, in __del__
+    self._loop.call_exception_handler(context)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 1903, in call_exception_handler
+    self.default_exception_handler(context)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 1875, in default_exception_handler
+    logger.error('\n'.join(log_lines), exc_info=exc_info)
+Message: 'Unclosed client session\nclient_session: <aiohttp.client.ClientSession object at 0x0000025097AAFB60>'
+Arguments: ()
+--- Logging error ---
+Traceback (most recent call last):
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\logging\__init__.py", line 1154, in emit
+    stream.write(msg + self.terminator)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: I/O operation on closed file.
+Call stack:
+
+
+=================================== ERRORS ====================================
+_________________________ ERROR at setup of test_mode _________________________
+file D:\SME\tests\test_gephi_bridge.py, line 10
+  def test_mode(mode, expected_success=True):
+E       fixture 'mode' not found
+>       available fixtures: anyio_backend, anyio_backend_name, anyio_backend_options, cache, capfd, capfdbinary, capfire, caplog, capsys, capsysbinary, capteesys, cov, doctest_namespace, free_tcp_port, free_tcp_port_factory, free_udp_port, free_udp_port_factory, hydra_restore_singletons, hydra_sweep_runner, hydra_task_runner, logfire_pytest, monkeypatch, no_cover, pytestconfig, record_property, record_testsuite_property, record_xml_attribute, recwarn, subtests, tmp_path, tmp_path_factory, tmpdir, tmpdir_factory
+>       use 'pytest --fixtures [testpath]' for help on them.
+
+D:\SME\tests\test_gephi_bridge.py:10
+================================== FAILURES ===================================
+___________ TestAdvancedNLPIntegration.test_comprehensive_analysis ____________
+
+self = <tests.test_advanced_nlp.TestAdvancedNLPIntegration testMethod=test_comprehensive_analysis>
+
+    def test_comprehensive_analysis(self):
+        """Test comprehensive analysis."""
+        text = "Yesterday, John went to New York. He met with Sarah and they discussed the project."
+        analysis = self.engine.analyze_advanced(text)
+    
+        if analysis:
+            # All components populated
+>           self.assertGreater(len(analysis.dependencies), 0)
+E           AssertionError: 0 not greater than 0
+
+tests\test_advanced_nlp.py:269: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+WARNING  src.core.advanced_nlp:advanced_nlp.py:212 spaCy not available: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+________ TestAdvancedNLPIntegration.test_integration_with_nlp_pipeline ________
+
+self = <tests.test_advanced_nlp.TestAdvancedNLPIntegration testMethod=test_integration_with_nlp_pipeline>
+
+    def test_integration_with_nlp_pipeline(self):
+        """Test integration with base NLPPipeline."""
+        text = "John gave Mary a book."
+        analysis = self.engine.analyze_advanced(text)
+    
+        if analysis:
+            # Should have base analysis
+>           self.assertIsNotNone(analysis.base_analysis)
+E           AssertionError: unexpectedly None
+
+tests\test_advanced_nlp.py:260: AssertionError
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+WARNING  src.core.advanced_nlp:advanced_nlp.py:212 spaCy not available: [E050] Can't find model 'en_core_web_sm'. It doesn't seem to be a Python package or a valid path to a data directory.
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+_____________________________ test_crawler_sling ______________________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+________________ TestEventHandler.test_handler_execution_error ________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+______________________ TestEventBus.test_bus_start_stop _______________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+_____________ TestAsyncEventHandling.test_sync_handler_execution ______________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+_____________ TestAsyncEventHandling.test_async_handler_execution _____________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+____________ TestAsyncEventHandling.test_multiple_event_processing ____________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+_________________ TestEventFiltering.test_filter_by_criteria __________________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+______________ TestEventBusIntegration.test_real_world_scenario _______________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+__________ TestEventBusIntegration.test_error_handling_and_recovery ___________
+async def functions are not natively supported.
+You need to install a suitable plugin for your async framework, for example:
+  - anyio
+  - pytest-asyncio
+  - pytest-tornasync
+  - pytest-trio
+  - pytest-twisted
+__________ test_extension_handler_returns_string[ext_behavior_audit] __________
+
+extension_manager = <gateway.extension_manager.ExtensionManager object at 0x00000250903BB770>
+ext_name = 'ext_behavior_audit'
+
+    @pytest.mark.parametrize("ext_name", EXTENSION_NAMES)
+    def test_extension_handler_returns_string(extension_manager, ext_name):
+        """
+        Call each tool handler with an empty string and verify it returns a string
+        (or raises a predictable ValueError/TypeError, not an unhandled crash).
+        """
+        all_tools: List[Dict[str, Any]] = extension_manager.get_extension_tools()
+        ext_tools = [t for t in all_tools if t.get("plugin_id") == ext_name]
+    
+        for tool in ext_tools:
+            handler = tool["handler"]
+            try:
+                if inspect.iscoroutinefunction(handler):
+                    result = asyncio.run(handler(""))
+                else:
+                    result = handler("")
+                # If it returns something, it must be a string (JSON or plain text)
+                if result is not None:
+>                   assert isinstance(result, str), (
+                        f"Tool '{tool['name']}' returned {type(result)} instead of str."
+                    )
+E                   AssertionError: Tool 'profile_rhetorical_motive' returned <class 'dict'> instead of str.
+E                   assert False
+E                    +  where False = isinstance({'message': 'Provenance profiling started in background thread', 'status': 'BACKGROUND_PROFILING_STARTED', 'thread_id': 21100}, str)
+
+tests\test_extension_matrix.py:143: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+extension_manager = <gateway.extension_manager.ExtensionManager object at 0x00000250903BB770>
+ext_name = 'ext_behavior_audit'
+
+    @pytest.mark.parametrize("ext_name", EXTENSION_NAMES)
+    def test_extension_handler_returns_string(extension_manager, ext_name):
+        """
+        Call each tool handler with an empty string and verify it returns a string
+        (or raises a predictable ValueError/TypeError, not an unhandled crash).
+        """
+        all_tools: List[Dict[str, Any]] = extension_manager.get_extension_tools()
+        ext_tools = [t for t in all_tools if t.get("plugin_id") == ext_name]
+    
+        for tool in ext_tools:
+            handler = tool["handler"]
+            try:
+                if inspect.iscoroutinefunction(handler):
+                    result = asyncio.run(handler(""))
+                else:
+                    result = handler("")
+                # If it returns something, it must be a string (JSON or plain text)
+                if result is not None:
+                    assert isinstance(result, str), (
+                        f"Tool '{tool['name']}' returned {type(result)} instead of str."
+                    )
+            except (ValueError, TypeError, NotImplementedError):
+                # Acceptable — the handler correctly rejects empty/invalid input
+                pass
+            except Exception as exc:
+>               pytest.fail(
+                    f"Tool '{tool['name']}' from extension '{ext_name}' raised an "
+                    f"unexpected exception when called with an empty string: {exc!r}"
+                )
+E               Failed: Tool 'profile_rhetorical_motive' from extension 'ext_behavior_audit' raised an unexpected exception when called with an empty string: AssertionError("Tool 'profile_rhetorical_motive' returned <class 'dict'> instead of str.\nassert False\n +  where False = isinstance({'message': 'Provenance profiling started in background thread', 'status': 'BACKGROUND_PROFILING_STARTED', 'thread_id': 21100}, str)")
+
+tests\test_extension_matrix.py:150: Failed
+---------------------------- Captured stdout call -----------------------------
+\U0001f50d Rhetorical Behavior Audit: Starting safe analysis\n\U0001f50d Starting rhetorical behavior audit for text length: 0 characters\n\U0001f4ca Sentiment volatility: 0.0\n\U0001f524 Type-Token Ratio: 0.0, Lexical diversity: 0.1\n\U0001f504 Synthetic repetitiveness: 0.0\n\U0001f4ac Emphatic qualifiers detected: 0\n\U0001f6ab Non-contracted denials detected: 0\n\U0001f50d Provenance Profiler: Starting analysis\n\U0001f50d Starting provenance profiling for text length: 0 characters\n\U0001f4ca God term density: 0.000 (0 terms)\n\U0001f4ca Devil term density: 0.000 (0 terms)\n\U0001f9f5 Background profiling started (Thread ID: 21100)\U0001f4ca Total ultimate term density: 0.000\n
+------------------------------ Captured log call ------------------------------
+WARNING  behavior_audit.governor_integration:governor_integration.py:85 Governor system not available, assuming NORMAL status
+INFO     behavior_audit.governor_integration:governor_integration.py:137 Safe to analyze: Governor=NORMAL, GPU=LOW
+INFO     behavior_audit.governor_integration:governor_integration.py:159 Analysis completed in 0.23s. Total analyses: 1
+INFO     behavior_audit.provenance_profiler:provenance_profiler.py:475 Background profiling started for text length: 0 characters
+ERROR    behavior_audit.provenance_profiler:provenance_profiler.py:467 Background profiling failed: 'charmap' codec can't encode character '\U0001f4cf' in position 0: character maps to <undefined>
+____________ test_extension_handler_returns_string[ext_ghost_trap] ____________
+
+extension_manager = <gateway.extension_manager.ExtensionManager object at 0x00000250903BB770>
+ext_name = 'ext_ghost_trap'
+
+    @pytest.mark.parametrize("ext_name", EXTENSION_NAMES)
+    def test_extension_handler_returns_string(extension_manager, ext_name):
+        """
+        Call each tool handler with an empty string and verify it returns a string
+        (or raises a predictable ValueError/TypeError, not an unhandled crash).
+        """
+        all_tools: List[Dict[str, Any]] = extension_manager.get_extension_tools()
+        ext_tools = [t for t in all_tools if t.get("plugin_id") == ext_name]
+    
+        for tool in ext_tools:
+            handler = tool["handler"]
+            try:
+                if inspect.iscoroutinefunction(handler):
+                    result = asyncio.run(handler(""))
+                else:
+                    result = handler("")
+                # If it returns something, it must be a string (JSON or plain text)
+                if result is not None:
+>                   assert isinstance(result, str), (
+                        f"Tool '{tool['name']}' returned {type(result)} instead of str."
+                    )
+E                   AssertionError: Tool 'scan_for_ghosts' returned <class 'dict'> instead of str.
+E                   assert False
+E                    +  where False = isinstance({'message': 'No suspicious files detected.', 'status': 'clean', 'suspicious_files': [], 'total_files_scanned': 0}, str)
+
+tests\test_extension_matrix.py:143: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+extension_manager = <gateway.extension_manager.ExtensionManager object at 0x00000250903BB770>
+ext_name = 'ext_ghost_trap'
+
+    @pytest.mark.parametrize("ext_name", EXTENSION_NAMES)
+    def test_extension_handler_returns_string(extension_manager, ext_name):
+        """
+        Call each tool handler with an empty string and verify it returns a string
+        (or raises a predictable ValueError/TypeError, not an unhandled crash).
+        """
+        all_tools: List[Dict[str, Any]] = extension_manager.get_extension_tools()
+        ext_tools = [t for t in all_tools if t.get("plugin_id") == ext_name]
+    
+        for tool in ext_tools:
+            handler = tool["handler"]
+            try:
+                if inspect.iscoroutinefunction(handler):
+                    result = asyncio.run(handler(""))
+                else:
+                    result = handler("")
+                # If it returns something, it must be a string (JSON or plain text)
+                if result is not None:
+                    assert isinstance(result, str), (
+                        f"Tool '{tool['name']}' returned {type(result)} instead of str."
+                    )
+            except (ValueError, TypeError, NotImplementedError):
+                # Acceptable — the handler correctly rejects empty/invalid input
+                pass
+            except Exception as exc:
+>               pytest.fail(
+                    f"Tool '{tool['name']}' from extension '{ext_name}' raised an "
+                    f"unexpected exception when called with an empty string: {exc!r}"
+                )
+E               Failed: Tool 'scan_for_ghosts' from extension 'ext_ghost_trap' raised an unexpected exception when called with an empty string: AssertionError("Tool 'scan_for_ghosts' returned <class 'dict'> instead of str.\nassert False\n +  where False = isinstance({'message': 'No suspicious files detected.', 'status': 'clean', 'suspicious_files': [], 'total_files_scanned': 0}, str)")
+
+tests\test_extension_matrix.py:150: Failed
+---------------------------- Captured stdout call -----------------------------
+\U0001f50d Ghost Trap: Starting scan with config: {'project_root': 'D:\\\\SME', 'size_threshold_mb': 100, 'recursive': True, 'detailed_report': True}\n\U0001f50d Scanning for ghost files in: D:\\SME\n\u2705 Scan completed. Found 0 suspicious files.\n\u2705 No suspicious files detected in the scan.
+------------------------------ Captured log call ------------------------------
+INFO     ghost_trap.ghost_detector:ghost_detector.py:132 Starting ghost scan in: D:\SME
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.47GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.49GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.52GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.51GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.52GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.52GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.52GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.53GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.54GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.56GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.55GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.56GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.56GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.56GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.55GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.55GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.56GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.56GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.57GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.59GB > 5.8GB
+WARNING  LawnmowerMan.Governor:plugin.py:89 [Governor] VRAM usage critical: 18.62GB > 5.8GB
+INFO     ghost_trap.ghost_detector:ghost_detector.py:178 Ghost scan completed. Found 0 suspicious files.
+___________ test_extension_handler_returns_string[ext_social_intel] ___________
+
+extension_manager = <gateway.extension_manager.ExtensionManager object at 0x00000250903BB770>
+ext_name = 'ext_social_intel'
+
+    @pytest.mark.parametrize("ext_name", EXTENSION_NAMES)
+    def test_extension_handler_returns_string(extension_manager, ext_name):
+        """
+        Call each tool handler with an empty string and verify it returns a string
+        (or raises a predictable ValueError/TypeError, not an unhandled crash).
+        """
+        all_tools: List[Dict[str, Any]] = extension_manager.get_extension_tools()
+        ext_tools = [t for t in all_tools if t.get("plugin_id") == ext_name]
+    
+        for tool in ext_tools:
+            handler = tool["handler"]
+            try:
+                if inspect.iscoroutinefunction(handler):
+                    result = asyncio.run(handler(""))
+                else:
+                    result = handler("")
+                # If it returns something, it must be a string (JSON or plain text)
+                if result is not None:
+>                   assert isinstance(result, str), (
+                        f"Tool '{tool['name']}' returned {type(result)} instead of str."
+                    )
+E                   AssertionError: Tool 'monitor_hashtag_campaign' returned <class 'dict'> instead of str.
+E                   assert False
+E                    +  where False = isinstance({'error': 'Invalid hashtag provided'}, str)
+
+tests\test_extension_matrix.py:143: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+extension_manager = <gateway.extension_manager.ExtensionManager object at 0x00000250903BB770>
+ext_name = 'ext_social_intel'
+
+    @pytest.mark.parametrize("ext_name", EXTENSION_NAMES)
+    def test_extension_handler_returns_string(extension_manager, ext_name):
+        """
+        Call each tool handler with an empty string and verify it returns a string
+        (or raises a predictable ValueError/TypeError, not an unhandled crash).
+        """
+        all_tools: List[Dict[str, Any]] = extension_manager.get_extension_tools()
+        ext_tools = [t for t in all_tools if t.get("plugin_id") == ext_name]
+    
+        for tool in ext_tools:
+            handler = tool["handler"]
+            try:
+                if inspect.iscoroutinefunction(handler):
+                    result = asyncio.run(handler(""))
+                else:
+                    result = handler("")
+                # If it returns something, it must be a string (JSON or plain text)
+                if result is not None:
+                    assert isinstance(result, str), (
+                        f"Tool '{tool['name']}' returned {type(result)} instead of str."
+                    )
+            except (ValueError, TypeError, NotImplementedError):
+                # Acceptable — the handler correctly rejects empty/invalid input
+                pass
+            except Exception as exc:
+>               pytest.fail(
+                    f"Tool '{tool['name']}' from extension '{ext_name}' raised an "
+                    f"unexpected exception when called with an empty string: {exc!r}"
+                )
+E               Failed: Tool 'monitor_hashtag_campaign' from extension 'ext_social_intel' raised an unexpected exception when called with an empty string: AssertionError("Tool 'monitor_hashtag_campaign' returned <class 'dict'> instead of str.\nassert False\n +  where False = isinstance({'error': 'Invalid hashtag provided'}, str)")
+
+tests\test_extension_matrix.py:150: Failed
+_____________________ TestGatekeeper.test_vault_proximity _____________________
+
+self = <tests.test_gatekeeper_v1_2.TestGatekeeper testMethod=test_vault_proximity>
+
+    def test_vault_proximity(self):
+        # Text identical to vault sample
+        vault_text = "ultimately, the decision rests with the stakeholders."
+        proximity = calculate_vault_proximity(vault_text)
+        print(f"Vault Proximity for exact match: {proximity}")
+>       self.assertGreater(proximity, 0.8, "Proximity should be high for vault text")
+E       AssertionError: 0.0 not greater than 0.8 : Proximity should be high for vault text
+
+tests\test_gatekeeper_v1_2.py:17: AssertionError
+---------------------------- Captured stdout call -----------------------------
+Vault Proximity for exact match: 0.0
+______________ TestImportStructure.test_backward_compat_imports _______________
+
+self = <tests.test_integration.TestImportStructure object at 0x000002508C50B9D0>
+
+    def test_backward_compat_imports(self):
+        """Test that old import paths still work via shims."""
+        # These should work via backward compatibility shims
+        try:
+>           from scribe_authorship import ScribeEngine
+E           ModuleNotFoundError: No module named 'scribe_authorship'
+
+tests\test_integration.py:25: ModuleNotFoundError
+
+During handling of the above exception, another exception occurred:
+
+self = <tests.test_integration.TestImportStructure object at 0x000002508C50B9D0>
+
+    def test_backward_compat_imports(self):
+        """Test that old import paths still work via shims."""
+        # These should work via backward compatibility shims
+        try:
+            from scribe_authorship import ScribeEngine
+            from adaptive_scout import Scout
+            from retrieval_query import SemanticSearchEngine
+            from memory_synapse import MemoryConsolidator
+        except ImportError as e:
+>           pytest.fail(f"Backward compatibility import failed: {e}")
+E           Failed: Backward compatibility import failed: No module named 'scribe_authorship'
+
+tests\test_integration.py:30: Failed
+_________________ TestModuleStructure.test_core_modules_exist _________________
+
+self = <tests.test_integration.TestModuleStructure object at 0x000002508C560770>
+
+    def test_core_modules_exist(self):
+        """Test that core modules are properly structured."""
+>       from src.core import centrifuge, semantic_db, config, factory
+
+tests\test_integration.py:190: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+>   import chromadb
+E   ModuleNotFoundError: No module named 'chromadb'
+
+src\core\semantic_db.py:1: ModuleNotFoundError
+_____________ TestLegacyCompatibility.test_legacy_files_archived ______________
+
+self = <tests.test_integration.TestLegacyCompatibility object at 0x000002508C50AFD0>
+
+    def test_legacy_files_archived(self):
+        """Test that legacy directory exists and contains old files."""
+        legacy_path = Path(__file__).parent.parent / "legacy"
+>       assert legacy_path.exists(), "Legacy directory should exist"
+E       AssertionError: Legacy directory should exist
+E       assert False
+E        +  where False = exists()
+E        +    where exists = WindowsPath('D:/SME/legacy').exists
+
+tests\test_integration.py:203: AssertionError
+__________________ TestNLPPipelineBasics.test_lemmatization ___________________
+
+self = <tests.test_nlp_pipeline.TestNLPPipelineBasics testMethod=test_lemmatization>
+
+    def test_lemmatization(self):
+        """Test lemmatization."""
+        text = "The dogs are running quickly"
+        analysis = self.nlp.analyze(text)
+    
+        # Lemmas dictionary should be populated
+>       self.assertGreater(len(analysis.lemmas), 0)
+                               ^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'lemmas'
+
+tests\test_nlp_pipeline.py:69: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.161440Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.161822Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.161951Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.162048Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.163801Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+___________________ TestNLPPipelineBasics.test_pos_tagging ____________________
+
+self = <tests.test_nlp_pipeline.TestNLPPipelineBasics testMethod=test_pos_tagging>
+
+    def test_pos_tagging(self):
+        """Test POS tag assignment."""
+        text = "I run quickly"
+        analysis = self.nlp.analyze(text)
+    
+        # Extract POS tags
+>       pos_dict = {word: pos for word, pos in analysis.pos_tags}
+                                               ^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'pos_tags'
+
+tests\test_nlp_pipeline.py:56: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.171704Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.171992Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.172106Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.172198Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.173729Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+_________________ TestNLPPipelineBasics.test_simple_analysis __________________
+
+self = <tests.test_nlp_pipeline.TestNLPPipelineBasics testMethod=test_simple_analysis>
+
+    def test_simple_analysis(self):
+        """Test analysis of simple sentence."""
+        text = "The quick brown fox jumps."
+        analysis = self.nlp.analyze(text)
+    
+>       self.assertIsNotNone(analysis)
+E       AssertionError: unexpectedly None
+
+tests\test_nlp_pipeline.py:34: AssertionError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.179745Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.180016Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.180122Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.180207Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.181702Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+___________________ TestNLPPipelineBasics.test_tokenization ___________________
+
+self = <tests.test_nlp_pipeline.TestNLPPipelineBasics testMethod=test_tokenization>
+
+    def test_tokenization(self):
+        """Test sentence and word tokenization."""
+        text = "The dog runs. The cat sleeps."
+        analysis = self.nlp.analyze(text)
+    
+        # Should have 2 sentences
+>       self.assertEqual(len(analysis.sentences), 2)
+                             ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'sentences'
+
+tests\test_nlp_pipeline.py:45: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.187266Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.187532Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.187638Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.187726Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.189184Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+________________ TestNLPTokenAnalysis.test_stopword_detection _________________
+
+self = <tests.test_nlp_pipeline.TestNLPTokenAnalysis testMethod=test_stopword_detection>
+
+    def test_stopword_detection(self):
+        """Test stopword identification."""
+        text = "the cat and dog"
+        analysis = self.nlp.analyze(text)
+    
+        # Find stopwords
+>       stopword_tokens = [t for t in analysis.tokens if t.is_stopword]
+                                      ^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'tokens'
+
+tests\test_nlp_pipeline.py:104: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.194721Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.194976Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.195081Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.195168Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.196620Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+__________________ TestNLPTokenAnalysis.test_token_structure __________________
+
+self = <tests.test_nlp_pipeline.TestNLPTokenAnalysis testMethod=test_token_structure>
+
+    def test_token_structure(self):
+        """Test Token dataclass structure."""
+        text = "Machine learning"
+        analysis = self.nlp.analyze(text)
+    
+>       tokens = analysis.tokens
+                 ^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'tokens'
+
+tests\test_nlp_pipeline.py:88: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.202063Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.202329Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.202435Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.202521Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.203952Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+_______________ TestNLPEntityExtraction.test_entity_extraction ________________
+
+self = <tests.test_nlp_pipeline.TestNLPEntityExtraction testMethod=test_entity_extraction>
+
+    def test_entity_extraction(self):
+        """Test basic entity extraction."""
+        text = "John Smith works at Microsoft in Seattle"
+        analysis = self.nlp.analyze(text)
+    
+        # Should have entities
+>       self.assertGreater(len(analysis.entities), 0)
+                               ^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'entities'
+
+tests\test_nlp_pipeline.py:126: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.209389Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.209638Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.209745Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.209833Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.211284Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+________________ TestNLPEntityExtraction.test_entity_structure ________________
+
+self = <tests.test_nlp_pipeline.TestNLPEntityExtraction testMethod=test_entity_structure>
+
+    def test_entity_structure(self):
+        """Test NamedEntity structure."""
+        text = "Dr. John Smith is visiting Paris"
+        analysis = self.nlp.analyze(text)
+    
+>       for entity in analysis.entities:
+                      ^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'entities'
+
+tests\test_nlp_pipeline.py:141: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.217778Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.218131Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.218265Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.218357Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.220014Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+______________ TestNLPKeyTermExtraction.test_key_terms_property _______________
+
+self = <tests.test_nlp_pipeline.TestNLPKeyTermExtraction testMethod=test_key_terms_property>
+
+    def test_key_terms_property(self):
+        """Test key_terms property of analysis."""
+        text = "Machine learning is powerful. Deep learning uses neural networks."
+        analysis = self.nlp.analyze(text)
+    
+>       key_terms = analysis.key_terms
+                    ^^^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'key_terms'
+
+tests\test_nlp_pipeline.py:159: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.235540Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.235812Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.235942Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.236031Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.237526Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+_____________ TestNLPComplexityMetrics.test_complexity_comparison _____________
+
+self = <tests.test_nlp_pipeline.TestNLPComplexityMetrics testMethod=test_complexity_comparison>
+
+    def test_complexity_comparison(self):
+        """Test that complexity metrics differentiate texts."""
+        simple = "Dog run. Cat sleep."
+        complex = "The sophisticated canine rapidly traverses the verdant meadow."
+    
+        simple_metrics = self.nlp.get_linguistic_complexity(simple)
+        complex_metrics = self.nlp.get_linguistic_complexity(complex)
+    
+        # Complex text should have different metrics
+        self.assertNotEqual(
+>           simple_metrics['stopword_ratio'],
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            complex_metrics['stopword_ratio']
+        )
+E       KeyError: 'stopword_ratio'
+
+tests\test_nlp_pipeline.py:238: KeyError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.247197Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.247471Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.247577Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.247664Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.249138Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.250609Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+_______________ TestNLPComplexityMetrics.test_complexity_values _______________
+
+self = <tests.test_nlp_pipeline.TestNLPComplexityMetrics testMethod=test_complexity_values>
+
+    def test_complexity_values(self):
+        """Test that complexity values are reasonable."""
+        text = "The dog runs. The cat sleeps. The bird flies."
+        metrics = self.nlp.get_linguistic_complexity(text)
+    
+        # All ratios should be between 0 and 1
+>       self.assertGreaterEqual(metrics['stopword_ratio'], 0)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'stopword_ratio'
+
+tests\test_nlp_pipeline.py:222: KeyError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.256434Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.256804Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.256911Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.256994Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.258587Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+____________ TestNLPComplexityMetrics.test_get_complexity_metrics _____________
+
+self = <tests.test_nlp_pipeline.TestNLPComplexityMetrics testMethod=test_get_complexity_metrics>
+
+    def test_get_complexity_metrics(self):
+        """Test complexity metric calculation."""
+        text = "The quick brown fox jumps over the lazy dog. " * 2
+        metrics = self.nlp.get_linguistic_complexity(text)
+    
+        # Should return dictionary with expected keys
+        expected_keys = [
+            'stopword_ratio',
+            'vocabulary_richness',
+            'avg_sentence_length',
+            'entity_density',
+            'total_tokens',
+            'unique_terms',
+            'entity_count',
+            'phrase_count'
+        ]
+    
+        for key in expected_keys:
+>           self.assertIn(key, metrics)
+E           AssertionError: 'stopword_ratio' not found in {}
+
+tests\test_nlp_pipeline.py:214: AssertionError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.264139Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.264409Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.264509Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.264592Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.265997Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+_______________ TestNLPPhraseExtraction.test_phrase_extraction ________________
+
+self = <tests.test_nlp_pipeline.TestNLPPhraseExtraction testMethod=test_phrase_extraction>
+
+    def test_phrase_extraction(self):
+        """Test phrase identification."""
+        text = "The quick brown fox jumps over the fence"
+        analysis = self.nlp.analyze(text)
+    
+        # Should have phrases
+>       self.assertGreater(len(analysis.phrases), 0)
+                               ^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'phrases'
+
+tests\test_nlp_pipeline.py:256: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.271641Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.271911Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.272012Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.272096Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.273512Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+________________ TestNLPPhraseExtraction.test_phrase_structure ________________
+
+self = <tests.test_nlp_pipeline.TestNLPPhraseExtraction testMethod=test_phrase_structure>
+
+    def test_phrase_structure(self):
+        """Test Phrase dataclass structure."""
+        text = "The big dog barked loudly"
+        analysis = self.nlp.analyze(text)
+    
+>       for phrase in analysis.phrases:
+                      ^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'phrases'
+
+tests\test_nlp_pipeline.py:263: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.278815Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.279063Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.279163Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.279246Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.280637Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+______________ TestNLPIntegration.test_analysis_reproducibility _______________
+
+self = <tests.test_nlp_pipeline.TestNLPIntegration testMethod=test_analysis_reproducibility>
+
+    def test_analysis_reproducibility(self):
+        """Test that analysis is reproducible."""
+        text = "The quick brown fox"
+        analysis1 = self.nlp.analyze(text)
+        analysis2 = self.nlp.analyze(text)
+    
+        # Should produce identical results
+>       self.assertEqual(len(analysis1.tokens), len(analysis2.tokens))
+                             ^^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'tokens'
+
+tests\test_nlp_pipeline.py:304: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.286815Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.287158Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.287268Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.287352Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.288860Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.290242Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+______________ TestNLPIntegration.test_full_analysis_consistency ______________
+
+self = <tests.test_nlp_pipeline.TestNLPIntegration testMethod=test_full_analysis_consistency>
+
+    def test_full_analysis_consistency(self):
+        """Test consistency across analysis components."""
+        text = "Python developers love programming in Python"
+        analysis = self.nlp.analyze(text)
+    
+        # Token count should match POS tags
+>       self.assertEqual(len(analysis.tokens), len(analysis.pos_tags))
+                             ^^^^^^^^^^^^^^^
+E       AttributeError: 'NoneType' object has no attribute 'tokens'
+
+tests\test_nlp_pipeline.py:291: AttributeError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.295561Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.295804Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.295904Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.295986Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.297352Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+______________________ TestNLPEdgeCases.test_single_word ______________________
+
+self = <tests.test_nlp_pipeline.TestNLPEdgeCases testMethod=test_single_word>
+
+    def test_single_word(self):
+        """Test single word analysis."""
+        result = self.nlp.analyze("Hello")
+>       self.assertIsNotNone(result)
+E       AssertionError: unexpectedly None
+
+tests\test_nlp_pipeline.py:324: AssertionError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.308886Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.309118Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.309218Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.309302Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.310672Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+__________________ TestNLPEdgeCases.test_special_characters ___________________
+
+self = <tests.test_nlp_pipeline.TestNLPEdgeCases testMethod=test_special_characters>
+
+    def test_special_characters(self):
+        """Test text with special characters."""
+        text = "Email me@example.com or call 555-1234"
+        result = self.nlp.analyze(text)
+>       self.assertIsNotNone(result)
+E       AssertionError: unexpectedly None
+
+tests\test_nlp_pipeline.py:331: AssertionError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.315865Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.316100Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.316200Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.316283Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.317740Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+_____________________ TestNLPEdgeCases.test_unicode_text ______________________
+
+self = <tests.test_nlp_pipeline.TestNLPEdgeCases testMethod=test_unicode_text>
+
+    def test_unicode_text(self):
+        """Test Unicode text handling."""
+        text = "Café, naïve, résumé"
+        result = self.nlp.analyze(text)
+>       self.assertIsNotNone(result)
+E       AssertionError: unexpectedly None
+
+tests\test_nlp_pipeline.py:337: AssertionError
+---------------------------- Captured stderr call -----------------------------
+{"timestamp": "2026-02-25T00:17:14.329179Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "NLTK not available. Install with: pip install nltk", "module": "data_manager", "function": "__init__", "line": 89, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.329898Z", "level": "ERROR", "logger": "src.core.data_manager", "message": "DataManager not available", "module": "data_manager", "function": "ensure_required_data", "line": 119, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.330155Z", "level": "WARNING", "logger": "src.core.nlp_pipeline", "message": "Some NLTK data not available", "module": "nlp_pipeline", "function": "__init__", "line": 150, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.330364Z", "level": "INFO", "logger": "src.core.nlp_pipeline", "message": "NLPPipeline initialized", "module": "nlp_pipeline", "function": "__init__", "line": 152, "hostname": "unknown", "field": "original"}
+{"timestamp": "2026-02-25T00:17:14.334031Z", "level": "ERROR", "logger": "src.core.nlp_pipeline", "message": "Analysis failed: \n**********************************************************************\n  Resource \u001b[93maveraged_perceptron_tagger_eng\u001b[0m not found.\n  Please use the NLTK Downloader to obtain the resource:\n\n  \u001b[31m>>> import nltk\n  >>> nltk.download('averaged_perceptron_tagger_eng')\n  \u001b[0m\n  For more information see: https://www.nltk.org/data.html\n\n  Attempted to load \u001b[93mtaggers/averaged_perceptron_tagger_eng\u001b[0m\n\n  Searched in:\n    - 'C:\\\\Users\\\\spectre/nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\share\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python314\\\\lib\\\\nltk_data'\n    - 'C:\\\\Users\\\\spectre\\\\AppData\\\\Roaming\\\\nltk_data'\n    - 'C:\\\\nltk_data'\n    - 'D:\\\\nltk_data'\n    - 'E:\\\\nltk_data'\n**********************************************************************\n", "module": "nlp_pipeline", "function": "analyze", "line": 238, "hostname": "unknown", "field": "original"}
+------------------------------ Captured log call ------------------------------
+ERROR    src.core.data_manager:data_manager.py:89 NLTK not available. Install with: pip install nltk
+ERROR    src.core.data_manager:data_manager.py:119 DataManager not available
+WARNING  src.core.nlp_pipeline:nlp_pipeline.py:150 Some NLTK data not available
+INFO     src.core.nlp_pipeline:nlp_pipeline.py:152 NLPPipeline initialized
+ERROR    src.core.nlp_pipeline:nlp_pipeline.py:238 Analysis failed: 
+**********************************************************************
+  Resource [93maveraged_perceptron_tagger_eng[0m not found.
+  Please use the NLTK Downloader to obtain the resource:
+
+  [31m>>> import nltk
+  >>> nltk.download('averaged_perceptron_tagger_eng')
+  [0m
+  For more information see: https://www.nltk.org/data.html
+
+  Attempted to load [93mtaggers/averaged_perceptron_tagger_eng[0m
+
+  Searched in:
+    - 'C:\\Users\\spectre/nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\share\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\lib\\nltk_data'
+    - 'C:\\Users\\spectre\\AppData\\Roaming\\nltk_data'
+    - 'C:\\nltk_data'
+    - 'D:\\nltk_data'
+    - 'E:\\nltk_data'
+**********************************************************************
+_______________ TestEntityLinkerBasics.test_entity_recognition ________________
+
+self = <tests.test_phase5_analytics.TestEntityLinkerBasics object at 0x000002508A018190>
+
+    def test_entity_recognition(self):
+        """Test entity recognition."""
+        linker = EntityLinker()
+        result = linker.link_entities("Albert Einstein was a physicist.")
+    
+        assert len(result.entities) > 0
+>       assert any(e.entity_type == EntityType.PERSON for e in result.entities)
+E       assert False
+E        +  where False = any(<generator object TestEntityLinkerBasics.test_entity_recognition.<locals>.<genexpr> at 0x0000025097DE3D30>)
+
+tests\test_phase5_analytics.py:337: AssertionError
+============================== warnings summary ===============================
+conftest.py:9
+  D:\SME\conftest.py:9: UserWarning: Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.
+    import pydantic.v1.main as pydantic_main
+
+C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\scipy\spatial\distance.py:670
+  C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\scipy\spatial\distance.py:670: RuntimeWarning: invalid value encountered in scalar divide
+    dist = 1.0 - uv / math.sqrt(uu * vv)
+
+tests/test_aether.py::test_vector_syncer
+  C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but tests/test_aether.py::test_vector_syncer returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+tests/test_aether.py::test_signature_library
+  C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but tests/test_aether.py::test_signature_library returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+tests/test_aether.py::test_epistemic_gate
+  C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\site-packages\_pytest\python.py:170: PytestReturnNotNoneWarning: Test functions should return None, but tests/test_aether.py::test_epistemic_gate returned <class 'bool'>.
+  Did you mean to use `assert` instead of `return`?
+  See https://docs.pytest.org/en/stable/how-to/assert.html#return-not-none for more information.
+    warnings.warn(
+
+tests/test_extension_matrix.py::test_extension_handler_returns_string[ext_ghost_trap]
+  C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\site-packages\\_pytest\\threadexception.py:58: PytestUnhandledThreadExceptionWarning: Exception in thread Thread-2 (profiling_task)\n  \n  Traceback (most recent call last):\n    File "D:\\SME\\extensions\\ext_behavior_audit\\provenance_profiler.py", line 462, in profiling_task\n      result = profile_rhetorical_motive(text)\n    File "D:\\SME\\extensions\\ext_behavior_audit\\provenance_profiler.py", line 431, in profile_rhetorical_motive\n      result = profiler.profile_rhetorical_motive(text)\n    File "D:\\SME\\extensions\\ext_behavior_audit\\provenance_profiler.py", line 314, in profile_rhetorical_motive\n      print(f"\U0001f4cf Distance markers detected: {distance_markers_count}")\n      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    File "C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\encodings\\cp1252.py", line 19, in encode\n      return codecs.charmap_encode(input,self.errors,encoding_table)[0]\n             ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  UnicodeEncodeError: 'charmap' codec can't encode character '\\U0001f4cf' in position 0: character maps to <undefined>\n  \n  During handling of the above exception, another exception occurred:\n  \n  Traceback (most recent call last):\n    File "C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\threading.py", line 1082, in _bootstrap_inner\n      self._context.run(self.run)\n      ~~~~~~~~~~~~~~~~~^^^^^^^^^^\n    File "C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\threading.py", line 1024, in run\n      self._target(*self._args, **self._kwargs)\n      ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    File "D:\\SME\\extensions\\ext_behavior_audit\\provenance_profiler.py", line 469, in profiling_task\n      callback({'error': str(e), 'status': 'PROFILING_FAILED'})\n      ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    File "D:\\SME\\extensions\\ext_behavior_audit\\plugin.py", line 282, in callback\n      print(f"\u2705 Background profiling completed. Status: {result.get('status', 'unknown')}")\n      ~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    File "C:\\Users\\spectre\\AppData\\Local\\Programs\\Python\\Python314\\Lib\\encodings\\cp1252.py", line 19, in encode\n      return codecs.charmap_encode(input,self.errors,encoding_table)[0]\n             ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  UnicodeEncodeError: 'charmap' codec can't encode character '\\u2705' in position 0: character maps to <undefined>\n  \n  Enable tracemalloc to get traceback where the object was allocated.\n  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.\n    warnings.warn(pytest.PytestUnhandledThreadExceptionWarning(msg))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_advanced_nlp.py::TestAdvancedNLPIntegration::test_comprehensive_analysis
+FAILED tests/test_advanced_nlp.py::TestAdvancedNLPIntegration::test_integration_with_nlp_pipeline
+FAILED tests/test_crawler_sling.py::test_crawler_sling - Failed: async def fu...
+FAILED tests/test_events.py::TestEventHandler::test_handler_execution_error
+FAILED tests/test_events.py::TestEventBus::test_bus_start_stop - Failed: asyn...
+FAILED tests/test_events.py::TestAsyncEventHandling::test_sync_handler_execution
+FAILED tests/test_events.py::TestAsyncEventHandling::test_async_handler_execution
+FAILED tests/test_events.py::TestAsyncEventHandling::test_multiple_event_processing
+FAILED tests/test_events.py::TestEventFiltering::test_filter_by_criteria - Fa...
+FAILED tests/test_events.py::TestEventBusIntegration::test_real_world_scenario
+FAILED tests/test_events.py::TestEventBusIntegration::test_error_handling_and_recovery
+FAILED tests/test_extension_matrix.py::test_extension_handler_returns_string[ext_behavior_audit]
+FAILED tests/test_extension_matrix.py::test_extension_handler_returns_string[ext_ghost_trap]
+FAILED tests/test_extension_matrix.py::test_extension_handler_returns_string[ext_social_intel]
+FAILED tests/test_gatekeeper_v1_2.py::TestGatekeeper::test_vault_proximity - ...
+FAILED tests/test_integration.py::TestImportStructure::test_backward_compat_imports
+FAILED tests/test_integration.py::TestModuleStructure::test_core_modules_exist
+FAILED tests/test_integration.py::TestLegacyCompatibility::test_legacy_files_archived
+FAILED tests/test_nlp_pipeline.py::TestNLPPipelineBasics::test_lemmatization
+FAILED tests/test_nlp_pipeline.py::TestNLPPipelineBasics::test_pos_tagging - ...
+FAILED tests/test_nlp_pipeline.py::TestNLPPipelineBasics::test_simple_analysis
+FAILED tests/test_nlp_pipeline.py::TestNLPPipelineBasics::test_tokenization
+FAILED tests/test_nlp_pipeline.py::TestNLPTokenAnalysis::test_stopword_detection
+FAILED tests/test_nlp_pipeline.py::TestNLPTokenAnalysis::test_token_structure
+FAILED tests/test_nlp_pipeline.py::TestNLPEntityExtraction::test_entity_extraction
+FAILED tests/test_nlp_pipeline.py::TestNLPEntityExtraction::test_entity_structure
+FAILED tests/test_nlp_pipeline.py::TestNLPKeyTermExtraction::test_key_terms_property
+FAILED tests/test_nlp_pipeline.py::TestNLPComplexityMetrics::test_complexity_comparison
+FAILED tests/test_nlp_pipeline.py::TestNLPComplexityMetrics::test_complexity_values
+FAILED tests/test_nlp_pipeline.py::TestNLPComplexityMetrics::test_get_complexity_metrics
+FAILED tests/test_nlp_pipeline.py::TestNLPPhraseExtraction::test_phrase_extraction
+FAILED tests/test_nlp_pipeline.py::TestNLPPhraseExtraction::test_phrase_structure
+FAILED tests/test_nlp_pipeline.py::TestNLPIntegration::test_analysis_reproducibility
+FAILED tests/test_nlp_pipeline.py::TestNLPIntegration::test_full_analysis_consistency
+FAILED tests/test_nlp_pipeline.py::TestNLPEdgeCases::test_single_word - Asser...
+FAILED tests/test_nlp_pipeline.py::TestNLPEdgeCases::test_special_characters
+FAILED tests/test_nlp_pipeline.py::TestNLPEdgeCases::test_unicode_text - Asse...
+FAILED tests/test_phase5_analytics.py::TestEntityLinkerBasics::test_entity_recognition
+ERROR tests/test_gephi_bridge.py::test_mode
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! KeyboardInterrupt !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\re\__init__.py:177: KeyboardInterrupt
+(to show a full traceback on KeyboardInterrupt use --full-trace)
+= 38 failed, 218 passed, 2 skipped, 6 warnings, 1 error in 424.21s (0:07:04) ==
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1044, in _bootstrap
+    self._bootstrap_inner()
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1082, in _bootstrap_inner
+    self._context.run(self.run)
+  File "C:\Users\spectre\AppData\Local\Programs\Python\Python314\Lib\threading.py", line 1024, in run
+    self._target(*self._args, **self._kwargs)
+  File "D:\SME\extensions\ext_governor\plugin.py", line 89, in _monitor_loop
+    logger.warning(f"[Governor] VRAM usage critical: {vram_usage:.2f}GB > {self.vram_threshold_gb}GB")
+Message: '[Governor] VRAM usage critical: 18.30GB > 5.8GB'
+Arguments: ()

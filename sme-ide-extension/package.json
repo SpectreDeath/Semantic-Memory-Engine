@@ -77,6 +77,16 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "SME IDE Engine",
+      "properties": {
+        "sme-ide.pythonPath": {
+          "type": "string",
+          "default": "python",
+          "description": "Path to the Python interpreter used to spawn the SME JSON-RPC bridge. Leave as 'python' for the system default, or provide an absolute path to a Docker exec command or virtual environment."
+        }
+      }
     }
   },
   "scripts": {

@@ -11,10 +11,17 @@ const ForensicController_1 = require("./forensics/ForensicController");
 const ForensicCodeLensProvider_1 = require("./forensics/ForensicCodeLensProvider");
 const SMEGraphWebview_1 = require("./webviews/SMEGraphWebview");
 const SMESearchView_1 = require("./webviews/SMESearchView");
+// @ts-ignore
+const node_reload_1 = require("@hediet/node-reload");
+// 1. Evolutionary Hot-Reloading Support
+if (process.env.NODE_ENV !== 'production') {
+    (0, node_reload_1.enableHotReload)({ entryModule: module });
+}
 function activate(context) {
     console.log('SME IDE Engine is now active');
     // 0. Initialize Bridge Client
-    const pythonPath = 'python'; // Should be configurable via settings
+    const config = vscode.workspace.getConfiguration('sme-ide');
+    const pythonPath = config.get('pythonPath', 'python');
     const scriptPath = path.join(context.extensionPath, '..', 'src', 'ai', 'bridge_rpc.py');
     const bridge = new SMEBridgeClient_1.SMEBridgeClient(pythonPath, scriptPath);
     bridge.start();
@@ -46,9 +53,19 @@ function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('sme-ide.showGraph', () => {
         graphWebview.show();
     }));
-    context.subscriptions.push(vscode.commands.registerCommand('sme-ide.inspectEntity', (entity) => {
+    context.subscriptions.push(vscode.commands.registerCommand('sme-ide.inspectEntity', async (entity) => {
         vscode.window.showInformationMessage(`Inspecting forensic entity: ${entity}`);
-        // Future: Open semantic graph or details view for this entity
+        // Evolutionary Loop: Log trace to Nexus
+        try {
+            await bridge.sendRequest('log_telemetry', {
+                action: 'inspect_entity',
+                target: entity,
+                context: 'graph_view'
+            });
+        }
+        catch (e) {
+            console.warn('Telemetry sync failed:', e);
+        }
     }));
     // Analyze active editor on start
     if (vscode.window.activeTextEditor) {
@@ -73,6 +90,12 @@ function activate(context) {
             try {
                 const results = await bridge.sendRequest('search_memory', { query });
                 vscode.window.showInformationMessage(`Found ${results.length} results for: ${query}`);
+                // Evolutionary Loop: Log search trace to Nexus
+                await bridge.sendRequest('log_telemetry', {
+                    action: 'search_memory',
+                    query: query,
+                    results_count: results.length
+                });
             }
             catch (e) {
                 vscode.window.showErrorMessage(`Search failed: ${e}`);

@@ -44,14 +44,27 @@ def patch_pydantic_v1():
                 try:
                     return original_infer(*args, **kwargs)
                 except Exception as e:
-                    if 'unable to infer type' in str(e):
+                    if 'unable to infer type' in str(e) or 'field constraints are set but not enforced' in str(e):
                         # Return a dummy field or similar
                         from pydantic.v1.fields import FieldInfo
+                        from pydantic.v1.config import BaseConfig
+                        
+                        # args can vary depending on whether it's bound or not, but typically 
+                        # cls, name, value, annotation, class_validators, config
+                        config = BaseConfig
+                        for arg in args:
+                            if isinstance(arg, type) and issubclass(arg, BaseConfig):
+                                config = arg
+                                break
+                                
                         return pydantic_fields.ModelField(
                             name=args[1] if len(args) > 1 else "unknown",
                             type_=typing.Any,
-                            class_validators={},
-                            model_config=args[4] if len(args) > 4 else None,
+                            class_validators=None,
+                            model_config=config,
+                            default=None,
+                            required=False,
+                            alias="unknown",
                             field_info=FieldInfo(),
                         )
                     raise

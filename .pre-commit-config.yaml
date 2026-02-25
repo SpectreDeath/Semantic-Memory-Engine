@@ -81,13 +81,3 @@ default_stages: [commit, push]
 
 # Skip slow checks for quick commits
 # Usage: SKIP=bandit,mypy git commit -m "quick fix"
-ci:
-  skip: [bandit, mypy]
-</parameter>
-<task_progress>- [x] Consolidate dependency management (pyproject.toml as source of truth)
-- [x] Add ruff, bandit, mypy configuration to pyproject.toml
-- [x] Add pre-commit configuration
-- [ ] Fix SQL injection in forensic vault
-- [ ] Refactor pipeline.py - extract late imports
-- [ ] Address legacy code - audit and plan
-- [ ] Create CI/CD workflow configuration

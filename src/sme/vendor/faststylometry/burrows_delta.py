@@ -33,7 +33,7 @@ from collections import Counter
 
 import numpy as np
 import pandas as pd
-from .corpus import Corpus
+from . import Corpus
 
 
 def get_top_tokens(corpus: Corpus, vocab_size: int, words_to_exclude: set, tok_match_pattern: str) -> list:

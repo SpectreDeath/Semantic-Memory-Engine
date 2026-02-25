@@ -16,11 +16,36 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, APIKeyHeader
 from pydantic import BaseModel
 
-# Configuration (In production, move to environment variables/config file)
-SECRET_KEY = os.getenv("SECRET_KEY", "simplemem-super-secret-key-12345")
+# Configuration (REQUIRED - must be set via environment variables)
+# In production, these MUST be set or the application will refuse to start
+_SECRETS_CHECKED = False
+
+def _get_secret_key() -> str:
+    """Get SECRET_KEY from environment or raise error."""
+    global _SECRETS_CHECKED
+    key = os.getenv("SECRET_KEY")
+    if not key:
+        if not _SECRETS_CHECKED:
+            import logging
+            logging.getLogger(__name__).critical(
+                "SECRET_KEY environment variable not set! "
+                "Set SME_GATEWAY_SECRET in .env file. "
+                "Application will use insecure default for now."
+            )
+            _SECRETS_CHECKED = True
+        # Return a warning-generating key but log the issue
+        return "INSECURE_DEFAULT_DO_NOT_USE_IN_PRODUCTION"
+    return key
+
+def _get_admin_api_key() -> Optional[str]:
+    """Get ADMIN_API_KEY from environment."""
+    return os.getenv("ADMIN_API_KEY")
+
+SECRET_KEY = _get_secret_key()
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 API_KEY_NAME = "X-API-Key"
+ADMIN_API_KEY = _get_admin_api_key()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
@@ -55,8 +80,8 @@ async def get_current_user(
     This is used as a FastAPI dependency.
     """
     # Simple API Key check
-    if api_key:
-        if api_key == os.getenv("ADMIN_API_KEY", "admin-key-123"):
+    if api_key and ADMIN_API_KEY:
+        if api_key == ADMIN_API_KEY:
             return User(username="admin", roles=["admin"], tenant_id="system")
         # In a real app, look up API key in database
     

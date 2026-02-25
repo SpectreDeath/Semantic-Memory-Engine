@@ -19,7 +19,8 @@ export function activate(context: vscode.ExtensionContext) {
     console.log('SME IDE Engine is now active');
 
     // 0. Initialize Bridge Client
-    const pythonPath = 'python'; // Should be configurable via settings
+    const config = vscode.workspace.getConfiguration('sme-ide');
+    const pythonPath = config.get<string>('pythonPath', 'python');
     const scriptPath = path.join(context.extensionPath, '..', 'src', 'ai', 'bridge_rpc.py');
     const bridge = new SMEBridgeClient(pythonPath, scriptPath);
     bridge.start();

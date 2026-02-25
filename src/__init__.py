@@ -225,7 +225,7 @@ except (ImportError, NameError):
     PipelineCoordinator = None
     PipelineJobQueue = None
 
-__version__ = "2.0.0"
+__version__ = "3.0.0"
 __author__ = "SimpleMem Laboratory"
 __description__ = "Refactored SimpleMem Toolkit with Semantic Memory"
 

@@ -60,6 +60,26 @@ smolagents>=1.0.0
 # --- v2.3.4: Cloud Storage Integration ---
 httpx>=0.24.0
 
+# --- Pipeline Orchestration ---
+prefect>=2.14.0
+
+# --- Anomaly Detection ---
+pyod>=1.0.0
+
+# --- Web Archival ---
+waybackpy>=4.0.0
+
+# --- Testing ---
+pytest-asyncio>=0.21.0
+
+# --- Database ---
+psycopg2-binary>=2.9.0
+
+# --- Optional: Test-only dependencies (not on PyPI - these tests will be skipped) ---
+# gephistreamer: Not available on PyPI (Gephi streaming library)
+# scribe_authorship: Not available on PyPI (legacy authorship analysis package)
+# For full test coverage, install these manually if available
+
 # --- Cross-Platform Compatibility ---
 # This ensures GitHub (Linux) ignores it but your Laptop (Windows) keeps it.
 pywin32==311; sys_platform == 'win32'

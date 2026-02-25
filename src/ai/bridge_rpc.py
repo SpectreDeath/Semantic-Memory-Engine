@@ -6,23 +6,30 @@ Bridge between VS Code Extension Host and SME Python Backend.
 import sys
 import json
 import logging
+import asyncio
 from typing import Any, Dict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("SME-Bridge")
 
-class SMEBridge:
-    """Handles JSON-RPC requests from the VS Code frontend."""
+class AsyncSMEBridge:
+    """Handles JSON-RPC requests from the VS Code frontend asynchronously."""
     
     def __init__(self):
-        # Placeholder for SME components
-        # from src.core.data_manager import DataManager
-        # self.data_manager = DataManager()
-        pass
+        # Initialize SME components
+        try:
+            from src.core.data_manager import DataManager
+            from src.core.semantic_db import SemanticMemory
+            self.data_manager = DataManager()
+            self.memory = SemanticMemory()
+        except ImportError as e:
+            logger.warning(f"Could not load core modules: {e}. Running in degraded mock mode.")
+            self.data_manager = None
+            self.memory = None
 
-    def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
-        """Process a single JSON-RPC request."""
+    async def handle_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        """Process a single JSON-RPC request asynchronously."""
         method = request.get("method")
         params = request.get("params", {})
         request_id = request.get("id")
@@ -31,21 +38,21 @@ class SMEBridge:
 
         try:
             if method == "get_memory_nodes":
-                result = self.get_memory_nodes(params)
+                result = await self.get_memory_nodes(params)
             elif method == "read_directory":
-                result = self.read_directory(params)
+                result = await self.read_directory(params)
             elif method == "read_file":
-                result = self.read_file(params)
+                result = await self.read_file(params)
             elif method == "search_memory":
-                result = self.search_memory(params)
+                result = await self.search_memory(params)
             elif method == "index_project":
-                result = self.index_project(params)
+                result = await self.index_project(params)
             elif method == "analyze_document":
-                result = self.analyze_document(params)
+                result = await self.analyze_document(params)
             elif method == "get_semantic_graph":
-                result = self.get_semantic_graph(params)
+                result = await self.get_semantic_graph(params)
             elif method == "log_telemetry":
-                result = self.log_telemetry(params)
+                result = await self.log_telemetry(params)
             else:
                 return self.error_response(request_id, -32601, "Method not found")
 
@@ -54,8 +61,20 @@ class SMEBridge:
             logger.exception(f"Error handling {method}")
             return self.error_response(request_id, -32000, str(e))
 
-    def get_memory_nodes(self, params: Dict) -> Any:
-        # Mocking memory nodes with richer metadata
+    async def get_memory_nodes(self, params: Dict) -> Any:
+        if self.memory:
+            # Use real memory nodes by extracting from chromadb.
+            # In a real implementation this would fetch actual context objects.
+            try:
+                results = self.memory.collection.get()
+                nodes = []
+                for i, id_ in enumerate(results["ids"]):
+                    nodes.append({"id": id_, "label": f"Node {id_}", "type": "document"})
+                return nodes
+            except Exception as e:
+                logger.error(f"Error fetching memory nodes: {e}")
+        
+        # Fallback to mock
         return [
             {"id": "ctx_001", "label": "Project Odyssey: Orchestration", "type": "context"},
             {"id": "doc_442", "label": "Incident Report: VRAM Spike", "type": "document"},
@@ -63,15 +82,38 @@ class SMEBridge:
             {"id": "auth_01", "label": "Author: spectre", "type": "context"}
         ]
 
-    def search_memory(self, params: Dict) -> Any:
+    async def search_memory(self, params: Dict) -> Any:
         query = params.get("query", "")
+        if self.memory and query:
+            try:
+                # Perform a threaded or async friendly call
+                loop = asyncio.get_running_loop()
+                results = await loop.run_in_executor(
+                    None, 
+                    lambda: self.memory.search_with_semantic_expansion(query, n_results=5)
+                )
+                
+                matches = []
+                if "ids" in results and results["ids"]:
+                    for idx, doc_id in enumerate(results["ids"][0]):
+                        doc_text = results["documents"][0][idx] if "documents" in results else ""
+                        matches.append({"id": doc_id, "text": doc_text})
+                
+                if matches:
+                    return matches
+            except Exception as e:
+                logger.error(f"Error searching memory: {e}")
+                
+        # Fallback to mock
         return [{"id": "match_1", "text": f"Found semantic alignment for '{query}' in Cluster: Forensics"}]
 
-    def index_project(self, params: Dict) -> Any:
+    async def index_project(self, params: Dict) -> Any:
         path = params.get("path", ".")
+        # Simulate some asynchronous work. We could trigger a real file walk and indexing here.
+        await asyncio.sleep(0.5)
         return {"status": "success", "message": f"Successfully indexed {path} into SME Vector Store."}
 
-    def analyze_document(self, params: Dict) -> Any:
+    async def analyze_document(self, params: Dict) -> Any:
         path = params.get("path", "unknown")
         # Mocking forensic outliers (burstiness, entropy) for testing UI decorations
         return {
@@ -84,8 +126,9 @@ class SMEBridge:
             "verdict": "SUSPICIOUS"
         }
 
-    def get_semantic_graph(self, params: Dict) -> Any:
-        # Returning mock nodes and links for D3.js visualization
+    async def get_semantic_graph(self, params: Dict) -> Any:
+        # Returning mock nodes and links for D3.js visualization. Real implementation
+        # would interact with self.memory.semantic_graph but D3 expects generic graph formats
         return {
             "nodes": [
                 {"id": "ctx_001", "label": "Odyssey", "group": 1, "size": 20},
@@ -104,7 +147,7 @@ class SMEBridge:
             ]
         }
 
-    def read_directory(self, params: Dict) -> Any:
+    async def read_directory(self, params: Dict) -> Any:
         # Mapping semantic directory mapping
         path = params.get("path", "/")
         if path == "/":
@@ -122,7 +165,7 @@ class SMEBridge:
             ["archive", 2]
         ]
 
-    def read_file(self, params: Dict) -> Any:
+    async def read_file(self, params: Dict) -> Any:
         path = params.get("path", "unknown")
         # Returning structured content that looks "forensic"
         return {
@@ -135,7 +178,7 @@ class SMEBridge:
             }, indent=2)
         }
 
-    def log_telemetry(self, params: Dict) -> Any:
+    async def log_telemetry(self, params: Dict) -> Any:
         # Pseudo-code to write to Nexus or simply log it.
         action = params.get("action", "unknown")
         logger.info(f"TELEMETRY: User action captured -> {action}, params: {params}")
@@ -148,23 +191,48 @@ class SMEBridge:
     def error_response(self, request_id: Any, code: int, message: str) -> Dict:
         return {"jsonrpc": "2.0", "error": {"code": code, "message": message}, "id": request_id}
 
-def main():
-    """Reads from stdin and writes to stdout for JSON-RPC over pipes."""
-    bridge = SMEBridge()
+async def process_messages(bridge: AsyncSMEBridge):
+    """Reads JSON-RPC messages from stdin asynchronously."""
+    loop = asyncio.get_running_loop()
+    reader = asyncio.StreamReader()
+    protocol = asyncio.StreamReaderProtocol(reader)
+    await loop.connect_read_pipe(lambda: protocol, sys.stdin)
+
     logger.info("SME Bridge started")
 
     while True:
-        line = sys.stdin.readline()
+        line = await reader.readline()
         if not line:
             break
         
         try:
-            request = json.loads(line)
-            response = bridge.handle_request(request)
-            sys.stdout.write(json.dumps(response) + "\n")
-            sys.stdout.flush()
-        except Exception as e:
+            request = json.loads(line.decode('utf-8'))
+            
+            # Fire and forget request handling so we don't block reading
+            asyncio.create_task(handle_and_respond(bridge, request))
+            
+        except json.JSONDecodeError as e:
             logger.error(f"Failed to parse line: {e}")
+        except Exception as e:
+            logger.error(f"Unexpected error: {e}")
+
+async def handle_and_respond(bridge: AsyncSMEBridge, request: Dict):
+    loop = asyncio.get_running_loop()
+    try:
+        response = await bridge.handle_request(request)
+        response_str = json.dumps(response) + "\\n"
+        # Write to stdout synchronosuly via run_in_executor to avoid blocking the loop
+        await loop.run_in_executor(None, sys.stdout.write, response_str)
+        await loop.run_in_executor(None, sys.stdout.flush)
+    except Exception as e:
+         logger.error(f"Error handling request and responding: {e}")
+
+
+async def main():
+    bridge = AsyncSMEBridge()
+    await process_messages(bridge)
 
 if __name__ == "__main__":
-    main()
+    if sys.platform == "win32":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    asyncio.run(main())

@@ -8,7 +8,9 @@
         "sents",
         "Ollama",
         "venv",
-        "pycache"
+        "pycache",
+        "mypy",
+        "getpid"
     ],
     "ignorePaths": [
         "**/node_modules/**",

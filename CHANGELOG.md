@@ -1,6 +1,25 @@
 
 # Changelog
 
+## [v3.0.0] - Odyssey Release & Arch Improvements - 2026-02-24
+
+### Summary
+
+The V3.0 "Odyssey" release brings substantial architectural improvements to the SME project. Key upgrades include making the JSON-RPC bridge fully asynchronous, decoupling the plugin ecosystem via a robust Data Access Layer (DAL), and enabling fully configurable VS Code environments.
+
+### Added
+
+- **Asynchronous JSON-RPC Bridge** (`src/ai/bridge_rpc.py`):
+  - Concurrency handling with `asyncio` to prevent IDE blocking.
+  - Native integration with real `SemanticMemory` and `DataManager`.
+- **Plugin Data Access Layer** (`src/core/plugin_base.py`):
+  - Abstracted SQL queries out of individual plugins to prepare for PostgreSQL migration.
+  - Refactored `ext_adversarial_breaker` to use the new `PluginDAL`.
+- **VS Code Extension Config** (`sme-ide-extension`):
+  - Configuration property for custom Python paths (`sme-ide.pythonPath`).
+
+---
+
 ## [v2.3.4] - Cloud Storage Integration - 2026-02-21
 
 ### Summary

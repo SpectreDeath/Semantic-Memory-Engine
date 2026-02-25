@@ -1,7 +1,7 @@
 [project]
 name = "sme-forensic-toolkit"
 # Keep this in sync with the latest CHANGELOG entry
-version = "2.3.4"
+version = "3.0.0"
 description = "Hardware-aware semantic memory engine for 10GB datasets"
 requires-python = ">=3.10"
 dependencies = [

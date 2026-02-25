@@ -15,14 +15,24 @@ Usage:
 """
 
 import argparse
+import asyncio
 import glob
 import json
 import os
+import requests
 import sqlite3
+import sys
 from pathlib import Path
 
 import pandas as pd
-from gephistreamer import graph, Streamer, GephiREST
+
+# Optional: gephistreamer for Gephi visualization (not on PyPI)
+try:
+    from gephistreamer import graph, Streamer, GephiREST
+    GEPHISTREAMER_AVAILABLE = True
+except ImportError:
+    GEPHISTREAMER_AVAILABLE = False
+    graph = Streamer = GephiREST = None
 
 
 # Hardware optimization: Maximum nodes limit for 1660 Ti
@@ -44,9 +54,11 @@ def read_active_persona():
 
 def connect_to_gephi(workspace="workspace0"):
     """Connect to Gephi with error handling."""
+    if not GEPHISTREAMER_AVAILABLE:
+        return None, False
+    
     try:
         # Test if the endpoint is actually reachable first
-        import requests
         requests.get(f"http://localhost:8080", timeout=0.5)
         
         # Create the streamer with GephiREST backend
@@ -563,7 +575,6 @@ Examples:
         # But since we're mostly using this as a library, we'll keep it simple
         print("Archival mode via CLI: Please use the integration script or provide --url")
         from src.extensions.ext_archival_diff.scout import WaybackScout
-        import asyncio
         scout = WaybackScout()
         history = asyncio.run(scout.get_snapshot_history(args.url))
         divergences = scout.identify_divergent_points(history)

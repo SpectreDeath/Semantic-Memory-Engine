@@ -5,16 +5,20 @@ Provides utilities for performance monitoring, caching, and optimization
 patterns to improve extension performance and resource usage.
 """
 
-import time
 import asyncio
+import collections
 import functools
+import hashlib
+import json
 import logging
-from typing import Any, Callable, Dict, Optional, TypeVar, Union
-from datetime import datetime, timedelta
-from collections import OrderedDict
-import threading
-import psutil
 import os
+import threading
+import time
+from collections.abc import Callable
+from datetime import datetime
+from typing import Any, TypeVar
+
+import psutil
 
 logger = logging.getLogger("SME.Performance")
 
@@ -22,16 +26,16 @@ T = TypeVar('T')
 
 class LRUCache:
     """Thread-safe LRU Cache implementation for SME extensions."""
-    
+
     def __init__(self, max_size: int = 1000, ttl_seconds: int = 300):
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds
-        self.cache: OrderedDict[str, Dict[str, Any]] = OrderedDict()
+        self.cache: collections.OrderedDict[str, dict[str, Any]] = collections.OrderedDict()
         self.lock = threading.RLock()
         self.hits = 0
         self.misses = 0
-    
-    def get(self, key: str) -> Optional[Any]:
+
+    def get(self, key: str) -> None | Any:
         """Get value from cache if it exists and is not expired."""
         with self.lock:
             if key in self.cache:
@@ -40,12 +44,12 @@ class LRUCache:
                     del self.cache[key]
                     self.misses += 1
                     return None
-                
+
                 # Move to end (most recently used)
                 self.cache.move_to_end(key)
                 self.hits += 1
                 return entry['value']
-            
+
             self.misses += 1
             return None
     
@@ -58,15 +62,15 @@ class LRUCache:
                 'value': value,
                 'timestamp': datetime.now()
             }
-            
+
             # Remove oldest items if cache is full
             if len(self.cache) > self.max_size:
                 self.cache.popitem(last=False)
     
-    def _is_expired(self, entry: Dict[str, Any]) -> bool:
+    def _is_expired(self, entry: dict[str, Any]) -> bool:
         """Check if cache entry has expired."""
         age = datetime.now() - entry['timestamp']
-        return age.total_seconds() > self.ttl_seconds
+        return bool(age.total_seconds() > self.ttl_seconds)
     
     def clear(self):
         """Clear all cache entries."""
@@ -74,8 +78,8 @@ class LRUCache:
             self.cache.clear()
             self.hits = 0
             self.misses = 0
-    
-    def get_stats(self) -> Dict[str, Any]:
+
+    def get_stats(self) -> dict[str, Any]:
         """Get cache performance statistics."""
         with self.lock:
             total_requests = self.hits + self.misses
@@ -95,7 +99,7 @@ class PerformanceMonitor:
     
     def __init__(self, plugin_id: str):
         self.plugin_id = plugin_id
-        self.operation_times: Dict[str, list] = {}
+        self.operation_times: dict[str, list] = {}
         self.lock = threading.RLock()
     
     def time_operation(self, operation_name: str) -> 'OperationTimer':
@@ -107,14 +111,14 @@ class PerformanceMonitor:
         with self.lock:
             if operation_name not in self.operation_times:
                 self.operation_times[operation_name] = []
-            
+
             self.operation_times[operation_name].append(duration)
-            
+
             # Keep only last 100 measurements
             if len(self.operation_times[operation_name]) > 100:
                 self.operation_times[operation_name] = self.operation_times[operation_name][-100:]
     
-    def get_operation_stats(self, operation_name: str) -> Dict[str, Any]:
+    def get_operation_stats(self, operation_name: str) -> dict[str, Any]:
         """Get performance statistics for an operation."""
         with self.lock:
             if operation_name not in self.operation_times:
@@ -123,11 +127,11 @@ class PerformanceMonitor:
             times = self.operation_times[operation_name]
             if not times:
                 return {'error': 'No data available'}
-            
+
             avg_time = sum(times) / len(times)
             min_time = min(times)
             max_time = max(times)
-            
+
             # Calculate percentiles
             sorted_times = sorted(times)
             p50 = sorted_times[len(sorted_times) // 2]
@@ -145,7 +149,7 @@ class PerformanceMonitor:
                 'p99_time': round(p99, 4)
             }
     
-    def get_all_stats(self) -> Dict[str, Any]:
+    def get_all_stats(self) -> dict[str, Any]:
         """Get performance statistics for all operations."""
         with self.lock:
             stats = {}
@@ -160,7 +164,7 @@ class OperationTimer:
     def __init__(self, monitor: PerformanceMonitor, operation_name: str):
         self.monitor = monitor
         self.operation_name = operation_name
-        self.start_time = None
+        self.start_time: float | None = None
     
     def __enter__(self):
         self.start_time = time.perf_counter()
@@ -214,8 +218,8 @@ def cache_result(max_size: int = 100, ttl_seconds: int = 300):
             return result
         
         # Store cache on function for access
-        sync_wrapper._cache = cache
-        async_wrapper._cache = cache
+        setattr(sync_wrapper, '_cache', cache)
+        setattr(async_wrapper, '_cache', cache)
         
         # Add cache management methods
         def clear_cache():
@@ -223,10 +227,10 @@ def cache_result(max_size: int = 100, ttl_seconds: int = 300):
         def get_cache_stats():
             return cache.get_stats()
         
-        sync_wrapper.clear_cache = clear_cache
-        sync_wrapper.get_cache_stats = get_cache_stats
-        async_wrapper.clear_cache = clear_cache
-        async_wrapper.get_cache_stats = get_cache_stats
+        setattr(sync_wrapper, 'clear_cache', clear_cache)
+        setattr(sync_wrapper, 'get_cache_stats', get_cache_stats)
+        setattr(async_wrapper, 'clear_cache', clear_cache)
+        setattr(async_wrapper, 'get_cache_stats', get_cache_stats)
         
         # Return appropriate wrapper based on function type
         if asyncio.iscoroutinefunction(func):
@@ -239,8 +243,6 @@ def cache_result(max_size: int = 100, ttl_seconds: int = 300):
 
 def _create_cache_key(func_name: str, args: tuple, kwargs: dict) -> str:
     """Create a cache key from function name, args, and kwargs."""
-    import hashlib
-    import json
     
     # Convert args and kwargs to a hashable string
     key_data = {
@@ -299,7 +301,7 @@ class ResourceMonitor:
                 logger.error(f"Error in resource monitoring: {e}")
                 time.sleep(5)  # Wait before retrying
     
-    def _collect_resource_stats(self) -> Dict[str, Any]:
+    def _collect_resource_stats(self) -> dict[str, Any]:
         """Collect current resource usage statistics."""
         try:
             # CPU usage
@@ -336,14 +338,14 @@ class ResourceMonitor:
             logger.error(f"Failed to collect resource stats: {e}")
             return {'error': str(e)}
     
-    def get_current_stats(self) -> Dict[str, Any]:
+    def get_current_stats(self) -> dict[str, Any]:
         """Get current resource usage."""
         try:
             return self._collect_resource_stats()
         except Exception as e:
             return {'error': str(e)}
     
-    def get_optimization_suggestions(self) -> List[str]:
+    def get_optimization_suggestions(self) -> list[str]:
         """Get optimization suggestions based on resource usage."""
         suggestions = []
         
@@ -376,7 +378,7 @@ class ResourceMonitor:
         except Exception as e:
             return [f"Error generating suggestions: {e}"]
     
-    def get_resource_history(self) -> List[Dict[str, Any]]:
+    def get_resource_history(self) -> list[dict[str, Any]]:
         """Get historical resource usage data."""
         with self.lock:
             return self.resource_history.copy()
@@ -391,7 +393,7 @@ class AsyncBatchProcessor:
         self.semaphore = asyncio.Semaphore(max_concurrent)
     
     async def process_items(self, items: list, process_func: Callable, 
-                          progress_callback: Optional[Callable] = None) -> list:
+                          progress_callback: None | Callable = None) -> list:
         """
         Process items in batches with concurrency control.
         
@@ -428,8 +430,8 @@ class AsyncBatchProcessor:
 
 # Global instances
 _global_resource_monitor = ResourceMonitor()
-_global_performance_monitors: Dict[str, PerformanceMonitor] = {}
-_global_caches: Dict[str, LRUCache] = {}
+_global_performance_monitors: dict[str, PerformanceMonitor] = {}
+_global_caches: dict[str, LRUCache] = {}
 
 
 def get_resource_monitor() -> ResourceMonitor:
@@ -457,7 +459,7 @@ def clear_all_caches():
         cache.clear()
 
 
-def get_all_cache_stats() -> Dict[str, Any]:
+def get_all_cache_stats() -> dict[str, Any]:
     """Get statistics for all caches."""
     stats = {}
     for name, cache in _global_caches.items():
@@ -465,7 +467,7 @@ def get_all_cache_stats() -> Dict[str, Any]:
     return stats
 
 
-def get_all_performance_stats() -> Dict[str, Any]:
+def get_all_performance_stats() -> dict[str, Any]:
     """Get performance statistics for all plugins."""
     stats = {}
     for plugin_id, monitor in _global_performance_monitors.items():

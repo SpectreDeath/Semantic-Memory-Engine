@@ -23,7 +23,9 @@ def vendor_faststylometry():
             
             # Patch imports: from faststylometry import ... -> from . import ...
             # Also handle: from faststylometry.something import ... -> from .something import ...
+            # Fix double-dot imports (..) to single-dot (.)
             patched_content = re.sub(r'from faststylometry(\..+)? import', r'from .\1 import', content)
+            patched_content = re.sub(r'\.\.(\.)?', r'.', patched_content)  # Fix .. to .
             patched_content = re.sub(r'import faststylometry', r'from . import __init__ as faststylometry', patched_content)
             
             with open(os.path.join(target_dir, filename), "w", encoding="utf-8") as f:

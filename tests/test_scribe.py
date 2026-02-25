@@ -20,7 +20,7 @@ LEGACY_DIR = PROJECT_ROOT / "legacy"
 if str(LEGACY_DIR) not in sys.path:
     sys.path.insert(0, str(LEGACY_DIR))
 
-from scribe_authorship import ScribeEngine
+from src.scribe.engine import ScribeEngine
 import json
 
 # ============================================================================

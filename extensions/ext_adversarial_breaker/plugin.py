@@ -41,21 +41,19 @@ class AdversarialPatternBreaker(BasePlugin):
         Initialize the 'nexus_adversarial_patterns' table and log startup.
         """
         print("🛡️ Pattern Breaker Extension: Initialized. Ready to scan for linguistic camouflage.")
-        sql = """
-            CREATE TABLE IF NOT EXISTS nexus_adversarial_patterns (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                text_hash TEXT NOT NULL,
-                text_sample TEXT NOT NULL,
-                camouflage_detected BOOLEAN NOT NULL,
-                deception_confidence REAL NOT NULL,
-                high_confidence_deception BOOLEAN NOT NULL,
-                analysis_data TEXT NOT NULL,
-                timestamp TEXT,
-                source_id TEXT
-            )
-        """
+        schema = {
+            "id": "PRIMARY_KEY",
+            "text_hash": "TEXT",
+            "text_sample": "TEXT",
+            "camouflage_detected": "BOOLEAN",
+            "deception_confidence": "FLOAT",
+            "high_confidence_deception": "BOOLEAN",
+            "analysis_data": "TEXT",
+            "timestamp": "TEXT",
+            "source_id": "TEXT"
+        }
         try:
-            self.nexus.nexus.execute(sql)
+            self.dal.create_table("nexus_adversarial_patterns", schema)
             logger.info(f"[{self.plugin_id}] 'nexus_adversarial_patterns' table initialized.")
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Failed to init DB table: {e}")
@@ -130,23 +128,18 @@ class AdversarialPatternBreaker(BasePlugin):
         """
         try:
             # Count total patterns detected
-            sql_count = "SELECT COUNT(*) as total_patterns FROM nexus_adversarial_patterns"
-            count_result = self.nexus.nexus.query(sql_count)
-            total_patterns = count_result[0]["total_patterns"] if count_result else 0
+            total_patterns = self.dal.get_count("nexus_adversarial_patterns")
             
             # Count high confidence deceptions
-            sql_high_confidence = "SELECT COUNT(*) as high_confidence FROM nexus_adversarial_patterns WHERE high_confidence_deception = 1"
-            high_confidence_result = self.nexus.nexus.query(sql_high_confidence)
-            high_confidence_count = high_confidence_result[0]["high_confidence"] if high_confidence_result else 0
+            high_confidence_count = self.dal.get_count("nexus_adversarial_patterns", {"high_confidence_deception": 1})
             
             # Get recent patterns
-            sql_recent = """
-                SELECT text_hash, deception_confidence, high_confidence_deception, timestamp 
-                FROM nexus_adversarial_patterns 
-                ORDER BY timestamp DESC 
-                LIMIT 10
-            """
-            recent_patterns = self.nexus.nexus.query(sql_recent)
+            recent_patterns = self.dal.get_recent(
+                "nexus_adversarial_patterns",
+                ["text_hash", "deception_confidence", "high_confidence_deception", "timestamp"],
+                "timestamp",
+                10
+            )
             
             stats = {
                 "total_patterns_detected": total_patterns,
@@ -216,23 +209,18 @@ class AdversarialPatternBreaker(BasePlugin):
             timestamp = datetime.now().isoformat()
             text_hash = hashlib.sha256(text.encode()).hexdigest()
             
-            sql = """
-                INSERT INTO nexus_adversarial_patterns 
-                (text_hash, text_sample, camouflage_detected, deception_confidence, 
-                 high_confidence_deception, analysis_data, timestamp, source_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """
+            data = {
+                "text_hash": text_hash,
+                "text_sample": text[:5000],
+                "camouflage_detected": analysis_result.get("camouflage_detected", False),
+                "deception_confidence": analysis_result.get("deception_confidence", 0.0),
+                "high_confidence_deception": analysis_result.get("high_confidence_deception", False),
+                "analysis_data": json.dumps(analysis_result.get("analysis", {})),
+                "timestamp": timestamp,
+                "source_id": source_id
+            }
             
-            self.nexus.nexus.execute(sql, (
-                text_hash,
-                text[:5000],  # Limit text size
-                analysis_result.get("camouflage_detected", False),
-                analysis_result.get("deception_confidence", 0.0),
-                analysis_result.get("high_confidence_deception", False),
-                json.dumps(analysis_result.get("analysis", {})),
-                timestamp,
-                source_id
-            ))
+            self.dal.insert_record("nexus_adversarial_patterns", data)
             
             logger.info(f"[{self.plugin_id}] Stored adversarial pattern: {text_hash[:8]}... (Confidence: {analysis_result.get('deception_confidence', 0):.2%})")
             

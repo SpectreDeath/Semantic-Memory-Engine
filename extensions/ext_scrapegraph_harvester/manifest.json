@@ -1,0 +1,42 @@
+{
+  "plugin_id": "scrapegraph_harvester",
+  "name": "ScrapeGraphAI Harvester",
+  "version": "1.0.0",
+  "description": "Agentic web scraping and forensic data harvesting using ScrapeGraphAI",
+  "entry_point": "plugin.py",
+  "author": "SME Architect",
+  "category": "forensics",
+  "dependencies": {
+    "scrapegraphai": "^0.1.0",
+    "playwright": "^1.40.0",
+    "pydantic": "^2.5.0"
+  },
+  "tools": [
+    {
+      "name": "scrape_and_remember",
+      "description": "Extract forensic evidence from a URL using agentic scraping and store in memory",
+      "parameters": {
+        "url": "str",
+        "prompt": "str",
+        "model": "str"
+      }
+    },
+    {
+      "name": "deep_research",
+      "description": "Search the web for a topic and synthesize findings into structured memory nodes",
+      "parameters": {
+        "query": "str",
+        "results_count": "int",
+        "model": "str"
+      }
+    },
+    {
+      "name": "markdownify",
+      "description": "Convert any URL to clean Markdown for semantic memory indexing",
+      "parameters": {
+        "url": "str",
+        "model": "str"
+      }
+    }
+  ]
+}

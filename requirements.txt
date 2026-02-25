@@ -67,7 +67,7 @@ prefect>=2.14.0
 pyod>=1.0.0
 
 # --- Web Archival ---
-waybackpy>=4.0.0
+waybackpy==3.0.6
 
 # --- Testing ---
 pytest-asyncio>=0.21.0

@@ -1,10 +1,10 @@
-# 🌿 Lawnmower Man: Forensic MCP Gateway (v2.3.4)
+# 🌿 Lawnmower Man: Forensic MCP Gateway (v3.0.0)
 
 > **The Semantic Memory Engine (SME) Bridge for Agentic AI.**
 > *Now featuring the Interactive Control Room & Unified Ingestion.*
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Version](https://img.shields.io/badge/Version-3.0.0_Cloud_Storage-green.svg)
+![Version](https://img.shields.io/badge/Version-3.0.0_Odyssey_Release-green.svg)
 ![Architecture](https://img.shields.io/badge/Architecture-Modular_Plugin-blueviolet.svg)
 ![Hardware Optimized](https://img.shields.io/badge/Hardware-1660_Ti_6GB-green.svg)
 
@@ -12,7 +12,7 @@
 
 ## 🚀 Overview
 
-Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents. Version 2.0.0 introduces the **Control Room**, a unified web interface for managing service connections and web ingestion.
+Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents. Version 3.0.0 introduces the **Control Room**, a unified web interface for managing service connections and web ingestion.
 
 - **Interactive Control Room**: Real-time monitoring of AI Providers, Sidecars, and Databases.
 - **Cloud Storage Integration**: Ingest content from Google Drive, Dropbox, OneDrive, and S3.
@@ -21,12 +21,15 @@ Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway tha
 - **The Harvester**: One-click web ingestion converting URLs into semantic atomic facts.
 - **Epistemic Trust**: Calculated Trust Scores for all data signals.
 - **Containerized Stack**: Full Docker support with auto-healing and health checks.
+- **Asynchronous JSON-RPC Bridge**: Non-blocking communication with AI agents.
+- **Plugin Data Access Layer**: Abstracted SQL queries for PostgreSQL migration.
+- **VS Code Extension Config**: Configurable Python paths for development environments.
 
 ---
 
 ## 🚀 Get Started (30-Second Launch)
 
-The recommended way to run SME v2.0.0 is via **GHCR (GitHub Container Registry)** to bypass local dependency issues.
+The recommended way to run SME v3.0.0 is via **GHCR (GitHub Container Registry)** to bypass local dependency issues.
 
 ```bash
 # 1. Download the blueprint
@@ -70,13 +73,13 @@ graph TD
     Client[AI Agent] <-->|MCP Protocol| Op[SME Operator - Py 3.14]
     Op <-->|HTTP/JSON-RPC| Sidecar[AI Sidecar - Py 3.13]
     Op <-->|Websocket| UI[Control Room Dashboard]
-    
+
     subgraph Core [Logic Layer]
         Op <--> Nexus[Postgres Nexus]
         Op <--> Lab[Centrifuge SQLite]
         Op <--> Cloud[Cloud Storage]
     end
-    
+
     subgraph AI [Inference Layer]
         Sidecar <--> Model[LLM / Langflow]
     end
@@ -148,20 +151,20 @@ Our lightweight utility tools are optimized for the NVIDIA GeForce GTX 1660 Ti 6
 
 ---
 
-## 🧱 Modular Architecture (v1.2.0)
+## 🧱 Modular Architecture (v3.0.0)
 
 The system is split into the **Core Gateway** and **Hot-Swappable Extensions**.
 
 ```mermaid
 graph TD
     Client[AI Agent] <-->|MCP Protocol| Gateway[Lawnmower Gateway]
-    
+
     subgraph Core [Core Services]
         Gateway <--> Nexus[Nexus DB]
         Gateway <--> TPM[Hardware Enclave]
         Gateway <--> Trust[Gatekeeper Logic]
     end
-    
+
     subgraph Extensions [Extension Layer]
         Gateway -.->|Load| Plugin1[Forensic Echo]
         Gateway -.->|Load| Plugin2[Tactical Pack]
@@ -210,7 +213,7 @@ docker-compose up lawnmower-gateway
 
 ## 🧩 Creating Extensions
 
-Lawnmower Man supports a standard v1.1.1+ boilerplate for new capabilities.
+Lawnmower Man supports a standard v3.0.0+ boilerplate for new capabilities.
 
 1. Create a folder in `extensions/` (e.g., `ext_my_tool`).
 2. Add a `manifest.json`.
@@ -245,7 +248,7 @@ Our utilities are specifically optimized for the 1660 Ti's 6GB VRAM limitations:
 **Optimization Results:**
 
 - Data Guard Auditor: 104 lines, <5MB memory usage
-- Context Sniffer: 68 lines, <2MB memory usage  
+- Context Sniffer: 68 lines, <2MB memory usage
 - Gephi Bridge: 148 lines, efficient streaming for 1000+ files
 
 ## 📦 Requirements

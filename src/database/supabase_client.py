@@ -1,4 +1,5 @@
 import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -7,7 +8,7 @@ url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 try:
-    from supabase import create_client, Client
+    from supabase import Client, create_client
     if not url or not key:
         print("⚠️ Warning: Supabase credentials not found in .env file.")
         supabase: Client = None
@@ -22,10 +23,10 @@ def sync_osint_results_to_supabase(scan_results):
     """Sync a single OSINT scan result to Supabase."""
     if not supabase:
         return None
-    
+
     username = scan_results.get("username")
     timestamp = scan_results.get("timestamp")
-    
+
     try:
         # 1. Upsert Actor
         actor_res = supabase.table("actors").upsert({
@@ -33,12 +34,12 @@ def sync_osint_results_to_supabase(scan_results):
             "last_scanned": timestamp,
             "metadata": {"last_scan_summary": scan_results}
         }, on_conflict="username").execute()
-        
+
         if not actor_res.data:
             return None
-        
+
         actor_id = actor_res.data[0]["id"]
-        
+
         # 2. Upsert Footprints
         footprints = []
         for p in scan_results.get("platforms", []):
@@ -49,10 +50,10 @@ def sync_osint_results_to_supabase(scan_results):
                 "status": p["status"],
                 "discovered_at": timestamp
             })
-        
+
         if footprints:
             supabase.table("footprints").upsert(footprints, on_conflict="actor_id,platform_name").execute()
-            
+
         return actor_id
     except Exception as e:
         print(f"❌ Supabase OSINT Sync Error: {e}")

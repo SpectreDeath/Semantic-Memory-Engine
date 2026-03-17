@@ -11,10 +11,9 @@ Uses Scribe + knowledge base to:
 """
 
 import logging
-from typing import Dict, List, Tuple, Optional
+import re
 from dataclasses import dataclass
 from datetime import datetime
-import re
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,7 +30,7 @@ class ExtractedClaim:
     confidence: float  # How confident extraction was
     subject: str  # What/who the claim is about
     sentiment: str  # positive, negative, neutral
-    supporting_details: List[str]
+    supporting_details: list[str]
 
 
 @dataclass
@@ -41,9 +40,9 @@ class VerificationResult:
     verified: bool
     confidence: float  # 0-100
     status: str  # "Verified", "Contradicted", "Disputed", "Unverifiable"
-    evidence: List[str]
+    evidence: list[str]
     source_count: int
-    contradicting_sources: List[Tuple[str, str]]  # (source, contradiction)
+    contradicting_sources: list[tuple[str, str]]  # (source, contradiction)
     author_consistency: bool  # Has author contradicted this elsewhere?
 
 
@@ -58,7 +57,7 @@ class AuthorConsistency:
     unverifiable_claims: int
     consistency_score: float  # 0-100
     reliability_rating: str  # "High", "Medium", "Low"
-    contradiction_history: List[Dict]
+    contradiction_history: list[dict]
 
 
 # ============================================================================
@@ -75,7 +74,7 @@ class FactVerifier:
         self.knowledge_base = self._initialize_knowledge_base()
         logger.info("✓ FactVerifier initialized")
 
-    def _initialize_knowledge_base(self) -> Dict:
+    def _initialize_knowledge_base(self) -> dict:
         """Initialize basic knowledge base"""
         return {
             "verified_facts": {
@@ -101,7 +100,7 @@ class FactVerifier:
     # TOOL 1: EXTRACT CLAIMS
     # ========================================================================
 
-    def extract_claims(self, text: str, author_id: str = "unknown") -> List[ExtractedClaim]:
+    def extract_claims(self, text: str, author_id: str = "unknown") -> list[ExtractedClaim]:
         """
         Extract factual claims from text.
         
@@ -152,14 +151,14 @@ class FactVerifier:
             return claims
 
         except Exception as e:
-            logger.error(f"❌ Claim extraction failed: {str(e)}")
+            logger.error(f"❌ Claim extraction failed: {e!s}")
             return []
 
     # ========================================================================
     # TOOL 2: VERIFY INDIVIDUAL CLAIMS
     # ========================================================================
 
-    def verify_claim(self, claim: ExtractedClaim, knowledge_sources: List[str] = None) -> VerificationResult:
+    def verify_claim(self, claim: ExtractedClaim, knowledge_sources: list[str] = None) -> VerificationResult:
         """
         Verify a single factual claim.
         
@@ -209,7 +208,7 @@ class FactVerifier:
             return result
 
         except Exception as e:
-            logger.error(f"❌ Verification failed: {str(e)}")
+            logger.error(f"❌ Verification failed: {e!s}")
             return VerificationResult(
                 claim_text=claim.claim_text,
                 verified=False,
@@ -228,7 +227,7 @@ class FactVerifier:
     def analyze_author_consistency(
         self,
         author_id: str,
-        claim_history: List[Tuple[str, str]]  # (claim_text, timestamp)
+        claim_history: list[tuple[str, str]]  # (claim_text, timestamp)
     ) -> AuthorConsistency:
         """
         Analyze whether author contradicts themselves over time.
@@ -323,7 +322,7 @@ class FactVerifier:
             return consistency
 
         except Exception as e:
-            logger.error(f"❌ Consistency analysis failed: {str(e)}")
+            logger.error(f"❌ Consistency analysis failed: {e!s}")
             raise
 
     # ========================================================================
@@ -332,8 +331,8 @@ class FactVerifier:
 
     def detect_cross_source_contradictions(
         self,
-        sources: List[Dict]  # [{author_id, text, source_url}, ...]
-    ) -> List[Dict]:
+        sources: list[dict]  # [{author_id, text, source_url}, ...]
+    ) -> list[dict]:
         """
         Find contradictions between sources.
         
@@ -398,7 +397,7 @@ class FactVerifier:
             return contradictions
 
         except Exception as e:
-            logger.error(f"❌ Contradiction detection failed: {str(e)}")
+            logger.error(f"❌ Contradiction detection failed: {e!s}")
             return []
 
     # ========================================================================
@@ -446,7 +445,7 @@ class FactVerifier:
         else:
             return "neutral"
 
-    def _extract_details(self, sentence: str) -> List[str]:
+    def _extract_details(self, sentence: str) -> list[str]:
         """Extract supporting details"""
         details = []
 
@@ -468,7 +467,7 @@ class FactVerifier:
 
         return (length_factor + specificity_factor) / 2
 
-    def _check_knowledge_base(self, claim: ExtractedClaim) -> Tuple[str, float]:
+    def _check_knowledge_base(self, claim: ExtractedClaim) -> tuple[str, float]:
         """Check claim against knowledge base"""
         claim_lower = claim.claim_text.lower()
 
@@ -515,7 +514,7 @@ class FactVerifier:
 
         return max(0, min(100, 40 + factors))
 
-    def _generate_evidence(self, claim: ExtractedClaim, kb_status: str) -> List[str]:
+    def _generate_evidence(self, claim: ExtractedClaim, kb_status: str) -> list[str]:
         """Generate evidence/justification"""
         evidence = []
 
@@ -538,7 +537,7 @@ class FactVerifier:
 # MCP TOOL FUNCTIONS
 # ============================================================================
 
-def extract_claims_tool(text: str, author_id: str = "unknown") -> Dict:
+def extract_claims_tool(text: str, author_id: str = "unknown") -> dict:
     """MCP Tool: Extract claims from text"""
     verifier = FactVerifier()
     claims = verifier.extract_claims(text, author_id)
@@ -559,7 +558,7 @@ def extract_claims_tool(text: str, author_id: str = "unknown") -> Dict:
     }
 
 
-def verify_claims_tool(text: str) -> Dict:
+def verify_claims_tool(text: str) -> dict:
     """MCP Tool: Extract and verify claims"""
     verifier = FactVerifier()
     claims = verifier.extract_claims(text)

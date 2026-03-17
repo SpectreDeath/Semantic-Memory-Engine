@@ -28,9 +28,9 @@ Usage:
     analysis = advanced.analyze_advanced(text)
 """
 
-import sys
 import logging
 import typing
+
 
 # --- PYDANTIC V1 PATCH FOR PYTHON 3.14 ---
 def _patch_pydantic_v1():
@@ -64,11 +64,6 @@ _patch_pydantic_v1()
 # Standard library imports
 import dataclasses
 import enum
-import logging
-import os
-import json
-from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
 
 import spacy
 
@@ -128,9 +123,9 @@ class DependencyRelation:
 class CoreferenceChain:
     """Linked mentions of same entity."""
     entity_id: int            # Unique entity ID
-    mentions: List[str]       # All mention texts
-    mention_indices: List[Tuple[int, int]] # (start, end) positions
-    entity_type: Optional[str] # PERSON, ORG, LOC, etc
+    mentions: list[str]       # All mention texts
+    mention_indices: list[tuple[int, int]] # (start, end) positions
+    entity_type: str | None # PERSON, ORG, LOC, etc
     representative: str       # Main/first mention
 
 
@@ -141,17 +136,17 @@ class SemanticRoleLabel:
     predicate_idx: int        # Position in sentence
     role: str                 # Role type (A0, A1, AM-LOC, etc)
     argument: str             # The argument text
-    argument_span: Tuple[int, int] # Character positions
+    argument_span: tuple[int, int] # Character positions
 
 
 @dataclasses.dataclass
 class Event:
     """Extracted event with participants."""
     event_trigger: str        # Main verb/action
-    event_type: Optional[str] # EVENT_TYPE (if classified)
-    participants: Dict[str, str] # Role -> entity mapping
-    temporal_info: Optional[str] # When it happened
-    location: Optional[str]   # Where it happened
+    event_type: str | None # EVENT_TYPE (if classified)
+    participants: dict[str, str] # Role -> entity mapping
+    temporal_info: str | None # When it happened
+    location: str | None   # Where it happened
     confidence: float         # Extraction confidence
 
 
@@ -159,29 +154,29 @@ class Event:
 class AdvancedAnalysis:
     """Complete advanced NLP analysis."""
     text: str
-    sentences: List[str]
-    base_analysis: Optional[nlp_pipeline.NLPAnalysis] # From NLPPipeline
-    
+    sentences: list[str]
+    base_analysis: nlp_pipeline.NLPAnalysis | None # From NLPPipeline
+
     # Dependency parsing
-    dependencies: List[DependencyRelation]
-    parse_trees: List[str]    # Formatted tree strings
-    
+    dependencies: list[DependencyRelation]
+    parse_trees: list[str]    # Formatted tree strings
+
     # Coreference resolution
-    coreference_chains: List[CoreferenceChain]
+    coreference_chains: list[CoreferenceChain]
     resolved_text: str        # Text with coreferences resolved
-    
+
     # Semantic role labeling
-    semantic_roles: List[SemanticRoleLabel]
-    predicates: List[str]     # Identified predicates
-    
+    semantic_roles: list[SemanticRoleLabel]
+    predicates: list[str]     # Identified predicates
+
     # Event extraction
-    events: List[Event]
-    
+    events: list[Event]
+
     # Semantic summary
-    key_participants: Set[str]
-    key_events: Set[str]
-    temporal_markers: List[str]
-    spatial_markers: List[str]
+    key_participants: set[str]
+    key_events: set[str]
+    temporal_markers: list[str]
+    spatial_markers: list[str]
 
 
 class AdvancedNLPEngine:
@@ -189,7 +184,7 @@ class AdvancedNLPEngine:
     Advanced NLP analysis engine with dependency parsing,
     coreference resolution, and semantic role labeling.
     """
-    
+
     def __init__(self, use_spacy: bool = True):
         """
         Initialize advanced NLP engine.
@@ -201,7 +196,7 @@ class AdvancedNLPEngine:
         self.nlp_pipeline = nlp_pipeline.NLPPipeline()
         self.data_manager = data_manager.DataManager()
         self.semantic_graph = semantic_graph.SemanticGraph()
-        
+
         # Try spacy
         self.spacy_model = None
         if use_spacy:
@@ -210,20 +205,20 @@ class AdvancedNLPEngine:
                 logger.info("spaCy model loaded for advanced parsing")
             except Exception as e:
                 logger.warning(f"spaCy not available: {e}")
-        
+
         # Check availability
         self._available = True
         if not self.nlp_pipeline.is_available():
             logger.warning("NLPPipeline not available")
             self._available = False
-        
+
         logger.info("AdvancedNLPEngine initialized")
-    
+
     def is_available(self) -> bool:
         """Check if engine is available."""
         return self._available
-    
-    def analyze_advanced(self, text: str) -> Optional[AdvancedAnalysis]:
+
+    def analyze_advanced(self, text: str) -> AdvancedAnalysis | None:
         """
         Perform complete advanced NLP analysis.
         
@@ -236,39 +231,39 @@ class AdvancedNLPEngine:
         if not self._available:
             logger.error("Advanced NLP engine not available")
             return None
-        
+
         try:
             logger.debug(f"Advanced analysis: {len(text)} chars")
-            
+
             # Base analysis
             sentences = self.data_manager.sentence_tokenize(text)
             base_analysis = self.nlp_pipeline.analyze(text)
-            
+
             # Dependency parsing
             dependencies = self._extract_dependencies(text, sentences)
             parse_trees = self._generate_parse_trees(text, sentences)
-            
+
             # Coreference resolution
             coref_chains = self._resolve_coreferences(text, sentences)
             resolved_text = self._apply_coref_resolution(text, coref_chains)
-            
+
             # Semantic role labeling
             semantic_roles = self._extract_semantic_roles(text, sentences)
             predicates = list(set(sr.predicate for sr in semantic_roles))
-            
+
             # Event extraction
             events = self._extract_events(text, semantic_roles, coref_chains)
-            
+
             # Extract semantic summary
             key_participants = set()
             for chain in coref_chains:
                 if chain.entity_type in ('PERSON', 'ORG', 'GPE'):
                     key_participants.add(chain.representative)
-            
+
             key_events = set(e.event_trigger for e in events)
             temporal_markers = self._extract_temporal_markers(text)
             spatial_markers = self._extract_spatial_markers(text)
-            
+
             analysis = AdvancedAnalysis(
                 text=text,
                 sentences=sentences,
@@ -285,19 +280,19 @@ class AdvancedNLPEngine:
                 temporal_markers=temporal_markers,
                 spatial_markers=spatial_markers
             )
-            
+
             logger.debug(f"Advanced analysis complete: "
                         f"{len(dependencies)} deps, "
                         f"{len(coref_chains)} coref chains, "
                         f"{len(events)} events")
-            
+
             return analysis
-            
+
         except Exception as e:
             logger.error(f"Advanced analysis failed: {e}")
             return None
-    
-    def extract_dependencies(self, text: str) -> List[DependencyRelation]:
+
+    def extract_dependencies(self, text: str) -> list[DependencyRelation]:
         """
         Extract syntactic dependency relations.
         
@@ -311,8 +306,8 @@ class AdvancedNLPEngine:
             return self._extract_dependencies_spacy(text)
         else:
             return self._extract_dependencies_nltk(text)
-    
-    def resolve_coreferences(self, text: str) -> List[CoreferenceChain]:
+
+    def resolve_coreferences(self, text: str) -> list[CoreferenceChain]:
         """
         Resolve pronoun and entity coreferences.
         
@@ -322,10 +317,10 @@ class AdvancedNLPEngine:
         Returns:
             List of coreference chains
         """
-        return self._resolve_coreferences(text, 
+        return self._resolve_coreferences(text,
                                          self.data_manager.sentence_tokenize(text))
-    
-    def extract_semantic_roles(self, text: str) -> List[SemanticRoleLabel]:
+
+    def extract_semantic_roles(self, text: str) -> list[SemanticRoleLabel]:
         """
         Extract semantic role labels.
         
@@ -337,17 +332,17 @@ class AdvancedNLPEngine:
         """
         sentences = self.data_manager.sentence_tokenize(text)
         return self._extract_semantic_roles(text, sentences)
-    
+
     # Private helper methods
-    
-    def _extract_dependencies(self, text: str, sentences: List[str]) -> List[DependencyRelation]:
+
+    def _extract_dependencies(self, text: str, sentences: list[str]) -> list[DependencyRelation]:
         """Extract dependencies using spaCy."""
         if not self.spacy_model:
             return []
-        
+
         dependencies = []
         doc = self.spacy_model(text)
-        
+
         for token in doc:
             if token.head != token:
                 dep = DependencyRelation(
@@ -360,17 +355,17 @@ class AdvancedNLPEngine:
                     dependent_idx=token.i
                 )
                 dependencies.append(dep)
-        
+
         return dependencies
 
-    def _extract_dependencies_spacy(self, text: str) -> List[DependencyRelation]:
+    def _extract_dependencies_spacy(self, text: str) -> list[DependencyRelation]:
         """Extract dependencies using spaCy."""
         if not self.spacy_model:
             return []
-        
+
         dependencies = []
         doc = self.spacy_model(text)
-        
+
         for token in doc:
             if token.head != token:
                 dep = DependencyRelation(
@@ -383,36 +378,36 @@ class AdvancedNLPEngine:
                     dependent_idx=token.i
                 )
                 dependencies.append(dep)
-        
+
         return dependencies
-    
-    def _extract_dependencies_nltk(self, text: str) -> List[DependencyRelation]:
+
+    def _extract_dependencies_nltk(self, text: str) -> list[DependencyRelation]:
         """Extract dependencies using NLTK (basic)."""
         # NLTK dependency parsing requires specific trained models
         # For now, return empty list - production would use spacy
         logger.warning("NLTK dependency parsing requires specialized models")
         return []
-    
-    def _resolve_coreferences(self, text: str, 
-                             sentences: List[str]) -> List[CoreferenceChain]:
+
+    def _resolve_coreferences(self, text: str,
+                             sentences: list[str]) -> list[CoreferenceChain]:
         """
         Resolve coreferences using simple heuristics.
         Production: use neuralcoref or similar library.
         """
         coref_chains = []
-        
+
         # Use spacy if available for better coreference
         if self.spacy_model:
             try:
                 doc = self.spacy_model(text)
-                
+
                 # Track entities
                 entity_mentions = {}
                 for ent in doc.ents:
                     if ent.label_ not in entity_mentions:
                         entity_mentions[ent.label_] = []
                     entity_mentions[ent.label_].append(ent.text)
-                
+
                 # Create chains
                 for entity_type, mentions in entity_mentions.items():
                     if mentions:
@@ -426,36 +421,36 @@ class AdvancedNLPEngine:
                         coref_chains.append(chain)
             except Exception as e:
                 logger.warning(f"spaCy coreference failed: {e}")
-        
+
         return coref_chains
-    
-    def _apply_coref_resolution(self, text: str, 
-                                chains: List[CoreferenceChain]) -> str:
+
+    def _apply_coref_resolution(self, text: str,
+                                chains: list[CoreferenceChain]) -> str:
         """Apply coreference resolution to text."""
         # Replace pronouns with entity representatives
         resolved = text
-        
+
         for chain in chains:
             for mention in chain.mentions[1:]:  # Skip first mention
                 # Simple replacement (production: use proper alignment)
                 resolved = resolved.replace(mention, chain.representative)
-        
+
         return resolved
-    
-    def _extract_semantic_roles(self, text: str, 
-                               sentences: List[str]) -> List[SemanticRoleLabel]:
+
+    def _extract_semantic_roles(self, text: str,
+                               sentences: list[str]) -> list[SemanticRoleLabel]:
         """
         Extract semantic roles (simplified).
         Production: use semantic role labeling library
         """
         roles = []
-        
+
         # This is simplified - production uses SRL models
         # For now, identify basic predicate-argument structures
-        
+
         if self.spacy_model:
             doc = self.spacy_model(text)
-            
+
             for token in doc:
                 # Find verbs as predicates
                 if token.pos_ == "VERB":
@@ -470,26 +465,26 @@ class AdvancedNLPEngine:
                                 argument_span=(child.idx, child.idx + len(child.text))
                             )
                             roles.append(role)
-        
+
         return roles
-    
-    def _extract_events(self, text: str, semantic_roles: List[SemanticRoleLabel],
-                       coref_chains: List[CoreferenceChain]) -> List[Event]:
+
+    def _extract_events(self, text: str, semantic_roles: list[SemanticRoleLabel],
+                       coref_chains: list[CoreferenceChain]) -> list[Event]:
         """Extract events from semantic roles."""
         events = []
         processed_predicates = set()
-        
+
         for sr in semantic_roles:
             if sr.predicate not in processed_predicates:
                 # Find all roles for this predicate
-                predicate_roles = [r for r in semantic_roles 
+                predicate_roles = [r for r in semantic_roles
                                  if r.predicate == sr.predicate]
-                
+
                 # Build participant map
                 participants = {}
                 for role in predicate_roles:
                     participants[role.role] = role.argument
-                
+
                 event = Event(
                     event_trigger=sr.predicate,
                     event_type=None,  # Could be classified
@@ -500,10 +495,10 @@ class AdvancedNLPEngine:
                 )
                 events.append(event)
                 processed_predicates.add(sr.predicate)
-        
+
         return events
-    
-    def _extract_temporal_markers(self, text: str) -> List[str]:
+
+    def _extract_temporal_markers(self, text: str) -> list[str]:
         """Extract temporal expressions."""
         # Simple extraction of common temporal markers
         temporal_words = [
@@ -516,16 +511,16 @@ class AdvancedNLPEngine:
             'ago', 'after', 'before', 'during', 'while', 'when',
             'now', 'then', 'soon', 'later', 'earlier'
         ]
-        
+
         text_lower = text.lower()
         found_markers = []
         for marker in temporal_words:
             if marker in text_lower:
                 found_markers.append(marker)
-        
+
         return found_markers
-    
-    def _extract_spatial_markers(self, text: str) -> List[str]:
+
+    def _extract_spatial_markers(self, text: str) -> list[str]:
         """Extract spatial/location expressions."""
         spatial_words = [
             'above', 'below', 'left', 'right', 'north', 'south',
@@ -533,20 +528,20 @@ class AdvancedNLPEngine:
             'near', 'far', 'beside', 'behind', 'front', 'back',
             'up', 'down', 'here', 'there', 'where'
         ]
-        
+
         text_lower = text.lower()
         found_markers = []
         for marker in spatial_words:
             if marker in text_lower:
                 found_markers.append(marker)
-        
+
         return found_markers
-    
-    def _generate_parse_trees(self, text: str, 
-                             sentences: List[str]) -> List[str]:
+
+    def _generate_parse_trees(self, text: str,
+                             sentences: list[str]) -> list[str]:
         """Generate formatted parse trees."""
         trees = []
-        
+
         if self.spacy_model:
             doc = self.spacy_model(text)
             for sent in doc.sents:
@@ -556,16 +551,16 @@ class AdvancedNLPEngine:
                     trees.append(tree_str)
                 except Exception as e:
                     logger.warning(f"Tree generation failed: {e}")
-        
+
         return trees
-    
+
     def _build_tree_string(self, token, depth: int = 0) -> str:
         """Build tree string recursively."""
         result = "  " * depth + f"{token.text} ({token.pos_})\n"
-        
+
         for child in token.children:
             result += self._build_tree_string(child, depth + 1)
-        
+
         return result
 
 
@@ -574,12 +569,12 @@ class AdvancedNLPAnalyzer:
     High-level API for advanced NLP analysis.
     Combines all Phase 4 capabilities into coherent analysis.
     """
-    
+
     def __init__(self):
         """Initialize analyzer."""
         self.engine = AdvancedNLPEngine()
-    
-    def analyze_story(self, text: str) -> Dict:
+
+    def analyze_story(self, text: str) -> dict:
         """
         Analyze narrative text to extract story structure.
         
@@ -589,7 +584,7 @@ class AdvancedNLPAnalyzer:
         analysis = self.engine.analyze_advanced(text)
         if not analysis:
             return {}
-        
+
         return {
             'characters': list(analysis.key_participants),
             'events': [e.event_trigger for e in analysis.events],
@@ -612,8 +607,8 @@ class AdvancedNLPAnalyzer:
                 for c in analysis.coreference_chains
             ]
         }
-    
-    def analyze_relationships(self, text: str) -> Dict:
+
+    def analyze_relationships(self, text: str) -> dict:
         """
         Extract relationships and dependencies.
         
@@ -623,7 +618,7 @@ class AdvancedNLPAnalyzer:
         analysis = self.engine.analyze_advanced(text)
         if not analysis:
             return {}
-        
+
         # Build relationship map from dependencies
         relationships = {}
         for dep in analysis.dependencies:
@@ -633,7 +628,7 @@ class AdvancedNLPAnalyzer:
                 'type': dep.relation_type,
                 'to': dep.head
             }
-        
+
         return {
             'dependencies': relationships,
             'predicates': analysis.predicates,

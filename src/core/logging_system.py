@@ -15,15 +15,15 @@ Status: Production Ready
 import json
 import logging
 import logging.handlers
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, Optional, Set
-from contextvars import ContextVar
-from enum import Enum
 import os
+from contextvars import ContextVar
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Optional
 
 # Context variables for propagating request/user info
-_context: ContextVar[Dict[str, Any]] = ContextVar("logging_context", default={})
+_context: ContextVar[dict[str, Any]] = ContextVar("logging_context", default={})
 
 
 class LogLevel(Enum):
@@ -40,12 +40,12 @@ class JSONFormatter(logging.Formatter):
     
     Converts log records to JSON with context information.
     """
-    
+
     def __init__(self):
         """Initialize JSON formatter."""
         super().__init__()
         self.hostname = os.getenv("HOSTNAME", "unknown")
-    
+
     def format(self, record: logging.LogRecord) -> str:
         """Format log record as JSON.
         
@@ -58,7 +58,7 @@ class JSONFormatter(logging.Formatter):
         try:
             # Get current context
             context = _context.get()
-            
+
             # Build log entry
             log_data = {
                 "timestamp": datetime.utcnow().isoformat() + "Z",
@@ -70,21 +70,21 @@ class JSONFormatter(logging.Formatter):
                 "line": record.lineno,
                 "hostname": self.hostname,
             }
-            
+
             # Add context fields
             if context:
                 log_data.update(context)
-            
+
             # Add exception info if present
             if record.exc_info:
                 log_data["exception"] = self.formatException(record.exc_info)
-            
+
             # Add custom fields from record
             if hasattr(record, "extra_fields"):
                 log_data.update(record.extra_fields)
-            
+
             return json.dumps(log_data, default=str)
-        except Exception as e:
+        except Exception:
             # Fallback to simple format if JSON encoding fails
             return f'{{"timestamp": "{datetime.utcnow().isoformat()}Z", "level": "{record.levelname}", "message": "{record.getMessage()}", "error": "JSON encoding failed"}}'
 
@@ -95,7 +95,7 @@ class LogContext:
     Temporarily sets context variables like request_id, user_id, etc.
     All logs within the context will include these fields.
     """
-    
+
     def __init__(self, **fields: Any):
         """Initialize context with fields.
         
@@ -104,14 +104,14 @@ class LogContext:
         """
         self.fields = fields
         self.token = None
-    
+
     def __enter__(self) -> "LogContext":
         """Enter context."""
         current_context = _context.get().copy()
         current_context.update(self.fields)
         self.token = _context.set(current_context)
         return self
-    
+
     def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Exit context and restore previous state."""
         if self.token:
@@ -127,7 +127,7 @@ class StructuredLogger:
         logger: Underlying Python logger
         name: Logger name
     """
-    
+
     def __init__(self, logger: logging.Logger):
         """Initialize structured logger.
         
@@ -136,7 +136,7 @@ class StructuredLogger:
         """
         self.logger = logger
         self.name = logger.name
-    
+
     def debug(self, message: str, **kwargs: Any) -> None:
         """Log debug message.
         
@@ -145,7 +145,7 @@ class StructuredLogger:
             **kwargs: Extra fields to include
         """
         self._log(logging.DEBUG, message, **kwargs)
-    
+
     def info(self, message: str, **kwargs: Any) -> None:
         """Log info message.
         
@@ -154,7 +154,7 @@ class StructuredLogger:
             **kwargs: Extra fields to include
         """
         self._log(logging.INFO, message, **kwargs)
-    
+
     def warning(self, message: str, **kwargs: Any) -> None:
         """Log warning message.
         
@@ -163,7 +163,7 @@ class StructuredLogger:
             **kwargs: Extra fields to include
         """
         self._log(logging.WARNING, message, **kwargs)
-    
+
     def error(self, message: str, exc_info: bool = False, **kwargs: Any) -> None:
         """Log error message.
         
@@ -173,7 +173,7 @@ class StructuredLogger:
             **kwargs: Extra fields to include
         """
         self._log(logging.ERROR, message, exc_info=exc_info, **kwargs)
-    
+
     def critical(self, message: str, exc_info: bool = False, **kwargs: Any) -> None:
         """Log critical message.
         
@@ -183,7 +183,7 @@ class StructuredLogger:
             **kwargs: Extra fields to include
         """
         self._log(logging.CRITICAL, message, exc_info=exc_info, **kwargs)
-    
+
     def _log(self, level: int, message: str, exc_info: bool = False, **kwargs: Any) -> None:
         """Internal method to log with extra fields.
         
@@ -202,12 +202,12 @@ class StructuredLogger:
             args=(),
             exc_info=None if not exc_info else True
         )
-        
+
         # Attach extra fields
         record.extra_fields = kwargs
-        
+
         self.logger.handle(record)
-    
+
     def with_context(self, **fields: Any) -> LogContext:
         """Create context manager for context propagation.
         
@@ -218,7 +218,7 @@ class StructuredLogger:
             LogContext context manager
         """
         return LogContext(**fields)
-    
+
     def __repr__(self) -> str:
         """String representation."""
         return f"StructuredLogger(name={self.name})"
@@ -230,23 +230,23 @@ class LogManager:
     Singleton that configures all loggers with JSON formatting
     and context support.
     """
-    
+
     _instance: Optional["LogManager"] = None
     _configured: bool = False
-    
+
     def __new__(cls) -> "LogManager":
         """Singleton pattern."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-    
+
     def __init__(self):
         """Initialize LogManager."""
-        self.loggers: Dict[str, StructuredLogger] = {}
-        self._log_handlers: Dict[str, logging.Handler] = {}
-    
+        self.loggers: dict[str, StructuredLogger] = {}
+        self._log_handlers: dict[str, logging.Handler] = {}
+
     @classmethod
-    def setup(cls, config: Optional[Dict[str, Any]] = None) -> None:
+    def setup(cls, config: dict[str, Any] | None = None) -> None:
         """Set up logging system with configuration.
         
         Args:
@@ -260,33 +260,33 @@ class LogManager:
         """
         if cls._configured:
             return
-        
+
         config = config or {}
         level = getattr(logging, config.get("level", "INFO"))
         log_dir = config.get("log_dir", "data/logs")
         log_file = config.get("log_file", "simplemem.log")
         rotate_size_mb = config.get("rotate_size_mb", 100)
         backup_count = config.get("backup_count", 5)
-        
+
         # Create log directory
         Path(log_dir).mkdir(parents=True, exist_ok=True)
-        
+
         # Configure root logger
         root_logger = logging.getLogger()
         root_logger.setLevel(level)
-        
+
         # Clear existing handlers
         root_logger.handlers.clear()
-        
+
         # Create JSON formatter
         formatter = JSONFormatter()
-        
+
         # Console handler (always added)
         console_handler = logging.StreamHandler()
         console_handler.setLevel(level)
         console_handler.setFormatter(formatter)
         root_logger.addHandler(console_handler)
-        
+
         # File handler with rotation
         log_path = Path(log_dir) / log_file
         file_handler = logging.handlers.RotatingFileHandler(
@@ -297,9 +297,9 @@ class LogManager:
         file_handler.setLevel(level)
         file_handler.setFormatter(formatter)
         root_logger.addHandler(file_handler)
-        
+
         cls._configured = True
-    
+
     def get_logger(self, name: str) -> StructuredLogger:
         """Get or create a structured logger.
         
@@ -313,7 +313,7 @@ class LogManager:
             py_logger = logging.getLogger(name)
             self.loggers[name] = StructuredLogger(py_logger)
         return self.loggers[name]
-    
+
     @classmethod
     def reset(cls) -> None:
         """Reset LogManager (mainly for testing)."""
@@ -322,7 +322,7 @@ class LogManager:
 
 
 # Global LogManager instance
-_log_manager: Optional[LogManager] = None
+_log_manager: LogManager | None = None
 
 
 def get_logger(name: str) -> StructuredLogger:
@@ -340,11 +340,11 @@ def get_logger(name: str) -> StructuredLogger:
         # Auto-configure if not already done
         if not LogManager._configured:
             LogManager.setup()
-    
+
     return _log_manager.get_logger(name)
 
 
-def setup_logging(config: Optional[Dict[str, Any]] = None) -> None:
+def setup_logging(config: dict[str, Any] | None = None) -> None:
     """Setup logging system with configuration.
     
     Args:

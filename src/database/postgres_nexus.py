@@ -13,13 +13,12 @@ Usage:
 Or configure in docker-compose.yaml environment section.
 """
 
+import logging
 import os
 import threading
-import logging
-from typing import List, Dict, Any, Optional
 from contextlib import contextmanager
+from typing import Any
 
-import psycopg2
 from psycopg2 import pool
 from psycopg2.extras import RealDictCursor
 
@@ -42,18 +41,18 @@ class PostgresNexus:
 
     def __init__(
         self,
-        connection_string: Optional[str] = None,
+        connection_string: str | None = None,
         min_connections: int = 1,
         max_connections: int = 10
     ):
         self.connection_string = connection_string or POSTGRES_CONNECTION_STRING
-        
+
         if not self.connection_string:
             raise ValueError(
                 "PostgreSQL connection string not provided. "
                 "Set POSTGRES_CONNECTION_STRING or DATABASE_URL environment variable."
             )
-        
+
         # Initialize connection pool
         self.pool = pool.ThreadedConnectionPool(
             min_connections,
@@ -61,7 +60,7 @@ class PostgresNexus:
             self.connection_string
         )
         logger.info("PostgreSQL Nexus: Connection pool initialized")
-        
+
         # Initialize schema
         self._init_schema()
 
@@ -102,7 +101,7 @@ class PostgresNexus:
             CREATE INDEX IF NOT EXISTS idx_forensic_events_metadata 
                 ON lab.forensic_events USING GIN(metadata);
         """
-        
+
         try:
             with self.get_connection() as conn:
                 with conn.cursor() as cur:
@@ -122,7 +121,7 @@ class PostgresNexus:
         finally:
             self.pool.putconn(conn)
 
-    def query(self, sql: str, params: tuple = ()) -> List[Dict[str, Any]]:
+    def query(self, sql: str, params: tuple = ()) -> list[dict[str, Any]]:
         """Run a query and return results as dicts."""
         try:
             with self.get_connection() as conn:
@@ -145,7 +144,7 @@ class PostgresNexus:
             logger.error(f"PostgreSQL Execution Error: {e}\nSQL: {sql}")
             raise
 
-    def get_unified_forensic_feed(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_unified_forensic_feed(self, limit: int = 10) -> list[dict[str, Any]]:
         """
         Cross-DB JOIN: Link forensic events to their source reliability.
         """
@@ -165,15 +164,14 @@ class PostgresNexus:
         """
         return self.query(sql, (limit,))
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Return the status of the PostgreSQL connection."""
         try:
-            with self.get_connection() as conn:
-                with conn.cursor() as cur:
-                    cur.execute("SELECT version() as version")
-                    version = cur.fetchone()
-                    
-                    cur.execute("""
+            with self.get_connection() as conn, conn.cursor() as cur:
+                cur.execute("SELECT version() as version")
+                version = cur.fetchone()
+
+                cur.execute("""
                         SELECT 
                             schemaname,
                             tablename,
@@ -182,13 +180,13 @@ class PostgresNexus:
                         ORDER BY n_live_tup DESC
                         LIMIT 10
                     """)
-                    tables = cur.fetchall()
-                    
-                    return {
-                        "backend": "PostgreSQL",
-                        "version": version[0] if version else "unknown",
-                        "tables": [dict(t) for t in tables]
-                    }
+                tables = cur.fetchall()
+
+                return {
+                    "backend": "PostgreSQL",
+                    "version": version[0] if version else "unknown",
+                    "tables": [dict(t) for t in tables]
+                }
         except Exception as e:
             return {"backend": "PostgreSQL", "error": str(e)}
 
@@ -196,12 +194,12 @@ class PostgresNexus:
 # ---------------------------------------------------------------------------
 # Thread-safe global singleton
 # ---------------------------------------------------------------------------
-_nexus: Optional[PostgresNexus] = None
+_nexus: PostgresNexus | None = None
 _nexus_lock = threading.Lock()
 
 
 def get_postgres_nexus(
-    connection_string: Optional[str] = None,
+    connection_string: str | None = None,
     min_connections: int = 1,
     max_connections: int = 10
 ) -> PostgresNexus:
@@ -235,7 +233,7 @@ def is_postgres_enabled() -> bool:
 # ---------------------------------------------------------------------------
 # Unified Nexus Factory
 # ---------------------------------------------------------------------------
-def get_nexus(use_postgres: Optional[bool] = None) -> Any:
+def get_nexus(use_postgres: bool | None = None) -> Any:
     """
     Factory function to get the appropriate Nexus instance.
     
@@ -247,10 +245,10 @@ def get_nexus(use_postgres: Optional[bool] = None) -> Any:
     """
     if use_postgres is None:
         use_postgres = is_postgres_enabled()
-    
+
     if use_postgres:
         return get_postgres_nexus()
-    
+
     # Fall back to SQLite
     from gateway.nexus_db import get_nexus as get_sqlite_nexus
     return get_sqlite_nexus()

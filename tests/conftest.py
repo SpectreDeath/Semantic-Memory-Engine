@@ -1,6 +1,6 @@
-import sys
 import logging
 import typing
+
 
 def patch_pydantic_v1():
     """
@@ -8,13 +8,13 @@ def patch_pydantic_v1():
     """
     print("Applying Pydantic v1 patch...")
     try:
-        import pydantic.v1.main as pydantic_main
         import pydantic.v1.fields as pydantic_fields
+        import pydantic.v1.main as pydantic_main
         from pydantic.v1.errors import ConfigError
-        
+
         # Patch ModelMetaclass.__new__
         original_new = pydantic_main.ModelMetaclass.__new__
-        
+
         def patched_new(mcs, name, bases, namespace, **kwargs):
             try:
                 return original_new(mcs, name, bases, namespace, **kwargs)
@@ -34,9 +34,9 @@ def patch_pydantic_v1():
                         except:
                             pass
                 raise
-        
+
         pydantic_main.ModelMetaclass.__new__ = patched_new
-        
+
         # Patch ModelField.infer
         if hasattr(pydantic_fields.ModelField, 'infer'):
             original_infer = pydantic_fields.ModelField.infer
@@ -46,17 +46,17 @@ def patch_pydantic_v1():
                 except Exception as e:
                     if 'unable to infer type' in str(e) or 'field constraints are set but not enforced' in str(e):
                         # Return a dummy field or similar
-                        from pydantic.v1.fields import FieldInfo
                         from pydantic.v1.config import BaseConfig
-                        
-                        # args can vary depending on whether it's bound or not, but typically 
+                        from pydantic.v1.fields import FieldInfo
+
+                        # args can vary depending on whether it's bound or not, but typically
                         # cls, name, value, annotation, class_validators, config
                         config = BaseConfig
                         for arg in args:
                             if isinstance(arg, type) and issubclass(arg, BaseConfig):
                                 config = arg
                                 break
-                                
+
                         return pydantic_fields.ModelField(
                             name=args[1] if len(args) > 1 else "unknown",
                             type_=typing.Any,
@@ -69,7 +69,7 @@ def patch_pydantic_v1():
                         )
                     raise
             pydantic_fields.ModelField.infer = patched_infer
-            
+
         logging.getLogger(__name__).info("Successfully applied aggressive patch to pydantic.v1")
     except ImportError:
         pass

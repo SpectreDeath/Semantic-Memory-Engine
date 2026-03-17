@@ -1,11 +1,12 @@
 import re
 
+
 class DoubleMetaphone:
     """
     Pure-Python implementation of the Double Metaphone phonetic algorithm.
     Optimized for memory with __slots__.
     """
-    __slots__ = ('primary', 'secondary', 'original', 'length', 'last')
+    __slots__ = ('last', 'length', 'original', 'primary', 'secondary')
 
     def __init__(self, text: str):
         self.primary = ""
@@ -27,11 +28,11 @@ class DoubleMetaphone:
 
         pos = 0
         # This is a highly truncated version for demonstration/forensic match
-        # Real Double Metaphone is ~800 lines of rules. 
+        # Real Double Metaphone is ~800 lines of rules.
         # We implement the 'Forensic Minimal' variant.
         while len(self.primary) < 4 and pos < len(text):
             char = text[pos]
-            
+
             if char in 'AEIOUY':
                 if pos == 0:
                     self.primary += 'A'

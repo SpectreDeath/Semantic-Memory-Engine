@@ -1,11 +1,10 @@
-import psycopg2
-from psycopg2 import pool
-import logging
 import hashlib
+import logging
 import os
-from datetime import datetime
-from typing import List, Dict, Any
-from prometheus_client import Gauge, Counter
+from typing import Any
+
+from prometheus_client import Counter, Gauge
+from psycopg2 import pool
 
 logger = logging.getLogger("LawnmowerMan.ArchivalDiff.Exporter")
 
@@ -33,7 +32,7 @@ class SmeExporter:
     Transforms deleted content into SME bipartite nodes and commits to PostgreSQL.
     Also handles Prometheus metric updates.
     """
-    
+
     def __init__(self, db_url: str = None):
         self.db_url = db_url or os.environ.get("DATABASE_URL", "postgresql://sme_user:sme_password@localhost:5432/sme_nexus")
         self.pool = None
@@ -54,7 +53,7 @@ class SmeExporter:
         conn = self._get_connection()
         if not conn:
             return
-            
+
         try:
             with conn.cursor() as cur:
                 # SourceURLNode table
@@ -66,7 +65,7 @@ class SmeExporter:
                         last_checked TIMESTAMPTZ DEFAULT NOW()
                     );
                 """)
-                
+
                 # ContentNode table
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS sme_content_nodes (
@@ -78,7 +77,7 @@ class SmeExporter:
                         detected_at TIMESTAMPTZ DEFAULT NOW()
                     );
                 """)
-                
+
                 # Relationship table (SCRUBBED_FROM)
                 cur.execute("""
                     CREATE TABLE IF NOT EXISTS sme_relationships (
@@ -110,14 +109,14 @@ class SmeExporter:
         if self.pool and conn:
             self.pool.putconn(conn)
 
-    def export_diff(self, diff_result: Dict[str, Any], metadata: Dict[str, Any]):
+    def export_diff(self, diff_result: dict[str, Any], metadata: dict[str, Any]):
         """
         Processes diff result and commits to PostgreSQL.
         Updates Prometheus metrics.
         """
         target_url = metadata.get('url')
         deleted_content = diff_result.get('deleted_content', [])
-        
+
         # Update metrics
         if deleted_content:
             SME_ARCHIVAL_CHANGE_DETECTED.labels(url=target_url).set(1)
@@ -128,11 +127,11 @@ class SmeExporter:
 
         if not deleted_content:
             return
-            
+
         conn = self._get_connection()
         if not conn:
             return
-            
+
         try:
             with conn.cursor() as cur:
                 # 1. Ensure SourceURLNode exists
@@ -143,11 +142,11 @@ class SmeExporter:
                     RETURNING id;
                 """, (target_url,))
                 source_id = cur.fetchone()[0]
-                
+
                 # 2. Add ContentNodes and Relationships for each deleted paragraph
                 for paragraph in deleted_content:
                     content_hash = hashlib.sha1(paragraph.encode()).hexdigest()
-                    
+
                     # Insert ContentNode
                     cur.execute("""
                         INSERT INTO sme_content_nodes (content_hash, content_text, snapshot_timestamp, snapshot_url)
@@ -155,25 +154,25 @@ class SmeExporter:
                         ON CONFLICT (content_hash) DO NOTHING
                         RETURNING id;
                     """, (
-                        content_hash, 
-                        paragraph, 
-                        metadata['snapshot_old']['timestamp'], 
+                        content_hash,
+                        paragraph,
+                        metadata['snapshot_old']['timestamp'],
                         metadata['snapshot_old']['url']
                     ))
-                    
+
                     result = cur.fetchone()
                     if result:
                         content_id = result[0]
-                        
+
                         # Create SCRUBBED_FROM relationship
                         cur.execute("""
                             INSERT INTO sme_relationships (content_node_id, source_url_node_id, relationship_type)
                             VALUES (%s, %s, 'SCRUBBED_FROM');
                         """, (content_id, source_id))
-                
+
                 conn.commit()
                 logger.info(f"Committed {len(deleted_content)} scrubbed nodes for {target_url}")
-                
+
         except Exception as e:
             logger.error(f"Error exporting scrubbing data: {e}")
             conn.rollback()

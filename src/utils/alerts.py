@@ -1,4 +1,5 @@
 import platform
+
 try:
     from win10toast import ToastNotifier
     HAS_TOAST = True
@@ -8,7 +9,7 @@ except ImportError:
 def send_forensic_alert(title, message, duration=10):
     """Send a Windows desktop notification for forensic alerts."""
     print(f"🔔 ALERT: {title} | {message}")
-    
+
     if HAS_TOAST and platform.system() == "Windows":
         try:
             toaster = ToastNotifier()
@@ -27,9 +28,9 @@ def check_for_threat_collision(intel_package):
     # Simple logic to detect CBRN_Ghost_99 or negative sentiment outliers
     osint = intel_package.get("osint", [])
     if isinstance(osint, dict): osint = [osint]
-    
+
     usernames = {s.get("username") for s in osint if s.get("username")}
-    
+
     # We'll simulate a 'Threat Intelligence' match if CBRN_Ghost_99 is present
     if "CBRN_Ghost_99" in usernames:
         send_forensic_alert(

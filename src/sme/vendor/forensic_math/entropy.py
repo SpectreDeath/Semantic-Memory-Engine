@@ -1,7 +1,8 @@
-import numpy as np
-from typing import List, Union
 
-def calculate_entropy_divergence(p: Union[List[float], np.ndarray], q: Union[List[float], np.ndarray]) -> float:
+import numpy as np
+
+
+def calculate_entropy_divergence(p: list[float] | np.ndarray, q: list[float] | np.ndarray) -> float:
     """
     Calculates the Kullback-Leibler (KL) Divergence (Relative Entropy) between two distributions.
     P is the 'observed' distribution, Q is the 'baseline' distribution.
@@ -30,7 +31,7 @@ def calculate_entropy_divergence(p: Union[List[float], np.ndarray], q: Union[Lis
     # KL Divergence formula: Sum( P(i) * log(P(i) / Q(i)) )
     return float(np.sum(p * np.log(p / q)))
 
-def calculate_shannon_entropy(p: Union[List[float], np.ndarray]) -> float:
+def calculate_shannon_entropy(p: list[float] | np.ndarray) -> float:
     """
     Calculates the Shannon Entropy of a distribution.
     """

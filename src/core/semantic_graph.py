@@ -19,10 +19,9 @@ Usage:
     related = sg.find_related_concepts("machine learning")
 """
 
-from typing import Dict, List, Set, Optional, Tuple
-from dataclasses import dataclass
-from collections import defaultdict
 import logging
+from collections import defaultdict
+from dataclasses import dataclass
 
 try:
     from nltk.corpus import wordnet as wn
@@ -46,12 +45,12 @@ class SemanticRelation:
 class ConceptMeaning:
     """Comprehensive semantic analysis of a concept."""
     word: str
-    definitions: List[str]
-    synonyms: List[str]
-    antonyms: List[str]
-    hypernyms: List[str]  # Broader/more general concepts
-    hyponyms: List[str]   # Narrower/more specific concepts
-    related_words: List[SemanticRelation]
+    definitions: list[str]
+    synonyms: list[str]
+    antonyms: list[str]
+    hypernyms: list[str]  # Broader/more general concepts
+    hyponyms: list[str]   # Narrower/more specific concepts
+    related_words: list[SemanticRelation]
     total_meanings: int
 
 
@@ -63,7 +62,7 @@ class SemanticGraph:
     understand concept hierarchies, and find related terms for
     knowledge gap detection and memory consolidation.
     """
-    
+
     def __init__(self):
         """Initialize SemanticGraph with WordNet."""
         if wn is None:
@@ -71,13 +70,13 @@ class SemanticGraph:
             self._available = False
         else:
             self._available = True
-            self._cache: Dict[str, ConceptMeaning] = {}
-    
+            self._cache: dict[str, ConceptMeaning] = {}
+
     def is_available(self) -> bool:
         """Check if WordNet is available."""
         return self._available
-    
-    def explore_meaning(self, word: str, max_relations: int = 10) -> Optional[ConceptMeaning]:
+
+    def explore_meaning(self, word: str, max_relations: int = 10) -> ConceptMeaning | None:
         """
         Comprehensive semantic analysis of a word.
         
@@ -90,27 +89,27 @@ class SemanticGraph:
         """
         if not self._available:
             return None
-        
+
         # Check cache
         if word in self._cache:
             return self._cache[word]
-        
+
         try:
             synsets = wn.synsets(word)
             if not synsets:
                 logger.debug(f"No synsets found for '{word}'")
                 return None
-            
+
             definitions = [s.definition() for s in synsets]
             synonyms = self._extract_lemmas(synsets)
             antonyms = self._extract_antonyms(synsets)
             hypernyms = self._extract_hypernyms(synsets, max_relations)
             hyponyms = self._extract_hyponyms(synsets, max_relations)
-            
+
             related_words = self._build_semantic_relations(
                 word, synonyms, antonyms, hypernyms, hyponyms
             )
-            
+
             result = ConceptMeaning(
                 word=word,
                 definitions=definitions,
@@ -121,16 +120,16 @@ class SemanticGraph:
                 related_words=related_words[:max_relations],
                 total_meanings=len(synsets)
             )
-            
+
             # Cache result
             self._cache[word] = result
             return result
-            
+
         except Exception as e:
             logger.error(f"Error exploring meaning of '{word}': {e}")
             return None
-    
-    def find_semantic_variants(self, word: str) -> Dict[str, List[str]]:
+
+    def find_semantic_variants(self, word: str) -> dict[str, list[str]]:
         """
         Find all semantic variants (synonyms, related forms).
         
@@ -142,18 +141,18 @@ class SemanticGraph:
         """
         if not self._available:
             return {}
-        
+
         meaning = self.explore_meaning(word)
         if not meaning:
             return {}
-        
+
         return {
             'synonyms': meaning.synonyms,
             'antonyms': meaning.antonyms,
             'hypernyms': meaning.hypernyms,
             'hyponyms': meaning.hyponyms,
         }
-    
+
     def calculate_semantic_similarity(self, word1: str, word2: str) -> float:
         """
         Calculate semantic similarity between two words (0-1).
@@ -169,14 +168,14 @@ class SemanticGraph:
         """
         if not self._available:
             return 0.0
-        
+
         try:
             synsets1 = wn.synsets(word1)
             synsets2 = wn.synsets(word2)
-            
+
             if not synsets1 or not synsets2:
                 return 0.0
-            
+
             # Use best match similarity
             max_similarity = 0.0
             for s1 in synsets1:
@@ -184,14 +183,14 @@ class SemanticGraph:
                     similarity = s1.path_similarity(s2)
                     if similarity and similarity > max_similarity:
                         max_similarity = similarity
-            
+
             return max(0.0, min(1.0, max_similarity))
-            
+
         except Exception as e:
             logger.error(f"Error calculating similarity: {e}")
             return 0.0
-    
-    def find_related_concepts(self, word: str, depth: int = 2) -> Dict[str, Set[str]]:
+
+    def find_related_concepts(self, word: str, depth: int = 2) -> dict[str, set[str]]:
         """
         Find all related concepts within specified depth.
         
@@ -204,33 +203,33 @@ class SemanticGraph:
         """
         if not self._available:
             return {}
-        
+
         result = defaultdict(set)
         visited = {word}
         current_level = {word}
-        
+
         for level in range(1, depth + 1):
             next_level = set()
-            
+
             for concept in current_level:
                 meaning = self.explore_meaning(concept)
                 if not meaning:
                     continue
-                
+
                 # Add all related concepts
                 for related in (meaning.synonyms + meaning.hypernyms + meaning.hyponyms):
                     if related not in visited:
                         result[f"depth_{level}"].add(related)
                         next_level.add(related)
                         visited.add(related)
-            
+
             current_level = next_level
             if not current_level:
                 break
-        
+
         return dict(result)
-    
-    def detect_semantic_gaps(self, concept: str, existing_concepts: Set[str]) -> List[Dict]:
+
+    def detect_semantic_gaps(self, concept: str, existing_concepts: set[str]) -> list[dict]:
         """
         Detect knowledge gaps by finding related concepts not yet covered.
         
@@ -243,13 +242,13 @@ class SemanticGraph:
         """
         if not self._available:
             return []
-        
+
         meaning = self.explore_meaning(concept)
         if not meaning:
             return []
-        
+
         gaps = []
-        
+
         # Check synonyms
         for synonym in meaning.synonyms:
             if synonym not in existing_concepts:
@@ -259,7 +258,7 @@ class SemanticGraph:
                     'reason': f'Synonym of {concept}',
                     'priority': 'high'
                 })
-        
+
         # Check hypernyms (broader concepts)
         for hypernym in meaning.hypernyms:
             if hypernym not in existing_concepts:
@@ -269,7 +268,7 @@ class SemanticGraph:
                     'reason': f'Broader concept of {concept}',
                     'priority': 'medium'
                 })
-        
+
         # Check hyponyms (narrower concepts)
         for hyponym in meaning.hyponyms[:5]:  # Limit to top 5
             if hyponym not in existing_concepts:
@@ -279,10 +278,10 @@ class SemanticGraph:
                     'reason': f'Specific instance of {concept}',
                     'priority': 'low'
                 })
-        
+
         return gaps
-    
-    def get_concept_hierarchy(self, word: str, direction: str = 'both') -> Dict:
+
+    def get_concept_hierarchy(self, word: str, direction: str = 'both') -> dict:
         """
         Get the concept hierarchy (taxonomy) for a word.
         
@@ -295,37 +294,37 @@ class SemanticGraph:
         """
         if not self._available:
             return {}
-        
+
         meaning = self.explore_meaning(word)
         if not meaning:
             return {}
-        
+
         hierarchy = {
             'word': word,
             'definitions': meaning.definitions[:1] if meaning.definitions else []
         }
-        
+
         if direction in ('up', 'both'):
             hierarchy['broader_concepts'] = meaning.hypernyms
-        
+
         if direction in ('down', 'both'):
             hierarchy['specific_examples'] = meaning.hyponyms[:5]
-        
+
         return hierarchy
-    
+
     # Private helper methods
-    
+
     @staticmethod
-    def _extract_lemmas(synsets) -> List[str]:
+    def _extract_lemmas(synsets) -> list[str]:
         """Extract all lemma names from synsets."""
         lemmas = set()
         for synset in synsets:
             for lemma in synset.lemmas():
                 lemmas.add(lemma.name().replace('_', ' '))
         return sorted(list(lemmas))
-    
+
     @staticmethod
-    def _extract_antonyms(synsets) -> List[str]:
+    def _extract_antonyms(synsets) -> list[str]:
         """Extract antonyms from synsets."""
         antonyms = set()
         for synset in synsets:
@@ -333,9 +332,9 @@ class SemanticGraph:
                 for antonym in lemma.antonyms():
                     antonyms.add(antonym.name().replace('_', ' '))
         return sorted(list(antonyms))
-    
+
     @staticmethod
-    def _extract_hypernyms(synsets, max_count: int = 10) -> List[str]:
+    def _extract_hypernyms(synsets, max_count: int = 10) -> list[str]:
         """Extract hypernyms (broader concepts)."""
         hypernyms = set()
         for synset in synsets:
@@ -343,9 +342,9 @@ class SemanticGraph:
                 for lemma in hyp.lemmas():
                     hypernyms.add(lemma.name().replace('_', ' '))
         return sorted(list(hypernyms))[:max_count]
-    
+
     @staticmethod
-    def _extract_hyponyms(synsets, max_count: int = 10) -> List[str]:
+    def _extract_hyponyms(synsets, max_count: int = 10) -> list[str]:
         """Extract hyponyms (narrower concepts)."""
         hyponyms = set()
         for synset in synsets:
@@ -353,18 +352,18 @@ class SemanticGraph:
                 for lemma in hyp.lemmas():
                     hyponyms.add(lemma.name().replace('_', ' '))
         return sorted(list(hyponyms))[:max_count]
-    
+
     @staticmethod
     def _build_semantic_relations(
         word: str,
-        synonyms: List[str],
-        antonyms: List[str],
-        hypernyms: List[str],
-        hyponyms: List[str]
-    ) -> List[SemanticRelation]:
+        synonyms: list[str],
+        antonyms: list[str],
+        hypernyms: list[str],
+        hyponyms: list[str]
+    ) -> list[SemanticRelation]:
         """Build semantic relation objects."""
         relations = []
-        
+
         for syn in synonyms:
             relations.append(SemanticRelation(
                 word=word,
@@ -372,7 +371,7 @@ class SemanticGraph:
                 relation_type='synonym',
                 confidence=0.9
             ))
-        
+
         for ant in antonyms:
             relations.append(SemanticRelation(
                 word=word,
@@ -380,7 +379,7 @@ class SemanticGraph:
                 relation_type='antonym',
                 confidence=0.85
             ))
-        
+
         for hyp in hypernyms:
             relations.append(SemanticRelation(
                 word=word,
@@ -388,7 +387,7 @@ class SemanticGraph:
                 relation_type='hypernym',
                 confidence=0.8
             ))
-        
+
         for hyp in hyponyms:
             relations.append(SemanticRelation(
                 word=word,
@@ -396,9 +395,9 @@ class SemanticGraph:
                 relation_type='hyponym',
                 confidence=0.75
             ))
-        
+
         return relations
-    
+
     def clear_cache(self):
         """Clear the exploration cache."""
         self._cache.clear()

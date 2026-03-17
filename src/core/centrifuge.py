@@ -1,10 +1,10 @@
-from mcp.server.fastmcp import FastMCP
-import sqlite3
 import os
-from datetime import datetime
+import sqlite3
 
-from src.core.utils import get_path
+from mcp.server.fastmcp import FastMCP
+
 from src.core.tenancy import get_tenant_db_path
+from src.core.utils import get_path
 
 mcp = FastMCP("Centrifuge")
 
@@ -30,7 +30,7 @@ def init_db():
             compound REAL
         )
     ''')
-    
+
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS atomic_facts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -40,7 +40,7 @@ def init_db():
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    
+
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS logical_links (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,7 +53,7 @@ def init_db():
             FOREIGN KEY(target_node_id) REFERENCES atomic_facts(node_id)
         )
     ''')
-    
+
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS source_provenance (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,7 +81,7 @@ def archive_sentiment(source_file: str, neg: float, neu: float, pos: float, comp
         conn.close()
         return f"Archived: {source_file} (Compound: {compound})"
     except Exception as e:
-        return f"Archive Error: {str(e)}"
+        return f"Archive Error: {e!s}"
 
 @mcp.tool()
 def get_sentiment_trends(days: int = 7) -> str:
@@ -97,14 +97,14 @@ def get_sentiment_trends(days: int = 7) -> str:
         ''', (f'-{days} days',))
         results = cursor.fetchall()
         conn.close()
-        
+
         if not results:
             return f"No trends found for the last {days} days."
-            
+
         trend_summary = [f"{row[0]}: {row[1]}" for row in results]
         return "\n".join(trend_summary)
     except Exception as e:
-        return f"Query Error: {str(e)}"
+        return f"Query Error: {e!s}"
 
 if __name__ == "__main__":
     init_db()

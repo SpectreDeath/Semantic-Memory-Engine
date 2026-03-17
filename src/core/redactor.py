@@ -1,6 +1,5 @@
-import re
 import logging
-from typing import List, Pattern
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -88,11 +87,11 @@ class Redactor:
 
         # Tier 2: Personal Metadata (Phones, Proper Names)
         redacted = _PATTERN_PHONE.sub(REDACTION_MARKER, redacted)
-        
+
         if strict:
             # Aggressive ID scrubbing
             redacted = _PATTERN_STRICT_ID.sub(REDACTION_MARKER, redacted)
-            
+
             # Name scrubbing with technical preservation
             # We don't want to redact common technical terms that look like names
             redacted = cls._smart_name_redact(redacted)

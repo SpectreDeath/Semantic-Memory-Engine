@@ -10,11 +10,10 @@ v2.1.0: Added Pydantic-AI integration for agentic forensic workflows.
 # cSpell:ignore agentic ollama Ollama exfiltration
 
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pydantic
 import pydantic_ai
-
 
 # ============================================================================
 # Pydantic Models for Type-Safe Responses
@@ -29,11 +28,11 @@ class EntityExtraction(pydantic.BaseModel):
 
 class ForensicAnalysisResult(pydantic.BaseModel):
     """Structured forensic analysis output."""
-    entities: List[EntityExtraction] = pydantic.Field(default_factory=list)
+    entities: list[EntityExtraction] = pydantic.Field(default_factory=list)
     sentiment: str = pydantic.Field(..., description="Overall sentiment: positive, negative, neutral")
-    key_findings: List[str] = pydantic.Field(default_factory=list)
+    key_findings: list[str] = pydantic.Field(default_factory=list)
     risk_level: str = pydantic.Field(..., description="Risk assessment: low, medium, high, critical")
-    recommended_actions: List[str] = pydantic.Field(default_factory=list)
+    recommended_actions: list[str] = pydantic.Field(default_factory=list)
 
 
 class ClaimVerification(pydantic.BaseModel):
@@ -41,8 +40,8 @@ class ClaimVerification(pydantic.BaseModel):
     claim: str = pydantic.Field(..., description="The claim being verified")
     is_verified: bool = pydantic.Field(..., description="Whether the claim can be verified")
     confidence: float = pydantic.Field(..., ge=0.0, le=1.0)
-    evidence_sources: List[str] = pydantic.Field(default_factory=list)
-    uncertainty_notes: Optional[str] = None
+    evidence_sources: list[str] = pydantic.Field(default_factory=list)
+    uncertainty_notes: str | None = None
 
 
 # ============================================================================
@@ -82,7 +81,7 @@ forensic_agent = None
 # Legacy-style wrapper for SME compatibility
 # ============================================================================
 
-def analyze_forensic_text(text: str) -> Dict[str, Any]:
+def analyze_forensic_text(text: str) -> dict[str, Any]:
     """
     Analyze text using Pydantic-AI agent.
     
@@ -97,9 +96,9 @@ def analyze_forensic_text(text: str) -> Dict[str, Any]:
     global forensic_agent
     if forensic_agent is None:
         forensic_agent = get_forensic_agent()
-    
+
     result = forensic_agent.run_sync(text)
-    
+
     # Convert to dict for SME compatibility
     return {
         "entities": [
@@ -121,12 +120,12 @@ def analyze_forensic_text(text: str) -> Dict[str, Any]:
     }
 
 
-async def analyze_forensic_text_async(text: str) -> Dict[str, Any]:
+async def analyze_forensic_text_async(text: str) -> dict[str, Any]:
     """
     Async version of forensic text analysis.
     """
     result = await forensic_agent.run(text)
-    
+
     return {
         "entities": [
             {
@@ -147,7 +146,7 @@ async def analyze_forensic_text_async(text: str) -> Dict[str, Any]:
     }
 
 
-def verify_claim(claim: str, evidence: List[str]) -> Dict[str, Any]:
+def verify_claim(claim: str, evidence: list[str]) -> dict[str, Any]:
     """
     Verify a forensic claim against evidence sources.
     
@@ -165,10 +164,10 @@ def verify_claim(claim: str, evidence: List[str]) -> Dict[str, Any]:
         Evaluate claims against provided evidence sources.
         Be strict - only verify claims that have clear support.""",
     )
-    
+
     context = f"Claim: {claim}\n\nEvidence:\n" + "\n".join(f"- {e}" for e in evidence)
     result = verification_agent.run_sync(context)
-    
+
     return {
         "claim": result.data.claim,
         "verified": result.data.is_verified,
@@ -195,7 +194,7 @@ def register_with_sme_registry(registry):
         description="AI-powered forensic text analysis using Pydantic-AI",
         parameters={"text": "str"}
     )
-    
+
     registry.add_tool(
         "pydantic_ai_verify",
         verify_claim,
@@ -216,6 +215,6 @@ if __name__ == "__main__":
     The administrative account 'admin_svc' showed unusual activity patterns.
     Security logs indicate potential data exfiltration to external IP 45.33.32.156.
     """
-    
+
     result = analyze_forensic_text(sample_text)
     print(json.dumps(result, indent=2))

@@ -5,9 +5,12 @@ Lightweight Context Sniffer - <80 lines
 Identifies project context and updates active_persona.json
 """
 
-import json, argparse, sys, os
+import argparse
+import json
+import sys
 from datetime import datetime
 from pathlib import Path
+
 
 def get_ext(file_path):
     return Path(file_path).suffix.lower()
@@ -21,7 +24,7 @@ def scan_keywords(file_path, lines=20):
     }
     specialties = set()
     try:
-        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(file_path, encoding='utf-8', errors='ignore') as f:
             for i, line in enumerate(f):
                 if i >= lines: break
                 line_lower = line.lower()
@@ -50,11 +53,11 @@ def main():
     p.add_argument('file', help='File to analyze')
     p.add_argument('--lines', '-l', type=int, default=20, help='Lines to scan')
     args = p.parse_args()
-    
+
     ext = get_ext(args.file)
     specs = scan_keywords(args.file, args.lines)
     persona, specialty = get_persona(ext, specs)
-    
+
     result = update_json(persona, specialty)
     print(f"Persona: {persona} | Specialty: {specialty}")
     print(f"Updated: {result['timestamp']}")

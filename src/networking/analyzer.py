@@ -11,10 +11,10 @@ Analyzes 6,734 rhetorical signals to find:
 """
 
 import logging
-from typing import Dict, List, Tuple, Set
-import numpy as np
 from dataclasses import dataclass
 from datetime import datetime
+
+import numpy as np
 from scribe_authorship import ScribeEngine
 
 logging.basicConfig(level=logging.INFO)
@@ -28,12 +28,12 @@ logger = logging.getLogger(__name__)
 class FingerprintCluster:
     """Group of accounts with similar linguistic fingerprints"""
     cluster_id: int
-    accounts: List[str]
+    accounts: list[str]
     avg_similarity: float
     confidence: float  # 0-100
     suspected_operator: str
     severity: str  # "Critical", "High", "Medium", "Low"
-    evidence: List[str]
+    evidence: list[str]
     created_at: str = None
 
     def __post_init__(self):
@@ -47,7 +47,7 @@ class CoauthorNetwork:
     author_a: str
     author_b: str
     similarity_score: float  # 0-1
-    shared_signals: Dict[str, float]
+    shared_signals: dict[str, float]
     likely_relationship: str  # "Same person", "Collaborators", "Unrelated"
 
 
@@ -57,8 +57,8 @@ class AnomalyAlert:
     alert_type: str  # "Sockpuppet", "BotFarm", "Campaign", "Anomaly"
     severity: str  # "Critical", "High", "Medium", "Low"
     confidence: float  # 0-100
-    accounts_involved: List[str]
-    evidence: List[str]
+    accounts_involved: list[str]
+    evidence: list[str]
     recommended_action: str
     timestamp: str = None
 
@@ -87,9 +87,9 @@ class NetworkAnalyzer:
 
     def detect_sockpuppet_accounts(
         self,
-        account_texts: Dict[str, str],
+        account_texts: dict[str, str],
         similarity_threshold: float = 0.85
-    ) -> List[FingerprintCluster]:
+    ) -> list[FingerprintCluster]:
         """
         Find accounts likely run by same person (sockpuppets).
         
@@ -159,7 +159,7 @@ class NetworkAnalyzer:
             return clusters
 
         except Exception as e:
-            logger.error(f"❌ Sockpuppet detection failed: {str(e)}")
+            logger.error(f"❌ Sockpuppet detection failed: {e!s}")
             raise
 
     # ========================================================================
@@ -168,10 +168,10 @@ class NetworkAnalyzer:
 
     def detect_bot_farms(
         self,
-        account_texts: Dict[str, str],
+        account_texts: dict[str, str],
         min_farm_size: int = 3,
         similarity_threshold: float = 0.80
-    ) -> List[FingerprintCluster]:
+    ) -> list[FingerprintCluster]:
         """
         Detect bot farms (3+ coordinated accounts with similar patterns).
         
@@ -250,7 +250,7 @@ class NetworkAnalyzer:
             return bot_farms
 
         except Exception as e:
-            logger.error(f"❌ Bot farm detection failed: {str(e)}")
+            logger.error(f"❌ Bot farm detection failed: {e!s}")
             raise
 
     # ========================================================================
@@ -259,9 +259,9 @@ class NetworkAnalyzer:
 
     def build_coauthor_network(
         self,
-        author_texts: Dict[str, str],
+        author_texts: dict[str, str],
         similarity_threshold: float = 0.60
-    ) -> List[CoauthorNetwork]:
+    ) -> list[CoauthorNetwork]:
         """
         Find writing partnerships (similar signal distributions).
         
@@ -329,7 +329,7 @@ class NetworkAnalyzer:
             return relationships
 
         except Exception as e:
-            logger.error(f"❌ Co-author network failed: {str(e)}")
+            logger.error(f"❌ Co-author network failed: {e!s}")
             raise
 
     # ========================================================================
@@ -338,9 +338,9 @@ class NetworkAnalyzer:
 
     def analyze_coordinated_campaign(
         self,
-        campaign_accounts: List[str],
-        timeline_data: Dict[str, List[Tuple[str, str]]]
-    ) -> List[AnomalyAlert]:
+        campaign_accounts: list[str],
+        timeline_data: dict[str, list[tuple[str, str]]]
+    ) -> list[AnomalyAlert]:
         """
         Detect coordinated posting patterns (same message, different accounts).
         
@@ -406,14 +406,14 @@ class NetworkAnalyzer:
             return alerts
 
         except Exception as e:
-            logger.error(f"❌ Campaign analysis failed: {str(e)}")
+            logger.error(f"❌ Campaign analysis failed: {e!s}")
             raise
 
     # ========================================================================
     # HELPER METHODS
     # ========================================================================
 
-    def _build_evidence(self, fp1, fp2, similarity: float) -> List[str]:
+    def _build_evidence(self, fp1, fp2, similarity: float) -> list[str]:
         """Build evidence list for sockpuppet detection"""
         evidence = []
 
@@ -460,10 +460,10 @@ class NetworkAnalyzer:
 
     def generate_network_report(
         self,
-        sockpuppets: List[FingerprintCluster],
-        bot_farms: List[FingerprintCluster],
-        coauthors: List[CoauthorNetwork]
-    ) -> Dict:
+        sockpuppets: list[FingerprintCluster],
+        bot_farms: list[FingerprintCluster],
+        coauthors: list[CoauthorNetwork]
+    ) -> dict:
         """Generate comprehensive network analysis report"""
         return {
             "report_type": "Network Analysis",
@@ -520,7 +520,7 @@ class NetworkAnalyzer:
 # MCP TOOL FUNCTIONS
 # ============================================================================
 
-def detect_sockpuppets_tool(account_texts: Dict[str, str], similarity_threshold: float = 0.85) -> Dict:
+def detect_sockpuppets_tool(account_texts: dict[str, str], similarity_threshold: float = 0.85) -> dict:
     """MCP Tool: Detect sockpuppet accounts"""
     analyzer = NetworkAnalyzer()
     clusters = analyzer.detect_sockpuppet_accounts(account_texts, similarity_threshold)
@@ -541,7 +541,7 @@ def detect_sockpuppets_tool(account_texts: Dict[str, str], similarity_threshold:
     }
 
 
-def detect_bot_farms_tool(account_texts: Dict[str, str], min_farm_size: int = 3) -> Dict:
+def detect_bot_farms_tool(account_texts: dict[str, str], min_farm_size: int = 3) -> dict:
     """MCP Tool: Detect bot farms"""
     analyzer = NetworkAnalyzer()
     farms = analyzer.detect_bot_farms(account_texts, min_farm_size)
@@ -562,7 +562,7 @@ def detect_bot_farms_tool(account_texts: Dict[str, str], min_farm_size: int = 3)
     }
 
 
-def build_network_tool(author_texts: Dict[str, str]) -> Dict:
+def build_network_tool(author_texts: dict[str, str]) -> dict:
     """MCP Tool: Build co-author network"""
     analyzer = NetworkAnalyzer()
     relationships = analyzer.build_coauthor_network(author_texts)

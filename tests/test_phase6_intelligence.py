@@ -5,18 +5,20 @@ Verification Tests for Phase 6 - Silicon Brain
 Tests for KnowledgeGraph, IntelligenceReports, and OverlapDiscovery modules.
 """
 
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src import ToolFactory, KnowledgeGraph, IntelligenceReports, OverlapDiscovery
+from src import ToolFactory
+
 
 class TestPhase6Intelligence:
     """Test suite for Phase 6 intelligence components."""
-    
+
     @pytest.fixture
     def sample_text(self):
         return """
@@ -31,11 +33,11 @@ class TestPhase6Intelligence:
         """Test building a graph from text."""
         kg = ToolFactory.create_knowledge_graph(reset=True)
         kg.build_from_text(sample_text)
-        
+
         summary = kg.get_summary()
         assert summary["node_count"] > 0
         assert summary["edge_count"] > 0
-        
+
         mermaid = kg.to_mermaid()
         assert "Albert_Einstein" in mermaid
         assert "graph LR" in mermaid
@@ -44,11 +46,11 @@ class TestPhase6Intelligence:
         """Test generating a narrative report."""
         ir = ToolFactory.create_intelligence_reports(reset=True)
         report = ir.generate_briefing(sample_text, title="Einstein Report")
-        
+
         assert report.title == "Einstein Report"
         assert len(report.key_points) > 0
         assert "polarity" in report.sentiment_overview
-        
+
         md = ir.to_markdown(report)
         assert "# Einstein Report" in md
         assert "Executive Summary" in md
@@ -64,12 +66,12 @@ class TestPhase6Intelligence:
         assert hasattr(ToolFactory, 'create_knowledge_graph')
         assert hasattr(ToolFactory, 'create_intelligence_reports')
         assert hasattr(ToolFactory, 'create_overlap_discovery')
-        
+
     def test_graph_export_json(self, sample_text):
         """Test JSON export for D3 integration."""
         kg = ToolFactory.create_knowledge_graph(reset=True)
         kg.build_from_text(sample_text)
-        
+
         js_data = kg.to_json()
         assert '"nodes":' in js_data
         assert '"links":' in js_data

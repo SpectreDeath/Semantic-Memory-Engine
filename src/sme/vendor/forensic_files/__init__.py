@@ -1,2 +1,2 @@
-from .signature import verify_file_signature
 from .complexity import calculate_structural_complexity
+from .signature import verify_file_signature

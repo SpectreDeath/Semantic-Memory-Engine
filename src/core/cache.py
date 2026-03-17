@@ -36,9 +36,10 @@ import pickle
 import time
 from abc import ABC, abstractmethod
 from collections import OrderedDict
+from collections.abc import Callable
 from functools import wraps
 from threading import Lock
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -47,12 +48,12 @@ class CacheBackend(ABC):
     """Abstract base class for cache backends."""
 
     @abstractmethod
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Retrieve value from cache."""
         pass
 
     @abstractmethod
-    def set(self, key: str, value: Any, ttl_seconds: Optional[int] = None) -> bool:
+    def set(self, key: str, value: Any, ttl_seconds: int | None = None) -> bool:
         """Store value in cache with optional TTL."""
         pass
 
@@ -72,7 +73,7 @@ class CacheBackend(ABC):
         pass
 
     @abstractmethod
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         pass
 
@@ -88,13 +89,13 @@ class LRUCache(CacheBackend):
     def __init__(self, max_size: int = 1000):
         """Initialize LRU cache."""
         self.max_size = max_size
-        self.cache: OrderedDict[str, Tuple[Any, Optional[float]]] = OrderedDict()
+        self.cache: OrderedDict[str, tuple[Any, float | None]] = OrderedDict()
         self.lock = Lock()
         self.hits = 0
         self.misses = 0
         self.evictions = 0
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Retrieve value from cache, returns None if expired or missing."""
         with self.lock:
             if key not in self.cache:
@@ -114,7 +115,7 @@ class LRUCache(CacheBackend):
             self.hits += 1
             return value
 
-    def set(self, key: str, value: Any, ttl_seconds: Optional[int] = None) -> bool:
+    def set(self, key: str, value: Any, ttl_seconds: int | None = None) -> bool:
         """Store value in cache with optional TTL."""
         with self.lock:
             # Remove old entry if exists
@@ -164,7 +165,7 @@ class LRUCache(CacheBackend):
 
             return True
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         with self.lock:
             total_requests = self.hits + self.misses
@@ -226,7 +227,7 @@ class RedisCache(CacheBackend):
             logger.error(f"Serialization error: {e}")
             return b""
 
-    def _deserialize(self, data: bytes) -> Optional[Any]:
+    def _deserialize(self, data: bytes) -> Any | None:
         """Deserialize value from Redis."""
         try:
             return pickle.loads(data)
@@ -234,7 +235,7 @@ class RedisCache(CacheBackend):
             logger.error(f"Deserialization error: {e}")
             return None
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Retrieve value from Redis cache."""
         if not self.available or not self.redis_client:
             self.misses += 1
@@ -253,7 +254,7 @@ class RedisCache(CacheBackend):
             self.misses += 1
             return None
 
-    def set(self, key: str, value: Any, ttl_seconds: Optional[int] = None) -> bool:
+    def set(self, key: str, value: Any, ttl_seconds: int | None = None) -> bool:
         """Store value in Redis cache with optional TTL."""
         if not self.available or not self.redis_client:
             return False
@@ -304,7 +305,7 @@ class RedisCache(CacheBackend):
             logger.error(f"Redis exists error: {e}")
             return False
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get Redis cache statistics."""
         total_requests = self.hits + self.misses
         hit_rate = (
@@ -345,7 +346,7 @@ class CacheManager:
     _instance = None
     _lock = Lock()
 
-    def __new__(cls, backend: Optional[CacheBackend] = None):
+    def __new__(cls, backend: CacheBackend | None = None):
         """Singleton pattern with optional backend injection."""
         if cls._instance is None:
             with cls._lock:
@@ -353,18 +354,18 @@ class CacheManager:
                     cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self, backend: Optional[CacheBackend] = None):
+    def __init__(self, backend: CacheBackend | None = None):
         """Initialize cache manager with backend."""
         if not hasattr(self, "_initialized"):
             self.backend = backend or LRUCache(max_size=1000)
             self._initialized = True
             logger.info(f"CacheManager initialized with {type(self.backend).__name__}")
 
-    def get(self, key: str) -> Optional[Any]:
+    def get(self, key: str) -> Any | None:
         """Retrieve value from cache."""
         return self.backend.get(key)
 
-    def set(self, key: str, value: Any, ttl_seconds: Optional[int] = None) -> bool:
+    def set(self, key: str, value: Any, ttl_seconds: int | None = None) -> bool:
         """Store value in cache."""
         return self.backend.set(key, value, ttl_seconds)
 
@@ -380,7 +381,7 @@ class CacheManager:
         """Check if key exists in cache."""
         return self.backend.exists(key)
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get cache statistics."""
         return self.backend.get_stats()
 
@@ -396,7 +397,7 @@ class CacheManager:
 
 
 def cache_decorator(
-    ttl_seconds: int = 3600, cache_manager: Optional[CacheManager] = None
+    ttl_seconds: int = 3600, cache_manager: CacheManager | None = None
 ):
     """
     Decorator for caching function results.
@@ -437,7 +438,7 @@ def cache_decorator(
 
 
 # Singleton instance
-_cache_manager: Optional[CacheManager] = None
+_cache_manager: CacheManager | None = None
 
 
 def get_cache_manager() -> CacheManager:

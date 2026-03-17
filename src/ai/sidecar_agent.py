@@ -30,7 +30,6 @@ Constraints:
 import asyncio
 import logging
 import os
-from typing import Optional
 
 from pydantic import BaseModel, Field, ValidationError
 from pydantic_ai import Agent
@@ -186,7 +185,7 @@ class ForensicAgent:
             max_retries=max_retries,
             base_delay_s=base_delay_s,
         )
-        self._agent: Optional[Agent] = None
+        self._agent: Agent | None = None
         logger.info(
             f"ForensicAgent initialized — retries={max_retries}, "
             f"base_delay={base_delay_s}s"
@@ -266,7 +265,7 @@ class ForensicAgent:
 # ---------------------------------------------------------------------------
 
 # Module-level singleton
-_forensic_agent: Optional[ForensicAgent] = None
+_forensic_agent: ForensicAgent | None = None
 
 
 def get_agent() -> ForensicAgent:

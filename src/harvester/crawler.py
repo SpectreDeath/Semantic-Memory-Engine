@@ -46,17 +46,14 @@ Database:
     └─ source_quality (INTEGER 0-100)
 """
 
-import json
-import sqlite3
-import logging
 import asyncio
-import time
+import json
+import logging
 import re
-from datetime import datetime
-from typing import Dict, List, Optional, Tuple
-from urllib.parse import urljoin, urlparse
+import sqlite3
+import time
 from pathlib import Path
-import hashlib
+from urllib.parse import urljoin, urlparse
 
 # Core dependencies
 try:
@@ -81,9 +78,7 @@ except ImportError:
     PLAYWRIGHT_AVAILABLE = False
     async_playwright = None
 
-import re
 from bs4 import BeautifulSoup
-from pathlib import Path
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -102,26 +97,26 @@ class HarvesterCrawler:
         2. Scrapling (Fallback) - Ultra-fast, undetectable, MCP-native
         3. Playwright (Backup) - Full browser control for complex SPA
     """
-    
+
     def __init__(self, db_path: str = DB_PATH, use_crawl4ai: bool = True):
         self.db_path = db_path
         self.use_crawl4ai = use_crawl4ai and CRAWL4AI_AVAILABLE
         self.use_scrapling = SCRAPLING_AVAILABLE
         self.use_playwright = PLAYWRIGHT_AVAILABLE
-        
+
         # Initialize database
         self._init_database()
-        
+
         # Engine selection
         self.engine = "crawl4ai" if self.use_crawl4ai else "scrapling"
         logger.info(f"🕸️ Harvester initialized with engine: {self.engine}")
-    
+
     def _init_database(self):
         """Initialize or verify raw_content table schema."""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             # Create raw_content table if not exists
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS raw_content (
@@ -140,31 +135,31 @@ class HarvesterCrawler:
                     error_log TEXT
                 )
             """)
-            
+
             # Create index on domain for crawl queries
             cursor.execute("""
                 CREATE INDEX IF NOT EXISTS idx_raw_content_domain 
                 ON raw_content(domain)
             """)
-            
+
             # Create index on processed status for Loom pipeline
             cursor.execute("""
                 CREATE INDEX IF NOT EXISTS idx_raw_content_loom 
                 ON raw_content(processed_by_loom)
             """)
-            
+
             conn.commit()
             conn.close()
             logger.info("✅ raw_content table initialized")
         except Exception as e:
             logger.error(f"❌ Database initialization error: {e}")
-    
+
     # ============================================================================
     # TOOL 1: fetch_semantic_markdown()
     # ============================================================================
-    
-    def fetch_semantic_markdown(self, url: str, js_render: bool = False, 
-                                wait_for: Optional[str] = None) -> Dict:
+
+    def fetch_semantic_markdown(self, url: str, js_render: bool = False,
+                                wait_for: str | None = None) -> dict:
         """
         Convert URL content to LLM-ready markdown.
         
@@ -209,7 +204,7 @@ class HarvesterCrawler:
             'engine_used': self.engine,
             'status': 'pending'
         }
-        
+
         try:
             # Check if already cached
             cached = self._check_cache(url)
@@ -219,7 +214,7 @@ class HarvesterCrawler:
                 result['html'] = cached['raw_html']
                 result['status'] = 'cached'
                 return result
-            
+
             # Route to appropriate engine
             if self.use_crawl4ai and not js_render:
                 result = self._fetch_with_crawl4ai(url, result, wait_for)
@@ -230,37 +225,37 @@ class HarvesterCrawler:
             else:
                 # Fallback to BeautifulSoup
                 result = self._fetch_with_beautifulsoup(url, result)
-            
+
             # Store to database
             self._store_to_centrifuge(url, result)
-            
+
             result['processing_time_ms'] = (time.time() - start_time) * 1000
             result['status'] = 'success'
-            
+
             logger.info(f"✅ Fetched {url} → {result['metadata'].get('word_count', 0)} words")
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ Error fetching {url}: {e}")
             result['status'] = 'error'
             result['error'] = str(e)
             return result
-    
-    def _fetch_with_crawl4ai(self, url: str, result: Dict, wait_for: Optional[str]) -> Dict:
+
+    def _fetch_with_crawl4ai(self, url: str, result: dict, wait_for: str | None) -> dict:
         """Fetch using Crawl4AI with PruningContentFilter."""
         try:
             crawler = AsyncWebCrawler()
-            
+
             # Run async crawler
             fetch_result = asyncio.run(crawler.arun(
                 url=url,
                 wait_until="load_event",  # Wait for JS
                 cache_mode="bypass"
             ))
-            
+
             result['html'] = fetch_result.html
             result['markdown'] = fetch_result.markdown
-            
+
             # Extract metadata
             soup = BeautifulSoup(fetch_result.html, 'html.parser')
             result['metadata'] = {
@@ -271,27 +266,27 @@ class HarvesterCrawler:
                 'word_count': len(result['markdown'].split()),
                 'engine': 'crawl4ai'
             }
-            
+
             # Quality scoring
             result['quality_score'] = self._score_content_quality(
-                result['markdown'], 
+                result['markdown'],
                 result['html']
             )
-            
+
             result['engine_used'] = 'crawl4ai'
             return result
-            
+
         except Exception as e:
             logger.warning(f"Crawl4AI failed, falling back: {e}")
             if self.use_scrapling:
                 return self._fetch_with_scrapling(url, result)
             raise
-    
-    def _fetch_with_scrapling(self, url: str, result: Dict) -> Dict:
+
+    def _fetch_with_scrapling(self, url: str, result: dict) -> dict:
         """Fetch using Scrapling (undetectable, ultra-fast)."""
         try:
             client = ScraplingClient()
-            
+
             response = client.fetch(
                 url,
                 cache_mode="bypass",
@@ -301,10 +296,10 @@ class HarvesterCrawler:
                     "timeout": 10000
                 }
             )
-            
+
             result['html'] = response.html
             result['markdown'] = self._html_to_markdown(response.html)
-            
+
             soup = BeautifulSoup(response.html, 'html.parser')
             result['metadata'] = {
                 'title': soup.title.string if soup.title else url,
@@ -314,22 +309,22 @@ class HarvesterCrawler:
                 'word_count': len(result['markdown'].split()),
                 'engine': 'scrapling'
             }
-            
+
             result['quality_score'] = self._score_content_quality(
                 result['markdown'],
                 result['html']
             )
-            
+
             result['engine_used'] = 'scrapling'
             return result
-            
+
         except Exception as e:
             logger.warning(f"Scrapling failed: {e}")
             if self.use_playwright:
                 return self._fetch_with_playwright(url, result)
             raise
-    
-    def _fetch_with_playwright(self, url: str, result: Dict) -> Dict:
+
+    def _fetch_with_playwright(self, url: str, result: dict) -> dict:
         """Fetch using Playwright headless browser (full JS support)."""
         try:
             async def browse():
@@ -340,10 +335,10 @@ class HarvesterCrawler:
                     html = await page.content()
                     await browser.close()
                     return html
-            
+
             result['html'] = asyncio.run(browse())
             result['markdown'] = self._html_to_markdown(result['html'])
-            
+
             soup = BeautifulSoup(result['html'], 'html.parser')
             result['metadata'] = {
                 'title': soup.title.string if soup.title else url,
@@ -353,29 +348,29 @@ class HarvesterCrawler:
                 'word_count': len(result['markdown'].split()),
                 'engine': 'playwright'
             }
-            
+
             result['quality_score'] = self._score_content_quality(
                 result['markdown'],
                 result['html']
             )
-            
+
             result['engine_used'] = 'playwright'
             return result
-            
+
         except Exception as e:
             logger.error(f"Playwright failed: {e}")
             raise
-    
-    def _fetch_with_beautifulsoup(self, url: str, result: Dict) -> Dict:
+
+    def _fetch_with_beautifulsoup(self, url: str, result: dict) -> dict:
         """Fallback to BeautifulSoup (no JS, static HTML only)."""
         try:
             import urllib.request
             with urllib.request.urlopen(url) as response:
                 html = response.read().decode('utf-8')
-            
+
             result['html'] = html
             result['markdown'] = self._html_to_markdown(html)
-            
+
             soup = BeautifulSoup(html, 'html.parser')
             result['metadata'] = {
                 'title': soup.title.string if soup.title else url,
@@ -385,25 +380,25 @@ class HarvesterCrawler:
                 'word_count': len(result['markdown'].split()),
                 'engine': 'beautifulsoup'
             }
-            
+
             result['quality_score'] = self._score_content_quality(
                 result['markdown'],
                 result['html']
             )
-            
+
             result['engine_used'] = 'beautifulsoup'
             return result
-            
+
         except Exception as e:
             logger.error(f"BeautifulSoup failed: {e}")
             raise
-    
+
     # ============================================================================
     # TOOL 2: deep_crawl_domain()
     # ============================================================================
-    
-    def deep_crawl_domain(self, seed_url: str, max_depth: int = 2, 
-                         max_pages: int = 50, parallel_workers: int = 4) -> Dict:
+
+    def deep_crawl_domain(self, seed_url: str, max_depth: int = 2,
+                         max_pages: int = 50, parallel_workers: int = 4) -> dict:
         """
         Recursively crawl domain starting from seed URL.
         
@@ -437,7 +432,7 @@ class HarvesterCrawler:
         start_time = time.time()
         parsed = urlparse(seed_url)
         domain = parsed.netloc
-        
+
         result = {
             'domain': domain,
             'seed_url': seed_url,
@@ -448,53 +443,53 @@ class HarvesterCrawler:
             'content_summary': {},
             'processing_time_s': 0
         }
-        
+
         visited = set()
         current_level = [seed_url]
         quality_scores = []
         content_types = {}
         total_words = 0
-        
+
         try:
             for depth in range(max_depth):
                 if not current_level or len(visited) >= max_pages:
                     break
-                
+
                 logger.info(f"🕸️ Crawling depth {depth+1}/{max_depth}, {len(current_level)} URLs")
-                
+
                 next_level = []
-                
+
                 # Process current level with parallelization
                 for url in current_level[:max_pages - len(visited)]:
                     if url in visited:
                         continue
-                    
+
                     visited.add(url)
-                    
+
                     try:
                         # Fetch and parse
                         fetch_result = self.fetch_semantic_markdown(url)
-                        
+
                         if fetch_result['status'] == 'success':
                             result['crawled_urls'].append(url)
                             quality_scores.append(fetch_result['quality_score'])
                             content_type = fetch_result['metadata'].get('content_type', 'unknown')
                             content_types[content_type] = content_types.get(content_type, 0) + 1
                             total_words += fetch_result['metadata'].get('word_count', 0)
-                            
+
                             # Extract links from markdown
                             links = self._extract_links_from_markdown(fetch_result['markdown'], domain)
                             next_level.extend([l for l in links if l not in visited and len(visited) < max_pages])
                         else:
                             result['failed_urls'][url] = fetch_result.get('error', 'Unknown error')
-                    
+
                     except Exception as e:
                         result['failed_urls'][url] = str(e)
                         logger.warning(f"Failed to crawl {url}: {e}")
-                
+
                 current_level = next_level
                 result['frontier'] = current_level
-            
+
             result['total_pages_crawled'] = len(visited)
             result['content_summary'] = {
                 'avg_quality': sum(quality_scores) / len(quality_scores) if quality_scores else 0,
@@ -502,21 +497,21 @@ class HarvesterCrawler:
                 'total_words': total_words
             }
             result['processing_time_s'] = time.time() - start_time
-            
+
             logger.info(f"✅ Crawl complete: {len(visited)} pages, {total_words} words")
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ Crawl error: {e}")
             result['error'] = str(e)
             result['processing_time_s'] = time.time() - start_time
             return result
-    
+
     # ============================================================================
     # TOOL 3: extract_structured_data()
     # ============================================================================
-    
-    def extract_structured_data(self, url: str, schema_hints: Optional[List[str]] = None) -> Dict:
+
+    def extract_structured_data(self, url: str, schema_hints: list[str] | None = None) -> dict:
         """
         Extract structured data (tables, forms, JSON-LD) from page.
         
@@ -550,26 +545,26 @@ class HarvesterCrawler:
             'extracted_structure': {},
             'status': 'pending'
         }
-        
+
         try:
             # Fetch raw HTML
             fetch_result = self.fetch_semantic_markdown(url)
             if fetch_result['status'] != 'success':
                 return {**result, 'status': 'error', 'error': 'Fetch failed'}
-            
+
             html = fetch_result['html']
             soup = BeautifulSoup(html, 'html.parser')
-            
+
             # Extract tables
             for table in soup.find_all('table'):
                 table_data = self._extract_table(table)
                 result['tables'].append(table_data)
-            
+
             # Extract forms
             for form in soup.find_all('form'):
                 form_data = self._extract_form(form)
                 result['forms'].append(form_data)
-            
+
             # Extract JSON-LD
             for script in soup.find_all('script', {'type': 'application/ld+json'}):
                 try:
@@ -577,11 +572,11 @@ class HarvesterCrawler:
                     result['json_ld'].append(json_ld)
                 except:
                     pass
-            
+
             # Extract microdata
             microdata = self._extract_microdata(soup)
             result['microdata'] = microdata
-            
+
             # Combine into overall structure
             result['extracted_structure'] = {
                 'table_count': len(result['tables']),
@@ -589,24 +584,24 @@ class HarvesterCrawler:
                 'json_ld_count': len(result['json_ld']),
                 'microdata_types': list(set([m.get('@type') for m in microdata.values()]))
             }
-            
+
             result['status'] = 'success'
             logger.info(f"✅ Extracted structures from {url}: {result['extracted_structure']}")
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ Structure extraction error: {e}")
             result['status'] = 'error'
             result['error'] = str(e)
             return result
-    
+
     # ============================================================================
     # TOOL 4: bypass_dynamic_content()
     # ============================================================================
-    
-    def bypass_dynamic_content(self, url: str, wait_selector: Optional[str] = None,
-                              scroll_to_bottom: bool = False, 
-                              interaction_script: Optional[str] = None) -> Dict:
+
+    def bypass_dynamic_content(self, url: str, wait_selector: str | None = None,
+                              scroll_to_bottom: bool = False,
+                              interaction_script: str | None = None) -> dict:
         """
         Handle JavaScript-heavy sites and SPA (Single Page Applications).
         
@@ -648,19 +643,19 @@ class HarvesterCrawler:
             'performance': {},
             'status': 'pending'
         }
-        
+
         if not PLAYWRIGHT_AVAILABLE:
             return {**result, 'status': 'error', 'error': 'Playwright not installed'}
-        
+
         try:
             async def render_spa():
                 async with async_playwright() as p:
                     browser = await p.chromium.launch(headless=True)
                     page = await browser.new_page()
-                    
+
                     start = time.time()
                     await page.goto(url, wait_until="domcontentloaded")
-                    
+
                     # Wait for specific selector if provided
                     if wait_selector:
                         try:
@@ -668,51 +663,51 @@ class HarvesterCrawler:
                             result['js_interactions_applied'].append(f"Waited for: {wait_selector}")
                         except:
                             logger.warning(f"Selector {wait_selector} not found")
-                    
+
                     # Auto-scroll for lazy loading
                     if scroll_to_bottom:
                         await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
                         await page.wait_for_load_state("networkidle")
                         result['js_interactions_applied'].append("Scrolled to bottom")
-                    
+
                     # Execute custom interaction
                     if interaction_script:
                         await page.evaluate(interaction_script)
                         result['js_interactions_applied'].append(f"Executed: {interaction_script[:50]}...")
-                    
+
                     load_time = (time.time() - start) * 1000
-                    
+
                     # Capture final HTML
                     html = await page.content()
-                    
+
                     # Optional screenshot
                     # await page.screenshot(path="screenshot.png")
                     # result['screenshot'] = str(Path("screenshot.png").absolute())
-                    
+
                     await browser.close()
                     return html, load_time
-            
+
             html, load_time = asyncio.run(render_spa())
             result['html'] = html
             result['markdown'] = self._html_to_markdown(html)
             result['dynamic_content_detected'] = True
             result['performance']['load_time_ms'] = load_time
             result['status'] = 'success'
-            
+
             logger.info(f"✅ Rendered SPA {url} ({load_time:.0f}ms)")
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ SPA rendering error: {e}")
             result['status'] = 'error'
             result['error'] = str(e)
             return result
-    
+
     # ============================================================================
     # TOOL 5: archive_to_centrifuge()
     # ============================================================================
-    
-    def archive_to_centrifuge(self, url: str, overwrite: bool = False) -> Dict:
+
+    def archive_to_centrifuge(self, url: str, overwrite: bool = False) -> dict:
         """
         Store raw content to Centrifuge DB for offline processing.
         
@@ -745,15 +740,15 @@ class HarvesterCrawler:
             'centrifuge_path': DB_PATH,
             'status': 'pending'
         }
-        
+
         try:
             # Check if already exists (unless overwrite)
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             cursor.execute("SELECT id, markdown_content FROM raw_content WHERE url = ?", (url,))
             existing = cursor.fetchone()
-            
+
             if existing and not overwrite:
                 result['record_id'] = existing[0]
                 result['archived'] = True
@@ -762,16 +757,16 @@ class HarvesterCrawler:
                 result['status'] = 'cached'
                 conn.close()
                 return result
-            
+
             # Fetch fresh content
             fetch_result = self.fetch_semantic_markdown(url)
             if fetch_result['status'] != 'success':
                 return {**result, 'status': 'error', 'error': 'Fetch failed'}
-            
+
             # Insert into database
             parsed = urlparse(url)
             domain = parsed.netloc
-            
+
             cursor.execute("""
                 INSERT OR REPLACE INTO raw_content 
                 (url, domain, raw_html, markdown_content, extracted_schema, 
@@ -789,33 +784,33 @@ class HarvesterCrawler:
                 fetch_result['quality_score'],
                 fetch_result['engine_used']
             ))
-            
+
             conn.commit()
             record_id = cursor.lastrowid
-            
+
             result['record_id'] = record_id
             result['archived'] = True
             result['size_bytes'] = len(fetch_result['html']) + len(fetch_result['markdown'])
             result['markdown_words'] = len(fetch_result['markdown'].split())
             result['ready_for_loom'] = True
             result['status'] = 'success'
-            
+
             conn.close()
-            
+
             logger.info(f"✅ Archived {url} (ID: {record_id}, {result['markdown_words']} words)")
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ Archive error: {e}")
             result['status'] = 'error'
             result['error'] = str(e)
             return result
-    
+
     # ============================================================================
     # Helper Methods
     # ============================================================================
-    
-    def _check_cache(self, url: str) -> Optional[Dict]:
+
+    def _check_cache(self, url: str) -> dict | None:
         """Check if URL already cached in Centrifuge DB."""
         try:
             conn = sqlite3.connect(self.db_path)
@@ -827,16 +822,16 @@ class HarvesterCrawler:
             return dict(row) if row else None
         except:
             return None
-    
-    def _store_to_centrifuge(self, url: str, fetch_result: Dict):
+
+    def _store_to_centrifuge(self, url: str, fetch_result: dict):
         """Store fetch result to database."""
         try:
             parsed = urlparse(url)
             domain = parsed.netloc
-            
+
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             cursor.execute("""
                 INSERT OR REPLACE INTO raw_content 
                 (url, domain, raw_html, markdown_content, extracted_schema, 
@@ -853,78 +848,77 @@ class HarvesterCrawler:
                 fetch_result['quality_score'],
                 fetch_result['engine_used']
             ))
-            
+
             conn.commit()
             conn.close()
         except Exception as e:
             logger.warning(f"Failed to store to Centrifuge: {e}")
-    
+
     def _html_to_markdown(self, html: str) -> str:
         """Convert HTML to clean markdown (removes nav, footer, ads)."""
         soup = BeautifulSoup(html, 'html.parser')
-        
+
         # Remove unwanted elements
         for element in soup.find_all(['nav', 'footer', 'script', 'style', 'noscript', 'iframe']):
             element.decompose()
-        
+
         # Remove common ad/sidebar classes
         for element in soup.find_all(class_=re.compile('(ad|sidebar|nav|footer|widget|banner)', re.I)):
             element.decompose()
-        
+
         # Extract main content
         main_content = soup.find('main') or soup.find('article') or soup.find(class_=re.compile('content|main|article', re.I))
         if main_content:
             soup = main_content
-        
+
         # Convert to markdown-like text
         markdown = self._html_to_text(soup)
         return markdown
-    
+
     def _html_to_text(self, soup) -> str:
         """Convert BeautifulSoup object to markdown-like text."""
         text_parts = []
-        
+
         for element in soup.children:
             if isinstance(element, str):
                 text = element.strip()
                 if text:
                     text_parts.append(text)
+            elif element.name in ['h1', 'h2', 'h3', 'h4']:
+                level = int(element.name[1])
+                text_parts.append('\n' + '#' * level + ' ' + element.get_text(strip=True) + '\n')
+            elif element.name == 'p':
+                text_parts.append(element.get_text(strip=True) + '\n')
+            elif element.name == 'a':
+                text_parts.append(f"[{element.get_text()}]({element.get('href', '#')})")
+            elif element.name in ['ul', 'ol']:
+                for li in element.find_all('li'):
+                    text_parts.append(f"• {li.get_text(strip=True)}\n")
+            elif element.name == 'code':
+                text_parts.append(f"`{element.get_text()}`")
+            elif element.name == 'blockquote':
+                text_parts.append(f"> {element.get_text(strip=True)}\n")
             else:
-                if element.name in ['h1', 'h2', 'h3', 'h4']:
-                    level = int(element.name[1])
-                    text_parts.append('\n' + '#' * level + ' ' + element.get_text(strip=True) + '\n')
-                elif element.name == 'p':
-                    text_parts.append(element.get_text(strip=True) + '\n')
-                elif element.name == 'a':
-                    text_parts.append(f"[{element.get_text()}]({element.get('href', '#')})")
-                elif element.name in ['ul', 'ol']:
-                    for li in element.find_all('li'):
-                        text_parts.append(f"• {li.get_text(strip=True)}\n")
-                elif element.name == 'code':
-                    text_parts.append(f"`{element.get_text()}`")
-                elif element.name == 'blockquote':
-                    text_parts.append(f"> {element.get_text(strip=True)}\n")
-                else:
-                    text_parts.append(self._html_to_text(element))
-        
+                text_parts.append(self._html_to_text(element))
+
         return ''.join(text_parts)
-    
-    def _extract_table(self, table) -> Dict:
+
+    def _extract_table(self, table) -> dict:
         """Extract HTML table to dict format."""
         headers = []
         rows = []
-        
+
         for th in table.find_all('th'):
             headers.append(th.get_text(strip=True))
-        
+
         for tr in table.find_all('tr')[1:]:
             cells = [td.get_text(strip=True) for td in tr.find_all(['td', 'th'])]
             if cells:
                 rows.append(cells)
-        
+
         return {'headers': headers, 'rows': rows}
-    
-    def _extract_form(self, form) -> Dict:
+
+    def _extract_form(self, form) -> dict:
         """Extract HTML form to dict format."""
         form_data = {
             'name': form.get('name', ''),
@@ -932,17 +926,17 @@ class HarvesterCrawler:
             'action': form.get('action', ''),
             'fields': []
         }
-        
+
         for field in form.find_all(['input', 'select', 'textarea']):
             form_data['fields'].append({
                 'name': field.get('name', ''),
                 'type': field.get('type', ''),
                 'value': field.get('value', '')
             })
-        
+
         return form_data
-    
-    def _extract_microdata(self, soup) -> Dict:
+
+    def _extract_microdata(self, soup) -> dict:
         """Extract schema.org microdata."""
         microdata = {}
         for element in soup.find_all(attrs={'itemscope': True}):
@@ -950,16 +944,16 @@ class HarvesterCrawler:
             item_id = element.get('itemid', '')
             microdata[item_id or item_type] = {'@type': item_type}
         return microdata
-    
+
     def _extract_meta(self, soup, meta_name: str) -> str:
         """Extract meta tag content."""
         meta = soup.find('meta', attrs={'name': meta_name}) or soup.find('meta', attrs={'property': f'og:{meta_name}'})
         return meta.get('content', '') if meta else ''
-    
+
     def _detect_js_content(self, html: str) -> bool:
         """Detect if page has significant JavaScript."""
         return bool(re.search(r'<script|async|defer|fetch|XMLHttpRequest|React|Vue|Angular', html, re.I))
-    
+
     def _detect_content_type(self, html: str) -> str:
         """Detect content type (article, table, video, etc)."""
         if 'table' in html.lower() and html.count('<table') > 2:
@@ -969,26 +963,26 @@ class HarvesterCrawler:
         if 'article' in html.lower():
             return 'article'
         return 'webpage'
-    
+
     def _score_content_quality(self, markdown: str, html: str) -> int:
         """Score content quality 0-100."""
         score = 50  # Base
-        
+
         # More text = higher quality
         word_count = len(markdown.split())
         score += min(30, word_count // 100)
-        
+
         # Structure = quality
         headers = markdown.count('#')
         score += min(20, headers)
-        
+
         # Penalize if too much HTML boilerplate left
         if len(html) > len(markdown) * 5:
             score -= 20
-        
+
         return max(0, min(100, score))
-    
-    def _extract_links_from_markdown(self, markdown: str, domain: str) -> List[str]:
+
+    def _extract_links_from_markdown(self, markdown: str, domain: str) -> list[str]:
         """Extract links from markdown."""
         links = []
         for match in re.finditer(r'\[.*?\]\((.*?)\)', markdown):
@@ -1017,13 +1011,13 @@ def crawl_domain_deep(seed_url: str, max_depth: int = 2, max_pages: int = 50) ->
     result = harvester.deep_crawl_domain(seed_url, max_depth=max_depth, max_pages=max_pages)
     return json.dumps(result)
 
-def extract_structured_data(url: str, schema_hints: Optional[List[str]] = None) -> str:
+def extract_structured_data(url: str, schema_hints: list[str] | None = None) -> str:
     """MCP Tool: Extract tables, forms, JSON-LD."""
     harvester = HarvesterCrawler()
     result = harvester.extract_structured_data(url, schema_hints=schema_hints)
     return json.dumps(result)
 
-def bypass_dynamic_content(url: str, wait_selector: Optional[str] = None) -> str:
+def bypass_dynamic_content(url: str, wait_selector: str | None = None) -> str:
     """MCP Tool: Handle JS-heavy sites."""
     harvester = HarvesterCrawler()
     result = harvester.bypass_dynamic_content(url, wait_selector=wait_selector)

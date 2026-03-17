@@ -4,12 +4,12 @@ Session Manager - Context Persistence for Project Lawnmower Man
 Handles cross-call state, temporary knowledge retention, and result history.
 """
 
+import json
+import os
+import sqlite3
 import uuid
 from datetime import datetime
-from typing import Dict, Any, List, Optional
-import json
-import sqlite3
-import os
+from typing import Any
 
 DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "storage", "laboratory.db"))
 
@@ -19,10 +19,10 @@ class Session:
         self.session_id = session_id
         self.created_at = datetime.now()
         self.last_accessed = datetime.now()
-        self.history: List[Dict[str, Any]] = []  # Last 10 tool results
-        self.scratchpad: Dict[str, Any] = {}     # Temporary facts/context
-        self.metadata: Dict[str, Any] = {}       # Intent tracking, user info
-        
+        self.history: list[dict[str, Any]] = []  # Last 10 tool results
+        self.scratchpad: dict[str, Any] = {}     # Temporary facts/context
+        self.metadata: dict[str, Any] = {}       # Intent tracking, user info
+
     def add_history(self, tool_name: str, result: Any):
         """Add record to history, maintaining max 10 entries."""
         self.history.append({
@@ -34,7 +34,7 @@ class Session:
         if len(self.history) > 10:
             self.history.pop(0)
         self.last_accessed = datetime.now()
-        
+
         # Persist to forensic_events table for visualization (The Beacon)
         self._log_to_db(tool_name, result)
 
@@ -45,7 +45,7 @@ class Session:
             event_type = "Analysis"
             target = "General"
             confidence = 1.0
-            
+
             if isinstance(result, dict):
                 event_type = result.get("status", result.get("event", "Analysis"))
                 # Try to find a target (author, entity, etc.)
@@ -64,7 +64,7 @@ class Session:
             ''', (self.session_id, tool_name, event_type, str(target)[:100], float(confidence), json.dumps(result)))
             conn.commit()
             conn.close()
-        except Exception as e:
+        except Exception:
             # We don't want session logic to fail just because logging failed
             pass
 
@@ -73,7 +73,7 @@ class Session:
         self.scratchpad[key] = value
         self.last_accessed = datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert session to serializable dict."""
         return {
             "session_id": self.session_id,
@@ -87,20 +87,20 @@ class Session:
 class SessionManager:
     """Manages multiple sessions."""
     def __init__(self):
-        self._sessions: Dict[str, Session] = {}
-        
-    def get_session(self, session_id: Optional[str] = None) -> Session:
+        self._sessions: dict[str, Session] = {}
+
+    def get_session(self, session_id: str | None = None) -> Session:
         """Get existing session or create new one."""
         if not session_id or session_id not in self._sessions:
             new_id = session_id or str(uuid.uuid4())
             self._sessions[new_id] = Session(new_id)
             return self._sessions[new_id]
-        
+
         session = self._sessions[session_id]
         session.last_accessed = datetime.now()
         return session
 
-    def list_sessions(self) -> List[str]:
+    def list_sessions(self) -> list[str]:
         """List all active session IDs."""
         return list(self._sessions.keys())
 
@@ -112,7 +112,7 @@ class SessionManager:
             age = (now - session.last_accessed).total_seconds() / 3600
             if age > max_age_hours:
                 to_delete.append(sid)
-        
+
         for sid in to_delete:
             del self._sessions[sid]
 

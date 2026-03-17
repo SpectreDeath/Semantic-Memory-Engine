@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Dict, Any, List
+from typing import Any
 
 # Ensure SME src is importable
 SME_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -8,7 +8,14 @@ if SME_ROOT not in sys.path:
     sys.path.insert(0, SME_ROOT)
 
 import numpy as np
-from src.sme.vendor import forensic_math, forensic_behavior, forensic_entropy, forensic_signal, forensic_metrics
+
+from src.sme.vendor import (
+    forensic_behavior,
+    forensic_entropy,
+    forensic_math,
+    forensic_metrics,
+)
+
 
 class CredibilityScorer:
     """
@@ -17,36 +24,36 @@ class CredibilityScorer:
     """
     __slots__ = ()
 
-    def get_forensic_report(self, target_text: str) -> Dict[str, Any]:
+    def get_forensic_report(self, target_text: str) -> dict[str, Any]:
         """
         Analyzes target text using Phase 11-16 algorithms and returns a structured payload.
         """
         # 1. Tokenize for SimHash (Phase 11)
         tokens = target_text.split()
         simhash_val = forensic_math.calculate_simhash(tokens)
-        
+
         # 2. Forensic Metrics (Phase 12: Cosine Delta)
         # We simulate a baseline comparison for demonstration if no suspect is provided
         # In a real tool, this would pull from the session bridge
         dummy_vector1 = np.random.rand(50)
         dummy_vector2 = np.random.rand(50)
         cosine_delta = forensic_metrics.calculate_cosine_delta(dummy_vector1, dummy_vector2)
-        
+
         # 3. Extract character-level features for "Signal" (Phase 13 Mock/Proxy)
         char_lengths = [float(len(t)) for t in tokens]
         burstiness_result = forensic_behavior.calculate_burstiness(char_lengths)
         burstiness = burstiness_result.get("burstiness_score", 0.0)
-        
+
         # 4. Forensic Metrics (Phase 14: Symmetrized KL Divergence)
         # Measures distribution shift against a standard linguistic model
         p_dist = np.array([target_text.count(c) for c in "aeiou"])
         q_dist = np.array([10, 8, 6, 4, 2]) # Mock reference distribution
         kl_div = forensic_metrics.calculate_symmetrized_kl_divergence(p_dist, q_dist)
-        
+
         # 5. Analyze Obfuscation (Phase 16)
         obf_result = forensic_entropy.analyze_obfuscation_score(target_text)
         obf_score = obf_result.get("obfuscation_score", 0.0)
-        
+
         # 6. Calculate complexity scores for Charting
         style_score = max(0, min(100, int(100 * (1.0 - cosine_delta))))
         signal_score = max(0, min(100, int(100 * (1.0 - obf_score))))
@@ -59,8 +66,8 @@ class CredibilityScorer:
             "data": {
                 "metrics": [
                     {
-                        "label": "Phase 11: SimHash", 
-                        "value": str(simhash_val), 
+                        "label": "Phase 11: SimHash",
+                        "value": str(simhash_val),
                         "status": "info"
                     },
                     {
@@ -69,8 +76,8 @@ class CredibilityScorer:
                         "status": "success" if cosine_delta < 0.4 else "warning"
                     },
                     {
-                        "label": "Phase 13: Burstiness", 
-                        "value": round(burstiness, 4), 
+                        "label": "Phase 13: Burstiness",
+                        "value": round(burstiness, 4),
                         "status": "low" if burstiness < 0.2 else "high"
                     },
                     {
@@ -93,7 +100,7 @@ class CredibilityScorer:
             }
         }
 
-def get_forensic_report(target_text: str) -> Dict[str, Any]:
+def get_forensic_report(target_text: str) -> dict[str, Any]:
     """Standalone wrapper for tool calls."""
     scorer = CredibilityScorer()
     return scorer.get_forensic_report(target_text)

@@ -4,63 +4,63 @@ Modulates search depth based on query complexity.
 Implements SimpleMem's query complexity estimation.
 """
 
-from mcp.server.fastmcp import FastMCP
-import sqlite3
 import json
-import os
-from typing import Dict, List, Tuple, Any
-from datetime import datetime
 import re
+import sqlite3
+from typing import Any
+
+from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("AdaptiveScout")
 
 from src.core.config import Config
+
 DB_PATH = Config().get_path('storage.db_path')
 
 class QueryComplexityEstimator:
     """Estimates query complexity to determine retrieval depth."""
-    
+
     @staticmethod
-    def estimate_complexity(query: str) -> Dict[str, Any]:
+    def estimate_complexity(query: str) -> dict[str, Any]:
         """Estimates complexity of a query (0-10 scale)."""
         complexity_score = 0
         factors = []
-        
+
         query_lower = query.lower()
-        
+
         # Factor 1: Question complexity
         question_words = ['how', 'why', 'what if', 'compare', 'analyze', 'relationship']
         if any(word in query_lower for word in question_words):
             complexity_score += 3
             factors.append('complex_question')
-        
+
         # Factor 2: Multiple entities
         capitalized_words = len(re.findall(r'\b[A-Z][a-z]+\b', query))
         if capitalized_words > 2:
             complexity_score += 2
             factors.append(f'{capitalized_words}_entities')
-        
+
         # Factor 3: Temporal constraints
         temporal_terms = ['when', 'before', 'after', 'during', 'since', 'until']
         if any(term in query_lower for term in temporal_terms):
             complexity_score += 2
             factors.append('temporal_constraint')
-        
+
         # Factor 4: Negation/contradiction
         negation_terms = ['not', 'unlike', 'different', 'contrast', 'but']
         if any(term in query_lower for term in negation_terms):
             complexity_score += 2
             factors.append('negation_present')
-        
+
         # Factor 5: Rhetorical intent
         rhetorical_terms = ['moral', 'ethics', 'justify', 'reasoning', 'argument']
         if any(term in query_lower for term in rhetorical_terms):
             complexity_score += 2
             factors.append('rhetorical_analysis')
-        
+
         # Normalize to 0-10
         complexity_score = min(complexity_score, 10)
-        
+
         return {
             'query': query,
             'complexity_score': complexity_score,
@@ -68,7 +68,7 @@ class QueryComplexityEstimator:
             'contributing_factors': factors,
             'recommended_depth': QueryComplexityEstimator._depth_for_complexity(complexity_score)
         }
-    
+
     @staticmethod
     def _level_name(score: float) -> str:
         """Names the complexity level."""
@@ -80,9 +80,9 @@ class QueryComplexityEstimator:
             return 'complex'
         else:
             return 'highly_complex'
-    
+
     @staticmethod
-    def _depth_for_complexity(score: float) -> Dict[str, int]:
+    def _depth_for_complexity(score: float) -> dict[str, int]:
         """Recommends retrieval depth based on complexity."""
         # Simple: 3 facts, Moderate: 8 facts, Complex: 15 facts, Highly complex: 25+ facts
         if score < 2:
@@ -97,31 +97,31 @@ class QueryComplexityEstimator:
 
 class AdaptiveRetriever:
     """Retrieves facts at appropriate depth level."""
-    
+
     def __init__(self, db_path: str):
         self.db_path = db_path
-    
-    def retrieve_by_complexity(self, query: str) -> Dict[str, Any]:
+
+    def retrieve_by_complexity(self, query: str) -> dict[str, Any]:
         """Retrieves facts adjusted to query complexity."""
         try:
             complexity_info = QueryComplexityEstimator.estimate_complexity(query)
             depth_params = complexity_info['recommended_depth']
-            
+
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             # Retrieve sentiment logs within temporal window
-            cursor.execute(f'''
+            cursor.execute('''
                 SELECT source_file, timestamp, neg, neu, pos, compound
                 FROM sentiment_logs
                 WHERE timestamp >= datetime('now', ?)
                 ORDER BY timestamp DESC
                 LIMIT ?
             ''', (f"-{depth_params['temporal_window_days']} days", depth_params['num_facts']))
-            
+
             results = cursor.fetchall()
             conn.close()
-            
+
             facts = []
             for row in results:
                 facts.append({
@@ -134,7 +134,7 @@ class AdaptiveRetriever:
                         'compound': row[5]
                     }
                 })
-            
+
             return {
                 'query': query,
                 'complexity_analysis': {
@@ -147,16 +147,16 @@ class AdaptiveRetriever:
                 'facts': facts,
                 'context_window_estimate': sum(len(f['source'].split()) for f in facts)
             }
-        
+
         except Exception as e:
             return {'error': str(e)}
-    
-    def search_deep(self, query: str, focus_area: str = "") -> Dict[str, Any]:
+
+    def search_deep(self, query: str, focus_area: str = "") -> dict[str, Any]:
         """Performs deep search for complex queries."""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             # Search across all temporal data
             if focus_area:
                 cursor.execute('''
@@ -175,17 +175,17 @@ class AdaptiveRetriever:
                     ORDER BY frequency DESC
                     LIMIT 50
                 ''')
-            
+
             results = cursor.fetchall()
             conn.close()
-            
+
             # Analyze patterns
             patterns = {
                 'high_negative': [r for r in results if r[2] < -0.5],
                 'high_positive': [r for r in results if r[2] > 0.5],
                 'neutral': [r for r in results if -0.5 <= r[2] <= 0.5],
             }
-            
+
             return {
                 'query': query,
                 'focus_area': focus_area,
@@ -205,7 +205,7 @@ class AdaptiveRetriever:
                     for r in results[:10]
                 ]
             }
-        
+
         except Exception as e:
             return {'error': str(e)}
 
@@ -219,7 +219,7 @@ def estimate_query_complexity(query: str) -> str:
     try:
         result = QueryComplexityEstimator.estimate_complexity(query)
         return json.dumps(result, indent=2)
-    
+
     except Exception as e:
         return json.dumps({'error': str(e)})
 
@@ -234,9 +234,9 @@ def adaptive_retrieval(query: str) -> str:
     try:
         retriever = AdaptiveRetriever(DB_PATH)
         result = retriever.retrieve_by_complexity(query)
-        
+
         return json.dumps(result, indent=2)
-    
+
     except Exception as e:
         return json.dumps({'error': str(e)})
 
@@ -251,9 +251,9 @@ def deep_search(query: str, focus_area: str = "") -> str:
     try:
         retriever = AdaptiveRetriever(DB_PATH)
         result = retriever.search_deep(query, focus_area)
-        
+
         return json.dumps(result, indent=2)
-    
+
     except Exception as e:
         return json.dumps({'error': str(e)})
 

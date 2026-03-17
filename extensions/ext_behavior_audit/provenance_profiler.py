@@ -5,15 +5,13 @@ Analyzes text for rhetorical motives including Ultimate Terms (God/Devil terms)
 and Distance Markers to identify commercial policy-aligned LLM patterns.
 """
 
-import re
 import logging
+import re
 import threading
 import time
-from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime
-from collections import Counter
-
+from typing import Any
 
 # Configure logging for the provenance profiler
 logger = logging.getLogger('behavior_audit.provenance_profiler')
@@ -38,9 +36,9 @@ class ProvenanceProfile:
     devil_term_density: float
     total_ultimate_term_density: float
     distance_markers_count: int
-    god_terms_found: List[str]
-    devil_terms_found: List[str]
-    distance_markers_found: List[str]
+    god_terms_found: list[str]
+    devil_terms_found: list[str]
+    distance_markers_found: list[str]
     profile_detected: bool
     confidence_score: float
     processing_time: float
@@ -49,7 +47,7 @@ class ProvenanceProfile:
 
 class ProvenanceProfiler:
     """Profiles text for rhetorical motives and commercial policy-aligned LLM patterns."""
-    
+
     def __init__(self):
         # Ultimate Terms (God/Devil terms) - terms that invoke ultimate values
         self.god_terms = {
@@ -67,9 +65,9 @@ class ProvenanceProfiler:
             'magnificence', 'glory', 'honor', 'dignity', 'respect', 'reverence',
             'devotion', 'faith', 'belief', 'trust', 'confidence', 'certainty',
             'assurance', 'conviction', 'determination', 'commitment', 'dedication',
-            'devotion', 'loyalty', 'fidelity', 'constancy', 'steadfastness', 'resolve'
+            'loyalty', 'fidelity', 'constancy', 'steadfastness', 'resolve'
         }
-        
+
         self.devil_terms = {
             # Negative ultimate values
             'evil', 'sin', 'wickedness', 'corruption', 'depravity', 'immorality',
@@ -87,9 +85,9 @@ class ProvenanceProfiler:
             'catastrophe', 'disaster', 'tragedy', 'calamity', 'misfortune', 'woe',
             'sorrow', 'grief', 'sadness', 'despair', 'despondency', 'hopelessness',
             'helplessness', 'powerlessness', 'weakness', 'vulnerability', 'fragility',
-            'brittleness', 'delicacy', 'sensitivity', 'susceptibility', 'fragility'
+            'brittleness', 'delicacy', 'sensitivity', 'susceptibility'
         }
-        
+
         # Distance Markers - replacing personal pronouns with institutional terms
         self.distance_markers = {
             # Replacing "I/Me" with institutional terms
@@ -276,7 +274,7 @@ class ProvenanceProfiler:
             r'\bthe possibility\b': 'The Possibility',
             r'\bthe potential\b': 'The Potential'
         }
-    
+
     def profile_rhetorical_motive(self, text: str) -> ProvenanceProfile:
         """
         Profile text for rhetorical motives and commercial policy-aligned LLM patterns.
@@ -289,48 +287,48 @@ class ProvenanceProfiler:
         """
         start_time = time.time()
         print(f"🔍 Starting provenance profiling for text length: {len(text)} characters")
-        
+
         # Convert to lowercase for analysis
         text_lower = text.lower()
-        
+
         # Step 1: Analyze Ultimate Terms (God/Devil terms)
         god_terms_found = self._find_god_terms(text_lower)
         devil_terms_found = self._find_devil_terms(text_lower)
-        
+
         # Calculate densities
         total_words = len(text_lower.split())
         god_term_density = len(god_terms_found) / total_words if total_words > 0 else 0.0
         devil_term_density = len(devil_terms_found) / total_words if total_words > 0 else 0.0
         total_ultimate_term_density = god_term_density + devil_term_density
-        
+
         print(f"📊 God term density: {god_term_density:.3f} ({len(god_terms_found)} terms)")
         print(f"📊 Devil term density: {devil_term_density:.3f} ({len(devil_terms_found)} terms)")
         print(f"📊 Total ultimate term density: {total_ultimate_term_density:.3f}")
-        
+
         # Step 2: Analyze Distance Markers
         distance_markers_found = self._find_distance_markers(text_lower)
         distance_markers_count = len(distance_markers_found)
-        
+
         print(f"📏 Distance markers detected: {distance_markers_count}")
-        
+
         # Step 3: Determine if commercial policy-aligned LLM profile detected
         profile_detected = self._detect_commercial_policy_profile(
             god_term_density, distance_markers_count
         )
-        
+
         # Step 4: Calculate confidence score
         confidence_score = self._calculate_confidence_score(
             god_term_density, devil_term_density, distance_markers_count, profile_detected
         )
-        
+
         # Step 5: Log results
         if profile_detected:
             message = "[Rhetorical Profile: Commercial Policy-Aligned LLM]"
             logger.warning(message)
             print(f"🚨 {message}")
-        
+
         processing_time = time.time() - start_time
-        
+
         profile = ProvenanceProfile(
             god_term_density=round(god_term_density, 3),
             devil_term_density=round(devil_term_density, 3),
@@ -344,34 +342,34 @@ class ProvenanceProfiler:
             processing_time=round(processing_time, 3),
             timestamp=datetime.now()
         )
-        
+
         return profile
-    
-    def _find_god_terms(self, text: str) -> List[str]:
+
+    def _find_god_terms(self, text: str) -> list[str]:
         """Find God terms in text."""
         found_terms = []
         for term in self.god_terms:
             if term in text:
                 found_terms.append(term)
         return found_terms
-    
-    def _find_devil_terms(self, text: str) -> List[str]:
+
+    def _find_devil_terms(self, text: str) -> list[str]:
         """Find Devil terms in text."""
         found_terms = []
         for term in self.devil_terms:
             if term in text:
                 found_terms.append(term)
         return found_terms
-    
-    def _find_distance_markers(self, text: str) -> List[str]:
+
+    def _find_distance_markers(self, text: str) -> list[str]:
         """Find distance markers in text."""
         found_markers = []
         for pattern, replacement in self.distance_markers.items():
             if re.search(pattern, text):
                 found_markers.append(replacement)
         return found_markers
-    
-    def _detect_commercial_policy_profile(self, god_term_density: float, 
+
+    def _detect_commercial_policy_profile(self, god_term_density: float,
                                         distance_markers_count: int) -> bool:
         """
         Detect commercial policy-aligned LLM profile.
@@ -380,32 +378,32 @@ class ProvenanceProfiler:
         """
         high_god_term_density = god_term_density > 0.05  # > 5%
         many_distance_markers = distance_markers_count > 2
-        
+
         profile_detected = high_god_term_density and many_distance_markers
-        
+
         return profile_detected
-    
+
     def _calculate_confidence_score(self, god_term_density: float, devil_term_density: float,
                                   distance_markers_count: int, profile_detected: bool) -> float:
         """
         Calculate overall confidence score for commercial policy-aligned LLM detection.
         """
         score = 0.0
-        
+
         # Base score for profile detection
         if profile_detected:
             score += 0.5
-        
+
         # Score for high God term density
         if god_term_density > 0.1:  # > 10%
             score += 0.3
         elif god_term_density > 0.05:  # > 5%
             score += 0.2
-        
+
         # Score for high Devil term density
         if devil_term_density > 0.05:  # > 5%
             score += 0.2
-        
+
         # Score for many distance markers
         if distance_markers_count >= 5:
             score += 0.3
@@ -413,11 +411,11 @@ class ProvenanceProfiler:
             score += 0.2
         elif distance_markers_count >= 1:
             score += 0.1
-        
+
         return min(score, 1.0)
 
 
-def profile_rhetorical_motive(text: str) -> Dict[str, Any]:
+def profile_rhetorical_motive(text: str) -> dict[str, Any]:
     """
     Main function to profile rhetorical motives in text.
     
@@ -429,7 +427,7 @@ def profile_rhetorical_motive(text: str) -> Dict[str, Any]:
     """
     profiler = ProvenanceProfiler()
     result = profiler.profile_rhetorical_motive(text)
-    
+
     return {
         'god_term_density': result.god_term_density,
         'devil_term_density': result.devil_term_density,
@@ -446,7 +444,7 @@ def profile_rhetorical_motive(text: str) -> Dict[str, Any]:
     }
 
 
-def profile_rhetorical_motive_async(text: str, callback: Optional[Callable] = None) -> threading.Thread:
+def profile_rhetorical_motive_async(text: str, callback: Callable | None = None) -> threading.Thread:
     """
     Run provenance profiling on a background thread to avoid blocking main inference.
     
@@ -467,16 +465,16 @@ def profile_rhetorical_motive_async(text: str, callback: Optional[Callable] = No
             logger.error(f"Background profiling failed: {e}")
             if callback:
                 callback({'error': str(e), 'status': 'PROFILING_FAILED'})
-    
+
     # Create and start background thread
     thread = threading.Thread(target=profiling_task, daemon=True)
     thread.start()
-    
+
     logger.info(f"Background profiling started for text length: {len(text)} characters")
     print(f"🧵 Background profiling started (Thread ID: {thread.ident})")
-    
+
     return thread
 
 
 # Export the main functions for use as tools
-__all__ = ['profile_rhetorical_motive', 'profile_rhetorical_motive_async', 'ProvenanceProfiler', 'ProvenanceProfile']
+__all__ = ['ProvenanceProfile', 'ProvenanceProfiler', 'profile_rhetorical_motive', 'profile_rhetorical_motive_async']

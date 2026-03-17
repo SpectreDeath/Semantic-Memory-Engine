@@ -2,20 +2,20 @@
 Main API Entry Point - SimpleMem Laboratory
 """
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
 import asyncio
-import psutil
-import time
 import os
+import time
 
-from src.api.router import router
+import psutil
+import uvicorn
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
 from src.api.rate_limiter import RateLimiter
-from src.core.logging_system import setup_logging, get_logger, get_log_context
+from src.api.router import router
+from src.core.logging_system import get_log_context, get_logger, setup_logging
 from src.core.tenancy import TenantContext
-from src.core.auth import get_current_user, User
 
 # Initialize Structured Logging
 setup_logging({"level": "INFO", "log_file": "api_access.log"})
@@ -67,7 +67,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     """Log all unhandled exceptions as structured errors."""
     error_id = str(time.time())
     logger.error(
-        f"Unhandled exception: {str(exc)}", 
+        f"Unhandled exception: {exc!s}",
         exc_info=True,
         error_id=error_id,
         path=request.url.path,
@@ -87,10 +87,10 @@ async def global_exception_handler(request: Request, exc: Exception):
 async def add_logging_and_tenant_context(request: Request, call_next):
     """Add request metadata and tenant context to all logs and operations."""
     request_id = request.headers.get("X-Request-ID", str(time.time()))
-    
+
     # Identify tenant from headers (simple for now)
     tenant_id = request.headers.get("X-Tenant-ID", "default")
-    
+
     # Propagate for both logging and for data isolation
     token = TenantContext.set_tenant(tenant_id)
     try:

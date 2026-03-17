@@ -1,5 +1,7 @@
+from typing import Any
+
 import numpy as np
-from typing import List, Union, Dict, Any
+
 
 class TemporalAnalyzer:
     """
@@ -8,7 +10,7 @@ class TemporalAnalyzer:
     """
     __slots__ = ()
 
-    def calculate_burstiness(self, timestamps: Union[List[float], np.ndarray]) -> Dict[str, Any]:
+    def calculate_burstiness(self, timestamps: list[float] | np.ndarray) -> dict[str, Any]:
         """
         Calculates the Burstiness Score (B) for a series of events.
         B = (r - 1) / (r + 1), where r = std_dev / mean of inter-event times.
@@ -22,23 +24,23 @@ class TemporalAnalyzer:
         try:
             # Sort timestamps to ensure sequence
             ts = np.sort(np.asarray(timestamps, dtype=float))
-            
+
             # Calculate inter-arrival times (intervals)
             intervals = np.diff(ts)
-            
+
             # Avoid division by zero if all intervals are 0 (simultaneous events)
             mean_interval = np.mean(intervals)
             if mean_interval == 0:
                 return {"burstiness_score": 1.0, "status": "Success", "note": "All events simultaneous"}
-                
+
             std_interval = np.std(intervals)
-            
+
             # r = coefficient of variation (std_dev / mean)
             r = std_interval / mean_interval
-            
+
             # Burstiness Score formula
             burstiness = (r - 1) / (r + 1)
-            
+
             return {
                 "burstiness_score": round(float(burstiness), 6),
                 "mean_interval": round(float(mean_interval), 4),
@@ -49,7 +51,7 @@ class TemporalAnalyzer:
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-def calculate_burstiness(timestamps: List[float]) -> Dict[str, Any]:
+def calculate_burstiness(timestamps: list[float]) -> dict[str, Any]:
     """Standalone wrapper for burstiness calculation."""
     analyzer = TemporalAnalyzer()
     return analyzer.calculate_burstiness(timestamps)

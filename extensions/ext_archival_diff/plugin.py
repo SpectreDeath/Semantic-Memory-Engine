@@ -1,20 +1,20 @@
-import logging
 import json
+import logging
 import sys
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Any
 
 try:
-    from .scout import WaybackScout
     from .analyst import ForensicAnalyst
     from .exporter import SmeExporter
+    from .scout import WaybackScout
 except ImportError:
     _dir = Path(__file__).resolve().parent
     if str(_dir) not in sys.path:
         sys.path.insert(0, str(_dir))
-    from scout import WaybackScout
     from analyst import ForensicAnalyst
     from exporter import SmeExporter
+    from scout import WaybackScout
 
 # NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
 from src.core.plugin_base import BasePlugin
@@ -25,10 +25,10 @@ class ArchivalDiffExtension(BasePlugin):
     """
     SME Extension: Detect Data Scrubbing via Wayback Machine Comparison.
     """
-    
-    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+
+    def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
-        
+
         # Initialize modules
         self.scout = WaybackScout()
         self.analyst = ForensicAnalyst()
@@ -37,7 +37,7 @@ class ArchivalDiffExtension(BasePlugin):
     async def on_startup(self):
         logger.info(f"[{self.plugin_id}] Archival Diff Extension activated.")
 
-    def get_tools(self) -> List[Any]:
+    def get_tools(self) -> list[Any]:
         return [self.scan_for_scrubbing]
 
     async def scan_for_scrubbing(self, target_url: str) -> str:
@@ -51,33 +51,33 @@ class ArchivalDiffExtension(BasePlugin):
             JSON string containing the diff analysis result.
         """
         logger.info(f"Starting archival scrub scan for: {target_url}")
-        
+
         try:
             # 1. Discover snapshots
             old_snap, new_snap = self.scout.find_divergent_snapshots(target_url)
-            
+
             if not old_snap or not new_snap:
                 return json.dumps({
                     "status": "inconclusive",
                     "reason": "Insufficient snapshot history or no divergent content found in archive index."
                 })
-            
+
             # 2. Fetch content
             old_url = self.scout.build_wayback_url(old_snap['timestamp'], target_url)
             new_url = self.scout.build_wayback_url(new_snap['timestamp'], target_url)
-            
+
             old_html = self.scout.get_snapshot_content(old_url)
             new_html = self.scout.get_snapshot_content(new_url)
-            
+
             if not old_html or not new_html:
                 return json.dumps({
                     "status": "error",
                     "reason": "Failed to retrieve snapshot content from Wayback Machine."
                 })
-            
+
             # 3. Analyze diff
             diff_result = self.analyst.semantic_diff(old_html, new_html)
-            
+
             # 4. Export to Postgres / SME
             metadata = {
                 "url": target_url,
@@ -92,9 +92,9 @@ class ArchivalDiffExtension(BasePlugin):
                     "digest": new_snap['digest']
                 }
             }
-            
+
             self.exporter.export_diff(diff_result, metadata)
-            
+
             # 5. Return report
             report = {
                 "status": "complete",
@@ -105,18 +105,18 @@ class ArchivalDiffExtension(BasePlugin):
                 "evidence": diff_result['deleted_content'][:3], # Sample evidence
                 "metadata": metadata
             }
-            
+
             return json.dumps(report, indent=2)
-            
+
         except Exception as e:
             logger.error(f"Error during scrub scan: {e}")
             return json.dumps({"status": "error", "error": str(e)})
 
-    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
         Optional: Automatically scan on a schedule or ingestion if URL is present.
         """
         pass
 
-def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+def register_extension(manifest: dict[str, Any], nexus_api: Any):
     return ArchivalDiffExtension(manifest, nexus_api)

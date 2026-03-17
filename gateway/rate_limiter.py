@@ -1,8 +1,7 @@
-import time
-import threading
 import logging
+import threading
+import time
 from collections import deque
-from typing import Dict, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -20,10 +19,10 @@ class RateLimiter:
     def __init__(self, requests_per_minute: int = 60):
         self.limit = requests_per_minute
         self.window = 60  # seconds
-        self.clients: Dict[str, deque] = {}
+        self.clients: dict[str, deque] = {}
         self._lock = threading.Lock()
 
-    def is_allowed(self, client_id: str) -> Tuple[bool, int]:
+    def is_allowed(self, client_id: str) -> tuple[bool, int]:
         """
         Check if request is allowed for client_id.
         Returns (is_allowed, remaining_requests).
@@ -48,7 +47,7 @@ class RateLimiter:
         return False, 0
 
 
-_rate_limiter: Optional[RateLimiter] = None
+_rate_limiter: RateLimiter | None = None
 _rate_limiter_lock = threading.Lock()
 
 

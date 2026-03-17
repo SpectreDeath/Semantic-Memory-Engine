@@ -1,9 +1,10 @@
-import click
 import os
-import sys
-import psutil
 import sqlite3
-from colorama import Fore, Style, init
+import sys
+
+import click
+import psutil
+from colorama import Fore, init
 
 # Initialize colors for Windows
 init(autoreset=True)
@@ -18,7 +19,7 @@ def cli():
 def verify():
     """Forensic Health Check: Data & Hardware."""
     click.secho("\n🔍 [SME SYSTEM DIAGNOSTICS]", fg='cyan', bold=True)
-    
+
     # 1. Hardware Status
     mem = psutil.virtual_memory()
     cpu_load = psutil.cpu_percent()
@@ -31,12 +32,12 @@ def verify():
         "Knowledge DB": "data/knowledge_core.sqlite",
         "Assertions": "data/conceptnet-assertions-5.7.0.csv"
     }
-    
+
     for name, path in paths.items():
         if os.path.exists(path):
             size = os.path.getsize(path) / 1e9
             click.echo(f" ✅ {Fore.GREEN}{name:.<15} {Fore.WHITE}{path} ({size:.2f} GB)")
-            
+
             # If it's the DB, check table count
             if path.endswith(".sqlite") and size > 0:
                 try:
@@ -55,7 +56,7 @@ def index(force):
     """Execute Smart Indexing with Data Lineage."""
     from src.logic.manifest_manager import ManifestManager
     from src.logic.reasoning_quantizer import ReasoningQuantizer
-    
+
     mm = ManifestManager()
     quantizer = ReasoningQuantizer()
     csv_path = "data/conceptnet-assertions-5.7.0.csv"
@@ -72,10 +73,10 @@ def index(force):
         return
 
     click.secho("🧠 Hash mismatch or --force detected. Starting distillation...", fg='yellow')
-    
+
     # Run the existing distillation logic
     quantizer.distill_assertions(csv_path)
-    
+
     # Update the manifest so we remember this version
     mm.update_source(csv_path)
     click.secho("✅ Indexing complete and manifest updated.", fg='green')
@@ -106,7 +107,7 @@ def drift(claims, inline):
 
     try:
         if claims:
-            with open(claims, 'r') as f:
+            with open(claims) as f:
                 claims_list = json.load(f)
         else:
             # Handle inline JSON with proper escaping
@@ -124,7 +125,7 @@ def drift(claims, inline):
     verified = result["verified"]
     anomalies = result["anomalies"]
 
-    click.secho(f"\n📊 [DRIFT ANALYSIS]", fg='cyan', bold=True)
+    click.secho("\n📊 [DRIFT ANALYSIS]", fg='cyan', bold=True)
     click.echo(f"  Drift Score: {drift_score:.2%} ({len(anomalies)} anomalies / {len(claims_list)} claims)")
     if verified:
         click.echo(f"\n  ✅ Verified ({len(verified)}):")
@@ -145,13 +146,15 @@ def drift(claims, inline):
 @cli.command()
 def status():
     """Display SME Workstation Health and Data Lineage."""
-    import psutil
-    from src.logic.manifest_manager import ManifestManager
-    import h5py
     import os
 
+    import h5py
+    import psutil
+
+    from src.logic.manifest_manager import ManifestManager
+
     mm = ManifestManager()
-    
+
     # --- Hardware Telemetry ---
     ram = psutil.virtual_memory()
     click.secho(f"🖥️  Workstation: 32GB RAM ({ram.percent}% Used) | GTX 1660 Ti", fg='cyan', bold=True)
@@ -169,7 +172,7 @@ def status():
     if os.path.exists(h5_path):
         with h5py.File(h5_path, 'r') as f:
             size_gb = os.path.getsize(h5_path) / (1024**3)
-            click.echo(f"\n🧠 Knowledge Core (HDF5):")
+            click.echo("\n🧠 Knowledge Core (HDF5):")
             click.echo(f"  - File: {h5_path} ({size_gb:.2f} GB)")
             click.echo(f"  - Keys: {list(f.keys())}")
     else:

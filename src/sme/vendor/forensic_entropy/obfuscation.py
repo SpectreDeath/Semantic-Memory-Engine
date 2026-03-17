@@ -1,6 +1,8 @@
-import numpy as np
 import zlib
-from typing import List, Dict, Any, Union
+from typing import Any
+
+import numpy as np
+
 
 class ObfuscationAnalyzer:
     """
@@ -18,7 +20,7 @@ class ObfuscationAnalyzer:
         bits = np.unpackbits(data)
         return float(np.sum(bits) / len(data))
 
-    def analyze_obfuscation_score(self, content: Union[str, bytes, List[int]]) -> Dict[str, Any]:
+    def analyze_obfuscation_score(self, content: str | bytes | list[int]) -> dict[str, Any]:
         """
         Detects obfuscated scripts using Hamming Weight and Compression-based Complexity.
         """
@@ -26,30 +28,30 @@ class ObfuscationAnalyzer:
             data = content.encode('utf-8')
         else:
             data = bytes(content)
-            
+
         if not data:
             return {"obfuscation_score": 0.0, "status": "Empty Content"}
-            
+
         arr = np.frombuffer(data, dtype=np.uint8)
-        
+
         # 1. Hamming Weight
         h_weight = self.calculate_hamming_weight(arr)
-        
+
         # 2. Compression Complexity (Lempel-Ziv proxy)
         # Ratio of compressed size to original size.
         compressed = zlib.compress(data)
         comp_ratio = len(compressed) / len(data)
-        
+
         # Obfuscation heuristic:
         # - Packed/Encrypted data has high entropy and high compression ratio (close to 1.0)
         # - Highly repetitive (simple obfuscation) has very low ratio.
         # - High Hamming Weight (> 5.0) often indicates non-textual or binary-embedded payloads.
-        
+
         # Score normalization: 0 to 1
         # High score means high probability of obfuscation/packing.
         # Simple heuristic combining entropy proxy (comp_ratio) and bit density.
         obfuscation_prob = (comp_ratio * 0.7) + (max(0, h_weight - 4) / 4 * 0.3)
-        
+
         return {
             "obfuscation_score": round(float(min(1.0, obfuscation_prob)), 4),
             "hamming_weight": round(h_weight, 4),
@@ -58,7 +60,7 @@ class ObfuscationAnalyzer:
             "status": "Success"
         }
 
-def analyze_obfuscation_score(content: Union[str, bytes]) -> Dict[str, Any]:
+def analyze_obfuscation_score(content: str | bytes) -> dict[str, Any]:
     """Standalone wrapper for obfuscation analysis."""
     analyzer = ObfuscationAnalyzer()
     return analyzer.analyze_obfuscation_score(content)

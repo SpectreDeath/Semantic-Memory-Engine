@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any
+
 
 class SME_AI_Provider(ABC):
     """
@@ -16,7 +17,7 @@ class SME_AI_Provider(ABC):
         pass
 
     @abstractmethod
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """
         Return provider-specific metadata (e.g., model name, version, status).
         """

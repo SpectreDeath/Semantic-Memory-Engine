@@ -6,7 +6,6 @@ Tests both Stylometry and Gephi components for 1660 Ti environment readiness.
 
 import sys
 import traceback
-import os
 from pathlib import Path
 
 # Ensure SME src is importable
@@ -18,10 +17,10 @@ def test_stylometry():
     try:
         from src.sme.vendor import faststylometry
         print("[+] vendored faststylometry imports successful")
-        
+
         # Test basic functionality - just check if the module is available
         print("[+] faststylometry module available for stylometric analysis")
-        
+
         return True
     except ImportError as e:
         print(f"[-] faststylometry import failed: {e}")
@@ -35,19 +34,19 @@ def test_gephi_components():
     print("\n[*] Testing Gephi Components...")
     try:
         import gephistreamer
-        from gephistreamer import graph, Streamer, GephiREST
+        from gephistreamer import GephiREST, Streamer, graph
         print("[+] gephistreamer imports successful")
-        
+
         # Test object creation
         rest = GephiREST('http://localhost:8080', workspace='workspace0')
         s = Streamer(rest)
         print("[+] Gephi objects initialized successfully")
-        
+
         # Test graph components
         node = graph.Node("test_node", label="Test")
         edge = graph.Edge("test_edge", "node1", "node2")
         print("[+] Graph Node and Edge creation successful")
-        
+
         return True
     except ImportError as e:
         print(f"[-] gephistreamer import failed: {e}")
@@ -64,7 +63,7 @@ def test_memory_usage():
         process = psutil.Process()
         memory_mb = process.memory_info().rss / 1024 / 1024
         print(f"[+] Current memory usage: {memory_mb:.2f} MB")
-        
+
         if memory_mb < 500:  # Adjusted for 1660 Ti realistic constraints
             print("[+] Memory usage within 1660 Ti constraints")
             return True
@@ -87,7 +86,7 @@ def test_file_system():
         'src/utils/context_sniffer.py',
         'tests/master_forensic_test.py'
     ]
-    
+
     all_exist = True
     for file_path in required_files:
         if Path(file_path).exists():
@@ -95,21 +94,21 @@ def test_file_system():
         else:
             print(f"[-] {file_path} missing")
             all_exist = False
-    
+
     return all_exist
 
 def main():
     """Run all verification tests."""
     print("Forensic Stack Verification for 1660 Ti Environment")
     print("=" * 60)
-    
+
     tests = [
         ("Stylometry Stack", test_stylometry),
         ("Gephi Components", test_gephi_components),
         ("Memory Constraints", test_memory_usage),
         ("File System", test_file_system)
     ]
-    
+
     results = {}
     for test_name, test_func in tests:
         try:
@@ -118,22 +117,22 @@ def main():
             print(f"[-] {test_name} crashed: {e}")
             traceback.print_exc()
             results[test_name] = False
-    
+
     print("\n" + "=" * 60)
     print("VERIFICATION SUMMARY")
     print("=" * 60)
-    
+
     passed = 0
     total = len(results)
-    
+
     for test_name, result in results.items():
         status = "PASS" if result else "FAIL"
         print(f"{test_name:20} | {status}")
         if result:
             passed += 1
-    
+
     print(f"\nOverall: {passed}/{total} tests passed")
-    
+
     if passed == total:
         print("\nAll systems ready for forensic operations!")
         print("Your 1660 Ti environment is fully optimized.")

@@ -1,12 +1,13 @@
 
-import unittest
-import sys
 import os
+import sys
+import unittest
 
 # Add src/gateway to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from gateway.gatekeeper_logic import calculate_trust_score, calculate_vault_proximity, calculate_entropy, calculate_burstiness
+from gateway.gatekeeper_logic import calculate_trust_score, calculate_vault_proximity
+
 
 class TestGatekeeper(unittest.TestCase):
     def test_vault_proximity(self):
@@ -29,7 +30,7 @@ class TestGatekeeper(unittest.TestCase):
         burstiness = 2.0 # Low -> Deficit = 4 -> Pen = 32
         proximity = 0.9 # High -> Pen = 54
         # Total Pen = 37.5 + 32 + 54 = 123.5 -> NTS = 0
-        
+
         score = calculate_trust_score(entropy, burstiness, proximity)
         print(f"Pollutant Score: {score}")
         self.assertLess(score['nts'], 40)
@@ -41,7 +42,7 @@ class TestGatekeeper(unittest.TestCase):
         entropy = 5.0 # High -> Deficit 0
         burstiness = 7.0 # High -> Deficit 0
         proximity = 0.0 # Low -> Pen 0
-        
+
         score = calculate_trust_score(entropy, burstiness, proximity)
         print(f"Human Score: {score}")
         self.assertGreater(score['nts'], 80)

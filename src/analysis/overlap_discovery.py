@@ -13,7 +13,6 @@ Features:
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass
 
 from src.core.factory import ToolFactory
@@ -27,7 +26,7 @@ class SemanticConnection:
     source_context: str
     target_context: str
     similarity_score: float
-    overlapping_concepts: List[str]
+    overlapping_concepts: list[str]
     sample_text: str
 
 
@@ -35,13 +34,13 @@ class OverlapDiscovery:
     """
     Discovers semantic overlaps and hidden connections across the laboratory memory.
     """
-    
+
     def __init__(self):
         """Initialize with semantic memory."""
         self.semantic_db = ToolFactory.create_semantic_db()
         logger.info("OverlapDiscovery engine initialized")
 
-    def find_connections(self, context_id: str, limit: int = 5) -> List[SemanticConnection]:
+    def find_connections(self, context_id: str, limit: int = 5) -> list[SemanticConnection]:
         """
         Find other contexts that overlap semantically with the given context.
         
@@ -63,18 +62,18 @@ class OverlapDiscovery:
         # We take a sample of documents from the source to query with
         connections = []
         seen_contexts = {context_id}
-        
+
         for doc_text in source_data['documents'][:3]: # Sample 3 documents
             results = self.semantic_db.search(doc_text, limit=limit * 2)
-            
+
             for i, target_doc in enumerate(results.get('documents', [[]])[0]):
                 target_meta = results.get('metadatas', [[]])[0][i]
                 target_context = target_meta.get('context_id', 'unknown')
                 distance = results.get('distances', [[]])[0][i]
-                
+
                 # Convert distance to similarity (simplified)
                 similarity = 1.0 - (distance / 2.0)
-                
+
                 if target_context not in seen_contexts and similarity > 0.7:
                     connections.append(SemanticConnection(
                         source_context=context_id,
@@ -84,16 +83,16 @@ class OverlapDiscovery:
                         sample_text=target_doc[:100] + "..."
                     ))
                     seen_contexts.add(target_context)
-                    
+
                 if len(connections) >= limit:
                     break
-            
+
             if len(connections) >= limit:
                 break
-                
+
         return sorted(connections, key=lambda x: x.similarity_score, reverse=True)
 
-    def discover_all_hubs(self) -> Dict[str, List[str]]:
+    def discover_all_hubs(self) -> dict[str, list[str]]:
         """
         Find 'hubs' - contexts that have many connections to others.
         (Conceptual implementation)

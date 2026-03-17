@@ -25,21 +25,19 @@ Usage:
         return {"status": "ok"}
 """
 
-from typing import Dict, Tuple, Optional
-from datetime import datetime, timedelta
+import logging
+from datetime import datetime
 from functools import wraps
-from starlette.middleware.base import BaseHTTPMiddleware
+
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-import logging
-import asyncio
 
 logger = logging.getLogger(__name__)
 
 
 class TokenBucket:
     """Token bucket for rate limiting."""
-    
+
     def __init__(self, capacity: int, refill_rate: float):
         """
         Initialize token bucket.
@@ -52,7 +50,7 @@ class TokenBucket:
         self.refill_rate = refill_rate
         self.tokens = capacity
         self.last_refill = datetime.now()
-    
+
     def consume(self, tokens: int = 1) -> bool:
         """
         Try to consume tokens.
@@ -64,12 +62,12 @@ class TokenBucket:
             True if tokens available, False otherwise
         """
         self._refill()
-        
+
         if self.tokens >= tokens:
             self.tokens -= tokens
             return True
         return False
-    
+
     def _refill(self) -> None:
         """Refill tokens based on time elapsed."""
         now = datetime.now()
@@ -83,8 +81,8 @@ class TokenBucket:
 
 class RateLimiter:
     """Rate limiting with token bucket algorithm."""
-    
-    def __init__(self, default_limit: str = "100/minute", 
+
+    def __init__(self, default_limit: str = "100/minute",
                  cleanup_interval: int = 300):
         """
         Initialize rate limiter.
@@ -95,11 +93,11 @@ class RateLimiter:
         """
         self.default_limit = default_limit
         self.cleanup_interval = cleanup_interval
-        self.buckets: Dict[str, TokenBucket] = {}
+        self.buckets: dict[str, TokenBucket] = {}
         self.last_cleanup = datetime.now()
         self._parse_limit(default_limit)
-    
-    def _parse_limit(self, limit_str: str) -> Tuple[int, float]:
+
+    def _parse_limit(self, limit_str: str) -> tuple[int, float]:
         """
         Parse limit string like '100/minute'.
         
@@ -111,52 +109,52 @@ class RateLimiter:
         """
         parts = limit_str.split('/')
         count = int(parts[0])
-        
+
         period = parts[1] if len(parts) > 1 else "minute"
-        
+
         periods = {
             "second": 1,
             "minute": 60,
             "hour": 3600,
             "day": 86400
         }
-        
+
         period_seconds = periods.get(period, 60)
         refill_rate = count / period_seconds
-        
+
         return count, refill_rate
-    
-    def _get_bucket(self, key: str, limit: Optional[str] = None) -> TokenBucket:
+
+    def _get_bucket(self, key: str, limit: str | None = None) -> TokenBucket:
         """Get or create token bucket for key."""
         if key not in self.buckets:
             capacity, refill_rate = self._parse_limit(limit or self.default_limit)
             self.buckets[key] = TokenBucket(capacity, refill_rate)
             logger.debug(f"Created rate limit bucket: {key} ({capacity}/{refill_rate:.2f}s)")
-        
+
         return self.buckets[key]
-    
+
     def _cleanup_expired_buckets(self) -> None:
         """Remove unused buckets to prevent memory leak."""
         now = datetime.now()
         if (now - self.last_cleanup).total_seconds() < self.cleanup_interval:
             return
-        
+
         # Remove buckets not used in 30 minutes
         expired_keys = []
         for key, bucket in self.buckets.items():
             age = (now - bucket.last_refill).total_seconds()
             if age > 1800:  # 30 minutes
                 expired_keys.append(key)
-        
+
         for key in expired_keys:
             del self.buckets[key]
-        
+
         if expired_keys:
             logger.debug(f"Cleaned up {len(expired_keys)} expired rate limit buckets")
-        
+
         self.last_cleanup = now
-    
-    def is_allowed(self, key: str, limit: Optional[str] = None) -> bool:
+
+    def is_allowed(self, key: str, limit: str | None = None) -> bool:
         """
         Check if request is allowed.
         
@@ -169,14 +167,14 @@ class RateLimiter:
         """
         bucket = self._get_bucket(key, limit)
         allowed = bucket.consume(1)
-        
+
         if not allowed:
             logger.warning(f"Rate limit exceeded for: {key}")
-        
+
         self._cleanup_expired_buckets()
-        
+
         return allowed
-    
+
     def get_remaining(self, key: str) -> int:
         """Get remaining requests for key."""
         bucket = self.buckets.get(key)
@@ -184,7 +182,7 @@ class RateLimiter:
             capacity, _ = self._parse_limit(self.default_limit)
             return capacity
         return int(bucket.tokens)
-    
+
     async def middleware_factory(self, request: Request, call_next):
         """
         FastAPI middleware factory.
@@ -198,7 +196,7 @@ class RateLimiter:
         """
         # Get client IP
         client_ip = request.client.host if request.client else "unknown"
-        
+
         # Check rate limit
         if not self.is_allowed(client_ip):
             remaining = self.get_remaining(client_ip)
@@ -214,16 +212,16 @@ class RateLimiter:
                     "X-RateLimit-Remaining": str(remaining)
                 }
             )
-        
+
         # Call next middleware/handler
         response = await call_next(request)
-        
+
         # Add rate limit headers
         remaining = self.get_remaining(client_ip)
         response.headers["X-RateLimit-Remaining"] = str(remaining)
-        
+
         return response
-    
+
     def limit(self, limit_str: str = "100/minute"):
         """
         Decorator for limiting endpoint.
@@ -238,17 +236,17 @@ class RateLimiter:
             @wraps(func)
             async def wrapper(request: Request, *args, **kwargs):
                 client_ip = request.client.host if request.client else "unknown"
-                
+
                 if not self.is_allowed(client_ip, limit_str):
                     return JSONResponse(
                         status_code=429,
                         content={"error": "Rate limit exceeded"}
                     )
-                
+
                 return await func(*args, **kwargs)
             return wrapper
         return decorator
-    
+
     def get_stats(self) -> dict:
         """Get rate limiter statistics."""
         return {

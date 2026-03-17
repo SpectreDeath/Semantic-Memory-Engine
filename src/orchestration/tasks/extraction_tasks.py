@@ -6,7 +6,8 @@
 
 import json
 from pathlib import Path
-from prefect import task, get_run_logger
+
+from prefect import get_run_logger, task
 
 
 @task(name="Extract Targets from Research", persist_result=True)
@@ -17,10 +18,10 @@ def extract_targets():
     if not path.exists():
         logger.warning("No research papers found to pivot from.")
         return []
-    
-    with open(path, "r", encoding="utf-8") as f:
+
+    with open(path, encoding="utf-8") as f:
         papers = json.load(f)
-    
+
     # Extract candidate authors
     candidates = []
     for paper in papers:
@@ -28,10 +29,10 @@ def extract_targets():
             # Basic cleanup: join names for username candidate
             clean_name = author.replace(" ", "")
             candidates.append(clean_name)
-    
+
     # NLP Filtering Layer
     from src.utils.entity_filter import filter_targets
     targets = filter_targets(candidates)
-    
+
     logger.info(f"🔍 Filtered {len(candidates)} candidates down to {len(targets)} high-probability targets.")
     return targets[:5]  # Limit for the operational run

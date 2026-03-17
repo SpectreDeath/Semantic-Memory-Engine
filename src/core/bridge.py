@@ -1,5 +1,5 @@
-import subprocess
 import os
+import subprocess
 import time
 
 # Paths to your verified infrastructure
@@ -9,7 +9,7 @@ STORAGE_JAIL = "D:/mcp_servers/storage"
 
 def run_agent_mission(topic):
     print(f"🕵️ Agent Mission Started: Investigating '{topic}'")
-    
+
     # 1. BROWSE: Trigger the WebSearcher with retry logic
     print("🌐 Step 1: Browsing the web for intelligence...")
     try:
@@ -30,14 +30,13 @@ def run_agent_mission(topic):
     if not logs:
         print("⚠️ No logs found. Did the Watcher script crash?")
         return
-    
+
     latest_log = max(logs, key=os.path.getctime)
-    
-    print(f"\n✨ MISSION COMPLETE ✨")
+
+    print("\n✨ MISSION COMPLETE ✨")
     print(f"📄 Full Report Saved: {latest_log}")
-    print(f"👉 PASTE THE CONTENT OF THIS LOG TO WHITERABBITNEO FOR FINAL DEBRIEF.")
+    print("👉 PASTE THE CONTENT OF THIS LOG TO WHITERABBITNEO FOR FINAL DEBRIEF.")
 
 if __name__ == "__main__":
     query = input("Enter Topic or URL for investigation: ")
     run_agent_mission(query)
-    

@@ -1,9 +1,8 @@
-import sys
-import os
-import re
 import logging
+import os
+import sys
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -49,13 +48,13 @@ async def run_flow(request: AIRequest):
     """Execute an AI flow through the initialized provider."""
     if not provider:
         raise HTTPException(status_code=503, detail="AI Provider not initialized")
-    
+
     try:
         # Serialize input_data if it's not a string (provider.run expects string/dict usually)
         input_data = request.input_data
         if not isinstance(input_data, (str, dict)):
              input_data = str(input_data)
-             
+
         logger.info(f"Running flow: {request.flow_name}")
         result = provider.run(request.flow_name, input_data)
         return {"result": result}
@@ -78,7 +77,7 @@ async def sentinel_switch_lens(payload: dict):
     lens = payload.get("lens_name")
     if not lens:
         raise HTTPException(status_code=400, detail="Missing lens_name")
-    
+
     if hasattr(provider, "switch_lens"):
         provider.switch_lens(lens)
         return {"status": "lens_shifted", "lens": lens}

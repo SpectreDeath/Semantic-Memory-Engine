@@ -1,11 +1,13 @@
 import os
-import yaml
 from pathlib import Path
+
+import yaml
+
 
 def load_config():
     """Loads the central configuration file."""
     config_path = Path(__file__).parent.parent.parent / "config" / "config.yaml"
-    with open(config_path, 'r') as f:
+    with open(config_path) as f:
         return yaml.safe_load(f)
 
 def get_path(category, key):

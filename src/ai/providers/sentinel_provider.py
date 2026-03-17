@@ -1,6 +1,7 @@
-import os
 import logging
-from typing import Any, Dict, Optional
+import os
+from typing import Any
+
 from src.ai.provider import SME_AI_Provider
 from src.core.config import get_config
 
@@ -121,7 +122,7 @@ class SentinelProvider(SME_AI_Provider):
         except Exception as e:
             logger.error(f"Offload re-init failed: {e}")
 
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         return {
             "provider": "sentinel",
             "backend": "llama-cpp",

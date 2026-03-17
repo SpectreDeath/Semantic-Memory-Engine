@@ -18,7 +18,6 @@ From AionUi chat:
 import json
 import os
 import subprocess
-import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -280,8 +279,8 @@ def _stream_to_gephi(nodes: list[dict], edges: list[dict], workspace: str) -> di
     Implements chunked streaming with VRAM guard.
     """
     try:
-        from gephistreamer import graph, Streamer, GephiREST
         import requests
+        from gephistreamer import GephiREST, Streamer, graph
         requests.get("http://localhost:8080", timeout=2)
     except Exception:
         return {"connected": False, "reason": "Gephi not reachable on localhost:8080"}
@@ -515,13 +514,13 @@ def _fetch_threat_leads() -> list[dict]:
     import csv
     csv_path = PROJECT_ROOT / "data" / "results" / "threat_leads.csv"
     if csv_path.exists():
-        with open(csv_path, "r", encoding="utf-8") as f:
+        with open(csv_path, encoding="utf-8") as f:
             return list(csv.DictReader(f))
 
     # Fallback: try trust_scores for demo
     csv_path = PROJECT_ROOT / "data" / "results" / "trust_scores_results.csv"
     if csv_path.exists():
-        with open(csv_path, "r", encoding="utf-8") as f:
+        with open(csv_path, encoding="utf-8") as f:
             rows = list(csv.DictReader(f))
             # Map CSV columns to expected schema
             return [

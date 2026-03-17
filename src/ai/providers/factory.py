@@ -1,6 +1,7 @@
 import os
-from typing import Optional
+
 from src.ai.provider import SME_AI_Provider
+
 
 def get_provider() -> SME_AI_Provider:
     """

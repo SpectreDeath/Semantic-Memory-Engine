@@ -1,2 +1,2 @@
-from .sequence import calculate_sequence_similarity
 from .frequency import detect_event_periodicity
+from .sequence import calculate_sequence_similarity

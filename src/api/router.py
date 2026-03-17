@@ -2,18 +2,17 @@
 API Router - Maps Laboratory Tools to REST Endpoints
 """
 
-from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel
-from typing import List, Dict, Any, Optional
 
-from src.core.factory import ToolFactory
-from src.core.validation import Validator, ValidationError
-from src.core.cache import cached
-from src.core.resilience import CircuitBreaker, CircuitBreakerError
-from src.core.auth import get_current_user, User
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
+
+from src.core.auth import User, get_current_user
 from src.core.batch_processor import get_batch_processor
+from src.core.cache import cached
+from src.core.factory import ToolFactory
+from src.core.resilience import CircuitBreaker, CircuitBreakerError
+from src.core.validation import ValidationError, Validator
 from src.logic.audit_engine import AuditEngine
-from fastapi import Depends
 
 # Define circuit breakers for major components
 analysis_breaker = CircuitBreaker("analysis_tools", failure_threshold=0.6, recovery_timeout=30)
@@ -32,7 +31,7 @@ class ConnectionRequest(BaseModel):
     limit: int = 5
 
 class BatchRequest(BaseModel):
-    items: List[str]
+    items: list[str]
     operation: str = "sentiment" # or "summarize", etc.
 
 class IngestRequest(BaseModel):
@@ -53,11 +52,11 @@ async def build_knowledge_graph(request: TextRequest):
     try:
         # Validate input
         Validator.validate_text(request.text)
-        
+
         # Call via circuit breaker
         kg = analysis_breaker.call(ToolFactory.create_knowledge_graph)
         kg.build_from_text(request.text, request.context_id)
-        
+
         return {
             "summary": kg.get_summary(),
             "mermaid": kg.to_mermaid(),
@@ -66,7 +65,7 @@ async def build_knowledge_graph(request: TextRequest):
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except CircuitBreakerError as e:
-        raise HTTPException(status_code=503, detail=f"Service temporarily unavailable: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Service temporarily unavailable: {e!s}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -77,11 +76,11 @@ async def generate_intelligence_report(request: TextRequest):
     try:
         # Validate input
         Validator.validate_text(request.text)
-        
+
         # Call via circuit breaker
         ir = analysis_breaker.call(ToolFactory.create_intelligence_reports)
         report = ir.generate_briefing(request.text, title=f"API Briefing - {request.context_id}")
-        
+
         return {
             "report_data": report,
             "markdown": ir.to_markdown(report)
@@ -89,7 +88,7 @@ async def generate_intelligence_report(request: TextRequest):
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except CircuitBreakerError as e:
-        raise HTTPException(status_code=503, detail=f"Service temporarily unavailable: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Service temporarily unavailable: {e!s}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -100,7 +99,7 @@ async def find_connections(context_id: str = Query(...), limit: int = 5):
         # Validate input
         Validator.validate_text(context_id, max_length=100)
         Validator.validate_number(limit, min_val=1, max_val=100)
-        
+
         # Call via circuit breaker
         od = analysis_breaker.call(ToolFactory.create_overlap_discovery)
         connections = od.find_connections(context_id, limit=limit)
@@ -108,7 +107,7 @@ async def find_connections(context_id: str = Query(...), limit: int = 5):
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except CircuitBreakerError as e:
-        raise HTTPException(status_code=503, detail=f"Service temporarily unavailable: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Service temporarily unavailable: {e!s}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -136,7 +135,7 @@ async def semantic_search(query: str = Query(...), limit: int = 5):
         # Validate input
         Validator.validate_query(query)
         Validator.validate_number(limit, min_val=1, max_val=50)
-        
+
         # Call via circuit breaker
         db = search_breaker.call(ToolFactory.create_semantic_db)
         results = db.search_with_semantic_expansion(query, n_results=limit)
@@ -144,7 +143,7 @@ async def semantic_search(query: str = Query(...), limit: int = 5):
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except CircuitBreakerError as e:
-        raise HTTPException(status_code=503, detail=f"Service temporarily unavailable: {str(e)}")
+        raise HTTPException(status_code=503, detail=f"Service temporarily unavailable: {e!s}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -154,7 +153,7 @@ async def semantic_search(query: str = Query(...), limit: int = 5):
 async def submit_batch_job(request: BatchRequest, user: User = Depends(get_current_user)):
     """Submit a list of items for background processing."""
     processor = get_batch_processor()
-    
+
     # Define task based on operation
     if request.operation == "sentiment":
         async def process_item(text: str):
@@ -190,16 +189,17 @@ async def get_batch_results(job_id: str, user: User = Depends(get_current_user))
 async def get_all_connections_status():
     """Get summarized status of all infrastructure connections."""
     try:
-        from src.ai.bridge import SIDECAR_URL
         import httpx
-        
+
+        from src.ai.bridge import SIDECAR_URL
+
         status = {
             "api": "online",
             "sidecar": "offline",
             "database": "offline",
             "tools": ToolFactory.health_check()
         }
-        
+
         # Check Sidecar
         try:
             async with httpx.AsyncClient(timeout=2.0) as client:
@@ -208,7 +208,7 @@ async def get_all_connections_status():
                     status["sidecar"] = resp.json()
         except:
             pass
-            
+
         # Check Database (Check if we can query the factory's DB instance)
         try:
             db = ToolFactory.create_semantic_db()
@@ -216,7 +216,7 @@ async def get_all_connections_status():
                 status["database"] = "online"
         except:
             pass
-            
+
         return status
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -232,7 +232,7 @@ async def update_ai_provider(request: ProviderUpdateRequest):
 # --- Drift Analysis (AuditEngine) ---
 
 class DriftAnalysisRequest(BaseModel):
-    claims: List[Dict[str, str]]
+    claims: list[dict[str, str]]
     format_type: str = "auto"  # "conceptnet", "custom", "auto"
 
 @router.post("/drift/analyze")
@@ -242,13 +242,13 @@ async def analyze_drift(request: DriftAnalysisRequest):
         # Validate input
         if not request.claims:
             raise HTTPException(status_code=400, detail="Claims list cannot be empty")
-        
+
         # Initialize AuditEngine
         engine = AuditEngine()
-        
+
         # Run drift analysis
         result = engine.analyze_drift(request.claims)
-        
+
         return {
             "drift_score": result["drift_score"],
             "verified_count": len(result["verified"]),
@@ -258,7 +258,7 @@ async def analyze_drift(request: DriftAnalysisRequest):
             "analysis_timestamp": result.get("analysis_timestamp", "N/A")
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Drift analysis failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Drift analysis failed: {e!s}")
 
 # --- Ingestion (Harvester) ---
 
@@ -268,17 +268,17 @@ async def ingest_from_url(request: IngestRequest):
     try:
         from src.harvester.crawler import HarvesterCrawler
         crawler = HarvesterCrawler()
-        
+
         if request.deep_crawl:
             # Running deep crawl in a background task would be better
             # For simplicity in this demo endpoint, we'll do it sync with a low page count
             result = crawler.deep_crawl_domain(request.url, max_pages=request.max_pages)
         else:
             result = crawler.fetch_semantic_markdown(request.url, js_render=request.js_render)
-            
+
         if result.get("status") == "error":
              raise HTTPException(status_code=422, detail=result.get("error"))
-             
+
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

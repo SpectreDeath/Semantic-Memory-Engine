@@ -1,7 +1,6 @@
-import os
-import json
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any
+
 
 class ReportGenerator:
     """
@@ -51,14 +50,14 @@ Based on the **probabilistic linguistic match** and the **high-trust provenance*
         session = self.bridge.get_session()
         if not session:
             return {"error": "Session not found."}
-        
+
         scratchpad = session.scratchpad
-        
+
         # 1. Executive Summary
         summary = scratchpad.get("Summary")
         if not summary:
             summary = f"Autonomous forensic audit for Case {case_id}. Investigation focused on authorship attribution and graph influence."
-        
+
         # 2. Authorship Rows
         authorship_rows = ""
         scribe_res = scratchpad.get("Scribe_Pro_Result")
@@ -66,7 +65,7 @@ Based on the **probabilistic linguistic match** and the **high-trust provenance*
              probs = scribe_res.get("probabilities", {})
              for target, prob in probs.items():
                  # Probabilities are already multiplied by 100 in ScribePro or need it?
-                 # FastStylometry returns 0.0-1.0. 
+                 # FastStylometry returns 0.0-1.0.
                  percentage = round(prob * 100, 2)
                  authorship_rows += f"| `Sample_Test` | `{target}` | `{percentage}%` | `faststylometry (Calibrated)` |\n"
         else:
@@ -85,19 +84,19 @@ Based on the **probabilistic linguistic match** and the **high-trust provenance*
         findings = scratchpad.get("Key_Findings", [])
         if not findings:
             findings = [{"claim": "General investigation", "evidence_sources": [{"id": "System_Audit"}]}]
-        
+
         # We audit the primary claim
         main_claim = scratchpad.get("Primary_Claim", "Incident Investigation")
         audit_res = self.epistemic_tool.evaluate_claim(main_claim, findings[0].get("evidence_sources", []))
-        
+
         cq = audit_res.get("certainty_quotient", 0.0)
         bullets = ""
         for trail in audit_res.get("audit_trail", []):
             bullets += f"* {trail}\n"
-        
+
         # 5. Conclusion
         status = audit_res.get("status", "Unknown")
-        
+
         report_md = self.template.format(
             case_id=case_id,
             date=datetime.now().strftime("%Y-%m-%d"),
@@ -108,12 +107,12 @@ Based on the **probabilistic linguistic match** and the **high-trust provenance*
             reliability_bullets=bullets,
             conclusion_status=status
         )
-        
+
         # Save to file
         report_path = f"Forensic_Report_{self.session_id}.md"
         with open(report_path, "w") as f:
             f.write(report_md)
-            
+
         return {
             "status": "Report Generated",
             "path": report_path,

@@ -5,42 +5,56 @@ Main plugin entry point that integrates the Unified Forensic Reporter extension
 with the SME system.
 """
 
-import os
-import sys
 import json
 import logging
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Callable
+import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 try:
-    from .unified_forensic_reporter import generate_nexus_summary, UnifiedForensicReporter, ForensicSummary
-    from .forensic_intelligence_reporter import generate_forensic_intelligence_summary, ForensicIntelligenceReporter, ForensicAnalysis, IntelligenceBucket
+    from .forensic_intelligence_reporter import (
+        ForensicAnalysis,
+        ForensicIntelligenceReporter,
+        IntelligenceBucket,
+        generate_forensic_intelligence_summary,
+    )
+    from .unified_forensic_reporter import (
+        ForensicSummary,
+        UnifiedForensicReporter,
+        generate_nexus_summary,
+    )
 except ImportError:
     _dir = Path(__file__).resolve().parent
     if str(_dir) not in sys.path:
         sys.path.insert(0, str(_dir))
-    from unified_forensic_reporter import generate_nexus_summary, UnifiedForensicReporter, ForensicSummary
-    from forensic_intelligence_reporter import generate_forensic_intelligence_summary, ForensicIntelligenceReporter, ForensicAnalysis, IntelligenceBucket
+    from forensic_intelligence_reporter import (
+        ForensicIntelligenceReporter,
+        generate_forensic_intelligence_summary,
+    )
+    from unified_forensic_reporter import (
+        UnifiedForensicReporter,
+        generate_nexus_summary,
+    )
 
 # NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
 from src.core.plugin_base import BasePlugin
-from src.utils.error_handling import ErrorHandler, create_error_response, OperationContext
-from src.utils.performance import get_performance_monitor, cache_result, LRUCache
+from src.utils.error_handling import ErrorHandler
+from src.utils.performance import get_performance_monitor
 
 logger = logging.getLogger("SME.UnifiedForensicReporter")
 
 
 class UnifiedForensicReporterPlugin(BasePlugin):
     """Main plugin class for the Unified Forensic Reporter extension."""
-    
-    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+
+    def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
         self.error_handler = ErrorHandler(self.plugin_id)
         self.monitor = get_performance_monitor(self.plugin_id)
         self.reporter = UnifiedForensicReporter()
         self.forensic_reporter = ForensicIntelligenceReporter()
-        
+
         # Plugin configuration
         self.config = {
             'analysis_period_hours': 24,  # Hours to look back in logs
@@ -50,9 +64,9 @@ class UnifiedForensicReporterPlugin(BasePlugin):
             'cpu_bound_only': True,       # Ensure VRAM constraint compliance
             'log_parsing_enabled': True   # Enable log file parsing
         }
-        
+
         logger.info(f"[{self.plugin_id}] Unified Forensic Reporter initialized")
-        
+
     async def on_startup(self):
         """
         Initialize the Unified Forensic Reporter.
@@ -71,7 +85,7 @@ class UnifiedForensicReporterPlugin(BasePlugin):
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
 
-    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
         Unified Forensic Reporter does not process on_ingestion directly.
         It provides tools for report generation and analysis.
@@ -88,7 +102,7 @@ class UnifiedForensicReporterPlugin(BasePlugin):
             self.get_unified_stats,
             self.clear_reporter_cache
         ]
-    
+
     async def generate_nexus_summary(self) -> str:
         """
         Generate unified nexus intelligence report.
@@ -98,18 +112,18 @@ class UnifiedForensicReporterPlugin(BasePlugin):
                 # Verify CPU-bound operation
                 if self.config.get('cpu_bound_only', True):
                     logger.info("Using CPU-bound processing (VRAM constraint compliant)")
-                
+
                 # Generate the report
                 result = generate_nexus_summary()
-                
+
                 # Update status
                 if result.get('status') == 'SUCCESS':
                     logger.info("Nexus summary generated successfully")
                 else:
                     logger.warning("Failed to generate nexus summary")
-                
+
                 return json.dumps(result, indent=2)
-                
+
         except Exception as e:
             return self.error_handler.handle_tool_error(e, "generate_nexus_summary")
 
@@ -122,10 +136,10 @@ class UnifiedForensicReporterPlugin(BasePlugin):
                 # Verify CPU-bound operation
                 if self.config.get('cpu_bound_only', True):
                     logger.info("Using CPU-bound processing (VRAM constraint compliant)")
-                
+
                 # Generate the forensic intelligence report
                 result = generate_forensic_intelligence_summary(text_sample)
-                
+
                 # Update status
                 if result.get('status') == 'FORENSIC_ANALYSIS_COMPLETED':
                     logger.info("Forensic intelligence analysis completed")
@@ -134,9 +148,9 @@ class UnifiedForensicReporterPlugin(BasePlugin):
                     logger.info(f"Report saved to: {result.get('report_path', 'unknown')}")
                 else:
                     logger.warning("Failed to generate forensic intelligence summary")
-                
+
                 return json.dumps(result, indent=2)
-                
+
         except Exception as e:
             return self.error_handler.handle_tool_error(e, "generate_forensic_intelligence_summary", {"text_sample_length": len(text_sample)})
 
@@ -170,7 +184,7 @@ class UnifiedForensicReporterPlugin(BasePlugin):
                 self.reporter.clear_cache()
             if hasattr(self.forensic_reporter, 'clear_cache'):
                 self.forensic_reporter.clear_cache()
-            
+
             return json.dumps({
                 "status": "success",
                 "message": "Reporter caches cleared successfully"
@@ -180,11 +194,11 @@ class UnifiedForensicReporterPlugin(BasePlugin):
 
 
 
-# The extension is instantiated via register_extension(manifest, nexus_api) 
+# The extension is instantiated via register_extension(manifest, nexus_api)
 # which calls create_plugin. Module-level instantiation without args is invalid.
 
 
-def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
+def create_plugin(manifest: dict[str, Any], nexus_api: Any):
     """Factory function to create and return a UnifiedForensicReporterPlugin instance."""
     return UnifiedForensicReporterPlugin(manifest, nexus_api)
 
@@ -195,4 +209,4 @@ def register_extension(manifest: dict, nexus_api: Any) -> UnifiedForensicReporte
 
 
 # Export for use by the extension system
-__all__ = ['UnifiedForensicReporterPlugin', 'get_plugin', 'unified_forensic_reporter_plugin', 'register_extension']
+__all__ = ['UnifiedForensicReporterPlugin', 'get_plugin', 'register_extension', 'unified_forensic_reporter_plugin']

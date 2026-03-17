@@ -8,9 +8,9 @@ import json
 import logging
 import os
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
-from gateway.routers.shared import make_safe_tool_call, serialize_result
+from gateway.routers.shared import make_safe_tool_call
 
 logger = logging.getLogger("lawnmower.memory")
 
@@ -31,7 +31,7 @@ def register(
 
     @mcp.tool()
     def semantic_search(
-        query: str, limit: int = 5, session_id: Optional[str] = None
+        query: str, limit: int = 5, session_id: str | None = None
     ) -> str:
         """
         Search the knowledge base using semantic vector similarity.
@@ -59,7 +59,7 @@ def register(
         return json.dumps(result, indent=2, default=str)
 
     @mcp.tool()
-    def query_knowledge(concept: str, session_id: Optional[str] = None) -> str:
+    def query_knowledge(concept: str, session_id: str | None = None) -> str:
         """
         Query the knowledge graph for concepts related to the input.
 
@@ -81,7 +81,7 @@ def register(
 
     @mcp.tool()
     def save_memory(
-        fact: str, source: str = "user_input", session_id: Optional[str] = None
+        fact: str, source: str = "user_input", session_id: str | None = None
     ) -> str:
         """
         Persist a new fact or insight to the long-term knowledge base.
@@ -159,7 +159,7 @@ def register(
 
     @mcp.tool()
     def store_session_entry(
-        key: str, value: Any, session_id: Optional[str] = None
+        key: str, value: Any, session_id: str | None = None
     ) -> str:
         """
         Persist arbitrary data (like stylistic baselines or suspect vectors)
@@ -171,7 +171,7 @@ def register(
         return json.dumps({"success": True, "key": key, "session_id": session.session_id})
 
     @mcp.tool()
-    def get_session_info(session_id: Optional[str] = None) -> str:
+    def get_session_info(session_id: str | None = None) -> str:
         """
         Get detailed information about a session.
 
@@ -182,7 +182,7 @@ def register(
 
     @mcp.tool()
     def update_scratchpad(
-        key: str, value: Any, session_id: Optional[str] = None
+        key: str, value: Any, session_id: str | None = None
     ) -> str:
         """Store temporary facts or context in the session scratchpad."""
         session = session_manager.get_session(session_id)

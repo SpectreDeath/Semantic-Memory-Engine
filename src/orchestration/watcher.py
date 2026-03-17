@@ -1,10 +1,12 @@
-import time
-import os
 import json
+import os
 import sqlite3
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+import time
+
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+
 from src.core.utils import get_path
 
 # --- SETUP ---
@@ -16,7 +18,7 @@ os.makedirs(LOG_DIRECTORY, exist_ok=True)
 # Initialize the Brain
 analyzer = SentimentIntensityAnalyzer()
 custom_signals = {
-    "vermin": -3.5, "parasite": -3.5, "infestation": -2.5, 
+    "vermin": -3.5, "parasite": -3.5, "infestation": -2.5,
     "entities": -1.0, "toxic": -2.0, "units": -1.5
 }
 analyzer.lexicon.update(custom_signals)
@@ -28,13 +30,13 @@ class AnalyzeHandler(FileSystemEventHandler):
             self.process_file(event.src_path)
 
     def process_file(self, file_path):
-        time.sleep(1) 
-        
-        with open(file_path, 'r', encoding='utf-8') as f:
+        time.sleep(1)
+
+        with open(file_path, encoding='utf-8') as f:
             content = f.read()
 
         scores = analyzer.polarity_scores(content)
-        
+
         # 1. Archive to SQLite (The Centrifuge)
         try:
             conn = sqlite3.connect(DB_PATH)
@@ -47,7 +49,7 @@ class AnalyzeHandler(FileSystemEventHandler):
             conn.close()
             print(f"💾 Archived to Centrifuge: {os.path.basename(file_path)}")
         except Exception as e:
-            print(f"❌ Archive Error: {str(e)}")
+            print(f"❌ Archive Error: {e!s}")
 
         # 2. Build the JSON report
         report = {
@@ -68,7 +70,7 @@ def load_brain():
     compiled_signals_path = "D:/mcp_servers/storage/compiled_signals.json"
     try:
         if os.path.exists(compiled_signals_path):
-            with open(compiled_signals_path, 'r') as f:
+            with open(compiled_signals_path) as f:
                 professional_signals = json.load(f)
             analyzer.lexicon.update(professional_signals)
             print(f"✅ Brain Loaded: {len(professional_signals)} professional signals active.")
@@ -80,12 +82,12 @@ def load_brain():
 if __name__ == "__main__":
     # Load professional signals if available
     load_brain()
-    
+
     # Install watchdog first: pip install watchdog
     event_handler = AnalyzeHandler()
     observer = Observer()
     observer.schedule(event_handler, WATCH_DIRECTORY, recursive=False)
-    
+
     print(f"🚀 Laboratory Monitoring Active: Watching {WATCH_DIRECTORY}...")
     observer.start()
     try:

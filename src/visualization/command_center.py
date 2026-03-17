@@ -1,11 +1,11 @@
-import streamlit as st
+import json
+import subprocess
+from datetime import datetime
+from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
-import json
-import os
-import subprocess
-from pathlib import Path
-from datetime import datetime
+import streamlit as st
 
 # Page Configuration
 st.set_page_config(
@@ -44,7 +44,7 @@ def load_json(filepath):
     if not Path(filepath).exists():
         return []
     try:
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, encoding='utf-8') as f:
             return json.load(f)
     except Exception as e:
         st.error(f"Error loading {filepath}: {e}")
@@ -95,13 +95,13 @@ if osint_data:
                     "Username": username,
                     "Platform": plat.get('name')
                 })
-    
+
     if platforms_found:
         df = pd.DataFrame(platforms_found)
         fig = px.density_heatmap(
-            df, 
-            x="Platform", 
-            y="Username", 
+            df,
+            x="Platform",
+            y="Username",
             title="Entity Detection Heatmap",
             color_continuous_scale="Viridis",
             labels={'Username': 'Potential Actor', 'Platform': 'Platform Found'}

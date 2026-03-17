@@ -1,11 +1,10 @@
-import streamlit as st
-import pandas as pd
-import sqlite3
 import os
-import psutil
-import time
-from datetime import datetime
+import sqlite3
+
 import altair as alt
+import pandas as pd
+import psutil
+import streamlit as st
 
 # Lawnmower Man: The Beacon (Visualization Layer)
 # v0.6.0 - Sprint 9
@@ -67,7 +66,7 @@ def get_memory_metrics():
         conn.close()
     except:
         facts_count = 0
-        
+
     # We'll mock the vector count for now as ChromaDB access is via API
     vector_count = facts_count * 1.2 # Approximation for visualization
     return facts_count, int(vector_count)
@@ -76,21 +75,21 @@ def get_memory_metrics():
 with st.sidebar:
     st.title("📡 System Monitor")
     st.markdown("---")
-    
+
     cpu, ram, vram = get_system_stats()
-    
+
     st.metric("CPU Load", f"{cpu}%")
     st.progress(cpu / 100)
-    
+
     st.metric("RAM Usage", f"{ram}%")
     st.progress(ram / 100)
-    
+
     if vram > 0:
         st.metric("VRAM Usage", f"{vram}%")
         st.progress(vram / 100)
     else:
         st.info("VRAM: No GPU Acceleration detected.")
-    
+
     st.markdown("---")
     st.markdown("**Version:** Lawnmower Man v0.5.0")
     st.markdown("**Status:** `ONLINE`")
@@ -126,7 +125,7 @@ tab1, tab2, tab3 = st.tabs(["📊 Forensic Feed", "📈 Epistemic Trends", "⚓ 
 
 with tab1:
     st.subheader("Live Investigation Stream")
-    
+
     try:
         conn = get_db_connection(DB_PATH)
         feed_df = pd.read_sql_query("""
@@ -135,7 +134,7 @@ with tab1:
             ORDER BY timestamp DESC LIMIT 20
         """, conn)
         conn.close()
-        
+
         if not feed_df.empty:
             st.dataframe(feed_df, use_container_width=True)
         else:
@@ -145,7 +144,7 @@ with tab1:
 
 with tab2:
     st.subheader("Epistemic Certainty Trend")
-    
+
     try:
         conn = get_db_connection(DB_PATH)
         trend_df = pd.read_sql_query("""
@@ -154,7 +153,7 @@ with tab2:
             ORDER BY id ASC LIMIT 50
         """, conn)
         conn.close()
-        
+
         if not trend_df.empty:
             chart = alt.Chart(trend_df).mark_line(point=True, color="#00ff9d").encode(
                 x='id',
@@ -169,7 +168,7 @@ with tab2:
 
 with tab3:
     st.subheader("Source Provenance Audit")
-    
+
     try:
         conn = get_db_connection(PROVENANCE_DB)
         provenance_df = pd.read_sql_query("SELECT source_id, reliability_tier, captured_at FROM source_provenance", conn)

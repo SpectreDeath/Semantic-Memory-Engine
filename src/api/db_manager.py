@@ -24,7 +24,7 @@ import math
 import os
 import sqlite3
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import polars as pl
 
@@ -59,7 +59,7 @@ class ForensicDBManager:
         - Euclidean distance comparison between signature vectors
     """
 
-    def __init__(self, db_path: Optional[str] = None) -> None:
+    def __init__(self, db_path: str | None = None) -> None:
         """
         Initialize the database manager.
 
@@ -110,9 +110,9 @@ class ForensicDBManager:
 
     def query_signatures(
         self,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
-        source: Optional[str] = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
+        source: str | None = None,
     ) -> pl.DataFrame:
         """
         Query signatures with predicate pushdown filtering.
@@ -155,9 +155,9 @@ class ForensicDBManager:
 
     def store_signature(
         self,
-        signature: Dict[str, Any],
+        signature: dict[str, Any],
         source: str,
-        metadata: Optional[str] = None,
+        metadata: str | None = None,
     ) -> int:
         """
         Insert a RhetoricalSignature into the database.
@@ -202,7 +202,7 @@ class ForensicDBManager:
 
     @staticmethod
     def compare_signatures(
-        sig_a: Dict[str, Any], sig_b: Dict[str, Any]
+        sig_a: dict[str, Any], sig_b: dict[str, Any]
     ) -> float:
         """
         Compute Euclidean distance between two rhetorical signatures.

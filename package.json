@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@utcp/code-mode-mcp": "^1.2.0"
+  }
+}

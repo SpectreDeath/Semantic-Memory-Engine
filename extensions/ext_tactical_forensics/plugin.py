@@ -1,9 +1,9 @@
-import os
+import hashlib
 import json
 import logging
-import hashlib
+import os
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any
 
 # NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
 from src.core.plugin_base import BasePlugin
@@ -15,7 +15,7 @@ class TacticalForensicExtension(BasePlugin):
     Tactical Intelligence Pack for Lawnmower Man v1.1.1.
     Specialized for analyzing physical evidence patterns at critical sites.
     """
-    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+    def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
         self.threat_signatures = {
             "IED_Component": ["nitrate", "detonator", "timer", "circuit"],
@@ -29,17 +29,17 @@ class TacticalForensicExtension(BasePlugin):
         """
         logger.info(f"[{self.plugin_id}] Tactical Enclave online. Threat signatures loaded.")
 
-    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
         Automatically screens all harvested evidence for tactical threat signatures.
         """
         found_threats = []
         lower_data = raw_data.lower()
-        
+
         for threat, signatures in self.threat_signatures.items():
             if any(sig in lower_data for sig in signatures):
                 found_threats.append(threat)
-        
+
         if found_threats:
             logger.warning(f"[{self.plugin_id}] TACTICAL ALERT: Found signatures {found_threats} in evidence.")
             return {
@@ -47,7 +47,7 @@ class TacticalForensicExtension(BasePlugin):
                 "priority": "HIGH",
                 "risk_assessment": "Immediate review required by Explosive Ordnance Disposal (EOD)."
             }
-        
+
         return {"status": "cleared", "tactical_hits": []}
 
     def get_tools(self) -> list:
@@ -63,14 +63,14 @@ class TacticalForensicExtension(BasePlugin):
         """
         if not os.path.exists(site_path):
             return json.dumps({"error": f"Site documentation not found at {site_path}"})
-            
+
         # Simulate scanning files in the directory
         hits = []
         if os.path.isdir(site_path):
             for root, _, files in os.walk(site_path):
                 for file in files:
                     if file.endswith(('.txt', '.md', '.log')):
-                        with open(os.path.join(root, file), 'r', errors='ignore') as f:
+                        with open(os.path.join(root, file), errors='ignore') as f:
                             content = f.read().lower()
                             for threat, signatures in self.threat_signatures.items():
                                 if any(sig in content for sig in signatures):
@@ -82,17 +82,17 @@ class TacticalForensicExtension(BasePlugin):
             "threat_hits": hits,
             "status": "DANGER" if hits else "CLEAR"
         }
-        
+
         # Hardware signature via SmeCoreBridge (through the bridge's nexus access)
         # NexusAPI: use nexus_api.get_hsm() — no gateway imports
         hsm = self.nexus_api.get_hsm()
         data_hash = hashlib.sha256(json.dumps(report, sort_keys=True).encode()).hexdigest()
         signature = hsm.sign_evidence(self.plugin_id, data_hash)
-        
+
         report["hw_signature"] = signature
         return json.dumps(report, indent=2)
 
-    async def classify_threat_level(self, detected_keywords: List[str]) -> str:
+    async def classify_threat_level(self, detected_keywords: list[str]) -> str:
         """
         Classifies the threat level based on specific tactical keywords.
         """
@@ -103,12 +103,12 @@ class TacticalForensicExtension(BasePlugin):
                 score += 5
             if any(sig in kw_lower for sig in self.threat_signatures["CBRN_Precursor"]):
                 score += 10
-        
+
         level = "LOW"
         if score > 15: level = "CRITICAL"
         elif score > 8: level = "HIGH"
         elif score > 3: level = "MEDIUM"
-        
+
         result = {
             "threat_score": score,
             "threat_level": level,
@@ -116,7 +116,7 @@ class TacticalForensicExtension(BasePlugin):
         }
         return json.dumps(result, indent=2)
 
-def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+def register_extension(manifest: dict[str, Any], nexus_api: Any):
     """
     Standard Lawnmower Man v1.1.1 Extension Hook.
     """

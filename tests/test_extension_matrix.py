@@ -12,12 +12,10 @@ Run with:
 """
 
 import asyncio
-import importlib
 import inspect
-import os
 import sys
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
 import pytest
 
@@ -29,7 +27,7 @@ if str(PROJECT_ROOT) not in sys.path:
 EXTENSIONS_DIR = PROJECT_ROOT / "extensions"
 
 # Collect every extension folder that contains a Python file
-def _discover_extension_dirs() -> List[Path]:
+def _discover_extension_dirs() -> list[Path]:
     dirs = []
     for entry in sorted(EXTENSIONS_DIR.iterdir()):
         if entry.is_dir() and not entry.name.startswith("_"):
@@ -87,7 +85,7 @@ def test_all_extensions_discovered(extension_manager):
 @pytest.mark.parametrize("ext_name", EXTENSION_NAMES)
 def test_extension_exposes_tools(extension_manager, ext_name):
     """Each extension must expose at least one tool."""
-    all_tools: List[Dict[str, Any]] = extension_manager.get_extension_tools()
+    all_tools: list[dict[str, Any]] = extension_manager.get_extension_tools()
     ext_tools = [t for t in all_tools if t.get("plugin_id") == ext_name]
 
     assert len(ext_tools) > 0, (
@@ -99,7 +97,7 @@ def test_extension_exposes_tools(extension_manager, ext_name):
 @pytest.mark.parametrize("ext_name", EXTENSION_NAMES)
 def test_extension_tool_schema(extension_manager, ext_name):
     """Each tool dict must have the required keys and a callable handler."""
-    all_tools: List[Dict[str, Any]] = extension_manager.get_extension_tools()
+    all_tools: list[dict[str, Any]] = extension_manager.get_extension_tools()
     ext_tools = [t for t in all_tools if t.get("plugin_id") == ext_name]
 
     required_keys = {"name", "description", "handler"}
@@ -128,7 +126,7 @@ def test_extension_handler_returns_string(extension_manager, ext_name):
     Call each tool handler with an empty string and verify it returns a string
     (or raises a predictable ValueError/TypeError, not an unhandled crash).
     """
-    all_tools: List[Dict[str, Any]] = extension_manager.get_extension_tools()
+    all_tools: list[dict[str, Any]] = extension_manager.get_extension_tools()
     ext_tools = [t for t in all_tools if t.get("plugin_id") == ext_name]
 
     for tool in ext_tools:

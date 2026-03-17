@@ -1,8 +1,8 @@
-from mcp.server.fastmcp import FastMCP
+import socket
+
 import ping3
 import requests
-import socket
-from typing import List, Dict
+from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("NetworkProbe")
 
@@ -16,14 +16,14 @@ def check_latency(host: str = "8.8.8.8") -> str:
             return f"Latency Check: {host} is unreachable."
         return f"Latency to {host}: {latency:.2f} ms"
     except Exception as e:
-        return f"Latency Error: {str(e)}"
+        return f"Latency Error: {e!s}"
 
 @mcp.tool()
-def verify_connectivity(urls: List[str] = None) -> str:
+def verify_connectivity(urls: list[str] = None) -> str:
     """Verifies external service availability via HEAD requests."""
     if urls is None:
         urls = ["https://www.google.com", "https://duckduckgo.com", "https://api.github.com"]
-    
+
     results = []
     for url in urls:
         try:
@@ -32,7 +32,7 @@ def verify_connectivity(urls: List[str] = None) -> str:
             results.append(f"{url}: {status}")
         except requests.exceptions.RequestException as e:
             results.append(f"{url}: Offline ({type(e).__name__})")
-            
+
     return "\n".join(results)
 
 @mcp.tool()
@@ -43,10 +43,10 @@ def get_network_summary() -> str:
         local_ip = socket.gethostbyname(hostname)
     except:
         local_ip = "Unknown"
-        
+
     latency = check_latency()
     connectivity = verify_connectivity()
-    
+
     return (
         f"--- NETWORK SUMMARY ---\n"
         f"Hostname: {hostname}\n"

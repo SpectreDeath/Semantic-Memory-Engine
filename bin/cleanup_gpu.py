@@ -1,5 +1,7 @@
-import torch
 import gc
+
+import torch
+
 
 def main():
     gc.collect()

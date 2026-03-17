@@ -1,5 +1,6 @@
 import os
-from typing import Dict, Any, Optional
+from typing import Any
+
 
 class FileSignatureChecker:
     """
@@ -23,13 +24,13 @@ class FileSignatureChecker:
             'sqlite': b'\x53\x51\x4c\x69\x74\x65\x20\x66\x6f\x72\x6d\x61\x74\x20\x33', # SQLite format 3
         }
 
-    def verify(self, file_path: str) -> Dict[str, Any]:
+    def verify(self, file_path: str) -> dict[str, Any]:
         """Reads the first 32 bytes and compares against known signatures."""
         if not os.path.exists(file_path):
             return {"error": "File not found", "status": "Error"}
 
         try:
-            ext = file_path.split('.')[-1].lower()
+            ext = file_path.rsplit('.', maxsplit=1)[-1].lower()
             with open(file_path, 'rb') as f:
                 header = f.read(32)
 
@@ -51,7 +52,7 @@ class FileSignatureChecker:
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-def verify_file_signature(file_path: str) -> Dict[str, Any]:
+def verify_file_signature(file_path: str) -> dict[str, Any]:
     """Standalone wrapper for file signature verification."""
     checker = FileSignatureChecker()
     return checker.verify(file_path)

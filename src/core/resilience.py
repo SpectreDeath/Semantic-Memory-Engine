@@ -27,14 +27,15 @@ Usage:
         return compute_result()
 """
 
-from typing import Callable, Any, Optional, Dict, TypeVar
-from enum import Enum
-from datetime import datetime, timedelta
-from functools import wraps
 import logging
-import time
 import random
+import time
+from collections.abc import Callable
+from datetime import datetime
+from enum import Enum
+from functools import wraps
 from threading import Lock
+from typing import Any, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +61,7 @@ class CircuitBreaker:
     Prevents cascade failures by monitoring failure rates and opening
     the circuit when they exceed thresholds.
     """
-    
+
     def __init__(self, name: str, failure_threshold: float = 0.5,
                  recovery_timeout: int = 60, expected_exception: type = Exception):
         """
@@ -76,13 +77,13 @@ class CircuitBreaker:
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
         self.expected_exception = expected_exception
-        
+
         self.state = CircuitState.CLOSED
         self.failure_count = 0
         self.success_count = 0
-        self.last_failure_time: Optional[datetime] = None
+        self.last_failure_time: datetime | None = None
         self.last_state_change: datetime = datetime.now()
-    
+
     def call(self, func: Callable, *args, **kwargs) -> Any:
         """
         Execute function with circuit breaker protection.
@@ -100,21 +101,21 @@ class CircuitBreaker:
             Exception: If function raises expected exception
         """
         self._check_state()
-        
+
         try:
             result = func(*args, **kwargs)
             self._on_success()
             return result
-        
-        except self.expected_exception as e:
+
+        except self.expected_exception:
             self._on_failure()
             raise
-    
+
     def _check_state(self) -> None:
         """Check if we should change state."""
         if self.state == CircuitState.CLOSED:
             return
-        
+
         if self.state == CircuitState.OPEN:
             # Check if recovery timeout has passed
             time_since_failure = (datetime.now() - self.last_failure_time).total_seconds()
@@ -131,7 +132,7 @@ class CircuitBreaker:
                 raise CircuitBreakerError(
                     f"Circuit '{self.name}' is OPEN. "
                     f"Recovery in {remaining}s")
-        
+
         elif self.state == CircuitState.HALF_OPEN:
             # In half-open, try limited requests
             if self.failure_count > 0:
@@ -143,11 +144,11 @@ class CircuitBreaker:
                 self.last_failure_time = datetime.now()
                 raise CircuitBreakerError(
                     f"Circuit '{self.name}' re-opened after recovery attempt")
-    
+
     def _on_success(self) -> None:
         """Handle successful call."""
         self.success_count += 1
-        
+
         if self.state == CircuitState.HALF_OPEN:
             # Successful recovery
             logger.info(f"Circuit '{self.name}' HALF_OPEN → CLOSED (recovered)")
@@ -155,16 +156,16 @@ class CircuitBreaker:
             self.failure_count = 0
             self.success_count = 0
             self.last_state_change = datetime.now()
-    
+
     def _on_failure(self) -> None:
         """Handle failed call."""
         self.failure_count += 1
         self.last_failure_time = datetime.now()
-        
+
         total = self.failure_count + self.success_count
         if total > 0:
             failure_rate = self.failure_count / total
-            
+
             if failure_rate >= self.failure_threshold:
                 if self.state != CircuitState.OPEN:
                     logger.error(
@@ -172,11 +173,11 @@ class CircuitBreaker:
                         f"(failure rate: {failure_rate:.2%})")
                     self.state = CircuitState.OPEN
                     self.last_state_change = datetime.now()
-    
+
     def get_state(self) -> str:
         """Get current circuit state."""
         return self.state.value
-    
+
     def reset(self) -> None:
         """Reset circuit to closed state."""
         old_state = self.state.value
@@ -185,14 +186,14 @@ class CircuitBreaker:
         self.success_count = 0
         self.last_failure_time = None
         logger.info(f"Circuit '{self.name}' reset ({old_state} → CLOSED)")
-    
+
     def get_stats(self) -> dict:
         """Get circuit statistics."""
         total = self.failure_count + self.success_count
         failure_rate = (self.failure_count / total * 100) if total > 0 else 0
-        
+
         time_in_state = (datetime.now() - self.last_state_change).total_seconds()
-        
+
         return {
             'name': self.name,
             'state': self.state.value,
@@ -202,7 +203,7 @@ class CircuitBreaker:
             'failure_rate_percent': f"{failure_rate:.1f}%",
             'time_in_state_seconds': int(time_in_state),
             'last_state_change': self.last_state_change.isoformat(),
-            'last_failure': (self.last_failure_time.isoformat() 
+            'last_failure': (self.last_failure_time.isoformat()
                            if self.last_failure_time else None)
         }
     def __call__(self, func: F) -> F:
@@ -224,7 +225,7 @@ def retry_with_backoff(
     max_delay: float = 300.0,
     exponential_base: float = 2.0,
     jitter: bool = True,
-    on_retry: Optional[Callable[[int, Exception], None]] = None,
+    on_retry: Callable[[int, Exception], None] | None = None,
 ) -> Callable:
     """
     Decorator for retrying with exponential backoff.
@@ -246,37 +247,37 @@ def retry_with_backoff(
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             last_exception = None
-            
+
             for attempt in range(1, max_attempts + 1):
                 try:
                     return func(*args, **kwargs)
                 except Exception as e:
                     last_exception = e
-                    
+
                     if attempt < max_attempts:
                         # Calculate delay with exponential backoff
                         delay = base_delay * (exponential_base ** (attempt - 1))
                         delay = min(delay, max_delay)
-                        
+
                         # Add jitter
                         if jitter:
                             delay *= (0.5 + random.random())
-                        
+
                         logger.warning(
                             f"{func.__name__} attempt {attempt}/{max_attempts} failed: {e}. "
                             f"Retrying in {delay:.2f}s..."
                         )
-                        
+
                         # Call retry callback
                         if on_retry:
                             on_retry(attempt, e)
-                        
+
                         time.sleep(delay)
                     else:
                         logger.error(
                             f"{func.__name__} failed after {max_attempts} attempts: {e}"
                         )
-            
+
             # All attempts failed
             raise last_exception
 
@@ -301,7 +302,7 @@ class TimeoutManager:
     def __init__(self, timeout_seconds: float):
         """Initialize timeout manager."""
         self.timeout_seconds = timeout_seconds
-        self.start_time: Optional[float] = None
+        self.start_time: float | None = None
         self.lock = Lock()
 
     def __enter__(self):
@@ -320,7 +321,7 @@ class TimeoutManager:
         with self.lock:
             if self.start_time is None:
                 return
-            
+
             elapsed = time.time() - self.start_time
             if elapsed > self.timeout_seconds:
                 raise TimeoutError(
@@ -332,7 +333,7 @@ class TimeoutManager:
         with self.lock:
             if self.start_time is None:
                 return self.timeout_seconds
-            
+
             elapsed = time.time() - self.start_time
             return max(0, self.timeout_seconds - elapsed)
 
@@ -349,7 +350,7 @@ class BulkheadIsolation:
     Limits concurrent requests to prevent resource exhaustion.
     """
 
-    def __init__(self, max_concurrent: int = 10, name: Optional[str] = None):
+    def __init__(self, max_concurrent: int = 10, name: str | None = None):
         """Initialize bulkhead isolation."""
         self.max_concurrent = max_concurrent
         self.name = name or "Bulkhead"
@@ -378,7 +379,7 @@ class BulkheadIsolation:
                 raise RuntimeError(
                     f"{self.name} bulkhead full ({self.active_count}/{self.max_concurrent})"
                 )
-            
+
             try:
                 return func(*args, **kwargs)
             finally:
@@ -386,7 +387,7 @@ class BulkheadIsolation:
 
         return wrapper
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get bulkhead statistics."""
         with self.lock:
             return {
@@ -409,9 +410,9 @@ class ResilientExecutor:
 
     def __init__(
         self,
-        circuit_breaker: Optional[CircuitBreaker] = None,
+        circuit_breaker: CircuitBreaker | None = None,
         timeout_seconds: float = 30.0,
-        bulkhead: Optional[BulkheadIsolation] = None,
+        bulkhead: BulkheadIsolation | None = None,
         max_retries: int = 3,
     ):
         """Initialize resilient executor."""
@@ -422,13 +423,13 @@ class ResilientExecutor:
 
     def execute(self, func: Callable, *args, **kwargs) -> Any:
         """Execute function with full resilience."""
-        
+
         @retry_with_backoff(max_attempts=self.max_retries)
         def retry_wrapper():
             # Check bulkhead
             if not self.bulkhead.acquire():
                 raise RuntimeError("Bulkhead full")
-            
+
             try:
                 # Apply timeout
                 with TimeoutManager(self.timeout_seconds) as tm:
@@ -440,7 +441,7 @@ class ResilientExecutor:
 
         return retry_wrapper()
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get executor statistics."""
         return {
             "circuit_breaker": self.circuit_breaker.get_stats(),
@@ -454,7 +455,7 @@ class ResilientExecutor:
 # Singleton Executor
 # ============================================================================
 
-_resilient_executor: Optional[ResilientExecutor] = None
+_resilient_executor: ResilientExecutor | None = None
 _executor_lock = Lock()
 
 

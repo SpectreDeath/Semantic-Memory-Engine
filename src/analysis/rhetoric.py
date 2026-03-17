@@ -1,5 +1,6 @@
-from textblob import TextBlob
 import json
+
+from textblob import TextBlob
 
 # Your custom dictionary (Risk Signals)
 custom_lexicon = {
@@ -14,14 +15,14 @@ def analyze_rhetoric(text):
         "subjectivity": blob.sentiment.subjectivity, # 0 (fact) to 1 (opinion)
         "custom_flags": []
     }
-    
+
     # Check for your specific character tells
     words = [w.lower() for w in blob.words]
     for category, terms in custom_lexicon.items():
         found = [t for t in terms if t in words]
         if found:
             results["custom_flags"].append({category: found})
-            
+
     return results
 
 # Example crawl-ready text
@@ -29,7 +30,6 @@ sample_text = "The entities were cleared as part of the toxic infestation remova
 print(analyze_rhetoric(sample_text))
 import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-import json
 
 # Ensure you have the lexicon downloaded (only needed once)
 nltk.download('vader_lexicon')
@@ -38,7 +38,7 @@ class RhetoricAnalyzer:
     def __init__(self):
         # Initialize the standard VADER engine
         self.vader = SentimentIntensityAnalyzer()
-        
+
         # YOUR CUSTOM LEXICON (Add your dehumanizing terms here)
         self.custom_signals = {
             "dehumanizing": ["vermin", "parasite", "infestation", "toxic"],
@@ -48,7 +48,7 @@ class RhetoricAnalyzer:
     def analyze(self, text):
         # 1. Get standard sentiment scores from VADER
         vader_scores = self.vader.polarity_scores(text)
-        
+
         # 2. Run your custom "Character Tell" check
         text_lower = text.lower()
         signal_counts = {}

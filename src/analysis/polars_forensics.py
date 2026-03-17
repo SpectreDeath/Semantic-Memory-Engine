@@ -9,10 +9,9 @@ v2.1.0: Added Polars for accelerated data processing.
 
 import json
 import pathlib
-from typing import Any, Dict, List
+from typing import Any
 
 import polars as pl
-
 
 # ============================================================================
 # Forensic Data Schemas
@@ -56,7 +55,7 @@ def load_forensic_events(file_path: str) -> pl.DataFrame:
     """
     path = pathlib.Path(file_path)
     suffix = path.suffix.lower()
-    
+
     if suffix == '.csv':
         return pl.read_csv(file_path)
     elif suffix == '.parquet':
@@ -94,22 +93,22 @@ def calculate_entity_centrality(relationships: pl.DataFrame) -> pl.DataFrame:
     in_degree = relationships.group_by("target").agg(
         pl.col("weight").sum().alias("in_centrality")
     ).rename({"target": "entity"})
-    
+
     # Calculate out-degree centrality
     out_degree = relationships.group_by("source").agg(
         pl.col("weight").sum().alias("out_centrality")
     ).rename({"source": "entity"})
-    
+
     # Combine and calculate total
     result = in_degree.join(out_degree, on="entity", how="outer").fill_null(0)
     result = result.with_columns(
         (pl.col("in_centrality") + pl.col("out_centrality")).alias("total_centrality")
     ).sort("total_centrality", descending=True)
-    
+
     return result
 
 
-def detect_synthetic_patterns(df: pl.DataFrame, probability_column: str = "synthetic_probability") -> Dict[str, Any]:
+def detect_synthetic_patterns(df: pl.DataFrame, probability_column: str = "synthetic_probability") -> dict[str, Any]:
     """
     Detect synthetic patterns in forensic data.
     
@@ -121,12 +120,12 @@ def detect_synthetic_patterns(df: pl.DataFrame, probability_column: str = "synth
         Dictionary with synthetic pattern analysis
     """
     total_records = len(df)
-    
+
     # High probability of synthetic content
     high_prob = df.filter(pl.col(probability_column) > 0.8)
     medium_prob = df.filter((pl.col(probability_column) > 0.5) & (pl.col(probability_column) <= 0.8))
     low_prob = df.filter(pl.col(probability_column) <= 0.5)
-    
+
     return {
         "total_records": total_records,
         "high_synthetic_probability": len(high_prob),
@@ -137,7 +136,7 @@ def detect_synthetic_patterns(df: pl.DataFrame, probability_column: str = "synth
     }
 
 
-def temporal_pattern_analysis(df: pl.DataFrame, timestamp_col: str = "timestamp") -> Dict[str, Any]:
+def temporal_pattern_analysis(df: pl.DataFrame, timestamp_col: str = "timestamp") -> dict[str, Any]:
     """
     Analyze temporal patterns in forensic events.
     
@@ -150,12 +149,12 @@ def temporal_pattern_analysis(df: pl.DataFrame, timestamp_col: str = "timestamp"
     """
     # Sort by timestamp
     df_sorted = df.sort(timestamp_col)
-    
+
     # Calculate time deltas between events
     time_deltas = df_sorted.select(
         pl.col(timestamp_col).diff().alias("delta")
     ).drop_nulls()
-    
+
     return {
         "earliest_event": df[timestamp_col].min(),
         "latest_event": df[timestamp_col].max(),
@@ -183,7 +182,7 @@ def calculate_trust_scores(df: pl.DataFrame) -> pl.DataFrame:
     )
 
 
-def group_by_entity_type(df: pl.DataFrame, entity_col: str = "user") -> Dict[str, int]:
+def group_by_entity_type(df: pl.DataFrame, entity_col: str = "user") -> dict[str, int]:
     """
     Group forensic events by entity type.
     
@@ -206,7 +205,7 @@ def group_by_entity_type(df: pl.DataFrame, entity_col: str = "user") -> Dict[str
 # SME Integration Functions
 # ============================================================================
 
-def process_forensic_batch(data: List[Dict[str, Any]]) -> Dict[str, Any]:
+def process_forensic_batch(data: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Process a batch of forensic data using Polars.
     
@@ -218,13 +217,13 @@ def process_forensic_batch(data: List[Dict[str, Any]]) -> Dict[str, Any]:
     """
     # Convert to Polars DataFrame
     df = pl.DataFrame(data)
-    
+
     # Run analyses
     anomalies = detect_anomalies(df)
     synthetic_analysis = detect_synthetic_patterns(df)
     trust_scores = calculate_trust_scores(df)
     entity_counts = group_by_entity_type(df)
-    
+
     return {
         "summary": {
             "total_events": len(df),
@@ -263,11 +262,11 @@ def export_to_parquet(df: pl.DataFrame, output_path: str) -> str:
 if __name__ == "__main__":
     # Create sample forensic data
     sample_data = [
-        {"timestamp": 1700000000 + i * 3600, "source_ip": f"192.168.1.{i%255}", 
-         "dest_ip": "10.0.0.1", "action": "login", "user": f"user{i%5}", 
+        {"timestamp": 1700000000 + i * 3600, "source_ip": f"192.168.1.{i%255}",
+         "dest_ip": "10.0.0.1", "action": "login", "user": f"user{i%5}",
          "risk_score": 0.3 + (i % 10) * 0.07, "synthetic_probability": 0.1 + (i % 5) * 0.15}
         for i in range(100)
     ]
-    
+
     result = process_forensic_batch(sample_data)
     print(json.dumps(result, indent=2))

@@ -1,6 +1,5 @@
 import asyncio
 import sys
-import os
 from pathlib import Path
 
 # Add project root to path
@@ -10,7 +9,12 @@ if str(PROJECT_ROOT) not in sys.path:
 
 # Try to import the extension
 try:
-    from extensions.ext_scrapegraph_harvester.plugin import ScrapeGraphHarvester, ScrapeRequest, ResearchRequest, MarkdownifyRequest
+    from extensions.ext_scrapegraph_harvester.plugin import (
+        MarkdownifyRequest,
+        ResearchRequest,
+        ScrapeGraphHarvester,
+        ScrapeRequest,
+    )
     from gateway.extension_manager import DefaultExtensionContext
     AVAILABLE = True
 except ImportError as e:

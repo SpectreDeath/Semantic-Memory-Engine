@@ -13,33 +13,32 @@ Technical Targets:
 - Scalability: Efficient batch processing
 """
 
-import os
-import json
-import time
 import hashlib
+import json
+import os
 import threading
+from collections import deque
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional, Tuple, Set
 from datetime import datetime
 from enum import Enum
-from collections import defaultdict, deque
+from typing import Any
+
+import joblib
 import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
 
 # For lightweight ML
 from sklearn.linear_model import SGDClassifier
-from sklearn.preprocessing import StandardScaler
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, confusion_matrix
-import joblib
+from sklearn.preprocessing import StandardScaler
 
 # Import existing gatekeeper logic
 from gateway.gatekeeper_logic import (
-    calculate_entropy,
+    analyze_model_origin,
     calculate_burstiness,
-    calculate_vault_proximity,
+    calculate_entropy,
     calculate_trust_score,
-    analyze_model_origin
+    calculate_vault_proximity,
 )
 
 # Constants
@@ -71,14 +70,14 @@ class GateFailure:
     """Record of a gatekeeper failure for learning."""
     id: str
     text: str
-    features: Dict[str, Any]
+    features: dict[str, Any]
     original_decision: str
     actual_label: str  # human or synthetic
     confidence: float
     timestamp: datetime = field(default_factory=datetime.now)
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    
-    def to_dict(self) -> Dict[str, Any]:
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
         return {
             "id": self.id,
             "text": self.text,
@@ -89,9 +88,9 @@ class GateFailure:
             "timestamp": self.timestamp.isoformat(),
             "metadata": self.metadata
         }
-    
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "GateFailure":
+    def from_dict(cls, data: dict[str, Any]) -> "GateFailure":
         return cls(
             id=data["id"],
             text=data["text"],
@@ -111,8 +110,8 @@ class GateFeedback:
     corrected_label: str
     notes: str = ""
     timestamp: datetime = field(default_factory=datetime.now)
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         return {
             "failure_id": self.failure_id,
             "corrected_label": self.corrected_label,
@@ -125,7 +124,7 @@ class GateFeedback:
 class GateStats:
     """Statistics for gate performance tracking."""
     total_decisions: int = 0
-    decisions_by_type: Dict[str, int] = field(default_factory=dict)
+    decisions_by_type: dict[str, int] = field(default_factory=dict)
     corrections_received: int = 0
     false_positives: int = 0
     false_negatives: int = 0
@@ -133,10 +132,10 @@ class GateStats:
     true_negatives: int = 0
     average_confidence: float = 0.0
     model_accuracy: float = 0.0
-    last_training: Optional[datetime] = None
+    last_training: datetime | None = None
     last_updated: datetime = field(default_factory=datetime.now)
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         return {
             "total_decisions": self.total_decisions,
             "decisions_by_type": self.decisions_by_type,
@@ -150,9 +149,9 @@ class GateStats:
             "last_training": self.last_training.isoformat() if self.last_training else None,
             "last_updated": self.last_updated.isoformat()
         }
-    
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "GateStats":
+    def from_dict(cls, data: dict[str, Any]) -> "GateStats":
         return cls(
             total_decisions=data.get("total_decisions", 0),
             decisions_by_type=data.get("decisions_by_type", {}),
@@ -178,7 +177,7 @@ class EpistemicGate:
     - Recursive trust validation loop
     - Multi-factor trust scoring
     """
-    
+
     def __init__(
         self,
         node_id: str = "local_node",
@@ -188,52 +187,52 @@ class EpistemicGate:
         self.node_id = node_id
         self.auto_train = auto_train
         self.training_threshold = training_threshold
-        
+
         # Ensure directories exist
         os.makedirs("data/aether", exist_ok=True)
-        
+
         # Failure history
-        self._failures: Dict[str, GateFailure] = {}
+        self._failures: dict[str, GateFailure] = {}
         self._failure_queue = deque(maxlen=FEEDBACK_HISTORY_SIZE)
-        
+
         # Feedback history
-        self._feedback_history: List[GateFeedback] = []
-        
+        self._feedback_history: list[GateFeedback] = []
+
         # Stats
         self._stats = self._load_stats()
-        
+
         # ML components - lightweight for 4GB VRAM
-        self._classifier: Optional[SGDClassifier] = None
-        self._scaler: Optional[StandardScaler] = None
-        self._vectorizer: Optional[TfidfVectorizer] = None
-        
+        self._classifier: SGDClassifier | None = None
+        self._scaler: StandardScaler | None = None
+        self._vectorizer: TfidfVectorizer | None = None
+
         # Feature extraction for the classifier
         self._feature_names = [
             "entropy", "burstiness", "vault_proximity", "trust_score",
-            "text_length", "word_count", "sentence_count", 
+            "text_length", "word_count", "sentence_count",
             "avg_word_length", "unique_word_ratio", "punctuation_ratio",
             "capital_ratio", "digit_ratio"
         ]
-        
+
         # Load existing model if available
         self._load_model()
-        
+
         # Lock for thread safety
         self._lock = threading.RLock()
-        
+
         print(f"[Aether.EpistemicGate] Initialized for node: {node_id}")
         print(f"[Aether.EpistemicGate] Auto-train: {auto_train}, Threshold: {training_threshold}")
-    
+
     def _load_stats(self) -> GateStats:
         """Load statistics from disk."""
         try:
             if os.path.exists(GATE_STATS_PATH):
-                with open(GATE_STATS_PATH, 'r') as f:
+                with open(GATE_STATS_PATH) as f:
                     return GateStats.from_dict(json.load(f))
         except Exception as e:
             print(f"[Aether.EpistemicGate] Error loading stats: {e}")
         return GateStats()
-    
+
     def _save_stats(self) -> None:
         """Save statistics to disk."""
         try:
@@ -242,7 +241,7 @@ class EpistemicGate:
                 json.dump(self._stats.to_dict(), f, indent=2)
         except Exception as e:
             print(f"[Aether.EpistemicGate] Error saving stats: {e}")
-    
+
     def _load_model(self) -> bool:
         """Load existing model from disk."""
         try:
@@ -251,14 +250,14 @@ class EpistemicGate:
                 self._classifier = model_data.get("classifier")
                 self._scaler = model_data.get("scaler")
                 self._vectorizer = model_data.get("vectorizer")
-                
+
                 if self._classifier and self._scaler and self._vectorizer:
                     print("[Aether.EpistemicGate] Loaded existing model")
                     return True
         except Exception as e:
             print(f"[Aether.EpistemicGate] Error loading model: {e}")
         return False
-    
+
     def _save_model(self) -> None:
         """Save model to disk."""
         try:
@@ -274,7 +273,7 @@ class EpistemicGate:
                 print("[Aether.EpistemicGate] Model saved")
         except Exception as e:
             print(f"[Aether.EpistemicGate] Error saving model: {e}")
-    
+
     def _extract_features(self, text: str) -> np.ndarray:
         """Extract features for the classifier."""
         # Get base features from gatekeeper
@@ -282,11 +281,11 @@ class EpistemicGate:
         burstiness = calculate_burstiness(text)
         vault_prox = calculate_vault_proximity(text)
         trust = calculate_trust_score(entropy, burstiness, vault_prox)
-        
+
         # Additional text features
         words = text.split()
         sentences = [s for s in text.split('.') if s.strip()]
-        
+
         text_length = len(text)
         word_count = len(words)
         sentence_count = len(sentences)
@@ -295,7 +294,7 @@ class EpistemicGate:
         punctuation_ratio = sum(1 for c in text if c in '.,!?;:"\'') / max(1, text_length)
         capital_ratio = sum(1 for c in text if c.isupper()) / max(1, text_length)
         digit_ratio = sum(1 for c in text if c.isdigit()) / max(1, text_length)
-        
+
         features = [
             entropy,
             burstiness,
@@ -310,10 +309,10 @@ class EpistemicGate:
             capital_ratio,
             digit_ratio
         ]
-        
+
         return np.array(features)
-    
-    def _extract_text_features(self, texts: List[str]) -> np.ndarray:
+
+    def _extract_text_features(self, texts: list[str]) -> np.ndarray:
         """Extract TF-IDF features from text."""
         if not self._vectorizer:
             # Use lightweight TF-IDF
@@ -324,31 +323,31 @@ class EpistemicGate:
                 min_df=2,
                 max_df=0.95
             )
-        
+
         return self._vectorizer.fit_transform(texts).toarray()
-    
+
     def _combine_features(
-        self, 
-        numeric_features: np.ndarray, 
+        self,
+        numeric_features: np.ndarray,
         text_features: np.ndarray
     ) -> np.ndarray:
         """Combine numeric and text features."""
         # Limit text features to save memory
         text_features_limited = text_features[:, :100] if text_features.shape[1] > 100 else text_features
-        
+
         # Handle dimension mismatch
         if numeric_features.ndim == 1:
             numeric_features = numeric_features.reshape(1, -1)
         if text_features_limited.ndim == 1:
             text_features_limited = text_features_limited.reshape(1, -1)
-        
+
         return np.hstack([numeric_features, text_features_limited])
-    
+
     def evaluate(
         self,
         text: str,
         return_features: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Evaluate text through the epistemic gate.
         
@@ -357,59 +356,59 @@ class EpistemicGate:
         with self._lock:
             # Extract features
             features = self._extract_features(text)
-            
+
             # Get base gatekeeper decision
             entropy = calculate_entropy(text)
             burstiness = calculate_burstiness(text)
             vault_prox = calculate_vault_proximity(text)
             trust = calculate_trust_score(entropy, burstiness, vault_prox)
             attribution = analyze_model_origin(text)
-            
+
             # Primary decision from gatekeeper
             base_decision = trust["nts"]
             base_label = trust["label"]
-            
+
             # If model exists, use it for recursive validation
             model_decision = None
             model_confidence = None
-            
+
             if self._classifier and self._scaler:
                 try:
                     # Scale features
                     features_scaled = self._scaler.transform(features.reshape(1, -1))
-                    
+
                     # Get prediction and probability
                     prediction = self._classifier.predict(features_scaled)[0]
                     probabilities = self._classifier.predict_proba(features_scaled)[0]
-                    
+
                     # Class 1 = synthetic, Class 0 = human
                     synthetic_prob = probabilities[1] if len(probabilities) > 1 else 0.5
                     human_prob = probabilities[0] if len(probabilities) > 0 else 0.5
-                    
+
                     model_confidence = max(synthetic_prob, human_prob)
-                    
+
                     # Convert to decision
                     if prediction == 1:  # Synthetic
                         model_decision = "synthetic"
                     else:
                         model_decision = "human"
-                        
+
                 except Exception as e:
                     print(f"[Aether.EpistemicGate] Model evaluation error: {e}")
-            
+
             # Combine decisions (recursive validation)
             final_decision = self._combine_decisions(
                 base_decision, base_label,
                 model_decision, model_confidence
             )
-            
+
             # Update stats
             self._stats.total_decisions += 1
             decision_type = final_decision["decision"].value
             self._stats.decisions_by_type[decision_type] = (
                 self._stats.decisions_by_type.get(decision_type, 0) + 1
             )
-            
+
             result = {
                 "decision": final_decision["decision"].value,
                 "confidence": final_decision["confidence"],
@@ -431,19 +430,19 @@ class EpistemicGate:
                     "vault_proximity": vault_prox
                 }
             }
-            
+
             if return_features:
                 result["raw_features"] = features.tolist()
-            
+
             return result
-    
+
     def _combine_decisions(
         self,
         base_score: float,
         base_label: str,
-        model_pred: Optional[str],
-        model_conf: Optional[float]
-    ) -> Dict[str, Any]:
+        model_pred: str | None,
+        model_conf: float | None
+    ) -> dict[str, Any]:
         """
         Recursively validate decision using both gatekeeper and model.
         
@@ -452,7 +451,7 @@ class EpistemicGate:
         reasons = []
         confidence = 0.5
         decision = GateDecision.REVIEW
-        
+
         # Base decision from gatekeeper
         if base_score >= 80:
             base_verdict = "human"
@@ -460,7 +459,7 @@ class EpistemicGate:
             base_verdict = "synthetic"
         else:
             base_verdict = "uncertain"
-        
+
         # If no model, use base decision
         if model_pred is None or model_conf is None:
             if base_verdict == "human":
@@ -475,16 +474,16 @@ class EpistemicGate:
                 decision = GateDecision.REVIEW
                 confidence = 0.5
                 reasons.append("Uncertain - requires review")
-            
+
             return {
                 "decision": decision,
                 "confidence": confidence,
                 "reasons": reasons
             }
-        
+
         # Recursive validation - check for consensus
         consensus = (base_verdict == model_pred)
-        
+
         if consensus:
             # Strong consensus
             if model_pred == "human":
@@ -508,19 +507,19 @@ class EpistemicGate:
             decision = GateDecision.REVIEW
             confidence = 0.5
             reasons.append(f"Disagreement: Gatekeeper={base_verdict}, Model={model_pred}")
-            
+
             # Log potential failure for later analysis
             self._log_potential_failure(
-                base_verdict, model_pred, 
+                base_verdict, model_pred,
                 max(base_score / 100.0, model_conf)
             )
-        
+
         return {
             "decision": decision,
             "confidence": confidence,
             "reasons": reasons
         }
-    
+
     def _log_potential_failure(
         self,
         base_verdict: str,
@@ -531,11 +530,11 @@ class EpistemicGate:
         # Only log significant disagreements
         if abs(confidence - 0.5) < 0.2:  # Both uncertain
             return
-        
+
         # This would be expanded to capture full text for training
         # For now, just increment counter
         pass
-    
+
     def report_feedback(
         self,
         text: str,
@@ -551,7 +550,7 @@ class EpistemicGate:
         with self._lock:
             # Extract features
             features = self._extract_features(text)
-            
+
             # Determine failure type
             if original_decision == "synthetic" and corrected_label == "human":
                 failure_type = FailureType.FALSE_POSITIVE
@@ -564,7 +563,7 @@ class EpistemicGate:
                     failure_type = FailureType.TRUE_NEGATIVE
             else:
                 failure_type = None
-            
+
             # Create failure record
             failure = GateFailure(
                 id=hashlib.sha256(os.urandom(8)).hexdigest()[:16],
@@ -575,13 +574,13 @@ class EpistemicGate:
                 confidence=0.5,
                 metadata={"failure_type": failure_type.value if failure_type else "unknown"}
             )
-            
+
             self._failures[failure.id] = failure
             self._failure_queue.append(failure.id)
-            
+
             # Update stats
             self._stats.corrections_received += 1
-            
+
             if failure_type == FailureType.FALSE_POSITIVE:
                 self._stats.false_positives += 1
             elif failure_type == FailureType.FALSE_NEGATIVE:
@@ -590,22 +589,22 @@ class EpistemicGate:
                 self._stats.true_positives += 1
             elif failure_type == FailureType.TRUE_NEGATIVE:
                 self._stats.true_negatives += 1
-            
+
             # Check if we should retrain
             if self.auto_train:
                 total_failures = (
-                    self._stats.false_positives + 
+                    self._stats.false_positives +
                     self._stats.false_negatives
                 )
-                
+
                 if total_failures >= self.training_threshold:
                     self.train()
-            
+
             self._save_stats()
-            
+
             return failure.id
-    
-    def train(self) -> Dict[str, Any]:
+
+    def train(self) -> dict[str, Any]:
         """
         Train the classifier on recorded failures.
         
@@ -618,16 +617,16 @@ class EpistemicGate:
                     "samples": len(self._failures),
                     "required": MIN_SAMPLES_FOR_TRAINING
                 }
-            
+
             # Prepare training data
             texts = []
             labels = []
-            
+
             for failure in self._failures.values():
                 texts.append(failure.text)
                 # Label: 1 = synthetic, 0 = human
                 labels.append(1 if failure.actual_label == "synthetic" else 0)
-            
+
             # Extract features
             try:
                 # Numeric features
@@ -635,23 +634,23 @@ class EpistemicGate:
                     [f.features.get(name, 0) for name in self._feature_names]
                     for f in self._failures.values()
                 ])
-                
+
                 # Text features
                 text_features = self._extract_text_features(texts)
-                
+
                 # Combine features
                 X = self._combine_features(numeric_features, text_features)
                 y = np.array(labels)
-                
+
                 # Train scaler
                 self._scaler = StandardScaler()
                 X_scaled = self._scaler.fit_transform(X)
-                
+
                 # Split for validation
                 X_train, X_test, y_train, y_test = train_test_split(
                     X_scaled, y, test_size=0.2, random_state=42
                 )
-                
+
                 # Train lightweight classifier
                 self._classifier = SGDClassifier(
                     loss='log_loss',  # Logistic regression
@@ -663,23 +662,23 @@ class EpistemicGate:
                     class_weight='balanced',
                     n_jobs=1  # Single thread for memory efficiency
                 )
-                
+
                 self._classifier.fit(X_train, y_train)
-                
+
                 # Evaluate
                 y_pred = self._classifier.predict(X_test)
-                
+
                 # Calculate accuracy
                 accuracy = np.mean(y_pred == y_test)
                 self._stats.model_accuracy = accuracy
-                
+
                 # Update last training time
                 self._stats.last_training = datetime.now()
-                
+
                 # Save model
                 self._save_model()
                 self._save_stats()
-                
+
                 return {
                     "status": "trained",
                     "samples": len(texts),
@@ -687,54 +686,54 @@ class EpistemicGate:
                     "train_size": len(X_train),
                     "test_size": len(X_test)
                 }
-                
+
             except Exception as e:
                 return {
                     "status": "error",
                     "error": str(e)
                 }
-    
-    def get_statistics(self) -> Dict[str, Any]:
+
+    def get_statistics(self) -> dict[str, Any]:
         """Get gate statistics."""
         stats = self._stats.to_dict()
-        
+
         # Calculate additional metrics
         total = (
-            self._stats.true_positives + 
-            self._stats.true_negatives + 
-            self._stats.false_positives + 
+            self._stats.true_positives +
+            self._stats.true_negatives +
+            self._stats.false_positives +
             self._stats.false_negatives
         )
-        
+
         if total > 0:
             stats["precision"] = (
-                self._stats.true_positives / 
+                self._stats.true_positives /
                 max(1, self._stats.true_positives + self._stats.false_positives)
             )
             stats["recall"] = (
-                self._stats.true_positives / 
+                self._stats.true_positives /
                 max(1, self._stats.true_positives + self._stats.false_negatives)
             )
             if stats["precision"] + stats["recall"] > 0:
                 stats["f1_score"] = (
-                    2 * stats["precision"] * stats["recall"] / 
+                    2 * stats["precision"] * stats["recall"] /
                     (stats["precision"] + stats["recall"])
                 )
-        
+
         stats["model_loaded"] = self._classifier is not None
         stats["pending_failures"] = len(self._failures)
-        
+
         return stats
-    
-    def get_recent_failures(self, limit: int = 10) -> List[Dict[str, Any]]:
+
+    def get_recent_failures(self, limit: int = 10) -> list[dict[str, Any]]:
         """Get recent failure records."""
         recent_ids = list(self._failure_queue)[-limit:]
         return [
-            self._failures[fid].to_dict() 
-            for fid in recent_ids 
+            self._failures[fid].to_dict()
+            for fid in recent_ids
             if fid in self._failures
         ]
-    
+
     def clear_failures(self) -> int:
         """Clear failure history."""
         count = len(self._failures)
@@ -742,7 +741,7 @@ class EpistemicGate:
         self._failure_queue.clear()
         self._save_stats()
         return count
-    
+
     def export_model(self, path: str) -> bool:
         """Export model to file."""
         try:
@@ -757,7 +756,7 @@ class EpistemicGate:
         except Exception as e:
             print(f"[Aether.EpistemicGate] Export error: {e}")
             return False
-    
+
     def import_model(self, path: str) -> bool:
         """Import model from file."""
         try:
@@ -769,7 +768,7 @@ class EpistemicGate:
         except Exception as e:
             print(f"[Aether.EpistemicGate] Import error: {e}")
             return False
-    
+
     def close(self):
         """Clean up resources."""
         self._save_stats()
@@ -777,14 +776,14 @@ class EpistemicGate:
 
 
 # Singleton instance
-_epistemic_gate: Optional[EpistemicGate] = None
+_epistemic_gate: EpistemicGate | None = None
 
 
 def get_epistemic_gate(node_id: str = "local_node") -> EpistemicGate:
     """Get or create EpistemicGate singleton."""
     global _epistemic_gate
-    
+
     if _epistemic_gate is None:
         _epistemic_gate = EpistemicGate(node_id=node_id)
-    
+
     return _epistemic_gate

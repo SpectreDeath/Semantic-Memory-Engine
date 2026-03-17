@@ -11,12 +11,11 @@ Provides real-time system monitoring for SME extensions including:
 This replaces placeholder implementations in extensions.
 """
 
-import os
 import logging
 import threading
 import time
-from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
+from typing import Any, Optional
 
 logger = logging.getLogger("lawnmower.governor")
 
@@ -61,10 +60,10 @@ class Governor:
     
     Singleton pattern ensures consistent monitoring across all extensions.
     """
-    
+
     _instance: Optional['Governor'] = None
     _lock = threading.Lock()
-    
+
     def __new__(cls):
         if cls._instance is None:
             with cls._lock:
@@ -76,14 +75,14 @@ class Governor:
     def __init__(self):
         if self._initialized:
             return
-            
+
         self._initialized = True
         self._nvml_initialized = False
         self._last_disk_io = None
         self._last_check_time = None
-        self._snapshot_history: List[SystemSnapshot] = []
+        self._snapshot_history: list[SystemSnapshot] = []
         self._max_history = 100  # Keep last 100 snapshots
-        
+
         # Initialize NVML for GPU monitoring
         if NVML_AVAILABLE:
             try:
@@ -100,20 +99,20 @@ class Governor:
     def get_snapshot(self) -> SystemSnapshot:
         """Get current system resource snapshot."""
         snap = SystemSnapshot()
-        
+
         if not PSUTIL_AVAILABLE:
             return snap
-        
+
         # CPU metrics
         snap.cpu_percent = psutil.cpu_percent(interval=0.1)
         snap.cpu_count = psutil.cpu_count()
-        
+
         # RAM metrics
         mem = psutil.virtual_memory()
         snap.ram_total_mb = mem.total / (1024 * 1024)
         snap.ram_used_mb = mem.used / (1024 * 1024)
         snap.ram_percent = mem.percent
-        
+
         # Disk I/O
         try:
             disk_io = psutil.disk_io_counters()
@@ -125,24 +124,24 @@ class Governor:
             self._last_check_time = time.time()
         except Exception as e:
             logger.debug(f"Governor: Disk I/O error: {e}")
-        
+
         # GPU metrics
         snap.gpu_available = self._nvml_initialized
         snap.gpu_count = self._gpu_count
-        
+
         if self._nvml_initialized and self._gpu_count > 0:
             try:
                 handle = pynvml.nvmlDeviceGetHandleByIndex(0)
-                
+
                 # Memory
                 mem_info = pynvml.nvmlDeviceGetMemoryInfo(handle)
                 snap.gpu_memory_total_mb = mem_info.total / (1024 * 1024)
                 snap.gpu_memory_used_mb = mem_info.used / (1024 * 1024)
-                
+
                 # Utilization
                 util = pynvml.nvmlDeviceGetUtilizationRates(handle)
                 snap.gpu_utilization = util.gpu
-                
+
                 # Temperature
                 try:
                     snap.gpu_temperature = pynvml.nvmlDeviceGetTemperature(
@@ -150,21 +149,21 @@ class Governor:
                     )
                 except:
                     pass  # Temperature may not be supported
-                    
+
             except Exception as e:
                 logger.debug(f"Governor: GPU query error: {e}")
-        
+
         # Store in history
         self._snapshot_history.append(snap)
         if len(self._snapshot_history) > self._max_history:
             self._snapshot_history.pop(0)
-        
+
         return snap
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get formatted status for API response."""
         snap = self.get_snapshot()
-        
+
         return {
             "governor": "active",
             "cpu": {
@@ -195,21 +194,21 @@ class Governor:
         cpu_threshold: float = 80.0,
         ram_threshold: float = 80.0,
         gpu_threshold: float = 90.0
-    ) -> Dict[str, bool]:
+    ) -> dict[str, bool]:
         """
         Check if any resource exceeds threshold.
         
         Returns dict with 'cpu', 'ram', 'gpu' boolean flags.
         """
         snap = self.get_snapshot()
-        
+
         return {
             "cpu": snap.cpu_percent >= cpu_threshold,
             "ram": snap.ram_percent >= ram_threshold,
             "gpu": snap.gpu_utilization >= gpu_threshold if snap.gpu_available else False
         }
 
-    def get_history(self, limit: int = 10) -> List[SystemSnapshot]:
+    def get_history(self, limit: int = 10) -> list[SystemSnapshot]:
         """Get recent system snapshots."""
         return self._snapshot_history[-limit:]
 
@@ -226,7 +225,7 @@ class Governor:
 # ---------------------------------------------------------------------------
 # Singleton accessor
 # ---------------------------------------------------------------------------
-_governor: Optional[Governor] = None
+_governor: Governor | None = None
 _governor_lock = threading.Lock()
 
 

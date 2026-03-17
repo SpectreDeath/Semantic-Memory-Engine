@@ -1,6 +1,6 @@
-from mcp.server.fastmcp import FastMCP
 import psutil
 import pynvml
+from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("BasementMonitor")
 
@@ -8,17 +8,17 @@ mcp = FastMCP("BasementMonitor")
 def get_thermal_stats() -> str:
     """Checks the laptop health in the cold basement."""
     cpu = psutil.cpu_percent(interval=0.1)
-    
+
     gpu_info = "GPU: Not Detected"
     try:
         pynvml.nvmlInit()
         handle = pynvml.nvmlDeviceGetHandleByIndex(0)
         temp = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
         mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-        
+
         # Calculate how much "room" we have in the cold
-        margin = 80 - temp 
-        
+        margin = 80 - temp
+
         gpu_info = (
             f"GPU Temp: {temp}°C\n"
             f"Thermal Margin: {margin}°C until throttle\n"

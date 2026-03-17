@@ -6,6 +6,7 @@ or external export is aggressively redacted.
 """
 
 import logging
+
 from src.core.redactor import Redactor
 
 logger = logging.getLogger(__name__)
@@ -31,10 +32,10 @@ class FederationGate:
             return ""
 
         logger.info("Federation Gate: Applying strict anonymity pass.")
-        
+
         # Apply strict redaction (scrapes IDs, phones, IPs, and identifies common name leaks)
         hardened = Redactor.redact(content, strict=True)
-        
+
         return hardened
 
     @staticmethod

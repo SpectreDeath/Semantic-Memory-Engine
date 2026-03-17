@@ -12,15 +12,15 @@ Technical Targets:
 - Scalability: 1M+ signatures using Polars native IPC
 """
 
-from .vector_syncer import VectorSyncer, VectorStoreType
-from .signature_library import SignatureLibrary, SignatureNode
 from .epistemic_gate import EpistemicGate, GateDecision
+from .signature_library import SignatureLibrary, SignatureNode
+from .vector_syncer import VectorStoreType, VectorSyncer
 
 __all__ = [
-    "VectorSyncer",
-    "VectorStoreType", 
-    "SignatureLibrary",
-    "SignatureNode",
     "EpistemicGate",
     "GateDecision",
+    "SignatureLibrary",
+    "SignatureNode",
+    "VectorStoreType",
+    "VectorSyncer",
 ]

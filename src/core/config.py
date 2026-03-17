@@ -14,10 +14,10 @@ Usage:
 """
 
 import os
-import yaml
 from pathlib import Path
-from typing import Any, Dict, Optional
-from functools import lru_cache
+from typing import Any, Optional
+
+import yaml
 
 
 class ConfigError(Exception):
@@ -32,53 +32,53 @@ class Config:
     Loads configuration from config/config.yaml and provides typed access
     to settings with sensible defaults.
     """
-    
+
     _instance: Optional['Config'] = None
-    _config: Dict[str, Any] = {}
-    
+    _config: dict[str, Any] = {}
+
     def __new__(cls):
         """Implement singleton pattern."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)
             cls._instance._load_config()
         return cls._instance
-    
+
     @classmethod
     def reset(cls):
         """Reset singleton (useful for testing)."""
         cls._instance = None
         cls._config = {}
-    
+
     def _load_config(self) -> None:
         """Load configuration from config.yaml."""
         config_path = self._find_config_file()
-        
+
         if not config_path:
             raise ConfigError(
                 "config.yaml not found. Expected at: config/config.yaml"
             )
-        
+
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path) as f:
                 self._config = yaml.safe_load(f) or {}
         except Exception as e:
             raise ConfigError(f"Failed to load config from {config_path}: {e}")
-    
+
     @staticmethod
-    def _find_config_file() -> Optional[Path]:
+    def _find_config_file() -> Path | None:
         """Find config.yaml in various possible locations."""
         possible_paths = [
             Path("config/config.yaml"),
             Path("./config/config.yaml"),
             Path(__file__).parent.parent.parent / "config" / "config.yaml",
         ]
-        
+
         for path in possible_paths:
             if path.exists():
                 return path
-        
+
         return None
-    
+
     def get(self, key: str, default: Any = None) -> Any:
         """
         Get a configuration value using dot notation.
@@ -96,7 +96,7 @@ class Config:
         """
         keys = key.split('.')
         value = self._config
-        
+
         try:
             for k in keys:
                 value = value[k]
@@ -105,7 +105,7 @@ class Config:
             if default is not None:
                 return default
             raise ConfigError(f"Configuration key '{key}' not found")
-    
+
     def get_safe(self, key: str, default: Any = None) -> Any:
         """
         Safely get a configuration value, always returning default if not found.
@@ -121,8 +121,8 @@ class Config:
             return self.get(key, default)
         except ConfigError:
             return default
-    
-    def get_path(self, key: str, default: Optional[str] = None) -> Path:
+
+    def get_path(self, key: str, default: str | None = None) -> Path:
         """
         Get a configuration path value and return as Path object.
         
@@ -138,40 +138,40 @@ class Config:
         value = self.get(key, default)
         if value is None:
             raise ConfigError(f"Path configuration key '{key}' not found")
-        
+
         # Expand environment variables and convert to Path
         expanded = os.path.expandvars(str(value))
         path = Path(expanded)
-        
+
         return path
-    
-    def get_int(self, key: str, default: Optional[int] = None) -> int:
+
+    def get_int(self, key: str, default: int | None = None) -> int:
         """Get an integer configuration value."""
         value = self.get(key, default)
         if value is None:
             raise ConfigError(f"Configuration key '{key}' not found")
         return int(value)
-    
-    def get_float(self, key: str, default: Optional[float] = None) -> float:
+
+    def get_float(self, key: str, default: float | None = None) -> float:
         """Get a float configuration value."""
         value = self.get(key, default)
         if value is None:
             raise ConfigError(f"Configuration key '{key}' not found")
         return float(value)
-    
-    def get_bool(self, key: str, default: Optional[bool] = None) -> bool:
+
+    def get_bool(self, key: str, default: bool | None = None) -> bool:
         """Get a boolean configuration value."""
         value = self.get(key, default)
         if value is None:
             raise ConfigError(f"Configuration key '{key}' not found")
-        
+
         if isinstance(value, bool):
             return value
         if isinstance(value, str):
             return value.lower() in ('true', 'yes', '1', 'on')
         return bool(value)
-    
-    def get_list(self, key: str, default: Optional[list] = None) -> list:
+
+    def get_list(self, key: str, default: list | None = None) -> list:
         """Get a list configuration value."""
         value = self.get(key, default)
         if value is None:
@@ -179,16 +179,16 @@ class Config:
         if not isinstance(value, list):
             return [value]
         return value
-    
-    def all(self) -> Dict[str, Any]:
+
+    def all(self) -> dict[str, Any]:
         """Return entire configuration dictionary."""
         return self._config.copy()
-    
+
     def reload(self) -> None:
         """Reload configuration from file."""
         self._config = {}
         self._load_config()
-    
+
     def __repr__(self) -> str:
         return f"Config(paths={len(self._config)} sections)"
 

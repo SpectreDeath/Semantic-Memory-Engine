@@ -1,13 +1,8 @@
-import os
+import hashlib
 import json
 import logging
-import math
-import hashlib
-import statistics
-import re
-from collections import Counter
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any
 
 # NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
 try:
@@ -30,8 +25,8 @@ class AdversarialPatternBreaker(BasePlugin):
     Detects 'Linguistic Camouflage' - artificial entropy smoothing used to hide synthetic origin.
     Flags 'High-Confidence Deception' in the on_ingestion pipeline.
     """
-    
-    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+
+    def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
         # Initialize Logic Anomaly Detector
         self.anomaly_detector = LogicAnomalyDetector()
@@ -58,7 +53,7 @@ class AdversarialPatternBreaker(BasePlugin):
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Failed to init DB table: {e}")
 
-    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
         Adversarial Pattern Breaker analysis for on_ingestion pipeline.
         Detects linguistic camouflage and flags High-Confidence Deception.
@@ -68,30 +63,30 @@ class AdversarialPatternBreaker(BasePlugin):
 
         # Perform linguistic camouflage detection
         camouflage_result = self.anomaly_detector.detect_linguistic_camouflage(raw_data)
-        
+
         # Extract key results
         camouflage_detected = camouflage_result.get("camouflage_detected", False)
         deception_confidence = camouflage_result.get("deception_confidence", 0.0)
         high_confidence_deception = camouflage_result.get("high_confidence_deception", False)
-        
+
         # Log significant findings
         if camouflage_detected:
             confidence_level = "HIGH" if high_confidence_deception else "MODERATE"
             logger.warning(f"[{self.plugin_id}] LINGUISTIC CAMOUFLAGE DETECTED - "
                           f"Confidence: {deception_confidence:.2%} ({confidence_level})")
-        
+
         if high_confidence_deception:
             logger.critical(f"[{self.plugin_id}] *** HIGH-CONFIDENCE DECEPTION DETECTED *** "
                            f"Deception Confidence: {deception_confidence:.2%}")
-        
+
         # Store result in database if significant
         if camouflage_detected:
             await self._store_adversarial_pattern(
-                raw_data, 
+                raw_data,
                 camouflage_result,
                 metadata.get("source_id", "INGESTION_PIPELINE")
             )
-        
+
         # Return analysis results
         return {
             "status": "analyzed",
@@ -120,7 +115,7 @@ class AdversarialPatternBreaker(BasePlugin):
                 "verdict": result.get("verdict", "HUMAN_SIGNATURE")
             }, indent=2)
         except Exception as e:
-            return json.dumps({"error": f"Pattern Breaker analysis failed: {str(e)}"})
+            return json.dumps({"error": f"Pattern Breaker analysis failed: {e!s}"})
 
     async def get_adversarial_statistics(self) -> str:
         """
@@ -129,10 +124,10 @@ class AdversarialPatternBreaker(BasePlugin):
         try:
             # Count total patterns detected
             total_patterns = self.dal.get_count("nexus_adversarial_patterns")
-            
+
             # Count high confidence deceptions
             high_confidence_count = self.dal.get_count("nexus_adversarial_patterns", {"high_confidence_deception": 1})
-            
+
             # Get recent patterns
             recent_patterns = self.dal.get_recent(
                 "nexus_adversarial_patterns",
@@ -140,7 +135,7 @@ class AdversarialPatternBreaker(BasePlugin):
                 "timestamp",
                 10
             )
-            
+
             stats = {
                 "total_patterns_detected": total_patterns,
                 "high_confidence_deceptions": high_confidence_count,
@@ -155,11 +150,11 @@ class AdversarialPatternBreaker(BasePlugin):
                     for pattern in recent_patterns
                 ]
             }
-            
+
             return json.dumps(stats, indent=2)
-            
+
         except Exception as e:
-            return json.dumps({"error": f"Failed to get adversarial statistics: {str(e)}"})
+            return json.dumps({"error": f"Failed to get adversarial statistics: {e!s}"})
 
     async def compare_text_patterns(self, text_a: str, text_b: str) -> str:
         """
@@ -168,15 +163,15 @@ class AdversarialPatternBreaker(BasePlugin):
         try:
             result_a = self.anomaly_detector.detect_linguistic_camouflage(text_a)
             result_b = self.anomaly_detector.detect_linguistic_camouflage(text_b)
-            
+
             # Compare deception confidences
             confidence_a = result_a.get("deception_confidence", 0.0)
             confidence_b = result_b.get("deception_confidence", 0.0)
-            
+
             # Compare analysis patterns
             analysis_a = result_a.get("analysis", {})
             analysis_b = result_b.get("analysis", {})
-            
+
             comparison = {
                 "text_a": {
                     "camouflage_detected": result_a.get("camouflage_detected", False),
@@ -195,20 +190,20 @@ class AdversarialPatternBreaker(BasePlugin):
                     "similarity_score": self._calculate_pattern_similarity(analysis_a, analysis_b)
                 }
             }
-            
-            return json.dumps(comparison, indent=2)
-            
-        except Exception as e:
-            return json.dumps({"error": f"Text pattern comparison failed: {str(e)}"})
 
-    async def _store_adversarial_pattern(self, text: str, analysis_result: Dict[str, Any], source_id: str):
+            return json.dumps(comparison, indent=2)
+
+        except Exception as e:
+            return json.dumps({"error": f"Text pattern comparison failed: {e!s}"})
+
+    async def _store_adversarial_pattern(self, text: str, analysis_result: dict[str, Any], source_id: str):
         """
         Store adversarial pattern detection result in the database.
         """
         try:
             timestamp = datetime.now().isoformat()
             text_hash = hashlib.sha256(text.encode()).hexdigest()
-            
+
             data = {
                 "text_hash": text_hash,
                 "text_sample": text[:5000],
@@ -219,52 +214,52 @@ class AdversarialPatternBreaker(BasePlugin):
                 "timestamp": timestamp,
                 "source_id": source_id
             }
-            
+
             self.dal.insert_record("nexus_adversarial_patterns", data)
-            
+
             logger.info(f"[{self.plugin_id}] Stored adversarial pattern: {text_hash[:8]}... (Confidence: {analysis_result.get('deception_confidence', 0):.2%})")
-            
+
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Failed to store adversarial pattern: {e}")
 
-    def _calculate_pattern_similarity(self, analysis_a: Dict[str, Any], analysis_b: Dict[str, Any]) -> float:
+    def _calculate_pattern_similarity(self, analysis_a: dict[str, Any], analysis_b: dict[str, Any]) -> float:
         """
         Calculate similarity score between two pattern analyses.
         """
         try:
             # Compare key metrics
             scores = []
-            
+
             # Compare entropy smoothing scores
             if "entropy_smoothing" in analysis_a and "entropy_smoothing" in analysis_b:
                 score_a = analysis_a["entropy_smoothing"].get("smoothing_score", 0.0)
                 score_b = analysis_b["entropy_smoothing"].get("smoothing_score", 0.0)
                 scores.append(1.0 - abs(score_a - score_b))
-            
+
             # Compare uniformity scores
             if "pattern_uniformity" in analysis_a and "pattern_uniformity" in analysis_b:
                 score_a = analysis_a["pattern_uniformity"].get("uniformity_score", 0.0)
                 score_b = analysis_b["pattern_uniformity"].get("uniformity_score", 0.0)
                 scores.append(1.0 - abs(score_a - score_b))
-            
+
             # Compare lexical smoothing scores
             if "lexical_smoothing" in analysis_a and "lexical_smoothing" in analysis_b:
                 score_a = analysis_a["lexical_smoothing"].get("lexical_smoothing_score", 0.0)
                 score_b = analysis_b["lexical_smoothing"].get("lexical_smoothing_score", 0.0)
                 scores.append(1.0 - abs(score_a - score_b))
-            
+
             # Return average similarity
             return round(sum(scores) / len(scores), 4) if scores else 0.0
-            
+
         except Exception:
             return 0.0
 
 
-def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
+def create_plugin(manifest: dict[str, Any], nexus_api: Any):
     """Factory function to create and return an AdversarialPatternBreaker instance."""
     return AdversarialPatternBreaker(manifest, nexus_api)
 
 
-def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+def register_extension(manifest: dict[str, Any], nexus_api: Any):
     """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
     return create_plugin(manifest, nexus_api)

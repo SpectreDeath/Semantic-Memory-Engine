@@ -3,14 +3,11 @@ SME OCR Service - FastAPI Application.
 Main entry point for the OCR microservice.
 """
 
-import io
 import logging
 import time
 import uuid
-from typing import Optional
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
 
 from app.ocr_engine import get_ocr_engine
 from app.pdf_processor import PdfProcessor
@@ -37,7 +34,7 @@ app = FastAPI(
 )
 
 # Initialize processors (lazy-loaded)
-_pdf_processor: Optional[PdfProcessor] = None
+_pdf_processor: PdfProcessor | None = None
 
 
 def get_pdf_processor() -> PdfProcessor:

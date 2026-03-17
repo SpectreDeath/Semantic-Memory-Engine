@@ -9,7 +9,7 @@ import logging
 import os
 import time
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 try:
     import psutil

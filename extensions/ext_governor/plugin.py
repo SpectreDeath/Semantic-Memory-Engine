@@ -1,20 +1,18 @@
-import os
+import asyncio
 import json
 import logging
-import asyncio
 import threading
 import time
-import psutil
-from typing import Dict, Any, List, Optional, Callable
-from datetime import datetime
 from collections import deque
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any
+
+import psutil
 
 # NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
 from src.core.plugin_base import BasePlugin
-from src.utils.error_handling import ErrorHandler, create_error_response, OperationContext
-from src.utils.performance import get_performance_monitor, cache_result, LRUCache
 
 logger = logging.getLogger("LawnmowerMan.Governor")
 
@@ -36,13 +34,13 @@ class IngestionTask:
     """Represents a task in the ingestion pipeline."""
     task_id: str
     raw_data: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     timestamp: datetime
     status: str = "pending"  # pending, running, completed, delayed
 
 class ResourceMonitor:
     """Monitors system resources, particularly VRAM usage."""
-    
+
     def __init__(self, vram_threshold_gb: float = 5.8):
         self.vram_threshold_gb = vram_threshold_gb
         self.monitoring = False
@@ -50,7 +48,7 @@ class ResourceMonitor:
         self.current_vram_usage = 0.0
         self.vram_history = deque(maxlen=100)  # Keep last 100 readings
         self._lock = threading.Lock()
-        
+
     def start_monitoring(self):
         """Start background VRAM monitoring."""
         if not self.monitoring:
@@ -62,16 +60,16 @@ class ResourceMonitor:
                     pynvml.nvmlInit()
                 except Exception as e:
                     logger.warning(f"[Governor] NVML init failed: {e}")
-                
+
         logger.info(f"[Governor] Resource monitoring started (VRAM threshold: {self.vram_threshold_gb}GB)")
-    
+
     def stop_monitoring(self):
         """Stop background VRAM monitoring."""
         self.monitoring = False
         if self.monitor_thread:
             self.monitor_thread.join(timeout=2.0)
         logger.info("[Governor] Resource monitoring stopped")
-    
+
     def _monitor_loop(self):
         """Background monitoring loop."""
         while self.monitoring:
@@ -83,17 +81,17 @@ class ResourceMonitor:
                         'timestamp': datetime.now(),
                         'vram_usage': vram_usage
                     })
-                
+
                 # Log significant changes
                 if vram_usage > self.vram_threshold_gb:
                     logger.warning(f"[Governor] VRAM usage critical: {vram_usage:.2f}GB > {self.vram_threshold_gb}GB")
-                
+
                 time.sleep(1.0)  # Monitor every second
-                
+
             except Exception as e:
                 logger.error(f"[Governor] Error in monitoring loop: {e}")
                 time.sleep(2.0)
-    
+
     def get_vram_usage_gb(self) -> float:
         """Get current VRAM usage in GB."""
         try:
@@ -104,35 +102,35 @@ class ResourceMonitor:
                     return info.used / (1024 * 1024 * 1024)  # Convert bytes to GB
                 except Exception as e:
                     logger.debug(f"[Governor] GPU query failed: {e}")
-            
+
             # Fallback to CPU memory
             return psutil.virtual_memory().used / (1024**3)
         except Exception as e:
             logger.warning(f"[Governor] Could not get VRAM usage: {e}")
             return 0.0
-    
+
     def get_vram_state(self) -> VRAMState:
         """Get current VRAM state based on usage."""
         with self._lock:
             current_usage = self.current_vram_usage
-        
+
         if current_usage >= self.vram_threshold_gb:
             return VRAMState.CRITICAL
         elif current_usage >= (self.vram_threshold_gb * 0.8):
             return VRAMState.HIGH
         else:
             return VRAMState.NORMAL
-    
+
     def should_delay_ingestion(self) -> bool:
         """Check if ingestion should be delayed due to high VRAM usage."""
         return self.get_vram_state() in [VRAMState.HIGH, VRAMState.CRITICAL]
-    
-    def get_status_info(self) -> Dict[str, Any]:
+
+    def get_status_info(self) -> dict[str, Any]:
         """Get current resource status information."""
         with self._lock:
             current_usage = self.current_vram_usage
             recent_history = list(self.vram_history)[-10:] if self.vram_history else []
-        
+
         return {
             "vram_usage_gb": round(current_usage, 2),
             "vram_threshold_gb": self.vram_threshold_gb,
@@ -153,28 +151,28 @@ class Governor(BasePlugin):
     Manages on_ingestion pipeline execution with resource monitoring and VRAM usage control.
     Wraps SDA, APB, and LogicAuditor in a serial queue with resource monitoring.
     """
-    
-    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+
+    def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
-        
+
         # Configuration
         self.vram_threshold_gb = 5.8
         self.cache_clear_delay_seconds = 30
         self.max_queue_size = 100
-        
+
         # Components to manage
         self.sda_plugin = None
         self.apb_plugin = None
         self.logic_auditor_plugin = None
-        
+
         # Queue management
         self.ingestion_queue = asyncio.Queue(maxsize=self.max_queue_size)
         self.processing_task = None
         self.shutdown_event = asyncio.Event()
-        
+
         # Resource monitoring
         self.resource_monitor = ResourceMonitor(self.vram_threshold_gb)
-        
+
         # Statistics
         self.stats = {
             "total_tasks": 0,
@@ -183,7 +181,7 @@ class Governor(BasePlugin):
             "failed_tasks": 0,
             "avg_processing_time": 0.0
         }
-        
+
         logger.info(f"[{self.plugin_id}] Governor initialized with VRAM threshold: {self.vram_threshold_gb}GB")
 
     async def on_startup(self):
@@ -193,10 +191,10 @@ class Governor(BasePlugin):
         try:
             # Initialize resource monitoring
             self.resource_monitor.start_monitoring()
-            
+
             # Start the processing task
             self.processing_task = asyncio.create_task(self._processing_loop())
-            
+
             # Initialize database table for governor statistics
             sql = """
                 CREATE TABLE IF NOT EXISTS nexus_governor_stats (
@@ -212,9 +210,9 @@ class Governor(BasePlugin):
                 )
             """
             self.nexus.nexus.execute(sql)
-            
+
             logger.info(f"[{self.plugin_id}] Governor started successfully")
-            
+
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Failed to start Governor: {e}")
 
@@ -224,24 +222,24 @@ class Governor(BasePlugin):
         """
         try:
             self.shutdown_event.set()
-            
+
             if self.processing_task:
                 await self.processing_task
-            
+
             self.resource_monitor.stop_monitoring()
-            
+
             logger.info(f"[{self.plugin_id}] Governor shutdown complete")
-            
+
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
 
-    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
         Governor-managed on_ingestion pipeline.
         Wraps SDA, APB, and LogicAuditor in a serial queue with resource monitoring.
         """
         task_id = f"task_{int(time.time() * 1000)}"
-        
+
         # Create ingestion task
         task = IngestionTask(
             task_id=task_id,
@@ -249,14 +247,14 @@ class Governor(BasePlugin):
             metadata=metadata,
             timestamp=datetime.now()
         )
-        
+
         try:
             # Add to queue (will block if queue is full)
             await self.ingestion_queue.put(task)
             self.stats["total_tasks"] += 1
-            
+
             logger.info(f"[{self.plugin_id}] Task {task_id} queued (Queue size: {self.ingestion_queue.qsize()})")
-            
+
             # Return immediate response indicating task is queued
             return {
                 "status": "queued",
@@ -264,7 +262,7 @@ class Governor(BasePlugin):
                 "queue_position": self.ingestion_queue.qsize(),
                 "resource_status": self.resource_monitor.get_status_info()
             }
-            
+
         except asyncio.QueueFull:
             logger.warning(f"[{self.plugin_id}] Queue full, rejecting task {task_id}")
             return {
@@ -294,7 +292,7 @@ class Governor(BasePlugin):
             status = self.resource_monitor.get_status_info()
             return json.dumps(status, indent=2)
         except Exception as e:
-            return json.dumps({"error": f"Failed to get resource status: {str(e)}"})
+            return json.dumps({"error": f"Failed to get resource status: {e!s}"})
 
     async def get_governor_stats(self) -> str:
         """Get Governor statistics."""
@@ -311,7 +309,7 @@ class Governor(BasePlugin):
             }
             return json.dumps(stats, indent=2)
         except Exception as e:
-            return json.dumps({"error": f"Failed to get governor stats: {str(e)}"})
+            return json.dumps({"error": f"Failed to get governor stats: {e!s}"})
 
     async def get_queue_status(self) -> str:
         """Get current queue status."""
@@ -324,7 +322,7 @@ class Governor(BasePlugin):
             }
             return json.dumps(queue_info, indent=2)
         except Exception as e:
-            return json.dumps({"error": f"Failed to get queue status: {str(e)}"})
+            return json.dumps({"error": f"Failed to get queue status: {e!s}"})
 
     async def set_vram_threshold(self, threshold_gb: float) -> str:
         """Set VRAM threshold for delaying ingestion."""
@@ -338,7 +336,7 @@ class Governor(BasePlugin):
                 "message": f"VRAM threshold set to {val}GB"
             }, indent=2)
         except Exception as e:
-            return json.dumps({"error": f"Failed to set VRAM threshold: {str(e)}"})
+            return json.dumps({"error": f"Failed to set VRAM threshold: {e!s}"})
 
     async def clear_queue(self) -> str:
         """Clear the ingestion queue."""
@@ -351,14 +349,14 @@ class Governor(BasePlugin):
                     cleared_count += 1
                 except asyncio.QueueEmpty:
                     break
-            
+
             return json.dumps({
                 "status": "success",
                 "cleared_tasks": cleared_count,
                 "message": f"Cleared {cleared_count} tasks from queue"
             }, indent=2)
         except Exception as e:
-            return json.dumps({"error": f"Failed to clear queue: {str(e)}"})
+            return json.dumps({"error": f"Failed to clear queue: {e!s}"})
 
     async def _processing_loop(self):
         """Main processing loop that handles tasks from the queue."""
@@ -369,23 +367,23 @@ class Governor(BasePlugin):
                     self.stats["delayed_tasks"] += 1
                     delay_seconds = self.cache_clear_delay_seconds
                     logger.info(f"[{self.plugin_id}] VRAM usage high, delaying next task for {delay_seconds}s")
-                    
+
                     # Wait for resource levels to drop or timeout
                     await asyncio.sleep(delay_seconds)
                     continue
-                
+
                 # Get next task from queue (with timeout)
                 try:
                     task = await asyncio.wait_for(
-                        self.ingestion_queue.get(), 
+                        self.ingestion_queue.get(),
                         timeout=1.0
                     )
                 except asyncio.TimeoutError:
                     continue  # No tasks available, continue loop
-                
+
                 # Process the task
                 await self._process_task(task)
-                
+
             except Exception as e:
                 logger.error(f"[{self.plugin_id}] Error in processing loop: {e}")
                 await asyncio.sleep(1.0)
@@ -394,38 +392,38 @@ class Governor(BasePlugin):
         """Process a single ingestion task through the pipeline."""
         start_time = time.time()
         task.status = "running"
-        
+
         try:
             logger.info(f"[{self.plugin_id}] Processing task {task.task_id}")
-            
+
             # Store task start in database
             await self._store_task_start(task)
-            
+
             # Execute the pipeline: SDA -> APB -> LogicAuditor
             results = await self._execute_pipeline(task.raw_data, task.metadata)
-            
+
             # Mark as completed
             task.status = "completed"
             self.stats["completed_tasks"] += 1
-            
+
             # Calculate processing time
             processing_time = time.time() - start_time
             self._update_avg_processing_time(processing_time)
-            
+
             # Store completion in database
             await self._store_task_completion(task, results, processing_time)
-            
+
             logger.info(f"[{self.plugin_id}] Task {task.task_id} completed in {processing_time:.2f}s")
-            
+
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Failed to process task {task.task_id}: {e}")
             task.status = "failed"
             self.stats["failed_tasks"] += 1
-            
+
             # Store failure in database
             await self._store_task_failure(task, str(e))
 
-    async def _execute_pipeline(self, raw_data: str, metadata: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_pipeline(self, raw_data: str, metadata: dict[str, Any]) -> dict[str, Any]:
         """Execute the SDA -> APB -> LogicAuditor pipeline."""
         pipeline_results = {
             "sda_result": None,
@@ -433,31 +431,31 @@ class Governor(BasePlugin):
             "logic_auditor_result": None,
             "pipeline_status": "completed"
         }
-        
+
         try:
             # 1. Execute SDA (Semantic Deception Analysis)
             if self.sda_plugin and hasattr(self.sda_plugin, 'on_ingestion'):
                 sda_result = await self.sda_plugin.on_ingestion(raw_data, metadata)
                 pipeline_results["sda_result"] = sda_result
                 logger.debug(f"[{self.plugin_id}] SDA completed: {sda_result.get('status', 'unknown')}")
-            
+
             # 2. Execute APB (Adversarial Pattern Breaker)
             if self.apb_plugin and hasattr(self.apb_plugin, 'on_ingestion'):
                 apb_result = await self.apb_plugin.on_ingestion(raw_data, metadata)
                 pipeline_results["apb_result"] = apb_result
                 logger.debug(f"[{self.plugin_id}] APB completed: {apb_result.get('status', 'unknown')}")
-            
+
             # 3. Execute LogicAuditor
             if self.logic_auditor_plugin and hasattr(self.logic_auditor_plugin, 'on_ingestion'):
                 logic_result = await self.logic_auditor_plugin.on_ingestion(raw_data, metadata)
                 pipeline_results["logic_auditor_result"] = logic_result
                 logger.debug(f"[{self.plugin_id}] LogicAuditor completed: {logic_result.get('status', 'unknown')}")
-            
+
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Pipeline execution failed: {e}")
             pipeline_results["pipeline_status"] = "failed"
             pipeline_results["error"] = str(e)
-        
+
         return pipeline_results
 
     async def _store_task_start(self, task: IngestionTask):
@@ -468,9 +466,9 @@ class Governor(BasePlugin):
                 (timestamp, vram_usage_gb, vram_state, queue_size, total_tasks, completed_tasks, delayed_tasks, failed_tasks)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """
-            
+
             status_info = self.resource_monitor.get_status_info()
-            
+
             self.nexus.nexus.execute(sql, (
                 task.timestamp.isoformat(),
                 status_info["vram_usage_gb"],
@@ -484,7 +482,7 @@ class Governor(BasePlugin):
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Failed to store task start: {e}")
 
-    async def _store_task_completion(self, task: IngestionTask, results: Dict[str, Any], processing_time: float):
+    async def _store_task_completion(self, task: IngestionTask, results: dict[str, Any], processing_time: float):
         """Store task completion information in database."""
         try:
             # Update the existing record with completion info
@@ -493,7 +491,7 @@ class Governor(BasePlugin):
                 SET processing_time = ?, pipeline_results = ?
                 WHERE timestamp = ?
             """
-            
+
             self.nexus.nexus.execute(sql, (
                 processing_time,
                 json.dumps(results),
@@ -510,7 +508,7 @@ class Governor(BasePlugin):
                 SET error_message = ?
                 WHERE timestamp = ?
             """
-            
+
             self.nexus.nexus.execute(sql, (
                 error,
                 task.timestamp.isoformat()
@@ -522,7 +520,7 @@ class Governor(BasePlugin):
         """Update the average processing time."""
         current_avg = self.stats["avg_processing_time"]
         completed = self.stats["completed_tasks"]
-        
+
         if completed == 1:
             self.stats["avg_processing_time"] = new_time
         else:
@@ -537,11 +535,11 @@ class Governor(BasePlugin):
         logger.info(f"[{self.plugin_id}] Registered plugins: SDA={sda_plugin is not None}, APB={apb_plugin is not None}, LogicAuditor={logic_auditor_plugin is not None}")
 
 
-def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
+def create_plugin(manifest: dict[str, Any], nexus_api: Any):
     """Factory function to create and return a Governor instance."""
     return Governor(manifest, nexus_api)
 
 
-def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+def register_extension(manifest: dict[str, Any], nexus_api: Any):
     """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
     return create_plugin(manifest, nexus_api)

@@ -1,10 +1,9 @@
-import sqlite3
-import os
-import threading
 import logging
+import os
+import sqlite3
+import threading
 from pathlib import Path
-from datetime import datetime
-from typing import List, Dict, Any, Optional
+from typing import Any
 
 logger = logging.getLogger("lawnmower.nexus")
 
@@ -27,7 +26,7 @@ class ForensicNexus:
     well when multiple Docker containers share the same file over a volume.
     """
 
-    def __init__(self, base_dir: Optional[str] = None):
+    def __init__(self, base_dir: str | None = None):
         # Prefer explicit arg → env var → project-relative default
         self.base_dir = (
             base_dir
@@ -116,7 +115,7 @@ class ForensicNexus:
             logger.error(f"Nexus Attach Error: {e}")
             raise
 
-    def query(self, sql: str, params: tuple = ()) -> List[Dict[str, Any]]:
+    def query(self, sql: str, params: tuple = ()) -> list[dict[str, Any]]:
         """Run a cross-database query and return results as dicts."""
         try:
             cursor = self.conn.cursor()
@@ -137,7 +136,7 @@ class ForensicNexus:
             self.conn.rollback()
             raise
 
-    def get_unified_forensic_feed(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_unified_forensic_feed(self, limit: int = 10) -> list[dict[str, Any]]:
         """
         Cross-DB JOIN example: Link forensic events to their source reliability.
         """
@@ -157,7 +156,7 @@ class ForensicNexus:
         """
         return self.query(sql, (limit,))
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Return the status of attached databases."""
         cursor = self.conn.cursor()
         cursor.execute("PRAGMA database_list")
@@ -170,11 +169,11 @@ class ForensicNexus:
 # ---------------------------------------------------------------------------
 # Thread-safe global singleton
 # ---------------------------------------------------------------------------
-_nexus: Optional[ForensicNexus] = None
+_nexus: ForensicNexus | None = None
 _nexus_lock = threading.Lock()
 
 
-def get_nexus(base_dir: Optional[str] = None) -> ForensicNexus:
+def get_nexus(base_dir: str | None = None) -> ForensicNexus:
     global _nexus
     with _nexus_lock:
         if _nexus is None:

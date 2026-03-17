@@ -20,17 +20,16 @@ This is your "forensic fingerprint" layer—useful for:
 import asyncio
 import json
 import logging
-import sqlite3
-import numpy as np
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
-from dataclasses import dataclass, asdict
-from scipy.spatial.distance import cosine
-from collections import Counter
 import re
-from nltk.tokenize import sent_tokenize, word_tokenize
+import sqlite3
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
+
 import nltk
+import numpy as np
+from nltk.tokenize import sent_tokenize, word_tokenize
+from scipy.spatial.distance import cosine
 
 # Download required NLTK data (newer versions use punkt_tab)
 try:
@@ -56,6 +55,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 from src.core.config import Config
+
 config = Config()
 DB_PATH = str(config.get_path('storage.base_dir') / "storage" / "centrifuge_db.sqlite")
 SCRIBE_DB_PATH = str(config.get_path('storage.base_dir') / "storage" / "scribe_profiles.sqlite")
@@ -75,7 +75,7 @@ ANOMALY_THRESHOLDS = {
 @dataclass
 class LinguisticFingerprint:
     """Complete linguistic profile of a writer."""
-    author_id: Optional[str] = None
+    author_id: str | None = None
     avg_sentence_length: float = 0.0
     sentence_length_std: float = 0.0
     avg_word_length: float = 0.0
@@ -84,9 +84,9 @@ class LinguisticFingerprint:
     passive_voice_ratio: float = 0.0
     active_voice_ratio: float = 0.0
     avg_clause_count: float = 0.0
-    punctuation_profile: Dict = None  # {',': 0.5, ';': 0.1, ...}
-    signal_weights: Dict = None  # {signal_id: weight, ...}
-    signal_vector: List[float] = None  # Normalized vector for cosine similarity
+    punctuation_profile: dict = None  # {',': 0.5, ';': 0.1, ...}
+    signal_weights: dict = None  # {signal_id: weight, ...}
+    signal_vector: list[float] = None  # Normalized vector for cosine similarity
     text_sample_count: int = 0
     created_at: str = ""
 
@@ -115,11 +115,11 @@ class AnomalyReport:
     """Stylistic anomaly detection report."""
     author_id: str
     author_name: str
-    anomalies_detected: List[str]
+    anomalies_detected: list[str]
     severity: str  # "Critical", "High", "Medium", "Low"
     confidence: float  # 0-100
-    baseline_profile: Dict
-    current_profile: Dict
+    baseline_profile: dict
+    current_profile: dict
     analysis_timestamp: str
 
 
@@ -139,18 +139,18 @@ class ScribeEngine:
         self.db_path = db_path
         self.centrifuge_path = centrifuge_path
         self.browser_config = None  # Placeholder for potential expansion
-        
+
         # Initialize databases
         self._ensure_scribe_tables()
         self._load_rhetoric_signals()
-        
+
         logger.info("🖋️ ScribeEngine initialized")
 
     # ========================================================================
     # TOOL 1: EXTRACT LINGUISTIC FINGERPRINT
     # ========================================================================
 
-    def extract_linguistic_fingerprint(self, text: str, author_id: Optional[str] = None) -> LinguisticFingerprint:
+    def extract_linguistic_fingerprint(self, text: str, author_id: str | None = None) -> LinguisticFingerprint:
         """
         Transform raw text into a numerical fingerprint vector.
         
@@ -227,7 +227,7 @@ class ScribeEngine:
             return fingerprint
 
         except Exception as e:
-            logger.error(f"❌ Fingerprint extraction failed: {str(e)}")
+            logger.error(f"❌ Fingerprint extraction failed: {e!s}")
             raise
 
     # ========================================================================
@@ -238,7 +238,7 @@ class ScribeEngine:
         self,
         unknown_fingerprint: LinguisticFingerprint,
         min_confidence: float = 50.0
-    ) -> List[AuthorshipMatch]:
+    ) -> list[AuthorshipMatch]:
         """
         Compare an unknown fingerprint against all known author profiles.
         
@@ -256,7 +256,7 @@ class ScribeEngine:
 
         try:
             known_profiles = self._get_all_author_profiles()
-            
+
             if not known_profiles:
                 logger.warning("⚠️ No known profiles in database")
                 return []
@@ -269,13 +269,13 @@ class ScribeEngine:
                     unknown_fingerprint.signal_vector,
                     profile['signal_vector']
                 )
-                
+
                 # Weighted metrics comparison
                 metrics_similarity = self._compare_linguistic_metrics(
                     unknown_fingerprint,
                     LinguisticFingerprint(**profile)
                 )
-                
+
                 # Composite score (70% signal + 30% metrics)
                 composite_score = (signal_similarity * 0.7) + (metrics_similarity * 0.3)
                 confidence = min(100.0, composite_score * 100)
@@ -305,10 +305,10 @@ class ScribeEngine:
             return matches
 
         except Exception as e:
-            logger.error(f"❌ Profile comparison failed: {str(e)}")
+            logger.error(f"❌ Profile comparison failed: {e!s}")
             raise
 
-    def get_stylo_attribution(self, text: str, corpus_path: Optional[str] = None) -> Dict[str, Any]:
+    def get_stylo_attribution(self, text: str, corpus_path: str | None = None) -> dict[str, Any]:
         """
         Performs secondary attribution using the R stylo package.
         
@@ -322,7 +322,7 @@ class ScribeEngine:
         try:
             from src.core.factory import ToolFactory
             stylo = ToolFactory.create_stylo_wrapper()
-            
+
             status = stylo.get_status()
             if not status["ready"]:
                 return {
@@ -334,10 +334,10 @@ class ScribeEngine:
                         "3. Run in terminal: pip install rpy2"
                     ]
                 }
-            
+
             if not corpus_path:
                 return {"status": "error", "reason": "No corpus path provided for Delta analysis"}
-            
+
             results = stylo.analyze_distance(text, corpus_path)
             return {
                 "status": "success",
@@ -356,7 +356,7 @@ class ScribeEngine:
         self,
         unknown_text: str,
         candidate_author_id: str
-    ) -> Tuple[float, Dict]:
+    ) -> tuple[float, dict]:
         """
         Calculate precise attribution probability for a specific author.
         
@@ -444,7 +444,7 @@ class ScribeEngine:
             return final_score, breakdown
 
         except Exception as e:
-            logger.error(f"❌ Attribution score calculation failed: {str(e)}")
+            logger.error(f"❌ Attribution score calculation failed: {e!s}")
             return 0.0, {"error": str(e)}
 
     # ========================================================================
@@ -455,7 +455,7 @@ class ScribeEngine:
         self,
         author_id: str,
         new_text: str
-    ) -> Optional[AnomalyReport]:
+    ) -> AnomalyReport | None:
         """
         Detect when a "known" author's style suddenly changes.
         
@@ -569,11 +569,11 @@ class ScribeEngine:
                 logger.info(f"🚨 Anomalies detected ({len(anomalies)} issues, {report.severity} severity)")
                 return report
 
-            logger.info(f"✅ No anomalies detected - style is consistent")
+            logger.info("✅ No anomalies detected - style is consistent")
             return None
 
         except Exception as e:
-            logger.error(f"❌ Anomaly detection failed: {str(e)}")
+            logger.error(f"❌ Anomaly detection failed: {e!s}")
             raise
 
     # ========================================================================
@@ -584,16 +584,16 @@ class ScribeEngine:
         """Calculates lexical diversity using Honoré's statistic."""
         words = word_tokenize(text.lower())
         words = [w for w in words if w.isalpha()]
-        
+
         if not words:
             return 0.0
-            
+
         N = len(words)
         V = len(set(words))
-        
+
         if V == 0 or N == 0:
             return 0.0
-        
+
         # Honoré's statistic: more accurate than simple TTR
         try:
             diversity = 100 * np.log(N) / (1 - (V / N))
@@ -605,39 +605,39 @@ class ScribeEngine:
         """Estimate passive voice ratio (simple heuristic)."""
         sentences = sent_tokenize(text)
         passive_count = 0
-        
+
         for sent in sentences:
             # Simple detection: "was/were" + past participle
             if re.search(r'\b(was|were|is|are|be|been|being)\s+\w+ed\b', sent, re.IGNORECASE):
                 passive_count += 1
-        
+
         return passive_count / len(sentences) if sentences else 0.0
 
-    def _count_clauses(self, sentences: List[str]) -> float:
+    def _count_clauses(self, sentences: list[str]) -> float:
         """Estimate average clause count per sentence."""
         clause_counts = []
-        
+
         for sent in sentences:
             # Count conjunctions as rough proxy for clauses
             conj_count = len(re.findall(r'\b(and|but|or|because|since|although|if|when|where)\b', sent, re.IGNORECASE))
             clause_counts.append(conj_count + 1)  # At least 1 main clause
-        
+
         return np.mean(clause_counts) if clause_counts else 1.0
 
-    def _analyze_punctuation(self, text: str) -> Dict[str, float]:
+    def _analyze_punctuation(self, text: str) -> dict[str, float]:
         """Extract punctuation usage patterns ("sparks")."""
         total_chars = len(text)
-        
+
         punct_chars = [',', '.', '!', '?', ';', ':', '"', "'", '-', '—', '…', '(', ')']
         profile = {}
-        
+
         for p in punct_chars:
             count = text.count(p)
             profile[p] = count / max(total_chars, 1)  # Normalize by text length
-        
+
         return profile
 
-    def _map_to_rhetoric_signals(self, text: str) -> Dict[str, float]:
+    def _map_to_rhetoric_signals(self, text: str) -> dict[str, float]:
         """
         Map text to the 6,734 rhetoric signals from the lexicon.
         
@@ -647,49 +647,49 @@ class ScribeEngine:
         signal_weights = {}
         words = word_tokenize(text.lower())
         words = [w for w in words if w.isalpha()]
-        
+
         # Load signal keywords from rhetoric signals
         signal_keywords = self._load_signal_keywords()
-        
+
         for signal_id, keywords in signal_keywords.items():
             # Count keyword hits
             hits = sum(1 for word in words if word in keywords)
             if hits > 0:
                 # Weight by frequency (normalized)
                 signal_weights[signal_id] = hits / len(words) if words else 0
-        
+
         return signal_weights
 
-    def _vectorize_signals(self, signal_weights: Dict[str, float]) -> List[float]:
+    def _vectorize_signals(self, signal_weights: dict[str, float]) -> list[float]:
         """Convert signal weights to normalized vector for cosine similarity."""
         if not signal_weights:
             return [0.0] * 100  # Default to 100-dim vector
-        
+
         # Create sorted vector from weights
         values = list(signal_weights.values())
         vector = np.array(values[:100])  # Use first 100 signals as primary
-        
+
         # Normalize to unit vector
         norm = np.linalg.norm(vector)
         if norm > 0:
             vector = vector / norm
-        
+
         return vector.tolist()
 
-    def _calculate_signal_similarity(self, vector1: List[float], vector2: List[float]) -> float:
+    def _calculate_signal_similarity(self, vector1: list[float], vector2: list[float]) -> float:
         """Calculate cosine similarity between two signal vectors."""
         if not vector1 or not vector2:
             return 0.0
-        
+
         v1 = np.array(vector1)
         v2 = np.array(vector2)
-        
+
         # Pad to same length
         if len(v1) < len(v2):
             v1 = np.pad(v1, (0, len(v2) - len(v1)))
         elif len(v2) < len(v1):
             v2 = np.pad(v2, (0, len(v1) - len(v2)))
-        
+
         # Cosine similarity (1 = identical, 0 = orthogonal)
         return 1 - cosine(v1, v2)
 
@@ -701,7 +701,7 @@ class ScribeEngine:
             (fp1.type_token_ratio, fp2.type_token_ratio),
             (fp1.passive_voice_ratio, fp2.passive_voice_ratio),
         ]
-        
+
         # Calculate normalized difference for each metric
         differences = []
         for m1, m2 in metrics:
@@ -713,21 +713,21 @@ class ScribeEngine:
                 # Relative difference (0-1, where 1 = identical)
                 rel_diff = abs(m1 - m2) / max(abs(m1), abs(m2))
                 differences.append(1.0 - min(rel_diff, 1.0))
-        
+
         return np.mean(differences) if differences else 0.0
 
-    def _compare_punctuation_profiles(self, p1: Dict, p2: Dict) -> float:
+    def _compare_punctuation_profiles(self, p1: dict, p2: dict) -> float:
         """Compare punctuation usage patterns."""
         if not p1 or not p2:
             return 0.5  # No data = neutral
-        
+
         all_punct = set(p1.keys()) | set(p2.keys())
         similarities = []
-        
+
         for p in all_punct:
             v1 = p1.get(p, 0)
             v2 = p2.get(p, 0)
-            
+
             if v1 == 0 and v2 == 0:
                 similarities.append(1.0)
             elif v1 == 0 or v2 == 0:
@@ -735,14 +735,14 @@ class ScribeEngine:
             else:
                 rel_diff = abs(v1 - v2) / max(v1, v2)
                 similarities.append(1.0 - min(rel_diff, 1.0))
-        
+
         return np.mean(similarities) if similarities else 0.5
 
     def _compare_lexical_diversity(self, ttr1: float, ttr2: float) -> float:
         """Compare lexical diversity (type-token ratio)."""
         if ttr1 == 0 or ttr2 == 0:
             return 0.5
-        
+
         rel_diff = abs(ttr1 - ttr2) / max(ttr1, ttr2)
         return 1.0 - min(rel_diff, 1.0)
 
@@ -751,29 +751,29 @@ class ScribeEngine:
         diff = abs(ratio1 - ratio2)
         return 1.0 - min(diff, 1.0)
 
-    def _calculate_signal_consistency_shift(self, baseline_signals: Dict, new_signals: Dict) -> float:
+    def _calculate_signal_consistency_shift(self, baseline_signals: dict, new_signals: dict) -> float:
         """Measure how much the signal distribution has changed."""
         if not baseline_signals or not new_signals:
             return 0.0
-        
+
         # Get top signals in baseline
         top_baseline = set(sorted(baseline_signals.items(), key=lambda x: x[1], reverse=True)[:50])
         top_baseline_ids = {s[0] for s in top_baseline}
-        
+
         # Check if top signals appear in new text
         overlap = sum(1 for sig_id in top_baseline_ids if sig_id in new_signals)
         shift = 1.0 - (overlap / len(top_baseline_ids)) if top_baseline_ids else 0.0
-        
+
         return shift
 
-    def _calculate_punctuation_shift(self, baseline_punct: Dict, new_punct: Dict) -> float:
+    def _calculate_punctuation_shift(self, baseline_punct: dict, new_punct: dict) -> float:
         """Measure changes in punctuation usage patterns."""
         shifts = []
-        
+
         for p in set(baseline_punct.keys()) | set(new_punct.keys()):
             b = baseline_punct.get(p, 0)
             n = new_punct.get(p, 0)
-            
+
             if b == 0 and n == 0:
                 continue
             elif b == 0 or n == 0:
@@ -781,7 +781,7 @@ class ScribeEngine:
             else:
                 shift = abs(b - n) / max(b, n)
                 shifts.append(shift)
-        
+
         return np.mean(shifts) if shifts else 0.0
 
     def _classify_match_strength(self, confidence: float) -> str:
@@ -819,12 +819,12 @@ class ScribeEngine:
         else:
             return "Low"
 
-    def _load_signal_keywords(self) -> Dict[str, set]:
+    def _load_signal_keywords(self) -> dict[str, set]:
         """Load signal-to-keyword mapping from Centrifuge DB."""
         # This would normally query the signals table
         # For now, return a basic mapping based on signal categories
         signal_keywords = {
-            "sanctity_1": {"holy", "sacred", "divine", "blessed", "sacred"},
+            "sanctity_1": {"holy", "sacred", "divine", "blessed"},
             "sanctity_2": {"pure", "clean", "unspoiled", "untainted"},
             "degradation_1": {"filthy", "dirty", "corrupt", "debased", "vile"},
             "care_1": {"compassion", "empathy", "kindness", "nurture", "support"},
@@ -962,7 +962,7 @@ class ScribeEngine:
         finally:
             conn.close()
 
-    def _get_author_profile(self, author_id: str) -> Optional[Dict]:
+    def _get_author_profile(self, author_id: str) -> dict | None:
         """Retrieve an author profile from database."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -993,7 +993,7 @@ class ScribeEngine:
         finally:
             conn.close()
 
-    def _get_all_author_profiles(self) -> List[Dict]:
+    def _get_all_author_profiles(self) -> list[dict]:
         """Retrieve all author profiles."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -1025,7 +1025,7 @@ class ScribeEngine:
         finally:
             conn.close()
 
-    def save_attribution_result(self, unknown_text_hash: str, result: AuthorshipMatch, breakdown: Dict):
+    def save_attribution_result(self, unknown_text_hash: str, result: AuthorshipMatch, breakdown: dict):
         """Save attribution result to history."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -1082,7 +1082,7 @@ class ScribeEngine:
     # GET STATISTICS
     # ========================================================================
 
-    def get_scribe_stats(self) -> Dict:
+    def get_scribe_stats(self) -> dict:
         """Return Scribe system statistics."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -1117,7 +1117,7 @@ class ScribeEngine:
 # MCP TOOL FUNCTIONS (Exposed to SimpleMem)
 # ============================================================================
 
-def extract_linguistic_fingerprint_tool(text: str, author_id: Optional[str] = None) -> Dict:
+def extract_linguistic_fingerprint_tool(text: str, author_id: str | None = None) -> dict:
     """
     MCP Tool: Extract linguistic fingerprint from text.
     
@@ -1125,7 +1125,7 @@ def extract_linguistic_fingerprint_tool(text: str, author_id: Optional[str] = No
     """
     scribe = ScribeEngine()
     fingerprint = scribe.extract_linguistic_fingerprint(text, author_id)
-    
+
     return {
         "status": "success",
         "author_id": fingerprint.author_id,
@@ -1145,7 +1145,7 @@ def extract_linguistic_fingerprint_tool(text: str, author_id: Optional[str] = No
     }
 
 
-def compare_to_profiles_tool(unknown_text: str, min_confidence: float = 50.0) -> Dict:
+def compare_to_profiles_tool(unknown_text: str, min_confidence: float = 50.0) -> dict:
     """
     MCP Tool: Compare unknown text against all known author profiles.
     
@@ -1154,7 +1154,7 @@ def compare_to_profiles_tool(unknown_text: str, min_confidence: float = 50.0) ->
     scribe = ScribeEngine()
     fingerprint = scribe.extract_linguistic_fingerprint(unknown_text)
     matches = scribe.compare_to_profiles(fingerprint, min_confidence)
-    
+
     return {
         "status": "success",
         "matches_found": len(matches),
@@ -1171,7 +1171,7 @@ def compare_to_profiles_tool(unknown_text: str, min_confidence: float = 50.0) ->
     }
 
 
-def calculate_attribution_score_tool(unknown_text: str, candidate_author_id: str) -> Dict:
+def calculate_attribution_score_tool(unknown_text: str, candidate_author_id: str) -> dict:
     """
     MCP Tool: Calculate precise attribution probability for a specific author.
     
@@ -1179,7 +1179,7 @@ def calculate_attribution_score_tool(unknown_text: str, candidate_author_id: str
     """
     scribe = ScribeEngine()
     score, breakdown = scribe.calculate_attribution_score(unknown_text, candidate_author_id)
-    
+
     return {
         "status": "success",
         "candidate_author_id": candidate_author_id,
@@ -1195,7 +1195,7 @@ def calculate_attribution_score_tool(unknown_text: str, candidate_author_id: str
     }
 
 
-def identify_stylistic_anomalies_tool(author_id: str, new_text: str) -> Dict:
+def identify_stylistic_anomalies_tool(author_id: str, new_text: str) -> dict:
     """
     MCP Tool: Detect stylistic anomalies (ghost-writing, account takeover, AI generation).
     
@@ -1203,7 +1203,7 @@ def identify_stylistic_anomalies_tool(author_id: str, new_text: str) -> Dict:
     """
     scribe = ScribeEngine()
     report = scribe.identify_stylistic_anomalies(author_id, new_text)
-    
+
     if not report:
         return {
             "status": "success",
@@ -1211,7 +1211,7 @@ def identify_stylistic_anomalies_tool(author_id: str, new_text: str) -> Dict:
             "anomalies_found": False,
             "message": "No stylistic anomalies detected - writing style is consistent"
         }
-    
+
     return {
         "status": "success",
         "author_id": author_id,
@@ -1223,7 +1223,7 @@ def identify_stylistic_anomalies_tool(author_id: str, new_text: str) -> Dict:
     }
 
 
-def get_scribe_stats_tool() -> Dict:
+def get_scribe_stats_tool() -> dict:
     """MCP Tool: Get Scribe system statistics."""
     scribe = ScribeEngine()
     return scribe.get_scribe_stats()
@@ -1250,7 +1250,7 @@ async def demo_scribe():
         communities. Furthermore, the statistical analysis thereof demonstrates 
         considerable consistency across multiple dimensions.
         """,
-        
+
         "author_casual": """
         So like, I was thinking about how people talk differently, you know? 
         And it's kinda wild how like, some folks are super formal and others are 
@@ -1316,7 +1316,7 @@ async def demo_scribe():
     right? And I'm like, why do people talk so formal? It's kinda weird if you 
     ask me. I mean, just say what you mean, you know?
     """
-    
+
     report = scribe.identify_stylistic_anomalies("author_academic", anomalous_text)
     if report:
         print(f"⚠️ ANOMALIES DETECTED ({report.severity} severity)")

@@ -1,10 +1,10 @@
 import hashlib
 import hmac
-import os
 import logging
+import os
 import threading
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +32,8 @@ class HardwareSecurity:
         self.key = hashlib.sha256(raw_seed.encode()).digest()
         self.device_id = "TPM_2.0_FS_MOCK"
         self.status = "HEALTHY"
-        self.alerts: List[Dict[str, Any]] = []
-        self._integrity_vault: Dict[str, str] = {}
+        self.alerts: list[dict[str, Any]] = []
+        self._integrity_vault: dict[str, str] = {}
 
     def sign_evidence(self, source_id: str, data_hash: str) -> str:
         """
@@ -70,7 +70,7 @@ class HardwareSecurity:
         self.alerts.append(alert)
         self.status = "ALERT_ACTIVE"
 
-    def get_telemetry(self) -> Dict[str, Any]:
+    def get_telemetry(self) -> dict[str, Any]:
         """Returns the hardware status and alert history."""
         return {
             "device_id": self.device_id,
@@ -82,7 +82,7 @@ class HardwareSecurity:
 
 
 # Thread-safe global singleton
-_hsm: Optional[HardwareSecurity] = None
+_hsm: HardwareSecurity | None = None
 _hsm_lock = threading.Lock()
 
 

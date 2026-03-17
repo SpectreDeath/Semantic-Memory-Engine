@@ -20,10 +20,10 @@ Usage:
 """
 
 import logging
-import os
-import json
 from pathlib import Path
+
 from markitdown import MarkItDown
+
 from src.core.redactor import Redactor
 
 # Configure logging

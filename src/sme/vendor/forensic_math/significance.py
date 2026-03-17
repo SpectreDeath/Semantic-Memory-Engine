@@ -1,7 +1,8 @@
-import numpy as np
-from typing import List, Dict, Tuple
 
-def calculate_tfidf(tokenized_docs: List[List[str]]) -> Tuple[np.ndarray, List[str]]:
+import numpy as np
+
+
+def calculate_tfidf(tokenized_docs: list[list[str]]) -> tuple[np.ndarray, list[str]]:
     """
     Lightweight, vectorized TF-IDF calculator.
     

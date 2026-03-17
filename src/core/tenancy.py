@@ -7,10 +7,10 @@ Provides:
 - Middleware for tenant identification
 """
 
-from contextvars import ContextVar
-from typing import Optional, Any, Callable
-from functools import wraps
 import logging
+from collections.abc import Callable
+from contextvars import ContextVar
+from functools import wraps
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ _tenant_context: ContextVar[str] = ContextVar("tenant_id", default="default")
 
 class TenantContext:
     """Context manager and utilities for multi-tenancy."""
-    
+
     @staticmethod
     def set_tenant(tenant_id: str):
         """Set the current tenant_id for the context."""
@@ -60,7 +60,7 @@ def get_tenant_db_path(base_path: str) -> str:
     tenant = TenantContext.get_tenant()
     if tenant == "default":
         return base_path
-    
+
     # Insert tenant into file name before .db
     if base_path.endswith('.db'):
         return base_path.replace('.db', f'_{tenant}.db')

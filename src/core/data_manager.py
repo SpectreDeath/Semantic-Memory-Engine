@@ -24,17 +24,14 @@ Usage:
     available = dm.list_available_resources()
 """
 
-import os
 import logging
-from pathlib import Path
-from typing import List, Dict, Optional, Set
 from dataclasses import dataclass
-import json
+from pathlib import Path
 
 try:
     import nltk
+    from nltk.corpus import punkt, stopwords, wordnet
     from nltk.downloader import Downloader
-    from nltk.corpus import wordnet, stopwords, punkt
 except ImportError:
     nltk = None
     Downloader = None
@@ -62,7 +59,7 @@ class DataManager:
     Handles corpus discovery, installation, and caching for all
     linguistic analysis in SimpleMem.
     """
-    
+
     # Core required resources for SimpleMem functionality
     REQUIRED_RESOURCES = {
         'wordnet': 'WordNet lexical database',
@@ -72,7 +69,7 @@ class DataManager:
         'wordnet_ic': 'Information content for WordNet',
         'omw-1.4': 'Open Multilingual Wordnet',
     }
-    
+
     # Optional resources for enhanced functionality
     OPTIONAL_RESOURCES = {
         'verbnet': 'VerbNet lexicon',
@@ -82,27 +79,27 @@ class DataManager:
         'brown': 'Brown corpus',
         'universal_tagset': 'Universal POS tagset',
     }
-    
+
     def __init__(self):
         """Initialize DataManager."""
         if nltk is None:
             logger.error("NLTK not available. Install with: pip install nltk")
             self._available = False
             return
-        
+
         self._available = True
         self.config = Config()
         self.downloader = Downloader() if Downloader else None
         self._data_dir = self._get_data_directory()
-        self._cache: Dict[str, any] = {}
-        self._resource_cache: Dict[str, CorpusInfo] = {}
-        
+        self._cache: dict[str, any] = {}
+        self._resource_cache: dict[str, CorpusInfo] = {}
+
         logger.info(f"DataManager initialized with data directory: {self._data_dir}")
-    
+
     def is_available(self) -> bool:
         """Check if DataManager is available."""
         return self._available
-    
+
     def ensure_required_data(self, verbose: bool = True) -> bool:
         """
         Ensure all required NLTK data is installed.
@@ -118,24 +115,24 @@ class DataManager:
         if not self._available:
             logger.error("DataManager not available")
             return False
-        
+
         if verbose:
             logger.info("🔍 Checking required NLTK data...")
-        
+
         all_present = True
         missing = []
-        
+
         for resource_id, description in self.REQUIRED_RESOURCES.items():
             if not self._check_resource(resource_id):
                 missing.append(resource_id)
                 all_present = False
                 if verbose:
                     logger.warning(f"  ❌ Missing: {resource_id} - {description}")
-        
+
         if missing:
             if verbose:
                 logger.info(f"📥 Downloading {len(missing)} missing resources...")
-            
+
             for resource_id in missing:
                 try:
                     nltk.download(resource_id, quiet=not verbose)
@@ -144,13 +141,13 @@ class DataManager:
                 except Exception as e:
                     logger.error(f"  ❌ Failed to download {resource_id}: {e}")
                     all_present = False
-        
+
         if verbose and all_present:
             logger.info("✅ All required NLTK data is available")
-        
+
         return all_present
-    
-    def install_optional_resources(self, resources: Optional[List[str]] = None) -> bool:
+
+    def install_optional_resources(self, resources: list[str] | None = None) -> bool:
         """
         Install optional resources for enhanced functionality.
         
@@ -162,12 +159,12 @@ class DataManager:
         """
         if not self._available:
             return False
-        
+
         to_install = resources or list(self.OPTIONAL_RESOURCES.keys())
         success = True
-        
+
         logger.info(f"📥 Installing {len(to_install)} optional resources...")
-        
+
         for resource_id in to_install:
             try:
                 nltk.download(resource_id, quiet=True)
@@ -175,10 +172,10 @@ class DataManager:
             except Exception as e:
                 logger.warning(f"  ⚠️ Could not install {resource_id}: {e}")
                 success = False
-        
+
         return success
-    
-    def get_wordnet_lemmas(self, word: str) -> List[str]:
+
+    def get_wordnet_lemmas(self, word: str) -> list[str]:
         """
         Get all lemmas for a word from WordNet.
         
@@ -190,15 +187,15 @@ class DataManager:
         """
         if not self._available:
             return []
-        
+
         try:
-            return [lemma.name() for synset in wordnet.synsets(word) 
+            return [lemma.name() for synset in wordnet.synsets(word)
                     for lemma in synset.lemmas()]
         except Exception as e:
             logger.error(f"Error getting lemmas for '{word}': {e}")
             return []
-    
-    def get_stopwords(self, language: str = 'english') -> Set[str]:
+
+    def get_stopwords(self, language: str = 'english') -> set[str]:
         """
         Get stopwords for a language.
         
@@ -210,11 +207,11 @@ class DataManager:
         """
         if not self._available:
             return set()
-        
+
         cache_key = f"stopwords_{language}"
         if cache_key in self._cache:
             return self._cache[cache_key]
-        
+
         try:
             stop_set = set(stopwords.words(language))
             self._cache[cache_key] = stop_set
@@ -222,8 +219,8 @@ class DataManager:
         except Exception as e:
             logger.error(f"Error getting stopwords for '{language}': {e}")
             return set()
-    
-    def tokenize(self, text: str) -> List[str]:
+
+    def tokenize(self, text: str) -> list[str]:
         """
         Tokenize text using Punkt tokenizer.
         
@@ -235,15 +232,15 @@ class DataManager:
         """
         if not self._available:
             return text.split()
-        
+
         try:
             from nltk.tokenize import word_tokenize
             return word_tokenize(text)
         except Exception as e:
             logger.error(f"Error tokenizing text: {e}")
             return text.split()
-    
-    def sentence_tokenize(self, text: str) -> List[str]:
+
+    def sentence_tokenize(self, text: str) -> list[str]:
         """
         Split text into sentences using Punkt.
         
@@ -255,15 +252,15 @@ class DataManager:
         """
         if not self._available:
             return text.split('.')
-        
+
         try:
             from nltk.tokenize import sent_tokenize
             return sent_tokenize(text)
         except Exception as e:
             logger.error(f"Error sentence tokenizing: {e}")
             return text.split('.')
-    
-    def list_available_resources(self) -> Dict[str, List[CorpusInfo]]:
+
+    def list_available_resources(self) -> dict[str, list[CorpusInfo]]:
         """
         List all available NLTK resources.
         
@@ -272,7 +269,7 @@ class DataManager:
         """
         if not self._available:
             return {}
-        
+
         required_info = [
             CorpusInfo(
                 name=desc,
@@ -284,7 +281,7 @@ class DataManager:
             )
             for res_id, desc in self.REQUIRED_RESOURCES.items()
         ]
-        
+
         optional_info = [
             CorpusInfo(
                 name=desc,
@@ -296,13 +293,13 @@ class DataManager:
             )
             for res_id, desc in self.OPTIONAL_RESOURCES.items()
         ]
-        
+
         return {
             'required': required_info,
             'optional': optional_info,
         }
-    
-    def health_check(self) -> Dict[str, bool]:
+
+    def health_check(self) -> dict[str, bool]:
         """
         Check health of all required resources.
         
@@ -311,48 +308,48 @@ class DataManager:
         """
         if not self._available:
             return {}
-        
+
         health = {}
         for resource_id in self.REQUIRED_RESOURCES.keys():
             health[resource_id] = self._check_resource(resource_id)
-        
+
         return health
-    
+
     def print_status(self):
         """Print status of all resources."""
         if not self._available:
             print("❌ DataManager not available")
             return
-        
+
         print("\n" + "="*70)
         print("📊 NLTK Data Manager Status")
         print("="*70)
-        
+
         print("\n✅ Required Resources:")
         for resource_id, desc in self.REQUIRED_RESOURCES.items():
             status = "✅" if self._check_resource(resource_id) else "❌"
             print(f"  {status} {resource_id:30} - {desc}")
-        
+
         print("\n⭐ Optional Resources:")
         for resource_id, desc in self.OPTIONAL_RESOURCES.items():
             status = "✅" if self._check_resource(resource_id) else "⭐"
             print(f"  {status} {resource_id:30} - {desc}")
-        
+
         print("\n" + "="*70 + "\n")
-    
+
     def clear_cache(self):
         """Clear internal cache."""
         self._cache.clear()
         self._resource_cache.clear()
         logger.info("DataManager cache cleared")
-    
+
     # Private helper methods
-    
+
     def _check_resource(self, resource_id: str) -> bool:
         """Check if a resource is installed."""
         if not self._available:
             return False
-        
+
         try:
             # Try to load the resource
             if resource_id == 'wordnet':
@@ -362,15 +359,14 @@ class DataManager:
             elif resource_id == 'punkt':
                 from nltk.tokenize import word_tokenize
                 _ = word_tokenize('test')
-            else:
-                # Generic check via downloader
-                if self.downloader:
-                    return self.downloader.is_installed(resource_id)
-            
+            # Generic check via downloader
+            elif self.downloader:
+                return self.downloader.is_installed(resource_id)
+
             return True
         except Exception:
             return False
-    
+
     def _get_data_directory(self) -> Path:
         """Get NLTK data directory."""
         if nltk:
@@ -381,10 +377,10 @@ class DataManager:
                     return Path(data_dir)
             except Exception:
                 pass
-            
+
             # Fall back to NLTK defaults
             if nltk.data.path:
                 return Path(nltk.data.path[0])
-        
+
         # Final fallback
         return Path.home() / 'nltk_data'

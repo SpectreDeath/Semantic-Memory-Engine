@@ -6,14 +6,15 @@ Hooks into task execution to detect calls to os.system, shutil.copy, or pickle.d
 in hidden directories.
 """
 
+import functools
+import logging
 import os
 import sys
-import logging
-import functools
 import threading
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set
+from collections.abc import Callable
 from contextlib import contextmanager
+from pathlib import Path
+from typing import Any
 
 # Configure logging for the ghost trap
 logger = logging.getLogger('ghost_trap.persistence_monitor')
@@ -33,17 +34,17 @@ logger.addHandler(ghost_trap_handler)
 
 class GhostTrapMonitor:
     """Monitors for potential self-replication events in task execution."""
-    
+
     def __init__(self):
-        self._original_functions: Dict[str, Callable] = {}
+        self._original_functions: dict[str, Callable] = {}
         self._is_monitoring = False
-        self._hidden_directories: Set[str] = self._get_hidden_directories()
+        self._hidden_directories: set[str] = self._get_hidden_directories()
         self._thread_local = threading.local()
-        
-    def _get_hidden_directories(self) -> Set[str]:
+
+    def _get_hidden_directories(self) -> set[str]:
         """Get common hidden directories where self-replication might occur."""
         hidden_dirs = set()
-        
+
         # Common hidden directories on different platforms
         if sys.platform == 'win32':
             appdata = os.getenv('APPDATA', '')
@@ -62,31 +63,31 @@ class GhostTrapMonitor:
                 '/tmp',
                 '/var/tmp'
             ])
-        
+
         return hidden_dirs
-    
+
     def _is_hidden_directory(self, path: str) -> bool:
         """Check if a path is in a hidden directory."""
         if not path:
             return False
-            
+
         path_lower = os.path.normpath(path).lower()
-        
+
         # Check if path contains any of our hidden directories
         for hidden_dir in self._hidden_directories:
             if hidden_dir in path_lower:
                 return True
-        
+
         # Also check for dot-prefixed directories
         path_parts = Path(path).parts
         for part in path_parts:
             if part.startswith('.') and len(part) > 1:  # Exclude '.' and '..'
                 return True
-                
+
         return False
-    
-    def _log_ghost_event(self, function_name: str, args: tuple, kwargs: dict, 
-                        target_path: Optional[str] = None):
+
+    def _log_ghost_event(self, function_name: str, args: tuple, kwargs: dict,
+                        target_path: str | None = None):
         """Log a potential self-replication event."""
         event_details = {
             'function': function_name,
@@ -96,7 +97,7 @@ class GhostTrapMonitor:
             'hidden_directory': self._is_hidden_directory(target_path) if target_path else False,
             'thread_id': threading.get_ident()
         }
-        
+
         message = (
             f"POTENTIAL SELF-REPLICATION EVENT - "
             f"Function: {function_name}, "
@@ -104,10 +105,10 @@ class GhostTrapMonitor:
             f"Hidden: {event_details['hidden_directory']}, "
             f"Thread: {event_details['thread_id']}"
         )
-        
+
         logger.warning(message)
         print(f"⚠️  GHOST TRAP ALERT: {message}")
-    
+
     def _wrap_os_system(self, original_func: Callable) -> Callable:
         """Wrap os.system to monitor for suspicious commands."""
         @functools.wraps(original_func)
@@ -116,10 +117,10 @@ class GhostTrapMonitor:
                 # Check if command might create files in hidden directories
                 if any(hidden_dir in command.lower() for hidden_dir in self._hidden_directories):
                     self._log_ghost_event('os.system', (command,) + args, kwargs, command)
-            
+
             return original_func(command, *args, **kwargs)
         return wrapper
-    
+
     def _wrap_shutil_copy(self, original_func: Callable) -> Callable:
         """Wrap shutil.copy to monitor file copying operations."""
         @functools.wraps(original_func)
@@ -127,10 +128,10 @@ class GhostTrapMonitor:
             if self._is_monitoring:
                 if self._is_hidden_directory(dst):
                     self._log_ghost_event('shutil.copy', (src, dst) + args, kwargs, dst)
-            
+
             return original_func(src, dst, *args, **kwargs)
         return wrapper
-    
+
     def _wrap_pickle_dump(self, original_func: Callable) -> Callable:
         """Wrap pickle.dump to monitor serialization operations."""
         @functools.wraps(original_func)
@@ -142,13 +143,13 @@ class GhostTrapMonitor:
                     target_path = file.name
                 elif isinstance(file, str):
                     target_path = file
-                
+
                 if target_path and self._is_hidden_directory(target_path):
                     self._log_ghost_event('pickle.dump', (obj, file) + args, kwargs, target_path)
-            
+
             return original_func(obj, file, *args, **kwargs)
         return wrapper
-    
+
     def _wrap_pickle_dumps(self, original_func: Callable) -> Callable:
         """Wrap pickle.dumps to monitor serialization operations."""
         @functools.wraps(original_func)
@@ -157,47 +158,47 @@ class GhostTrapMonitor:
                 # Check if this might be part of a larger operation
                 # We can't easily detect the target path for dumps, but we can log the call
                 self._log_ghost_event('pickle.dumps', (obj,) + args, kwargs)
-            
+
             return original_func(obj, *args, **kwargs)
         return wrapper
-    
+
     def start_monitoring(self):
         """Start monitoring for self-replication events."""
         if self._is_monitoring:
             return
-            
+
         self._is_monitoring = True
-        
+
         # Store original functions
         if hasattr(os, 'system') and 'os.system' not in self._original_functions:
             self._original_functions['os.system'] = os.system
             os.system = self._wrap_os_system(os.system)
-        
+
         if hasattr(sys.modules.get('shutil'), 'copy') and 'shutil.copy' not in self._original_functions:
             import shutil
             self._original_functions['shutil.copy'] = shutil.copy
             shutil.copy = self._wrap_shutil_copy(shutil.copy)
-        
+
         if hasattr(sys.modules.get('pickle'), 'dump') and 'pickle.dump' not in self._original_functions:
             import pickle
             self._original_functions['pickle.dump'] = pickle.dump
             pickle.dump = self._wrap_pickle_dump(pickle.dump)
-        
+
         if hasattr(sys.modules.get('pickle'), 'dumps') and 'pickle.dumps' not in self._original_functions:
             import pickle
             self._original_functions['pickle.dumps'] = pickle.dumps
             pickle.dumps = self._wrap_pickle_dumps(pickle.dumps)
-        
+
         logger.info("Ghost Trap Persistence Monitor started")
         print("🛡️  Ghost Trap Persistence Monitor activated")
-    
+
     def stop_monitoring(self):
         """Stop monitoring and restore original functions."""
         if not self._is_monitoring:
             return
-            
+
         self._is_monitoring = False
-        
+
         # Restore original functions
         for func_name, original_func in self._original_functions.items():
             if func_name == 'os.system':
@@ -211,11 +212,11 @@ class GhostTrapMonitor:
             elif func_name == 'pickle.dumps':
                 import pickle
                 pickle.dumps = original_func
-        
+
         self._original_functions.clear()
         logger.info("Ghost Trap Persistence Monitor stopped")
         print("🛡️  Ghost Trap Persistence Monitor deactivated")
-    
+
     @contextmanager
     def monitor_context(self):
         """Context manager for temporary monitoring."""
@@ -240,7 +241,7 @@ def hook_governor_task_execution(task_func: Callable, *args, **kwargs):
         return task_func(*args, **kwargs)
 
 
-def get_monitoring_status() -> Dict[str, Any]:
+def get_monitoring_status() -> dict[str, Any]:
     """Get current monitoring status."""
     return {
         'is_monitoring': ghost_monitor._is_monitoring,
@@ -250,4 +251,4 @@ def get_monitoring_status() -> Dict[str, Any]:
 
 
 # Export the hook function for the Governor to use
-__all__ = ['hook_governor_task_execution', 'ghost_monitor', 'get_monitoring_status']
+__all__ = ['get_monitoring_status', 'ghost_monitor', 'hook_governor_task_execution']

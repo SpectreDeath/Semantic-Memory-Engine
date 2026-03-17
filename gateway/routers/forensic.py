@@ -7,34 +7,32 @@ crawler, and scorer tools — plus the autonomous audit pipeline.
 
 import json
 import logging
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from gateway.routers.shared import (
     AuthorshipProRequest,
+    AutonomousAuditRequest,
     InfluenceRequest,
     JustifyRequest,
     WitnessStatementRequest,
-    AutonomousAuditRequest,
     make_safe_tool_call,
-    serialize_result,
 )
+from gateway.scripts.forensic_planner import ForensicPlanner
+from gateway.scripts.report_generator import ReportGenerator
 from gateway.tool_registry import (
+    EpistemicValidator,
+    ForensicBehaviorTool,
+    ForensicCrawlerTool,
+    ForensicEntropyTool,
+    ForensicFilesTool,
+    ForensicGraphTool,
+    ForensicMathTool,
+    ForensicScorerTool,
+    ForensicSignalTool,
+    InfluenceTool,
     ScribeAuthorshipTool,
     ScribeProTool,
-    InfluenceTool,
-    EpistemicValidator,
-    ForensicMathTool,
-    ForensicFilesTool,
-    ForensicBehaviorTool,
-    ForensicGraphTool,
-    ForensicSignalTool,
-    ForensicEntropyTool,
-    ForensicCrawlerTool,
-    ForensicScorerTool,
 )
-from gateway.scripts.report_generator import ReportGenerator
-from gateway.scripts.forensic_planner import ForensicPlanner
 
 logger = logging.getLogger("lawnmower.forensic")
 
@@ -135,6 +133,16 @@ def register(
         parameters={"p": "list", "q": "list"},
     )
     registry.add_tool(
+        "get_ego_triples", graph_tool,
+        description="Live WordNet-based discovery of an entity's semantic neighborhood.",
+        parameters={"entity_name": "str"},
+    )
+    registry.add_tool(
+        "detect_knowledge_gaps", graph_tool,
+        description="Identify missing conceptual relationships in the semantic memory.",
+        parameters={"central_concept": "str"},
+    )
+    registry.add_tool(
         "verify_file_signature", files_tool,
         description="Verify file integrity by checking magic numbers.",
         parameters={"file_path": "str"},
@@ -203,7 +211,7 @@ def register(
     def analyze_authorship(
         text: str,
         suspect_vector_id: str = None,
-        session_id: Optional[str] = None,
+        session_id: str | None = None,
     ) -> str:
         """
         Extract linguistic fingerprint for authorship attribution using Burrows' Delta.
@@ -222,7 +230,7 @@ def register(
 
     @mcp.tool()
     def analyze_authorship_pro(
-        request: AuthorshipProRequest, session_id: Optional[str] = None
+        request: AuthorshipProRequest, session_id: str | None = None
     ) -> str:
         """Advanced probabilistic forensic matching using faststylometry."""
         if isinstance(request, dict):
@@ -236,7 +244,7 @@ def register(
 
     @mcp.tool()
     def get_influence_score(
-        request: InfluenceRequest, session_id: Optional[str] = None
+        request: InfluenceRequest, session_id: str | None = None
     ) -> str:
         """Calculate graph centrality for an entity in the knowledge graph."""
         if isinstance(request, dict):
@@ -250,7 +258,7 @@ def register(
 
     @mcp.tool()
     def justify_claim(
-        request: JustifyRequest, session_id: Optional[str] = None
+        request: JustifyRequest, session_id: str | None = None
     ) -> str:
         """Perform an Epistemological Audit of a forensic claim."""
         if isinstance(request, dict):
@@ -264,7 +272,7 @@ def register(
 
     @mcp.tool()
     def generate_witness_statement(
-        request: WitnessStatementRequest, session_id: Optional[str] = None
+        request: WitnessStatementRequest, session_id: str | None = None
     ) -> str:
         """Generate a formal Digital Forensic Witness Statement (Markdown)."""
         if isinstance(request, dict):
@@ -279,7 +287,7 @@ def register(
 
     @mcp.tool()
     def autonomous_audit(
-        request: AutonomousAuditRequest, session_id: Optional[str] = None
+        request: AutonomousAuditRequest, session_id: str | None = None
     ) -> str:
         """Run an end-to-end automated forensic investigation."""
         logger.info(f"autonomous_audit called for case: {request.case_id}")
@@ -299,9 +307,9 @@ def register(
 
     @mcp.tool()
     def calculate_cosine_similarity(
-        freq_dict_1: Dict[str, float],
-        freq_dict_2: Dict[str, float],
-        session_id: Optional[str] = None,
+        freq_dict_1: dict[str, float],
+        freq_dict_2: dict[str, float],
+        session_id: str | None = None,
     ) -> str:
         """Vectorized cosine similarity comparison of two frequency dictionaries."""
         math_tool.core.session_id = session_id
@@ -309,7 +317,7 @@ def register(
 
     @mcp.tool()
     def calculate_typo_distance(
-        word1: str, word2: str, session_id: Optional[str] = None
+        word1: str, word2: str, session_id: str | None = None
     ) -> str:
         """Identify fuzzy word matches using optimized Levenshtein distance."""
         math_tool.core.session_id = session_id
@@ -317,7 +325,7 @@ def register(
 
     @mcp.tool()
     def calculate_set_overlap(
-        tokens1: List[str], tokens2: List[str], session_id: Optional[str] = None
+        tokens1: list[str], tokens2: list[str], session_id: str | None = None
     ) -> str:
         """Calculate Jaccard Similarity (Set Overlap) between token lists."""
         math_tool.core.session_id = session_id
@@ -325,7 +333,7 @@ def register(
 
     @mcp.tool()
     def calculate_tfidf(
-        tokenized_docs: List[List[str]], session_id: Optional[str] = None
+        tokenized_docs: list[list[str]], session_id: str | None = None
     ) -> str:
         """Calculate term significance (TF-IDF) across a corpus of documents."""
         math_tool.core.session_id = session_id
@@ -333,21 +341,21 @@ def register(
 
     @mcp.tool()
     def calculate_kl_divergence(
-        p: List[float], q: List[float], session_id: Optional[str] = None
+        p: list[float], q: list[float], session_id: str | None = None
     ) -> str:
         """Measure relative entropy (KL Divergence) between two distributions."""
         math_tool.core.session_id = session_id
         return json.dumps(math_tool.calculate_kl_divergence(p, q), indent=2)
 
     @mcp.tool()
-    def calculate_phonetic_hash(word: str, session_id: Optional[str] = None) -> str:
+    def calculate_phonetic_hash(word: str, session_id: str | None = None) -> str:
         """Phonetic hashing using Double Metaphone for alias discovery."""
         math_tool.core.session_id = session_id
         return json.dumps(math_tool.calculate_phonetic_hash(word), indent=2)
 
     @mcp.tool()
     def audit_benford_distribution(
-        data: List[float], session_id: Optional[str] = None
+        data: list[float], session_id: str | None = None
     ) -> str:
         """Fraud detection using Benford's Law distribution analysis."""
         math_tool.core.session_id = session_id
@@ -355,7 +363,7 @@ def register(
 
     @mcp.tool()
     def calculate_simhash(
-        tokens: List[str], hash_size: int = 64, session_id: Optional[str] = None
+        tokens: list[str], hash_size: int = 64, session_id: str | None = None
     ) -> str:
         """Locality Sensitive Hashing (SimHash) for near-duplicate detection."""
         math_tool.core.session_id = session_id
@@ -363,7 +371,7 @@ def register(
 
     @mcp.tool()
     def calculate_entropy_divergence(
-        p: List[float], q: List[float], session_id: Optional[str] = None
+        p: list[float], q: list[float], session_id: str | None = None
     ) -> str:
         """Measure relative entropy (Data Drift) between two distributions."""
         math_tool.core.session_id = session_id
@@ -372,14 +380,14 @@ def register(
     # --- File tools ---
 
     @mcp.tool()
-    def verify_file_signature(file_path: str, session_id: Optional[str] = None) -> str:
+    def verify_file_signature(file_path: str, session_id: str | None = None) -> str:
         """Verify file integrity by checking magic numbers."""
         files_tool.core.session_id = session_id
         return json.dumps(files_tool.verify_file_signature(file_path), indent=2)
 
     @mcp.tool()
     def calculate_structural_complexity(
-        file_path: str, session_id: Optional[str] = None
+        file_path: str, session_id: str | None = None
     ) -> str:
         """Calculate compression ratio as structural entropy proxy."""
         files_tool.core.session_id = session_id
@@ -389,7 +397,7 @@ def register(
 
     @mcp.tool()
     def calculate_burstiness(
-        timestamps: List[float], session_id: Optional[str] = None
+        timestamps: list[float], session_id: str | None = None
     ) -> str:
         """Calculate temporal burstiness score."""
         behavior_tool.core.session_id = session_id
@@ -397,7 +405,7 @@ def register(
 
     @mcp.tool()
     def validate_luhn_checksum(
-        numeric_string: str, session_id: Optional[str] = None
+        numeric_string: str, session_id: str | None = None
     ) -> str:
         """Validate numeric leakage via Luhn algorithm."""
         behavior_tool.core.session_id = session_id
@@ -410,7 +418,7 @@ def register(
         graph: dict,
         start_node: str,
         end_node: str,
-        session_id: Optional[str] = None,
+        session_id: str | None = None,
     ) -> str:
         """Find the shortest path between nodes in a relationship graph."""
         graph_tool.core.session_id = session_id
@@ -418,9 +426,9 @@ def register(
 
     @mcp.tool()
     def identify_central_hubs(
-        adjacency_matrix: List[List[float]],
-        node_labels: List[str],
-        session_id: Optional[str] = None,
+        adjacency_matrix: list[list[float]],
+        node_labels: list[str],
+        session_id: str | None = None,
     ) -> str:
         """Identify influential nodes using Eigenvector Centrality."""
         graph_tool.core.session_id = session_id
@@ -430,7 +438,7 @@ def register(
 
     @mcp.tool()
     def calculate_sequence_similarity(
-        seq1: List[float], seq2: List[float], session_id: Optional[str] = None
+        seq1: list[float], seq2: list[float], session_id: str | None = None
     ) -> str:
         """Find similarity between time-series sequences using DTW."""
         signal_tool.core.session_id = session_id
@@ -438,7 +446,7 @@ def register(
 
     @mcp.tool()
     def detect_event_periodicity(
-        data: List[float], session_id: Optional[str] = None
+        data: list[float], session_id: str | None = None
     ) -> str:
         """Identify dominant periodicities via DFT."""
         signal_tool.core.session_id = session_id
@@ -448,7 +456,7 @@ def register(
 
     @mcp.tool()
     def map_stream_entropy(
-        stream: List[int], window_size: int = 256, session_id: Optional[str] = None
+        stream: list[int], window_size: int = 256, session_id: str | None = None
     ) -> str:
         """Map Shannon entropy across a byte-stream using a sliding window."""
         entropy_tool.core.session_id = session_id
@@ -456,7 +464,7 @@ def register(
 
     @mcp.tool()
     def analyze_obfuscation_score(
-        content: str, session_id: Optional[str] = None
+        content: str, session_id: str | None = None
     ) -> str:
         """Detect obfuscated scripts using Hamming Weight and Compression complexity."""
         entropy_tool.core.session_id = session_id
@@ -465,14 +473,14 @@ def register(
     # --- Crawler + Scorer ---
 
     @mcp.tool()
-    async def ingest_forensic_target(url: str, session_id: Optional[str] = None) -> str:
+    async def ingest_forensic_target(url: str, session_id: str | None = None) -> str:
         """Fetch a URL, extract clean prose, and generate stylometric fingerprints."""
         crawler_tool.core.session_id = session_id
         result = await crawler_tool.ingest_forensic_target(url)
         return json.dumps(result, indent=2)
 
     @mcp.tool()
-    def get_forensic_report(target_text: str, session_id: Optional[str] = None) -> str:
+    def get_forensic_report(target_text: str, session_id: str | None = None) -> str:
         """Generate a high-fidelity forensic credibility report with visualization data."""
         scorer_tool.core.session_id = session_id
         return json.dumps(scorer_tool.get_forensic_report(target_text), indent=2)

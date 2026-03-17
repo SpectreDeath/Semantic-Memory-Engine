@@ -1,5 +1,5 @@
 import gephistreamer
-from gephistreamer import graph, Streamer, GephiREST
+from gephistreamer import GephiREST, Streamer, graph
 
 print(f"Module: {gephistreamer.__file__}")
 print(f"Has Node: {hasattr(graph, 'Node')}")

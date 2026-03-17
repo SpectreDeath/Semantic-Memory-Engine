@@ -4,14 +4,13 @@ OSINT Toolkit - SME Gathering Component
 High-concurrency identity footprinting tool with stealth and rate-limit handling.
 """
 
-import os
-import json
 import argparse
-import random
+import json
+import os
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Add the project root to sys.path to allow imports from src
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
@@ -49,26 +48,26 @@ def check_platform(name, url_template, username, session):
     """Check a single platform for a username."""
     url = url_template.format(username)
     headers = {"User-Agent": get_random_user_agent()}
-    
+
     try:
         # Use a reasonable timeout to prevent hanging the pool
         response = session.get(url, headers=headers, timeout=10, allow_redirects=True)
-        
+
         if response.status_code == 200:
             # Special logic for Reddit: sometimes they redirect/shadow-ban check
             if "reddit.com" in url and "unauthenticated" in response.url:
                 return {"name": name, "url": url, "status": "uncertain", "reason": "Redirected to auth"}
             return {"name": name, "url": url, "status": "found"}
-        
+
         elif response.status_code == 404:
             return {"name": name, "url": url, "status": "not_found"}
-        
+
         elif response.status_code == 429:
             return {"name": name, "url": url, "status": "uncertain", "reason": "Rate Limited"}
-        
+
         else:
             return {"name": name, "url": url, "status": "uncertain", "reason": f"HTTP {response.status_code}"}
-            
+
     except requests.exceptions.Timeout:
         return {"name": name, "url": url, "status": "uncertain", "reason": "Timeout"}
     except Exception as e:
@@ -77,21 +76,21 @@ def check_platform(name, url_template, username, session):
 def footprint_username(username):
     """Concurrently check a username across multiple platforms."""
     print(f"🕵️  Scanning OSINT footprint for actor: {username}")
-    
+
     results = {
         "username": username,
         "timestamp": datetime.now().isoformat(),
         "platforms": []
     }
-    
+
     # Using a session for connection pooling
     with requests.Session() as session:
         with ThreadPoolExecutor(max_workers=5) as executor:
             future_to_platform = {
-                executor.submit(check_platform, name, template, username, session): name 
+                executor.submit(check_platform, name, template, username, session): name
                 for name, template in PLATFORMS.items()
             }
-            
+
             for future in as_completed(future_to_platform):
                 platform_res = future.result()
                 results["platforms"].append(platform_res)
@@ -105,34 +104,34 @@ def save_to_json(data, filename="osint_results.json"):
     raw_dir = Path("data/raw")
     raw_dir.mkdir(parents=True, exist_ok=True)
     file_path = raw_dir / filename
-    
+
     existing_data = []
     if file_path.exists():
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 existing_data = json.load(f)
         except json.JSONDecodeError:
             pass
-            
+
     # Add new scan results
     existing_data.append(data)
-    
+
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(existing_data, f, indent=2, ensure_ascii=False)
-    
+
     return file_path
 
 def main():
     parser = argparse.ArgumentParser(description="Concurrent OSINT Toolkit for Forensic Ingestion.")
     parser.add_argument("--username", type=str, required=True, help="Username to track")
     args = parser.parse_args()
-    
+
     scan_results = footprint_username(args.username)
     path = save_to_json(scan_results)
-    
+
     # Sync to Supabase
     sync_osint_results_to_supabase(scan_results)
-    
+
     found_count = len([p for p in scan_results["platforms"] if p["status"] == "found"])
     print(f"\n🎯 Scan complete for {args.username}. Found on {found_count} platforms. Ingested to {path}")
 

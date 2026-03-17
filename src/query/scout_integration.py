@@ -11,10 +11,9 @@ Uses all layers to:
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple, Set
-from dataclasses import dataclass
-from datetime import datetime, timedelta
 import sqlite3
+from dataclasses import dataclass
+from datetime import datetime
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,8 +31,8 @@ class KnowledgeGap:
     complexity_score: float  # 0-100
     urgency: str  # "Immediate", "High", "Medium", "Low"
     detected_timestamp: str
-    related_claims: List[str]
-    suggested_search_terms: List[str]
+    related_claims: list[str]
+    suggested_search_terms: list[str]
     auto_harvest_triggered: bool
     estimated_resolution_time: int  # seconds
 
@@ -44,8 +43,8 @@ class GapResolution:
     gap_id: str
     resolution_timestamp: str
     harvested_articles: int
-    key_findings: List[str]
-    authoritative_sources: List[str]
+    key_findings: list[str]
+    authoritative_sources: list[str]
     confidence_in_answer: float  # 0-100
 
 
@@ -55,7 +54,7 @@ class GapQuery:
     query_text: str
     frequency: int
     last_seen: str
-    related_gaps: List[str]
+    related_gaps: list[str]
     successful_resolutions: int
     avg_resolution_time: int
 
@@ -78,7 +77,7 @@ class Scout:
         self.db_path = str(config.get_path('storage.base_dir') / "storage" / "scout_gaps.sqlite")
         self.harvester_path = harvester_path or str(Path(__file__).parent.parent.parent / "harvester_spider.py")
         self._initialize_db()
-        
+
         # Initialize semantic graph for semantic gap detection
         try:
             from src.core.semantic_graph import SemanticGraph
@@ -86,7 +85,7 @@ class Scout:
         except Exception as e:
             logger.warning(f"Semantic graph not available: {e}")
             self.semantic_graph = None
-        
+
         logger.info("🔎 Scout initialized")
 
     def _initialize_db(self):
@@ -137,7 +136,7 @@ class Scout:
             conn.close()
             logger.info("✅ Scout database initialized")
         except Exception as e:
-            logger.error(f"❌ Database initialization failed: {str(e)}")
+            logger.error(f"❌ Database initialization failed: {e!s}")
             raise
 
     # ========================================================================
@@ -149,7 +148,7 @@ class Scout:
         text: str,
         context: str = "",
         auto_harvest: bool = True
-    ) -> List[KnowledgeGap]:
+    ) -> list[KnowledgeGap]:
         """
         Detect knowledge gaps in provided text.
         
@@ -189,7 +188,7 @@ class Scout:
 
                 # Generate search terms
                 search_terms = self._generate_search_terms(content, topic)
-                
+
                 # Add semantic variants if available
                 if self.semantic_graph:
                     search_terms.extend(self._get_semantic_variants(topic))
@@ -223,14 +222,14 @@ class Scout:
             return gaps
 
         except Exception as e:
-            logger.error(f"❌ Gap detection failed: {str(e)}")
+            logger.error(f"❌ Gap detection failed: {e!s}")
             return []
-    
+
     def detect_semantic_gaps(
         self,
         central_concept: str,
-        existing_facts: Optional[Set[str]] = None
-    ) -> List[Dict]:
+        existing_facts: set[str] | None = None
+    ) -> list[dict]:
         """
         Detect knowledge gaps using semantic relationships.
         
@@ -247,15 +246,15 @@ class Scout:
         if not self.semantic_graph:
             logger.warning("Semantic graph not available for gap detection")
             return []
-        
+
         logger.info(f"🧠 Detecting semantic gaps for: {central_concept}")
-        
+
         try:
             gaps = self.semantic_graph.detect_semantic_gaps(
                 central_concept,
                 existing_facts or set()
             )
-            
+
             # Annotate gaps with additional context
             annotated_gaps = []
             for gap in gaps:
@@ -266,16 +265,16 @@ class Scout:
                     'concept_source': central_concept,
                     'auto_harvest': gap.get('priority') in ('high', 'medium')
                 }
-                
+
                 # Auto-harvest high-priority semantic gaps
                 if annotated_gap['auto_harvest']:
                     search_terms = [annotated_gap['gap']]
                     logger.info(f"📚 Semantic gap detected: {annotated_gap['gap']} ({annotated_gap['type']})")
-                
+
                 annotated_gaps.append(annotated_gap)
-            
+
             return annotated_gaps
-            
+
         except Exception as e:
             logger.error(f"❌ Semantic gap detection failed: {e}")
             return []
@@ -333,14 +332,14 @@ class Scout:
             return final_score
 
         except Exception as e:
-            logger.error(f"❌ Complexity scoring failed: {str(e)}")
+            logger.error(f"❌ Complexity scoring failed: {e!s}")
             return 0
 
     # ========================================================================
     # TOOL 3: TRIGGER AUTOMATED HARVEST
     # ========================================================================
 
-    def trigger_harvest_for_gap(self, gap: KnowledgeGap) -> Dict:
+    def trigger_harvest_for_gap(self, gap: KnowledgeGap) -> dict:
         """
         Trigger HarvesterSpider to resolve knowledge gap.
         
@@ -385,7 +384,7 @@ class Scout:
             return harvest_job
 
         except Exception as e:
-            logger.error(f"❌ Harvest triggering failed: {str(e)}")
+            logger.error(f"❌ Harvest triggering failed: {e!s}")
             return {"error": str(e)}
 
     # ========================================================================
@@ -395,8 +394,8 @@ class Scout:
     def track_gap_resolution(
         self,
         gap_id: str,
-        harvested_articles: List[Dict],
-        key_findings: List[str]
+        harvested_articles: list[dict],
+        key_findings: list[str]
     ) -> GapResolution:
         """
         Track resolution of a knowledge gap.
@@ -439,14 +438,14 @@ class Scout:
             return resolution
 
         except Exception as e:
-            logger.error(f"❌ Resolution tracking failed: {str(e)}")
+            logger.error(f"❌ Resolution tracking failed: {e!s}")
             raise
 
     # ========================================================================
     # TOOL 5: QUERY PATTERN LEARNING
     # ========================================================================
 
-    def learn_from_query_patterns(self) -> List[GapQuery]:
+    def learn_from_query_patterns(self) -> list[GapQuery]:
         """
         Learn from historical query patterns to predict future gaps.
         
@@ -488,14 +487,14 @@ class Scout:
             return patterns
 
         except Exception as e:
-            logger.error(f"❌ Pattern learning failed: {str(e)}")
+            logger.error(f"❌ Pattern learning failed: {e!s}")
             return []
 
     # ========================================================================
     # HELPER METHODS
     # ========================================================================
 
-    def _extract_questions(self, text: str) -> List[Tuple[str, str]]:
+    def _extract_questions(self, text: str) -> list[tuple[str, str]]:
         """Extract questions from text"""
         questions = []
         sentences = text.split('.')
@@ -507,7 +506,7 @@ class Scout:
 
         return questions
 
-    def _extract_uncertain_claims(self, text: str) -> List[Tuple[str, str]]:
+    def _extract_uncertain_claims(self, text: str) -> list[tuple[str, str]]:
         """Extract uncertain statements"""
         uncertain = []
         uncertainty_phrases = ['might', 'could', 'possibly', 'perhaps', 'uncertain', 'unclear', 'need more info']
@@ -556,7 +555,7 @@ class Scout:
             return ' '.join(words[:2])
         return 'General'
 
-    def _generate_search_terms(self, text: str, topic: str) -> List[str]:
+    def _generate_search_terms(self, text: str, topic: str) -> list[str]:
         """Generate search terms for gap resolution"""
         terms = []
 
@@ -588,7 +587,7 @@ class Scout:
         except:
             return "failed"
 
-    def _save_gaps_to_db(self, gaps: List[KnowledgeGap]):
+    def _save_gaps_to_db(self, gaps: list[KnowledgeGap]):
         """Save detected gaps to database"""
         try:
             conn = sqlite3.connect(self.db_path)
@@ -613,7 +612,7 @@ class Scout:
             conn.commit()
             conn.close()
         except Exception as e:
-            logger.error(f"❌ Failed to save gaps: {str(e)}")
+            logger.error(f"❌ Failed to save gaps: {e!s}")
 
     def _save_resolution_to_db(self, resolution: GapResolution):
         """Save gap resolution to database"""
@@ -642,7 +641,7 @@ class Scout:
             conn.commit()
             conn.close()
         except Exception as e:
-            logger.error(f"❌ Failed to save resolution: {str(e)}")
+            logger.error(f"❌ Failed to save resolution: {e!s}")
 
     def _analyze_sentence_complexity(self, text: str) -> float:
         """Analyze sentence structure complexity"""
@@ -690,12 +689,12 @@ class Scout:
         """Analyze how available information is for this topic"""
         # Placeholder - would check web data availability
         return 50
-    
-    def _get_semantic_variants(self, term: str) -> List[str]:
+
+    def _get_semantic_variants(self, term: str) -> list[str]:
         """Get semantic variants (synonyms, related terms) for a term."""
         if not self.semantic_graph or not term:
             return []
-        
+
         try:
             variants = self.semantic_graph.find_semantic_variants(term)
             result = []
@@ -712,7 +711,7 @@ class Scout:
 # MCP TOOL FUNCTIONS
 # ============================================================================
 
-def detect_knowledge_gaps_tool(text: str) -> Dict:
+def detect_knowledge_gaps_tool(text: str) -> dict:
     """MCP Tool: Detect knowledge gaps in text"""
     scout = Scout()
     gaps = scout.detect_gaps_in_text(text, auto_harvest=True)
@@ -735,7 +734,7 @@ def detect_knowledge_gaps_tool(text: str) -> Dict:
     }
 
 
-def score_complexity_tool(text: str) -> Dict:
+def score_complexity_tool(text: str) -> dict:
     """MCP Tool: Score knowledge complexity"""
     scout = Scout()
     score = scout.score_knowledge_complexity(text)

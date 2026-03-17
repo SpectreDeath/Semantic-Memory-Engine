@@ -52,7 +52,7 @@ class LRUCache:
 
             self.misses += 1
             return None
-    
+
     def set(self, key: str, value: Any):
         """Set value in cache with current timestamp."""
         with self.lock:
@@ -66,12 +66,12 @@ class LRUCache:
             # Remove oldest items if cache is full
             if len(self.cache) > self.max_size:
                 self.cache.popitem(last=False)
-    
+
     def _is_expired(self, entry: dict[str, Any]) -> bool:
         """Check if cache entry has expired."""
         age = datetime.now() - entry['timestamp']
         return bool(age.total_seconds() > self.ttl_seconds)
-    
+
     def clear(self):
         """Clear all cache entries."""
         with self.lock:
@@ -96,16 +96,16 @@ class LRUCache:
 
 class PerformanceMonitor:
     """Monitors and logs performance metrics for operations."""
-    
+
     def __init__(self, plugin_id: str):
         self.plugin_id = plugin_id
         self.operation_times: dict[str, list] = {}
         self.lock = threading.RLock()
-    
+
     def time_operation(self, operation_name: str) -> 'OperationTimer':
         """Time a specific operation."""
         return OperationTimer(self, operation_name)
-    
+
     def record_operation_time(self, operation_name: str, duration: float):
         """Record the duration of an operation."""
         with self.lock:
@@ -117,13 +117,13 @@ class PerformanceMonitor:
             # Keep only last 100 measurements
             if len(self.operation_times[operation_name]) > 100:
                 self.operation_times[operation_name] = self.operation_times[operation_name][-100:]
-    
+
     def get_operation_stats(self, operation_name: str) -> dict[str, Any]:
         """Get performance statistics for an operation."""
         with self.lock:
             if operation_name not in self.operation_times:
                 return {'error': 'Operation not found'}
-            
+
             times = self.operation_times[operation_name]
             if not times:
                 return {'error': 'No data available'}
@@ -137,7 +137,7 @@ class PerformanceMonitor:
             p50 = sorted_times[len(sorted_times) // 2]
             p95 = sorted_times[int(len(sorted_times) * 0.95)]
             p99 = sorted_times[int(len(sorted_times) * 0.99)]
-            
+
             return {
                 'operation': operation_name,
                 'count': len(times),
@@ -148,7 +148,7 @@ class PerformanceMonitor:
                 'p95_time': round(p95, 4),
                 'p99_time': round(p99, 4)
             }
-    
+
     def get_all_stats(self) -> dict[str, Any]:
         """Get performance statistics for all operations."""
         with self.lock:
@@ -160,16 +160,16 @@ class PerformanceMonitor:
 
 class OperationTimer:
     """Context manager for timing operations."""
-    
+
     def __init__(self, monitor: PerformanceMonitor, operation_name: str):
         self.monitor = monitor
         self.operation_name = operation_name
         self.start_time: float | None = None
-    
+
     def __enter__(self):
         self.start_time = time.perf_counter()
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.start_time:
             duration = time.perf_counter() - self.start_time
@@ -186,105 +186,105 @@ def cache_result(max_size: int = 100, ttl_seconds: int = 300):
     """
     def decorator(func: Callable) -> Callable:
         cache = LRUCache(max_size, ttl_seconds)
-        
+
         @functools.wraps(func)
         async def async_wrapper(*args, **kwargs):
             # Create cache key from args and kwargs
             key = _create_cache_key(func.__name__, args, kwargs)
-            
+
             # Try to get from cache
             result = cache.get(key)
             if result is not None:
                 return result
-            
+
             # Execute function and cache result
             result = await func(*args, **kwargs)
             cache.set(key, result)
             return result
-        
+
         @functools.wraps(func)
         def sync_wrapper(*args, **kwargs):
             # Create cache key from args and kwargs
             key = _create_cache_key(func.__name__, args, kwargs)
-            
+
             # Try to get from cache
             result = cache.get(key)
             if result is not None:
                 return result
-            
+
             # Execute function and cache result
             result = func(*args, **kwargs)
             cache.set(key, result)
             return result
-        
+
         # Store cache on function for access
-        setattr(sync_wrapper, '_cache', cache)
-        setattr(async_wrapper, '_cache', cache)
-        
+        sync_wrapper._cache = cache
+        async_wrapper._cache = cache
+
         # Add cache management methods
         def clear_cache():
             cache.clear()
         def get_cache_stats():
             return cache.get_stats()
-        
-        setattr(sync_wrapper, 'clear_cache', clear_cache)
-        setattr(sync_wrapper, 'get_cache_stats', get_cache_stats)
-        setattr(async_wrapper, 'clear_cache', clear_cache)
-        setattr(async_wrapper, 'get_cache_stats', get_cache_stats)
-        
+
+        sync_wrapper.clear_cache = clear_cache
+        sync_wrapper.get_cache_stats = get_cache_stats
+        async_wrapper.clear_cache = clear_cache
+        async_wrapper.get_cache_stats = get_cache_stats
+
         # Return appropriate wrapper based on function type
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
             return sync_wrapper
-    
+
     return decorator
 
 
 def _create_cache_key(func_name: str, args: tuple, kwargs: dict) -> str:
     """Create a cache key from function name, args, and kwargs."""
-    
+
     # Convert args and kwargs to a hashable string
     key_data = {
         'func': func_name,
         'args': args,
         'kwargs': kwargs
     }
-    
+
     key_str = json.dumps(key_data, sort_keys=True, default=str)
     return hashlib.md5(key_str.encode()).hexdigest()
 
 
 class ResourceMonitor:
     """Monitor system resources and provide optimization suggestions."""
-    
+
     def __init__(self):
         self.monitoring = False
         self.monitor_thread = None
         self.resource_history = []
         self.lock = threading.Lock()
-    
+
     def start_monitoring(self, interval_seconds: int = 30):
         """Start background resource monitoring."""
         if self.monitoring:
             return
-        
+
         self.monitoring = True
         self.monitor_thread = threading.Thread(
-            target=self._monitor_loop, 
-            args=(interval_seconds,), 
+            target=self._monitor_loop,
+            args=(interval_seconds,),
             daemon=True
         )
         self.monitor_thread.start()
         logger.info("Resource monitoring started")
-    
+
     def stop_monitoring(self):
         """Stop background resource monitoring."""
         self.monitoring = False
         if self.monitor_thread:
             self.monitor_thread.join(timeout=2.0)
         logger.info("Resource monitoring stopped")
-    
+
     def _monitor_loop(self, interval_seconds: int):
         """Background monitoring loop."""
         while self.monitoring:
@@ -295,34 +295,34 @@ class ResourceMonitor:
                     # Keep only last 100 entries
                     if len(self.resource_history) > 100:
                         self.resource_history = self.resource_history[-100:]
-                
+
                 time.sleep(interval_seconds)
             except Exception as e:
                 logger.error(f"Error in resource monitoring: {e}")
                 time.sleep(5)  # Wait before retrying
-    
+
     def _collect_resource_stats(self) -> dict[str, Any]:
         """Collect current resource usage statistics."""
         try:
             # CPU usage
             cpu_percent = psutil.cpu_percent(interval=1)
-            
+
             # Memory usage
             memory = psutil.virtual_memory()
             memory_percent = memory.percent
             memory_used_gb = memory.used / (1024**3)
             memory_total_gb = memory.total / (1024**3)
-            
+
             # Disk usage
             disk = psutil.disk_usage('/')
             disk_percent = disk.percent
             disk_free_gb = disk.free / (1024**3)
-            
+
             # Process-specific stats
             process = psutil.Process(os.getpid())
             process_memory = process.memory_info().rss / (1024**2)  # MB
             process_cpu = process.cpu_percent()
-            
+
             return {
                 'timestamp': datetime.now().isoformat(),
                 'cpu_percent': cpu_percent,
@@ -337,47 +337,47 @@ class ResourceMonitor:
         except Exception as e:
             logger.error(f"Failed to collect resource stats: {e}")
             return {'error': str(e)}
-    
+
     def get_current_stats(self) -> dict[str, Any]:
         """Get current resource usage."""
         try:
             return self._collect_resource_stats()
         except Exception as e:
             return {'error': str(e)}
-    
+
     def get_optimization_suggestions(self) -> list[str]:
         """Get optimization suggestions based on resource usage."""
         suggestions = []
-        
+
         try:
             current = self.get_current_stats()
             if 'error' in current:
                 return ['Unable to collect resource statistics']
-            
+
             # CPU suggestions
             if current['cpu_percent'] > 80:
                 suggestions.append("High CPU usage detected - consider optimizing algorithms or adding caching")
-            
+
             # Memory suggestions
             if current['memory_percent'] > 80:
                 suggestions.append("High memory usage detected - consider clearing caches or optimizing data structures")
-            
+
             # Disk suggestions
             if current['disk_percent'] > 90:
                 suggestions.append("Low disk space detected - consider cleaning up temporary files")
-            
+
             # Process-specific suggestions
             if current['process_memory_mb'] > 1000:  # > 1GB
                 suggestions.append("High process memory usage - consider implementing memory pooling")
-            
+
             if not suggestions:
                 suggestions.append("Resource usage is within normal ranges")
-            
+
             return suggestions
-            
+
         except Exception as e:
             return [f"Error generating suggestions: {e}"]
-    
+
     def get_resource_history(self) -> list[dict[str, Any]]:
         """Get historical resource usage data."""
         with self.lock:
@@ -386,13 +386,13 @@ class ResourceMonitor:
 
 class AsyncBatchProcessor:
     """Process items in batches with concurrency control."""
-    
+
     def __init__(self, max_concurrent: int = 10, batch_size: int = 100):
         self.max_concurrent = max_concurrent
         self.batch_size = batch_size
         self.semaphore = asyncio.Semaphore(max_concurrent)
-    
-    async def process_items(self, items: list, process_func: Callable, 
+
+    async def process_items(self, items: list, process_func: Callable,
                           progress_callback: None | Callable = None) -> list:
         """
         Process items in batches with concurrency control.
@@ -406,24 +406,24 @@ class AsyncBatchProcessor:
             List of results
         """
         results = []
-        
+
         # Process in batches
         for i in range(0, len(items), self.batch_size):
             batch = items[i:i + self.batch_size]
             batch_results = await self._process_batch(batch, process_func)
             results.extend(batch_results)
-            
+
             if progress_callback:
                 await progress_callback(i + len(batch), len(items))
-        
+
         return results
-    
+
     async def _process_batch(self, batch: list, process_func: Callable) -> list:
         """Process a single batch with concurrency control."""
         async def process_with_semaphore(item):
             async with self.semaphore:
                 return await process_func(item)
-        
+
         tasks = [process_with_semaphore(item) for item in batch]
         return await asyncio.gather(*tasks, return_exceptions=True)
 

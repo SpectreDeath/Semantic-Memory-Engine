@@ -14,8 +14,6 @@ in the project root or specify their location via SOURCE_DIR.
 
 import os
 import re
-import shutil
-from pathlib import Path
 
 # Configuration
 SOURCE_DIR = "."  # Where to find the source files (project root by default)
@@ -30,7 +28,7 @@ def ensure_package_structure():
         os.path.join("src", "sme", "vendor"),
         VENDOR_DIR,
     ]
-    
+
     for dir_path in dirs_to_create:
         os.makedirs(dir_path, exist_ok=True)
         init_file = os.path.join(dir_path, "__init__.py")
@@ -52,21 +50,21 @@ def refactor_imports(content: str, filename: str) -> str:
       - import faststylometry -> from . import __init__ as faststylometry
     """
     updated = content
-    
+
     # Pattern 1: from faststylometry import X -> from . import X
     updated = re.sub(
         r'from\s+faststylometry\s+import\s+([A-Za-z_][A-Za-z0-9_]*)',
         r'from . import \1',
         updated
     )
-    
+
     # Pattern 2: from faststylometry.X import Y -> from .X import Y
     updated = re.sub(
         r'from\s+faststylometry\.(\w+)\s+import\s+(.+)',
         r'from .\1 import \2',
         updated
     )
-    
+
     # Pattern 3: import faststylometry -> from . import __init__ as faststylometry
     updated = re.sub(
         r'^import\s+faststylometry\s*$',
@@ -74,7 +72,7 @@ def refactor_imports(content: str, filename: str) -> str:
         updated,
         flags=re.MULTILINE
     )
-    
+
     return updated
 
 
@@ -82,22 +80,22 @@ def vendor_file(filename: str) -> bool:
     """Copy and refactor a single file."""
     source_path = os.path.join(SOURCE_DIR, filename)
     dest_path = os.path.join(VENDOR_DIR, filename)
-    
+
     if not os.path.exists(source_path):
         print(f"[!] Warning: {filename} not found in {SOURCE_DIR}. Skipping.")
         return False
-    
+
     # Read source
-    with open(source_path, "r", encoding="utf-8") as f:
+    with open(source_path, encoding="utf-8") as f:
         content = f.read()
-    
+
     # Refactor imports
     patched_content = refactor_imports(content, filename)
-    
+
     # Write to vendor directory
     with open(dest_path, "w", encoding="utf-8") as f:
         f.write(patched_content)
-    
+
     print(f"[+] Copied and patched: {filename}")
     return True
 
@@ -110,18 +108,18 @@ def main():
     print(f"\n[*] Source directory: {SOURCE_DIR}")
     print(f"[*] Target directory: {VENDOR_DIR}")
     print()
-    
+
     # Step 1: Create package structure
     print("[*] Creating package structure...")
     ensure_package_structure()
-    
+
     # Step 2: Vendor each file
     print("\n[*] Copying and patching files...")
     success_count = 0
     for filename in FILES_TO_VENDOR:
         if vendor_file(filename):
             success_count += 1
-    
+
     # Summary
     print()
     print("=" * 60)

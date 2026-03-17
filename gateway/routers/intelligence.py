@@ -10,13 +10,12 @@ red-team auditing, and evidence harvesting.
 import json
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from gateway.routers.shared import (
-    RedTeamRequest,
     HarvestRequest,
+    RedTeamRequest,
     make_safe_tool_call,
-    serialize_result,
 )
 
 logger = logging.getLogger("lawnmower.intelligence")
@@ -36,9 +35,9 @@ def register(
 
     @mcp.tool()
     def cluster_documents(
-        documents: List[str],
+        documents: list[str],
         algorithm: str = "kmeans",
-        session_id: Optional[str] = None,
+        session_id: str | None = None,
     ) -> str:
         """Cluster a list of documents by semantic similarity."""
         logger.info(f"cluster_documents called: count={len(documents)} algo={algorithm}")
@@ -50,7 +49,7 @@ def register(
 
     @mcp.tool()
     def build_knowledge_graph(
-        concepts: List[str], session_id: Optional[str] = None
+        concepts: list[str], session_id: str | None = None
     ) -> str:
         """Build a semantic graph from a list of concepts and their relationships."""
         logger.info(f"build_knowledge_graph called: count={len(concepts)}")
@@ -61,7 +60,7 @@ def register(
         return json.dumps(result, indent=2, default=str)
 
     @mcp.tool()
-    def verify_facts(claim: str, session_id: Optional[str] = None) -> str:
+    def verify_facts(claim: str, session_id: str | None = None) -> str:
         """Verify a claim against the evidence in the knowledge base."""
         logger.info(f"verify_facts called: claim='{claim[:50]}...'")
         result = safe_tool_call("verify_facts", "verify", claim)
@@ -72,7 +71,7 @@ def register(
 
     @mcp.tool()
     def detect_networks(
-        authors: List[str], session_id: Optional[str] = None
+        authors: list[str], session_id: str | None = None
     ) -> str:
         """Detect coordinated sockpuppet networks or behavioral clusters among authors."""
         logger.info(f"detect_networks called: authors_count={len(authors)}")
@@ -84,7 +83,7 @@ def register(
 
     @mcp.tool()
     def generate_intelligence_report(
-        subject: str, findings: List[str], session_id: Optional[str] = None
+        subject: str, findings: list[str], session_id: str | None = None
     ) -> str:
         """Aggregate forensic findings into a structured intelligence report."""
         logger.info(f"generate_intelligence_report: subject='{subject}' findings={len(findings)}")
@@ -107,7 +106,7 @@ def register(
 
     @mcp.tool()
     def discover_overlap(
-        author_ids: List[str], session_id: Optional[str] = None
+        author_ids: list[str], session_id: str | None = None
     ) -> str:
         """Find shared rhetorical signals and style overlaps between multiple authors."""
         logger.info(f"discover_overlap called: count={len(author_ids)}")
@@ -119,7 +118,7 @@ def register(
 
     @mcp.tool()
     def analyze_rolling_delta(
-        text: str, window_size: int = 1000, session_id: Optional[str] = None
+        text: str, window_size: int = 1000, session_id: str | None = None
     ) -> str:
         """Perform temporal stylometric analysis to see how writing style evolves."""
         logger.info(f"analyze_rolling_delta: text_len={len(text)} window={window_size}")
@@ -131,7 +130,7 @@ def register(
 
     @mcp.tool()
     def cross_author_comparison(
-        texts: List[Dict[str, str]], session_id: Optional[str] = None
+        texts: list[dict[str, str]], session_id: str | None = None
     ) -> str:
         """
         Compare multiple authors/texts to find commonalities and discrepancies.
@@ -172,7 +171,7 @@ def register(
 
     @mcp.tool()
     def process_batch(
-        tool_name: str, inputs: List[Any], session_id: Optional[str] = None
+        tool_name: str, inputs: list[Any], session_id: str | None = None
     ) -> str:
         """
         Execute a tool against multiple inputs in a single batch.
@@ -221,7 +220,7 @@ def register(
         return json.dumps(results, indent=2, default=str)
 
     @mcp.tool()
-    def deep_analyze(text: str, session_id: Optional[str] = None) -> str:
+    def deep_analyze(text: str, session_id: str | None = None) -> str:
         """
         Perform comprehensive forensic analysis combining authorship, sentiment,
         entity extraction, and epistemic audit in a single call.
@@ -279,7 +278,7 @@ def register(
 
     @mcp.tool()
     def red_team_audit(
-        request: RedTeamRequest, session_id: Optional[str] = None
+        request: RedTeamRequest, session_id: str | None = None
     ) -> str:
         """
         Stress-test the authorship engine using adversarial mimicry samples.
@@ -316,7 +315,7 @@ def register(
 
     @mcp.tool()
     def harvest_suspect_baseline(
-        request: HarvestRequest, session_id: Optional[str] = None
+        request: HarvestRequest, session_id: str | None = None
     ) -> str:
         """
         Recursively harvest text from a path, redact it, and create a stylometric
@@ -331,7 +330,7 @@ def register(
         try:
             fingerprint = harvester.harvest(request.path)
         except Exception as e:
-            return json.dumps({"error": f"Harvest failed: {str(e)}", "path": request.path})
+            return json.dumps({"error": f"Harvest failed: {e!s}", "path": request.path})
 
         nexus.execute("""
             CREATE TABLE IF NOT EXISTS lab.suspect_baselines (

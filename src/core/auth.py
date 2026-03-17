@@ -10,10 +10,10 @@ Provides:
 
 import os
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, List
-from jose import JWTError, jwt
+
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, APIKeyHeader
+from fastapi.security import APIKeyHeader, OAuth2PasswordBearer
+from jose import JWTError, jwt
 from pydantic import BaseModel
 
 # Configuration (REQUIRED - must be set via environment variables)
@@ -37,7 +37,7 @@ def _get_secret_key() -> str:
         return "INSECURE_DEFAULT_DO_NOT_USE_IN_PRODUCTION"
     return key
 
-def _get_admin_api_key() -> Optional[str]:
+def _get_admin_api_key() -> str | None:
     """Get ADMIN_API_KEY from environment."""
     return os.getenv("ADMIN_API_KEY")
 
@@ -52,14 +52,14 @@ api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
 class User(BaseModel):
     username: str
-    roles: List[str] = ["user"]
+    roles: list[str] = ["user"]
     tenant_id: str = "default"
 
 class Token(BaseModel):
     access_token: str
     token_type: str
 
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
     """Create a new JWT access token."""
     to_encode = data.copy()
     if expires_delta:
@@ -71,8 +71,8 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 async def get_current_user(
-    token: Optional[str] = Depends(oauth2_scheme),
-    api_key: Optional[str] = Depends(api_key_header)
+    token: str | None = Depends(oauth2_scheme),
+    api_key: str | None = Depends(api_key_header)
 ) -> User:
     """
     Validate credentials (JWT or API Key) and return current user.
@@ -84,7 +84,7 @@ async def get_current_user(
         if api_key == ADMIN_API_KEY:
             return User(username="admin", roles=["admin"], tenant_id="system")
         # In a real app, look up API key in database
-    
+
     # JWT check
     if not token:
         raise HTTPException(
@@ -92,13 +92,13 @@ async def get_current_user(
             detail="Not authenticated",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise HTTPException(status_code=401, detail="Invalid token")
-        
+
         return User(
             username=username,
             roles=payload.get("roles", ["user"]),

@@ -13,11 +13,9 @@ Covers:
 
 import math
 import os
-import sqlite3
 import tempfile
 
 import pytest
-
 
 # ===================================================================
 # 1. Import Guards — verify new libraries are installed
@@ -270,6 +268,7 @@ class TestForensicAgent:
 
     def test_analyze_rejects_empty_input(self):
         import asyncio
+
         from src.ai.sidecar_agent import ForensicAgent
         agent = ForensicAgent()
         with pytest.raises(ValueError, match="Evidence cannot be empty"):

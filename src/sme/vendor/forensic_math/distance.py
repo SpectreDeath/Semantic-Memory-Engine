@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def calculate_typo_distance(s1: str, s2: str) -> int:
     """
     Optimized Levenshtein distance algorithm using NumPy for memory-efficient matrix operations.

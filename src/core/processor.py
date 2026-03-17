@@ -3,14 +3,13 @@ Data Processing & Analysis Tools
 Batch semantic compression, lexicon processing, signal aggregation.
 """
 
-from mcp.server.fastmcp import FastMCP
 import json
 import os
-import glob
-from typing import Dict, List, Any
-from collections import Counter, defaultdict
+from collections import defaultdict
 from datetime import datetime
-import re
+from typing import Any
+
+from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("DataProcessor")
 
@@ -19,12 +18,12 @@ STORAGE_DIR = os.path.normpath("D:/mcp_servers/storage")
 
 class LexiconProcessor:
     """Processes and indexes lexicon files."""
-    
+
     def __init__(self, lexicon_dir: str):
         self.lexicon_dir = lexicon_dir
         self.cache = {}
-    
-    def list_lexicons(self) -> Dict[str, Any]:
+
+    def list_lexicons(self) -> dict[str, Any]:
         """Lists all available lexicon files."""
         lexicons = {
             'category_files': {},
@@ -32,7 +31,7 @@ class LexiconProcessor:
             'readme_files': {},
             'total_files': 0
         }
-        
+
         for file in os.listdir(self.lexicon_dir):
             full_path = os.path.join(self.lexicon_dir, file)
             if os.path.isfile(full_path):
@@ -42,26 +41,26 @@ class LexiconProcessor:
                     lexicons['nfo_files'][file] = os.path.getsize(full_path)
                 elif file.endswith('.txt'):
                     lexicons['readme_files'][file] = os.path.getsize(full_path)
-                
+
                 lexicons['total_files'] += 1
-        
+
         return lexicons
-    
-    def load_lexicon(self, filename: str, limit: int = 1000) -> Dict[str, Any]:
+
+    def load_lexicon(self, filename: str, limit: int = 1000) -> dict[str, Any]:
         """Loads and indexes a lexicon file."""
         try:
             file_path = os.path.join(self.lexicon_dir, filename)
-            
+
             if not os.path.exists(file_path):
                 return {'error': f'File not found: {filename}'}
-            
+
             words = []
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding='utf-8', errors='ignore') as f:
                 for i, line in enumerate(f):
                     if i >= limit:
                         break
                     words.append(line.strip())
-            
+
             return {
                 'lexicon': filename,
                 'words_loaded': len(words),
@@ -69,62 +68,62 @@ class LexiconProcessor:
                 'words': words[:100],  # Return first 100 for preview
                 'status': 'loaded'
             }
-        
+
         except Exception as e:
             return {'error': str(e)}
-    
-    def build_index(self, filenames: List[str] = None) -> Dict[str, Any]:
+
+    def build_index(self, filenames: list[str] = None) -> dict[str, Any]:
         """Builds a master index of all lexicons."""
         try:
             if filenames is None:
                 # Index all .cat files
                 filenames = [f for f in os.listdir(self.lexicon_dir) if f.endswith('.cat')]
-            
+
             master_index = defaultdict(list)
             total_entries = 0
-            
+
             for filename in filenames:
                 file_path = os.path.join(self.lexicon_dir, filename)
-                
+
                 if not os.path.exists(file_path):
                     continue
-                
+
                 try:
-                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    with open(file_path, encoding='utf-8', errors='ignore') as f:
                         for line in f:
                             word = line.strip().lower()
                             if word:
                                 master_index[filename].append(word)
                                 total_entries += 1
-                except Exception as e:
+                except Exception:
                     continue
-            
+
             return {
                 'indexed_files': len(filenames),
                 'total_entries': total_entries,
                 'files': dict(master_index),
                 'status': 'indexed'
             }
-        
+
         except Exception as e:
             return {'error': str(e)}
 
 
 class SignalAggregator:
     """Aggregates signals from multiple sources."""
-    
+
     @staticmethod
-    def aggregate_sentiment_signals(days: int = 30) -> Dict[str, Any]:
+    def aggregate_sentiment_signals(days: int = 30) -> dict[str, Any]:
         """Aggregates sentiment signals over time."""
         try:
             compiled_signals_path = os.path.join(STORAGE_DIR, 'compiled_signals.json')
-            
+
             if os.path.exists(compiled_signals_path):
-                with open(compiled_signals_path, 'r') as f:
+                with open(compiled_signals_path) as f:
                     signals = json.load(f)
             else:
                 signals = {}
-            
+
             # Aggregate statistics
             aggregated = {
                 'total_signals': len(signals),
@@ -133,7 +132,7 @@ class SignalAggregator:
                 'temporal_coverage': f'{days} days',
                 'aggregated_at': datetime.now().isoformat()
             }
-            
+
             # Categorize signals
             for signal_key, signal_val in signals.items():
                 if isinstance(signal_val, (int, float)):
@@ -145,14 +144,14 @@ class SignalAggregator:
                         })
                 elif isinstance(signal_val, str):
                     aggregated['signal_categories']['text'] += 1
-            
+
             return aggregated
-        
+
         except Exception as e:
             return {'error': str(e)}
-    
+
     @staticmethod
-    def merge_multi_source_data(sources: List[str]) -> Dict[str, Any]:
+    def merge_multi_source_data(sources: list[str]) -> dict[str, Any]:
         """Merges data from multiple source files."""
         try:
             merged_data = {
@@ -161,13 +160,13 @@ class SignalAggregator:
                 'merge_timestamp': datetime.now().isoformat(),
                 'total_entries': 0
             }
-            
+
             for source in sources:
                 source_path = os.path.join(STORAGE_DIR, source)
-                
+
                 if os.path.exists(source_path) and source.endswith('.json'):
                     try:
-                        with open(source_path, 'r') as f:
+                        with open(source_path) as f:
                             data = json.load(f)
                             if isinstance(data, dict):
                                 merged_data['entries'].append(data)
@@ -176,18 +175,18 @@ class SignalAggregator:
                             merged_data['total_entries'] += 1
                     except:
                         pass
-            
+
             return merged_data
-        
+
         except Exception as e:
             return {'error': str(e)}
 
 
 class BatchCompressor:
     """Performs batch semantic compression."""
-    
+
     @staticmethod
-    def compress_batch(json_files: List[str], output_file: str = "") -> Dict[str, Any]:
+    def compress_batch(json_files: list[str], output_file: str = "") -> dict[str, Any]:
         """Compresses multiple JSON files."""
         try:
             compressed_data = {
@@ -200,53 +199,53 @@ class BatchCompressor:
                 },
                 'timestamp': datetime.now().isoformat()
             }
-            
+
             for file in json_files:
                 file_path = os.path.join(STORAGE_DIR, file)
-                
+
                 if os.path.exists(file_path):
                     try:
-                        with open(file_path, 'r') as f:
+                        with open(file_path) as f:
                             data = json.load(f)
-                        
+
                         original_size = len(json.dumps(data))
-                        
+
                         # Simple compression: key extraction
                         if isinstance(data, dict):
                             compressed = {k: v for k, v in list(data.items())[:10]}
                         else:
                             compressed = data[:10] if isinstance(data, list) else data
-                        
+
                         compressed_size = len(json.dumps(compressed))
-                        
+
                         compressed_data['compressed_entries'].append({
                             'source': file,
                             'original_size': original_size,
                             'compressed_size': compressed_size,
                             'ratio': original_size / (compressed_size + 1)
                         })
-                        
+
                         compressed_data['compression_stats']['original_size'] += original_size
                         compressed_data['compression_stats']['compressed_size'] += compressed_size
-                    
-                    except Exception as e:
+
+                    except Exception:
                         continue
-            
+
             # Calculate overall ratio
             total_original = compressed_data['compression_stats']['original_size']
             total_compressed = compressed_data['compression_stats']['compressed_size']
             if total_compressed > 0:
                 compressed_data['compression_stats']['compression_ratio'] = total_original / total_compressed
-            
+
             # Write output if specified
             if output_file:
                 output_path = os.path.join(STORAGE_DIR, output_file)
                 with open(output_path, 'w') as f:
                     json.dump(compressed_data, f, indent=2)
                 compressed_data['output_file'] = output_file
-            
+
             return compressed_data
-        
+
         except Exception as e:
             return {'error': str(e)}
 
@@ -258,7 +257,7 @@ def list_available_lexicons() -> str:
         processor = LexiconProcessor(LEXICON_DIR)
         result = processor.list_lexicons()
         return json.dumps(result, indent=2)
-    
+
     except Exception as e:
         return json.dumps({'error': str(e)})
 
@@ -273,7 +272,7 @@ def load_lexicon_file(filename: str, limit: int = 1000) -> str:
         processor = LexiconProcessor(LEXICON_DIR)
         result = processor.load_lexicon(filename, limit)
         return json.dumps(result, indent=2)
-    
+
     except Exception as e:
         return json.dumps({'error': str(e)})
 
@@ -289,7 +288,7 @@ def build_lexicon_index(filenames: str = "") -> str:
         processor = LexiconProcessor(LEXICON_DIR)
         result = processor.build_index(file_list)
         return json.dumps(result, indent=2)
-    
+
     except Exception as e:
         return json.dumps({'error': str(e)})
 
@@ -303,7 +302,7 @@ def aggregate_sentiment_signals(days: int = 30) -> str:
     try:
         result = SignalAggregator.aggregate_sentiment_signals(days)
         return json.dumps(result, indent=2, default=str)
-    
+
     except Exception as e:
         return json.dumps({'error': str(e)})
 
@@ -318,7 +317,7 @@ def merge_multi_source_data(sources_json: str) -> str:
         sources = json.loads(sources_json) if isinstance(sources_json, str) else sources_json
         result = SignalAggregator.merge_multi_source_data(sources)
         return json.dumps(result, indent=2, default=str)
-    
+
     except Exception as e:
         return json.dumps({'error': str(e)})
 
@@ -334,7 +333,7 @@ def batch_semantic_compression(files_json: str, output_file: str = "") -> str:
         files = json.loads(files_json) if isinstance(files_json, str) else files_json
         result = BatchCompressor.compress_batch(files, output_file)
         return json.dumps(result, indent=2)
-    
+
     except Exception as e:
         return json.dumps({'error': str(e)})
 

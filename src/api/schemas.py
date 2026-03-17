@@ -15,9 +15,10 @@ Usage:
         return AnalysisResponse(result=result)
 """
 
-from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, field_validator, ConfigDict
 import logging
+from typing import Any
+
+from pydantic import BaseModel, Field, field_validator
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +27,10 @@ logger = logging.getLogger(__name__)
 
 class AnalysisRequest(BaseModel):
     """Request model for text analysis."""
-    
+
     text: str = Field(
-        ..., 
-        min_length=1, 
+        ...,
+        min_length=1,
         max_length=10000,
         description="Text to analyze"
     )
@@ -51,7 +52,7 @@ class AnalysisRequest(BaseModel):
         le=0.9,
         description="Summary compression ratio (0.1-0.9)"
     )
-    
+
     @field_validator('text')
     @classmethod
     def text_not_empty(cls, v):
@@ -62,7 +63,7 @@ class AnalysisRequest(BaseModel):
 
 class SearchRequest(BaseModel):
     """Request model for semantic search."""
-    
+
     query: str = Field(
         ...,
         min_length=1,
@@ -83,14 +84,14 @@ class SearchRequest(BaseModel):
 
 class ClusteringRequest(BaseModel):
     """Request model for document clustering."""
-    
-    documents: List[str] = Field(
+
+    documents: list[str] = Field(
         ...,
         min_length=2,
         max_length=1000,
         description="Documents to cluster"
     )
-    num_clusters: Optional[int] = Field(
+    num_clusters: int | None = Field(
         default=None,
         ge=2,
         le=100,
@@ -104,8 +105,8 @@ class ClusteringRequest(BaseModel):
 
 class BatchAnalysisRequest(BaseModel):
     """Request model for batch analysis."""
-    
-    documents: List[str] = Field(
+
+    documents: list[str] = Field(
         ...,
         min_length=1,
         max_length=1000,
@@ -121,7 +122,7 @@ class BatchAnalysisRequest(BaseModel):
 
 class SentimentResult(BaseModel):
     """Sentiment analysis result."""
-    
+
     polarity: float = Field(
         ...,
         ge=-1.0,
@@ -138,7 +139,7 @@ class SentimentResult(BaseModel):
         ...,
         description="Sentiment label: very_negative, negative, neutral, positive, very_positive"
     )
-    emotions: Optional[Dict[str, float]] = Field(
+    emotions: dict[str, float] | None = Field(
         default=None,
         description="Detected emotions with scores"
     )
@@ -146,7 +147,7 @@ class SentimentResult(BaseModel):
 
 class SummaryResult(BaseModel):
     """Text summarization result."""
-    
+
     original_length: int = Field(..., description="Original text length")
     summary_length: int = Field(..., description="Summary length")
     compression_ratio: float = Field(
@@ -156,7 +157,7 @@ class SummaryResult(BaseModel):
         description="Compression ratio (0.0-1.0)"
     )
     summary: str = Field(..., description="Summarized text")
-    keywords: List[str] = Field(
+    keywords: list[str] = Field(
         default_factory=list,
         description="Key terms from summary"
     )
@@ -164,7 +165,7 @@ class SummaryResult(BaseModel):
 
 class Entity(BaseModel):
     """Named entity."""
-    
+
     text: str = Field(..., description="Entity text")
     entity_type: str = Field(..., description="Entity type")
     confidence: float = Field(
@@ -179,10 +180,10 @@ class Entity(BaseModel):
 
 class EntityResult(BaseModel):
     """Entity linking result."""
-    
-    entities: List[Entity] = Field(default_factory=list, description="Detected entities")
+
+    entities: list[Entity] = Field(default_factory=list, description="Detected entities")
     count: int = Field(..., description="Total entity count")
-    types: Dict[str, int] = Field(
+    types: dict[str, int] = Field(
         default_factory=dict,
         description="Entity type counts"
     )
@@ -190,17 +191,17 @@ class EntityResult(BaseModel):
 
 class AnalysisResponse(BaseModel):
     """Complete analysis response."""
-    
+
     text_preview: str = Field(..., max_length=200, description="Text preview")
-    sentiment: Optional[SentimentResult] = Field(
+    sentiment: SentimentResult | None = Field(
         default=None,
         description="Sentiment analysis result"
     )
-    summary: Optional[SummaryResult] = Field(
+    summary: SummaryResult | None = Field(
         default=None,
         description="Summary result"
     )
-    entities: Optional[EntityResult] = Field(
+    entities: EntityResult | None = Field(
         default=None,
         description="Entity linking result"
     )
@@ -213,7 +214,7 @@ class AnalysisResponse(BaseModel):
 
 class SearchResult(BaseModel):
     """Single search result."""
-    
+
     id: str = Field(..., description="Document ID")
     text: str = Field(..., description="Document text preview")
     score: float = Field(
@@ -222,7 +223,7 @@ class SearchResult(BaseModel):
         le=1.0,
         description="Similarity score"
     )
-    metadata: Optional[Dict[str, Any]] = Field(
+    metadata: dict[str, Any] | None = Field(
         default=None,
         description="Additional metadata"
     )
@@ -230,9 +231,9 @@ class SearchResult(BaseModel):
 
 class SearchResponse(BaseModel):
     """Search response."""
-    
+
     query: str = Field(..., description="Search query")
-    results: List[SearchResult] = Field(
+    results: list[SearchResult] = Field(
         default_factory=list,
         description="Search results"
     )
@@ -246,11 +247,11 @@ class SearchResponse(BaseModel):
 
 class ClusterInfo(BaseModel):
     """Information about a cluster."""
-    
+
     cluster_id: int = Field(..., ge=0, description="Cluster identifier")
     size: int = Field(..., ge=1, description="Number of documents in cluster")
-    label: Optional[str] = Field(None, description="Cluster label/topic")
-    silhouette_score: Optional[float] = Field(
+    label: str | None = Field(None, description="Cluster label/topic")
+    silhouette_score: float | None = Field(
         None,
         ge=-1.0,
         le=1.0,
@@ -260,17 +261,17 @@ class ClusterInfo(BaseModel):
 
 class ClusteringResponse(BaseModel):
     """Document clustering response."""
-    
+
     num_clusters: int = Field(..., ge=2, description="Number of clusters")
-    clusters: List[ClusterInfo] = Field(
+    clusters: list[ClusterInfo] = Field(
         default_factory=list,
         description="Cluster information"
     )
-    assignments: List[int] = Field(
+    assignments: list[int] = Field(
         default_factory=list,
         description="Document cluster assignments"
     )
-    silhouette_avg: Optional[float] = Field(
+    silhouette_avg: float | None = Field(
         None,
         ge=-1.0,
         le=1.0,
@@ -287,11 +288,11 @@ class ClusteringResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     """Error response model."""
-    
+
     error: str = Field(..., description="Error type")
     message: str = Field(..., description="Error message")
     status_code: int = Field(..., ge=400, le=599, description="HTTP status code")
-    request_id: Optional[str] = Field(
+    request_id: str | None = Field(
         None,
         description="Request ID for tracking"
     )
@@ -301,11 +302,11 @@ class ErrorResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     """Health check response."""
-    
+
     status: str = Field(..., description="Service status: healthy, degraded, unhealthy")
     version: str = Field(..., description="API version")
     timestamp: str = Field(..., description="Response timestamp")
-    components: Dict[str, str] = Field(
+    components: dict[str, str] = Field(
         default_factory=dict,
         description="Status of individual components"
     )
@@ -313,7 +314,7 @@ class HealthResponse(BaseModel):
 
 class StatsResponse(BaseModel):
     """API statistics response."""
-    
+
     uptime_seconds: int = Field(..., ge=0, description="Uptime in seconds")
     requests_total: int = Field(..., ge=0, description="Total requests processed")
     requests_per_second: float = Field(..., ge=0, description="Current RPS")
@@ -324,7 +325,7 @@ class StatsResponse(BaseModel):
         description="Error rate percentage"
     )
     avg_response_time_ms: float = Field(..., ge=0, description="Average response time")
-    cache_hit_rate_percent: Optional[float] = Field(
+    cache_hit_rate_percent: float | None = Field(
         None,
         ge=0.0,
         le=100.0,

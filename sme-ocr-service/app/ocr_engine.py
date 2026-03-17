@@ -24,7 +24,7 @@ class PaddleOcrEngine:
     - Singleton pattern to avoid reloading models
     """
 
-    def __init__(self, use_gpu: Optional[bool] = None):
+    def __init__(self, use_gpu: bool | None = None):
         """
         Initialize OCR engine.
 

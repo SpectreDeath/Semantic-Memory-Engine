@@ -1,6 +1,6 @@
-import nltk
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import json
+
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # Initialize the analyzer
 # Note: On a first run, you may need to run nltk.download('vader_lexicon')
@@ -27,7 +27,7 @@ def analyze_rhetoric(text):
     Analyzes text for sentiment and specific risk signals.
     """
     scores = analyzer.polarity_scores(text)
-    
+
     # Check for specific "tells" from your research
     found_signals = {}
     text_lower = text.lower()

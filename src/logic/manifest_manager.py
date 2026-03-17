@@ -3,6 +3,7 @@ import json
 import os
 from datetime import datetime
 
+
 class ManifestManager:
     def __init__(self, manifest_path: str = None):
         if manifest_path is None:
@@ -13,7 +14,7 @@ class ManifestManager:
 
     def _load(self):
         if os.path.exists(self.path):
-            with open(self.path, 'r') as f:
+            with open(self.path) as f:
                 return json.load(f)
         return {"sources": {}, "last_updated": None}
 

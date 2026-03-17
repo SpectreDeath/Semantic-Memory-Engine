@@ -1,5 +1,5 @@
-import os
 import json
+import os
 import re
 
 # Paths aligned with your MCP Jail and Laboratory setup
@@ -8,27 +8,27 @@ OUTPUT_PATH = "D:/mcp_servers/storage/compiled_signals.json"
 
 def ingest_professional_lexicons():
     compiled_data = {}
-    print(f"🚀 Laboratory Ingestion Started...")
+    print("🚀 Laboratory Ingestion Started...")
 
     # 1. CUSTOM WMODEL PARSER (for Moral Foundations Dictionary.wmodel)
     # This specifically targets the file found in your MFD2 folder
     mfd_path = os.path.join(LEXICON_BASE, "MFD2/Moral Foundations Dictionary.wmodel")
-    
+
     if os.path.exists(mfd_path):
         print(f"🔍 Found WMODEL file: {os.path.basename(mfd_path)}")
         try:
-            with open(mfd_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(mfd_path, encoding='utf-8', errors='ignore') as f:
                 content = f.read()
-                
+
                 # Regex logic: Finds words in ALL CAPS followed by (1)
                 # Example: VERMIN (1), INFESTATION (1)
                 matches = re.findall(r'([A-Z0-9\']+)\s+\(1\)', content)
-                
+
                 for word in matches:
                     # Normalize to lowercase for the analysis engine
                     # Assigning a weight of -2.0 (High Risk Signal)
                     compiled_data[word.lower()] = -2.0
-            
+
             print(f"✅ Extracted {len(matches)} moral signals from WMODEL.")
         except Exception as e:
             print(f"❌ Error parsing WMODEL: {e}")
@@ -42,7 +42,7 @@ def ingest_professional_lexicons():
         for file in os.listdir(eml_folder):
             if file.endswith(('.csv', '.txt')):
                 print(f"🔍 Found EML file: {file}")
-                with open(os.path.join(eml_folder, file), 'r', errors='ignore') as f:
+                with open(os.path.join(eml_folder, file), errors='ignore') as f:
                     for line in f:
                         # Simple split to grab words from the first column
                         parts = line.strip().split(',')
@@ -55,7 +55,7 @@ def ingest_professional_lexicons():
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
         json.dump(compiled_data, f, indent=4)
-    
+
     return len(compiled_data)
 
 if __name__ == "__main__":
@@ -65,4 +65,3 @@ if __name__ == "__main__":
         print(f"📂 Storage Location: {OUTPUT_PATH}")
     else:
         print("\n❌ FAILED: No signals found. Check your folder paths.")
-        

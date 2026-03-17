@@ -1,6 +1,7 @@
-import zlib
 import os
-from typing import Dict, Any
+import zlib
+from typing import Any
+
 
 class StructuralComplexityTool:
     """
@@ -10,7 +11,7 @@ class StructuralComplexityTool:
     """
     __slots__ = ()
 
-    def calculate(self, file_path: str) -> Dict[str, Any]:
+    def calculate(self, file_path: str) -> dict[str, Any]:
         """Calculates the compression ratio of a file."""
         if not os.path.exists(file_path):
             return {"error": "File not found", "status": "Error"}
@@ -27,7 +28,7 @@ class StructuralComplexityTool:
 
             compressed_data = zlib.compress(data)
             comp_size = len(compressed_data)
-            
+
             # Ratio: Compressed / Original
             # Lower ratio (e.g. 0.1) means highly compressible (simple)
             # Higher ratio (e.g. 0.9+) means already compressed or high entropy (complex)
@@ -43,7 +44,7 @@ class StructuralComplexityTool:
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-def calculate_structural_complexity(file_path: str) -> Dict[str, Any]:
+def calculate_structural_complexity(file_path: str) -> dict[str, Any]:
     """Standalone wrapper for structural complexity calculation."""
     tool = StructuralComplexityTool()
     return tool.calculate(file_path)

@@ -1,6 +1,7 @@
-from mcp.server.fastmcp import FastMCP
-from duckduckgo_search import DDGS
 import time
+
+from duckduckgo_search import DDGS
+from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("WebSearcher")
 
@@ -9,7 +10,7 @@ def search_duckduckgo(query: str) -> str:
     """Searches the web for real-time information and returns snippets."""
     max_retries = 3
     retry_delay = 2 # seconds
-    
+
     for attempt in range(max_retries):
         try:
             results_list = []
@@ -22,13 +23,13 @@ def search_duckduckgo(query: str) -> str:
                     return "\n---\n".join(results_list)
                 else:
                     return "No results found for your query."
-                    
+
         except Exception as e:
             if attempt < max_retries - 1:
                 time.sleep(retry_delay)
                 continue
-            return f"Error after {max_retries} attempts: {str(e)}"
-    
+            return f"Error after {max_retries} attempts: {e!s}"
+
     return "Search failed unexpectedly."
 
 if __name__ == "__main__":

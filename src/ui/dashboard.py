@@ -1,12 +1,13 @@
-import streamlit as st
-import pandas as pd
 import json
 import os
 import subprocess
-import time
-from pathlib import Path
 from datetime import datetime
-from src.ui.components import render_metric_cards, render_identity_matrix, render_log_streamer
+from pathlib import Path
+
+import pandas as pd
+import streamlit as st
+
+from src.ui.components import render_identity_matrix, render_log_streamer, render_metric_cards
 from src.utils.entity_filter import is_valid_username
 
 # Page Configuration
@@ -17,8 +18,8 @@ st.set_page_config(
 )
 
 from src.database.supabase_client import supabase
-
 from src.utils.loaders import load_intel_data
+
 
 @st.cache_data(ttl=120)
 def load_supabase_data(table_name):
@@ -33,6 +34,7 @@ def load_supabase_data(table_name):
         return None
 
 import sys
+
 from src.ui.report_gen import generate_session_report
 
 # Sidebar: Control Panel
@@ -78,10 +80,10 @@ with c1:
         osint_temp = load_intel_data("data/raw/osint_results.json")
         news_temp = load_intel_data("data/raw/forensic_news.json")
         research_temp = load_intel_data("data/raw/research_papers.json")
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M")
         report_file = f"reports/forensic_report_{timestamp}.pdf"
-        
+
         try:
             os.makedirs("reports", exist_ok=True)
             from src.ui.report_gen import generate_session_report
@@ -96,13 +98,13 @@ with c2:
     if st.button("🕵️ Case Report"):
         osint_temp = load_intel_data("data/raw/osint_results.json")
         news_temp = load_intel_data("data/raw/forensic_news.json")
-        
+
         from src.ui.analytics import batch_analyze_news
         sentiment_df = batch_analyze_news(news_temp) if news_temp else None
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M")
         report_file = f"data/reports/target_case_{timestamp}.pdf"
-        
+
         try:
             os.makedirs("data/reports", exist_ok=True)
             from src.ui.report_gen import generate_case_report
@@ -134,9 +136,10 @@ if st.sidebar.button("🕵️ Pivot & Scan"):
     else:
         st.sidebar.warning("Invalid username pattern.")
 
-from src.ui.analytics import batch_analyze_news
-from src.ui.dvc_utils import get_dvc_history, fetch_historical_json
 import plotly.graph_objects as go
+
+from src.ui.analytics import batch_analyze_news
+from src.ui.dvc_utils import fetch_historical_json, get_dvc_history
 
 # Main Interface
 st.title("🧭 SME Glass Cockpit")
@@ -169,7 +172,7 @@ with tab_research:
             with st.expander(f"📄 {paper.get('title')}"):
                 st.write(f"**TLDR:** {paper.get('tldr') or 'Summarization pending...'}")
                 st.write(f"**Abstract Snippet:** {paper.get('abstract')[:300] if paper.get('abstract') else 'N/A'}...")
-                
+
                 st.write("**Identified Authors:**")
                 auth_cols = st.columns(len(paper.get('authors', [])) or 1)
                 for idx, author in enumerate(paper.get('authors', [])):
@@ -182,12 +185,12 @@ with tab_research:
 with tab_tactical:
     from src.ui.components import render_tactical_graph
     selected_node = render_tactical_graph(osint_data)
-    
+
     if selected_node:
         st.sidebar.markdown("---")
         st.sidebar.subheader("🎯 Deep Trace Pivot")
         st.sidebar.info(f"Selected: **{selected_node}**")
-        
+
         # Only pivot on usernames (actors), not platform nodes
         if not selected_node.startswith("plat_"):
             if st.sidebar.button(f"🔍 Deep Trace {selected_node}"):
@@ -201,14 +204,14 @@ with tab_tactical:
                 try:
                     logs = []
                     if pivot_log.exists():
-                        with open(pivot_log, 'r') as f:
+                        with open(pivot_log) as f:
                             logs = json.load(f)
                     logs.append(log_entry)
                     with open(pivot_log, 'w') as f:
                         json.dump(logs, f, indent=4)
                 except:
                     pass
-                
+
                 # Targeted Execution
                 run_script(["python", "src/gathering/osint_toolkit.py", "--username", selected_node], f"Deep Trace: {selected_node}")
         else:
@@ -220,12 +223,12 @@ with tab_news:
     if news_data:
         # Prepare color-coded news stream
         news_df = pd.DataFrame(news_data)
-        
+
         # Ensure sentiment is available
         if "polarity" not in news_df.columns:
             from src.ui.analytics import batch_analyze_news
             news_df = batch_analyze_news(news_data)
-            
+
         def color_sentiment(val):
             if val < -0.3: return 'background-color: rgba(255, 75, 75, 0.2)' # Hostile
             if val > 0.3: return 'background-color: rgba(35, 134, 54, 0.2)'  # Academic/Positive
@@ -245,7 +248,7 @@ with tab_sentiment:
         if st.button("🔍 Analyze Forensic Vibe"):
             sentiment_df = batch_analyze_news(news_data)
             avg_polarity = sentiment_df["polarity"].mean()
-            
+
             # Gauge Chart
             fig = go.Figure(go.Indicator(
                 mode = "gauge+number",
@@ -263,7 +266,7 @@ with tab_sentiment:
                 }
             ))
             st.plotly_chart(fig, use_container_width=True)
-            
+
             # Identify Toxicity
             toxic_news = sentiment_df[sentiment_df["polarity"] < -0.3]
             if not toxic_news.empty:
@@ -277,30 +280,30 @@ with tab_sentiment:
 with tab_history:
     st.subheader("🕰️ DVC Time Machine: Historical Comparison")
     dvc_history = get_dvc_history("data/raw/osint_results.json")
-    
+
     if dvc_history:
-        ver_option = st.selectbox("Select Historical Snapshot (Rev)", 
+        ver_option = st.selectbox("Select Historical Snapshot (Rev)",
                                  [f"{h['hash']} - {h['msg']}" for h in dvc_history])
         commit_hash = ver_option.split(" ")[0]
-        
+
         if st.button("🕒 Compare with Current"):
             hist_data = fetch_historical_json("data/raw/osint_results.json", commit_hash)
             if hist_data:
                 # Comparison Logic
                 curr_users = {s['username'] for s in osint_data}
                 hist_users = {s['username'] for s in hist_data}
-                
+
                 new_actors = curr_users - hist_users
                 lost_actors = hist_users - curr_users
-                
+
                 col1, col2 = st.columns(2)
                 col1.metric("Newly Detected Actors", len(new_actors))
                 col2.metric("Sunsetted Profiles", len(lost_actors))
-                
+
                 if new_actors:
                     st.write("**New Actor Footprints:**")
                     st.write(", ".join(list(new_actors)[:10]))
-                
+
                 st.info(f"Historical Snapshot loaded: {commit_hash}. Delta analysis complete.")
             else:
                 st.error("Failed to load historical version.")

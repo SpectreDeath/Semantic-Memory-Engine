@@ -1,6 +1,7 @@
-import numpy as np
 import hashlib
-from typing import List, Dict, Any
+
+import numpy as np
+
 
 class SimHash:
     """
@@ -12,25 +13,25 @@ class SimHash:
     def __init__(self, hash_size: int = 64):
         self.hash_size = hash_size
 
-    def calculate(self, tokens: List[str]) -> int:
+    def calculate(self, tokens: list[str]) -> int:
         """Vectorized SimHash calculation using NumPy."""
         if not tokens:
             return 0
-        
+
         # Initialize the v-vector (fingerprint accumulator)
         v = np.zeros(self.hash_size, dtype=int)
-        
+
         for token in tokens:
             # Create a traditional 64-bit hash for the token using MD5
             h = int(hashlib.md5(token.encode('utf-8')).hexdigest()[:16], 16)
-            
+
             for i in range(self.hash_size):
                 bit = (h >> i) & 1
                 if bit:
                     v[i] += 1
                 else:
                     v[i] -= 1
-        
+
         # Build the final hash from the fingerprint
         ans = 0
         for i in range(self.hash_size):
@@ -43,7 +44,7 @@ class SimHash:
         x = hash1 ^ hash2
         return bin(x).count('1')
 
-def calculate_simhash(tokens: List[str], hash_size: int = 64) -> int:
+def calculate_simhash(tokens: list[str], hash_size: int = 64) -> int:
     """
     Standalone function to calculate SimHash for a token list.
     """

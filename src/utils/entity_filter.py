@@ -7,6 +7,7 @@ Prevents "junk" entities from flooding the OSINT pipeline.
 
 import re
 
+
 def is_valid_username(username: str) -> bool:
     """
     Check if a string looks like a valid username/alias.
@@ -19,18 +20,18 @@ def is_valid_username(username: str) -> bool:
     """
     if not username or not isinstance(username, str):
         return False
-        
+
     # Remove whitespace
     username = username.strip()
-    
+
     # 1. Length check
     if not (3 <= len(username) <= 32):
         return False
-        
+
     # 2. Character set check
     if not re.match(r'^[a-zA-Z0-9_\-]+$', username):
         return False
-        
+
     # 3. Junk word blacklist (academic/citation common words)
     blacklist = {
         "Volume", "Vol", "Page", "Pages", "pp", "Issue", "No", "Number",
@@ -40,7 +41,7 @@ def is_valid_username(username: str) -> bool:
     }
     if username.lower().capitalize() in blacklist or username.upper() in blacklist:
         return False
-        
+
     # 4. Pattern check for common citation junk (e.g., "pp.32-45", "1990-202X")
     if re.search(r'\d{1,2}-\d{1,2}', username) or re.search(r'[0-9]{4}', username):
         return False
@@ -56,11 +57,11 @@ def filter_targets(targets: list) -> list:
 if __name__ == "__main__":
     # Test cases
     test_names = [
-        "SpectreDeath", "ForensicAnalyst_88", "Vol.42", "pp.12-14", 
+        "SpectreDeath", "ForensicAnalyst_88", "Vol.42", "pp.12-14",
         "University", "short", "VeryLongUsernameThatIsActuallyAJunkString",
         "valid-user", "invalid user", "1994", "JSmith"
     ]
-    
+
     filtered = filter_targets(test_names)
     print(f"Original list: {test_names}")
     print(f"Filtered list: {filtered}")

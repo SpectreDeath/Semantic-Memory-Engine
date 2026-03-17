@@ -1,7 +1,9 @@
-from fpdf import FPDF
+import json
 from datetime import datetime
 from pathlib import Path
-import json
+
+from fpdf import FPDF
+
 
 class ForensicReport(FPDF):
     def header(self):
@@ -20,7 +22,7 @@ def generate_session_report(output_path, osint_data, news_data, research_data):
     """Generate a clean PDF report from session data."""
     pdf = ForensicReport()
     pdf.add_page()
-    
+
     # 1. Summary Section
     pdf.set_font('Arial', 'B', 12)
     pdf.cell(0, 10, '1. Executive Summary', 0, 1)
@@ -34,19 +36,19 @@ def generate_session_report(output_path, osint_data, news_data, research_data):
     pdf.set_font('Arial', 'B', 12)
     pdf.cell(0, 10, '2. Discovered Identity Matrix', 0, 1)
     pdf.set_font('Arial', '', 10)
-    
+
     if osint_data:
         for scan in osint_data:
             user = scan.get('username', 'Unknown')
             pdf.set_font('Arial', 'B', 11)
             pdf.cell(0, 10, f"Alias: {user}", 0, 1)
             pdf.set_font('Arial', '', 10)
-            
+
             platforms = []
             for p in scan.get('platforms', []):
                 if p.get('status') == 'found':
                     platforms.append(f"{p['name']} ({p.get('url')})")
-            
+
             if platforms:
                 pdf.multi_cell(0, 7, "Platforms Detected: " + ", ".join(platforms))
             else:
@@ -60,7 +62,7 @@ def generate_session_report(output_path, osint_data, news_data, research_data):
     pdf.set_font('Arial', 'B', 12)
     pdf.cell(0, 10, '3. Academic Context & Signals', 0, 1)
     pdf.set_font('Arial', '', 10)
-    
+
     if research_data:
         for paper in research_data[:5]: # Top 5
             pdf.set_font('Arial', 'B', 10)
@@ -78,7 +80,7 @@ def generate_case_report(output_path, osint_data, sentiment_data=None):
     """Generate a specialized case report focusing on identity hits and sentiment."""
     pdf = ForensicReport()
     pdf.add_page()
-    
+
     pdf.set_font('Arial', 'B', 14)
     pdf.cell(0, 10, 'Target Case Analysis: Confirmed Footprints', 0, 1)
     pdf.ln(5)
@@ -95,9 +97,9 @@ def generate_case_report(output_path, osint_data, sentiment_data=None):
         pdf.set_fill_color(240, 240, 240)
         pdf.cell(0, 10, f"Subject: {user}", 0, 1, 'L', fill=True)
         pdf.set_font('Arial', '', 11)
-        
+
         found_platforms = [p for p in scan.get('platforms', []) if p.get('status') == 'found']
-        
+
         if found_platforms:
             pdf.cell(0, 10, "Confirmed Digital Footprints:", 0, 1)
             pdf.set_font('Arial', '', 10)
@@ -106,14 +108,14 @@ def generate_case_report(output_path, osint_data, sentiment_data=None):
                 pdf.cell(0, 7, f"- {p['name']}: {p.get('url')}", 0, 1)
         else:
             pdf.cell(0, 10, "No active digital footprints confirmed.", 0, 1)
-        
+
         pdf.ln(5)
 
     # 3. Manual Pivots (Investigation Logic)
     pivot_log = Path("data/raw/pivot_log.json")
     if pivot_log.exists():
         try:
-            with open(pivot_log, 'r') as f:
+            with open(pivot_log) as f:
                 logs = json.load(f)
             if logs:
                 pdf.set_font('Arial', 'B', 12)
@@ -134,7 +136,7 @@ def generate_case_report(output_path, osint_data, sentiment_data=None):
         pdf.multi_cell(0, 10, f"Average session sentiment polarity: {avg_pol:.2f}. "
                               f"(Scale: -1 Hostile, 0 Neutral, +1 Positive)")
         pdf.ln(5)
-        
+
         pdf.set_font('Arial', 'B', 11)
         pdf.cell(0, 10, "Top News Signals analyzed:", 0, 1)
         pdf.set_font('Arial', '', 9)
@@ -151,9 +153,9 @@ if __name__ == "__main__":
         data_path = Path("data/raw")
         osint = []
         if (data_path / "osint_results.json").exists():
-            with open(data_path / "osint_results.json", 'r', encoding='utf-8') as f:
+            with open(data_path / "osint_results.json", encoding='utf-8') as f:
                 osint = json.load(f)
-        
+
         generate_session_report("reports/test_forensic_report.pdf", osint, [], [])
         print("Test report generated successfully.")
     except Exception as e:

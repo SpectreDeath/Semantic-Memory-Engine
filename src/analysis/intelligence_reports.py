@@ -14,9 +14,9 @@ Features:
 """
 
 import logging
-from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
 from datetime import datetime
-from dataclasses import dataclass, asdict
+from typing import Any
 
 from src.core.factory import ToolFactory
 from src.core.sentiment_analyzer import SentimentAnalysis
@@ -31,23 +31,23 @@ class IntelligenceReport:
     timestamp: str
     title: str
     summary: str
-    key_points: List[str]
-    sentiment_overview: Dict[str, Any]
-    dominant_themes: List[str]
+    key_points: list[str]
+    sentiment_overview: dict[str, Any]
+    dominant_themes: list[str]
     confidence_score: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class IntelligenceReports:
     """
     Synthesizes multiple analysis perspectives into narrative reports.
     """
-    
+
     def __init__(self):
         """Initialize with required analytical tools."""
         self.summarizer = ToolFactory.create_text_summarizer()
         self.sentiment_analyzer = ToolFactory.create_sentiment_analyzer()
-        
+
         logger.info("IntelligenceReports engine initialized")
 
     def generate_briefing(self, text: str, title: str = "Intelligence Briefing") -> IntelligenceReport:
@@ -63,16 +63,16 @@ class IntelligenceReports:
 
         # 1. Summarization
         summary_obj: Summary = self.summarizer.summarize(text)
-        
+
         # 2. Sentiment Analysis
         sentiment_obj: SentimentAnalysis = self.sentiment_analyzer.analyze(text)
-        
+
         # 3. Emotion-aware points extraction
         key_points = self._extract_key_points(summary_obj, sentiment_obj)
-        
+
         # 4. Synthesize narrative
         narrative = self._synthesize_narrative(summary_obj, sentiment_obj)
-        
+
         return IntelligenceReport(
             timestamp=datetime.now().isoformat(),
             title=title,
@@ -93,18 +93,18 @@ class IntelligenceReports:
             }
         )
 
-    def _extract_key_points(self, summary: Summary, sentiment: SentimentAnalysis) -> List[str]:
+    def _extract_key_points(self, summary: Summary, sentiment: SentimentAnalysis) -> list[str]:
         """Combine summary sentences with emotional highlights."""
         # Fix: access sentence from SentenceScore objects in key_sentences
         points = [s.sentence for s in summary.key_sentences[:3]]
-        
+
         # Add high-intensity emotion points if they exist
         if sentiment.intensity > 0.6 and sentiment.dominant_emotion:
             points.append(f"High emotional intensity detected: Strong expressions of {sentiment.dominant_emotion.value}.")
-            
+
         if sentiment.is_sarcastic:
             points.append("Ambiguity Alert: Potential sarcasm or double-meaning detected in the source.")
-            
+
         return points
 
     def _synthesize_narrative(self, summary: Summary, sentiment: SentimentAnalysis) -> str:
@@ -114,7 +114,7 @@ class IntelligenceReports:
             tone = "positive"
         elif sentiment.polarity_score < -0.3:
             tone = "negative"
-            
+
         narrative = (
             f"The analyzed text presents a {tone} perspective focused on {', '.join(summary.keywords[:3])}. "
             f"The primary substance centers on: {summary.summary_text} "
@@ -149,7 +149,7 @@ class IntelligenceReports:
         ]
         for point in report.key_points:
             md.append(f"- {point}")
-            
+
         md.extend([
             "",
             "## Emotional & Semantic Metadata",
@@ -158,5 +158,5 @@ class IntelligenceReports:
             f"- **Core Themes:** {', '.join(report.dominant_themes)}",
             f"- **Analytical Confidence:** {report.confidence_score:.1%}"
         ])
-        
+
         return "\n".join(md)

@@ -9,13 +9,13 @@ Supports fetching content from various cloud storage providers:
 - Generic HTTP/HTTPS URLs
 """
 
+import hashlib
+import logging
 import os
 import re
-import logging
-import hashlib
-from typing import Optional, Dict, Any, List
-from urllib.parse import urlparse, parse_qs
 from pathlib import Path
+from typing import Any
+from urllib.parse import urlparse
 
 import httpx
 
@@ -36,7 +36,7 @@ class CloudFetcher:
     - S3 (aws.amazon.com/s3/... or any presigned URL)
     - Generic URLs (any HTTP-accessible file)
     """
-    
+
     # Known patterns for cloud providers
     PROVIDER_PATTERNS = {
         "google_drive": [
@@ -60,11 +60,11 @@ class CloudFetcher:
             r"s3\.([^/]+)\.amazonaws\.com/([^/]+)",
         ],
     }
-    
-    def __init__(self, cache_dir: Optional[str] = None):
+
+    def __init__(self, cache_dir: str | None = None):
         self.cache_dir = cache_dir or CACHE_DIR
         os.makedirs(self.cache_dir, exist_ok=True)
-        
+
         # HTTP client with reasonable timeout
         self.client = httpx.AsyncClient(
             timeout=30.0,
@@ -73,7 +73,7 @@ class CloudFetcher:
                 "User-Agent": "SME-CloudFetcher/1.0"
             }
         )
-        
+
     def _detect_provider(self, url: str) -> str:
         """Detect which cloud provider the URL belongs to."""
         for provider, patterns in self.PROVIDER_PATTERNS.items():
@@ -81,18 +81,18 @@ class CloudFetcher:
                 if re.search(pattern, url, re.IGNORECASE):
                     return provider
         return "generic"
-    
+
     def _get_cache_path(self, url: str) -> Path:
         """Generate a cache file path for a URL."""
         url_hash = hashlib.sha256(url.encode()).hexdigest()[:16]
         return Path(self.cache_dir) / f"{url_hash}.cache"
-    
+
     async def fetch(
         self,
         url: str,
         use_cache: bool = True,
         force_download: bool = False
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Fetch content from a cloud storage URL.
         
@@ -117,11 +117,11 @@ class CloudFetcher:
                     "provider": self._detect_provider(url),
                     "cached": True
                 }
-        
+
         # Detect provider and fetch
         provider = self._detect_provider(url)
         logger.info(f"CloudFetcher: Fetching from {provider}: {url[:50]}...")
-        
+
         try:
             if provider == "google_drive":
                 result = await self._fetch_google_drive(url)
@@ -133,17 +133,17 @@ class CloudFetcher:
                 result = await self._fetch_s3(url)
             else:
                 result = await self._fetch_generic(url)
-            
+
             # Cache the result
             if use_cache and result.get("content"):
                 cache_path = self._get_cache_path(url)
                 cache_path.write_bytes(result["content"])
                 logger.info(f"CloudFetcher: Cached to {cache_path}")
-            
+
             result["provider"] = provider
             result["cached"] = False
             return result
-            
+
         except Exception as e:
             logger.error(f"CloudFetcher: Failed to fetch {url}: {e}")
             return {
@@ -151,31 +151,31 @@ class CloudFetcher:
                 "provider": provider,
                 "cached": False
             }
-    
-    async def _fetch_google_drive(self, url: str) -> Dict[str, Any]:
+
+    async def _fetch_google_drive(self, url: str) -> dict[str, Any]:
         """Fetch from Google Drive shared link."""
         # Extract file ID
         match = re.search(r"/d/([^/]+)", url)
         if not match:
             match = re.search(r"id=([^&]+)", url)
-        
+
         if match:
             file_id = match.group(1)
             # Use the export URL for known formats
             download_url = f"https://drive.google.com/uc?export=download&id={file_id}"
         else:
             download_url = url
-        
+
         response = await self.client.get(download_url)
         response.raise_for_status()
-        
+
         return {
             "content": response.content,
             "filename": self._extract_filename(response, url),
             "mime_type": response.headers.get("content-type", "application/octet-stream")
         }
-    
-    async def _fetch_dropbox(self, url: str) -> Dict[str, Any]:
+
+    async def _fetch_dropbox(self, url: str) -> dict[str, Any]:
         """Fetch from Dropbox shared link."""
         # Dropbox shared links need dl=1 for direct download
         if "dl=0" in url:
@@ -184,51 +184,51 @@ class CloudFetcher:
             url = url + "&dl=1"
         elif "dl?" not in url:
             url = url + "?dl=1"
-        
+
         response = await self.client.get(url)
         response.raise_for_status()
-        
+
         return {
             "content": response.content,
             "filename": self._extract_filename(response, url),
             "mime_type": response.headers.get("content-type", "application/octet-stream")
         }
-    
-    async def _fetch_onedrive(self, url: str) -> Dict[str, Any]:
+
+    async def _fetch_onedrive(self, url: str) -> dict[str, Any]:
         """Fetch from OneDrive shared link."""
         # OneDrive uses embed URLs for direct access
         # Try to get the embed URL
         response = await self.client.get(url, follow_redirects=True)
         response.raise_for_status()
-        
+
         return {
             "content": response.content,
             "filename": self._extract_filename(response, url),
             "mime_type": response.headers.get("content-type", "application/octet-stream")
         }
-    
-    async def _fetch_s3(self, url: str) -> Dict[str, Any]:
+
+    async def _fetch_s3(self, url: str) -> dict[str, Any]:
         """Fetch from S3 presigned URL."""
         response = await self.client.get(url)
         response.raise_for_status()
-        
+
         return {
             "content": response.content,
             "filename": self._extract_filename(response, url),
             "mime_type": response.headers.get("content-type", "application/octet-stream")
         }
-    
-    async def _fetch_generic(self, url: str) -> Dict[str, Any]:
+
+    async def _fetch_generic(self, url: str) -> dict[str, Any]:
         """Fetch from generic HTTP/HTTPS URL."""
         response = await self.client.get(url)
         response.raise_for_status()
-        
+
         return {
             "content": response.content,
             "filename": self._extract_filename(response, url),
             "mime_type": response.headers.get("content-type", "application/octet-stream")
         }
-    
+
     def _extract_filename(self, response: httpx.Response, url: str) -> str:
         """Extract filename from response headers or URL."""
         # Try Content-Disposition header
@@ -237,15 +237,15 @@ class CloudFetcher:
             match = re.search(r'filename="?([^";\n]+)"?', content_disposition)
             if match:
                 return match.group(1)
-        
+
         # Try URL path
         parsed = urlparse(url)
         path = Path(parsed.path)
         if path.name and "." in path.name:
             return path.name
-        
+
         return "download"
-    
+
     def _guess_mime_type(self, filename: str) -> str:
         """Guess MIME type from filename extension."""
         ext = Path(filename).suffix.lower()
@@ -265,7 +265,7 @@ class CloudFetcher:
             ".gif": "image/gif",
         }
         return mime_types.get(ext, "application/octet-stream")
-    
+
     async def close(self):
         """Close the HTTP client."""
         await self.client.aclose()
@@ -276,7 +276,8 @@ class CloudFetcher:
 # ---------------------------------------------------------------------------
 import asyncio
 
-def fetch_sync(url: str, **kwargs) -> Dict[str, Any]:
+
+def fetch_sync(url: str, **kwargs) -> dict[str, Any]:
     """Synchronous wrapper for CloudFetcher.fetch()"""
     async def _fetch():
         fetcher = CloudFetcher()
@@ -284,5 +285,5 @@ def fetch_sync(url: str, **kwargs) -> Dict[str, Any]:
             return await fetcher.fetch(url, **kwargs)
         finally:
             await fetcher.close()
-    
+
     return asyncio.run(_fetch())

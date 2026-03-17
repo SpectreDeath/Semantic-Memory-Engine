@@ -145,7 +145,7 @@ def main() -> None:
     total_count = len(df_with_outliers)
     outlier_percentage = (outlier_count / total_count) * 100
 
-    print(f"\nAudit Summary:")
+    print("\nAudit Summary:")
     print(f"- Total records: {total_count}")
     print(f"- Outliers detected: {outlier_count} ({outlier_percentage:.2f}%)")
     print(f"- Output saved to: {args.output}")

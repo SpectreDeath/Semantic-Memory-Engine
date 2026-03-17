@@ -3,7 +3,7 @@ Pydantic schemas for SME OCR Service.
 Defines request/response models for the OCR API.
 """
 
-from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -26,7 +26,7 @@ class OcrPage(BaseModel):
     page_number: int = Field(description="Page number (1-indexed)")
     text: str = Field(description="Full text of the page (all blocks concatenated)")
     blocks: list[OcrBlock] = Field(description="List of text blocks with coordinates")
-    dimensions: Optional[dict[str, int]] = Field(
+    dimensions: dict[str, int] | None = Field(
         default=None,
         description="Page dimensions {width, height} in points"
     )
@@ -56,7 +56,7 @@ class HealthResponse(BaseModel):
     """Health check response."""
     status: str = Field(description="Service status")
     gpu_available: bool = Field(description="Whether GPU is detected")
-    engine_version: Optional[str] = Field(
+    engine_version: str | None = Field(
         default=None,
         description="PaddleOCR version if available"
     )

@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
+
 from src.ai.bridge import run_ai_flow
+
 
 def get_common_sense_context(term: str):
     """
@@ -21,7 +23,7 @@ def run_langflow_flow(flow_name: str, input_value: str):
         return f"Error: Flow {flow_name} not found."
 
     print(f"🧬 Orchestrating Agentic Flow: {flow_name} (Sidecar Bridge)")
-    
+
     # Execute via the Python 3.13 Sidecar
     return run_ai_flow(flow_name, input_value)
 
@@ -30,18 +32,18 @@ def generate_forensic_summary(intel_package: dict):
     High-level entry point for the Prefect pipeline to trigger agentic summarization.
     """
     context = json.dumps(intel_package)
-    
+
     # Check for specific "Smoking Gun" scenario
     osint = intel_package.get("osint", [])
     if isinstance(osint, dict): osint = [osint]
     usernames = {s.get("username") for s in osint if s.get("username")}
-    
+
     if "CBRN_Ghost_99" in usernames:
         print("AGENT ALERT: High-Value Threat 'CBRN_Ghost_99' Detected!")
-        
+
         # Logic Expansion Layer
         cs_context = get_common_sense_context("CBRN")
-        
+
         return (f"CRITICAL ALERT: Target 'CBRN_Ghost_99' identified with cross-referenced digital fingerprints. "
                 f"CBRN sensor array research detected. Common-sense context: {cs_context}. "
                 f"High probability of malicious intent.")

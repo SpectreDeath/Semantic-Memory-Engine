@@ -1,5 +1,6 @@
-from mcp.server.fastmcp import FastMCP
 import os
+
+from mcp.server.fastmcp import FastMCP
 
 # Initialize FastMCP
 mcp = FastMCP("WhitesFileManager")
@@ -11,11 +12,11 @@ def get_safe_path(requested_path: str) -> str:
     """Ensures the path is within the allowed BASE_DIR."""
     # Resolve to absolute path
     target_path = os.path.normpath(os.path.join(BASE_DIR, requested_path))
-    
+
     # Check if the target path is actually within the BASE_DIR
     if not target_path.startswith(BASE_DIR):
         raise PermissionError(f"Access denied: {requested_path} is outside the allowed directory.")
-    
+
     return target_path
 
 @mcp.tool()
@@ -26,10 +27,10 @@ def read_local_file(file_path: str) -> str:
     """
     try:
         safe_path = get_safe_path(file_path)
-        with open(safe_path, "r", encoding="utf-8") as f:
+        with open(safe_path, encoding="utf-8") as f:
             return f.read()
     except Exception as e:
-        return f"Error reading file: {str(e)}"
+        return f"Error reading file: {e!s}"
 
 @mcp.tool()
 def list_directory_contents(dir_path: str = ".") -> str:
@@ -42,7 +43,7 @@ def list_directory_contents(dir_path: str = ".") -> str:
         items = os.listdir(safe_path)
         return "\n".join(items)
     except Exception as e:
-        return f"Error listing directory: {str(e)}"
+        return f"Error listing directory: {e!s}"
 
 if __name__ == "__main__":
     mcp.run()

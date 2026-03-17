@@ -1,17 +1,13 @@
-import os
+import hashlib
 import json
 import logging
-import math
-import hashlib
-import statistics
-import re
-from collections import Counter
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any
 
 # NexusAPI: use self.nexus.get_hsm() — no gateway imports
 # Import shared logic
-from gateway.gatekeeper_logic import calculate_trust_score, calculate_entropy, calculate_burstiness
+from gateway.gatekeeper_logic import calculate_burstiness, calculate_entropy
+
 # Import SDA engine
 try:
     from .sda_engine import SourceDeAnonymizationEngine
@@ -31,7 +27,7 @@ class AnalyticAuditor:
     Detects low-entropy synthetic text and vaults it for counter-intelligence.
     Now includes Source De-Anonymization (SDA) capabilities.
     """
-    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+    def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         self.manifest = manifest
         self.nexus = nexus_api  # SmeCoreBridge
         self.plugin_id = manifest.get("plugin_id")
@@ -53,7 +49,7 @@ class AnalyticAuditor:
             )
         """
         try:
-            # We access the underlying sqlite connection via nexus_api.nexus.conn 
+            # We access the underlying sqlite connection via nexus_api.nexus.conn
             # or execute directly if exposed. SmeCoreBridge exposes .nexus (NexusDB).
             # NexusDB has execute(sql, params).
             self.nexus.nexus.execute(sql)
@@ -61,7 +57,7 @@ class AnalyticAuditor:
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Failed to init DB table: {e}")
 
-    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
         Automatically audits ingestion stream for synthetic patterns.
         Now includes SDA analysis for model attribution.
@@ -72,10 +68,10 @@ class AnalyticAuditor:
         # Calculate Entropy & Burstiness via Shared Logic
         entropy = calculate_entropy(raw_data)
         burstiness = calculate_burstiness(raw_data)
-        
+
         # SDA Analysis for model attribution
         sda_result = self.sda_engine.analyze_text(raw_data)
-        
+
         # Threshold Check for Vaulting
         # Vault if clearly synthetic (Low Entropy OR Low Burstiness)
         if entropy < 4.0 or (burstiness < 2.0 and len(raw_data) > 100):
@@ -88,19 +84,19 @@ class AnalyticAuditor:
                 "sda_analysis": sda_result,
                 "action": "vaulted"
             }
-        
+
         return {
-            "status": "cleared", 
-            "entropy": entropy, 
+            "status": "cleared",
+            "entropy": entropy,
             "burstiness": burstiness,
             "sda_analysis": sda_result
         }
 
     def get_tools(self) -> list:
         return [
-            self.audit_text_integrity, 
-            self.vault_synthetic_pattern, 
-            self.compare_to_synthetic_baseline, 
+            self.audit_text_integrity,
+            self.vault_synthetic_pattern,
+            self.compare_to_synthetic_baseline,
             self.calculate_burstiness_metric,
             self.sda_analyze_model_origin,
             self.sda_get_signature_info,
@@ -123,7 +119,7 @@ class AnalyticAuditor:
         """
         entropy = calculate_entropy(text)
         burstiness = calculate_burstiness(text)
-        
+
         # Import Gatekeeper Logic (Dynamic to avoid circular imports during startup if logic not ready)
         try:
             from gateway.gatekeeper_logic import calculate_trust_score, calculate_vault_proximity
@@ -135,7 +131,7 @@ class AnalyticAuditor:
             # Fallback if logic library missing
             verdict = "Likely Human" if entropy >= 4.0 else "Likely Synthetic"
             nts = "N/A"
-        
+
         return json.dumps({
             "entropy_bits": round(entropy, 4),
             "burstiness": round(burstiness, 4),
@@ -151,7 +147,7 @@ class AnalyticAuditor:
         timestamp = datetime.now().isoformat()
         # Create integrity hash
         data_hash = hashlib.sha256(text.encode()).hexdigest()
-        
+
         sql = """
             INSERT INTO nexus_synthetic_baselines (source_id, text_sample, entropy_score, timestamp, integrity_hash)
             VALUES (?, ?, ?, ?, ?)
@@ -167,7 +163,7 @@ class AnalyticAuditor:
         Compares new text against the 'Synthetic Baseline Vault' to find stylistic matches.
         """
         entropy = calculate_entropy(text)
-        
+
         # Find samples with similar entropy (+/- 0.1)
         sql = """
             SELECT source_id, entropy_score, text_sample FROM nexus_synthetic_baselines
@@ -178,7 +174,7 @@ class AnalyticAuditor:
             lower = entropy - 0.1
             upper = entropy + 0.1
             res = self.nexus.nexus.query(sql, (lower, upper))
-            
+
             matches = []
             if res:
                 for row in res:
@@ -187,13 +183,13 @@ class AnalyticAuditor:
                         "baseline_entropy": row["entropy_score"],
                         "delta": abs(entropy - row["entropy_score"])
                     })
-            
+
             return json.dumps({
                 "input_entropy": entropy,
                 "matches_found": len(matches),
                 "closest_matches": sorted(matches, key=lambda x: x['delta'])
             }, indent=2)
-            
+
         except Exception as e:
             return json.dumps({"error": str(e)})
 
@@ -205,7 +201,7 @@ class AnalyticAuditor:
             result = self.sda_engine.analyze_text(text)
             return json.dumps(result, indent=2)
         except Exception as e:
-            return json.dumps({"error": f"SDA Analysis failed: {str(e)}"})
+            return json.dumps({"error": f"SDA Analysis failed: {e!s}"})
 
     async def sda_get_signature_info(self) -> str:
         """
@@ -215,7 +211,7 @@ class AnalyticAuditor:
             info = self.sda_engine.get_signature_info()
             return json.dumps(info, indent=2)
         except Exception as e:
-            return json.dumps({"error": f"Failed to get signature info: {str(e)}"})
+            return json.dumps({"error": f"Failed to get signature info: {e!s}"})
 
     async def sda_compare_texts(self, text_a: str, text_b: str) -> str:
         """
@@ -225,14 +221,14 @@ class AnalyticAuditor:
             result = self.sda_engine.compare_texts(text_a, text_b)
             return json.dumps(result, indent=2)
         except Exception as e:
-            return json.dumps({"error": f"Text comparison failed: {str(e)}"})
+            return json.dumps({"error": f"Text comparison failed: {e!s}"})
 
 
-def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
+def create_plugin(manifest: dict[str, Any], nexus_api: Any):
     """Factory function to create and return an AnalyticAuditor instance."""
     return AnalyticAuditor(manifest, nexus_api)
 
 
-def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+def register_extension(manifest: dict[str, Any], nexus_api: Any):
     """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
     return create_plugin(manifest, nexus_api)

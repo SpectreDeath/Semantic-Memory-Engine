@@ -9,7 +9,7 @@ import json
 import logging
 import string
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from gateway.routers.shared import make_safe_tool_call, serialize_result
 
@@ -27,7 +27,7 @@ def register(
     safe_tool_call = make_safe_tool_call(registry, metrics_manager)
 
     @mcp.tool()
-    def entity_extractor(text: str, session_id: Optional[str] = None) -> str:
+    def entity_extractor(text: str, session_id: str | None = None) -> str:
         """
         Advanced entity cross-referencing against the 10GB ConceptNet knowledge graph.
 
@@ -76,7 +76,7 @@ def register(
         return json.dumps(extracted, indent=2)
 
     @mcp.tool()
-    def analyze_sentiment(text: str, session_id: Optional[str] = None) -> str:
+    def analyze_sentiment(text: str, session_id: str | None = None) -> str:
         """
         Detect emotions, sarcasm, and overall sentiment in text.
 
@@ -122,7 +122,7 @@ def register(
     def link_entities(
         text: str,
         knowledge_base: str = "wikipedia",
-        session_id: Optional[str] = None,
+        session_id: str | None = None,
     ) -> str:
         """
         Extract and link named entities to knowledge bases.
@@ -174,7 +174,7 @@ def register(
         text: str,
         mode: str = "extractive",
         ratio: float = 0.3,
-        session_id: Optional[str] = None,
+        session_id: str | None = None,
     ) -> str:
         """
         Summarize text using multiple summarization modes.
@@ -224,7 +224,7 @@ def register(
             return json.dumps({"error": str(e)})
 
     @mcp.tool()
-    def analyze_nlp(text: str, session_id: Optional[str] = None) -> str:
+    def analyze_nlp(text: str, session_id: str | None = None) -> str:
         """Perform deep NLP analysis: dependencies, coreference, and semantic roles."""
         logger.info(f"analyze_nlp called: text_len={len(text)}")
         result = safe_tool_call("analyze_nlp", "process", text)
@@ -234,7 +234,7 @@ def register(
         return json.dumps(result, indent=2, default=str)
 
     @mcp.tool()
-    def resolve_concept(term: str, session_id: Optional[str] = None) -> str:
+    def resolve_concept(term: str, session_id: str | None = None) -> str:
         """Map an ambiguous term to a specific knowledge graph node."""
         logger.info(f"resolve_concept called: term='{term}'")
         result = safe_tool_call("resolve_concept", "resolve", term)

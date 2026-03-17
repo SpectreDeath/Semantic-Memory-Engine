@@ -8,26 +8,24 @@ Usage:
     python __main__.py run [tool-name] [args]
 """
 
-import sys
 import argparse
-from typing import Dict, Callable
-from pathlib import Path
+
+from src.analysis.intelligence_reports import IntelligenceReports
+from src.analysis.knowledge_graph import KnowledgeGraph
+from src.analysis.overlap_discovery import OverlapDiscovery
+from src.core.centrifuge import Centrifuge
+from src.core.dashboard_cmd import DashboardOrchestrator
+from src.monitoring.diagnostics import SystemMonitor
+from src.query.engine import SemanticSearchEngine
+from src.query.scout_integration import Scout
 
 # Import core tool classes
 from src.scribe.engine import ScribeEngine
-from src.query.scout_integration import Scout
-from src.query.engine import SemanticSearchEngine
 from src.synapse.synapse import MemoryConsolidator
 from src.visualization.dashboard import RhetoricAnalyzer
-from src.core.centrifuge import Centrifuge
-from src.monitoring.diagnostics import SystemMonitor
-from src.analysis.knowledge_graph import KnowledgeGraph
-from src.analysis.intelligence_reports import IntelligenceReports
-from src.analysis.overlap_discovery import OverlapDiscovery
-from src.core.dashboard_cmd import DashboardOrchestrator
 
 # Tool registry
-TOOLS: Dict[str, Dict[str, any]] = {
+TOOLS: dict[str, dict[str, any]] = {
     "scribe": {
         "name": "Scribe Authorship Engine",
         "description": "Forensic authorship analysis and attribution",
@@ -155,10 +153,10 @@ def show_tool_info(tool_name: str):
     if tool_name not in TOOLS:
         print(f"❌ Tool '{tool_name}' not found.")
         print("\nAvailable tools:")
-        for key in TOOLS.keys():
+        for key in TOOLS:
             print(f"  - {key}")
         return
-    
+
     tool = TOOLS[tool_name]
     print(f"\n📋 {tool['name']}")
     print("=" * 70)
@@ -178,18 +176,18 @@ def run_tool(tool_name: str, args: list = None):
     if tool_name not in TOOLS:
         print(f"❌ Tool '{tool_name}' not found.")
         return
-    
+
     tool_class = TOOLS[tool_name]['class']
     print(f"🚀 Launching {TOOLS[tool_name]['name']}...")
     print(f"   From: {tool_class.__module__}")
-    
+
     try:
         # Try to instantiate and run if the tool supports it
         instance = tool_class()
         if hasattr(instance, 'main'):
             instance.main(args or [])
         else:
-            print(f"   Tool is loaded but requires programmatic usage.")
+            print("   Tool is loaded but requires programmatic usage.")
             print(f"   See documentation: docs/{tool_name.upper()}_*.md")
     except Exception as e:
         print(f"❌ Error running tool: {e}")
@@ -202,7 +200,7 @@ def main():
         description="SimpleMem Laboratory CLI",
         add_help=True,
     )
-    
+
     parser.add_argument(
         "command",
         nargs="?",
@@ -220,9 +218,9 @@ def main():
         nargs="*",
         help="Additional arguments for the tool",
     )
-    
+
     args = parser.parse_args()
-    
+
     if args.command == "list":
         list_tools()
     elif args.command == "info":

@@ -25,12 +25,12 @@ Integration:
 
 import asyncio
 import logging
-from typing import Optional, Tuple, Dict, Any
 from datetime import datetime
+from typing import Any
 from urllib.parse import urlparse
 
 try:
-    from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, BrowserConfig
+    from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
     from crawl4ai.content_filter_strategy import PruningContentFilter
     CRAWL4AI_AVAILABLE = True
 except ImportError:
@@ -38,7 +38,6 @@ except ImportError:
     print("⚠️  Crawl4AI not installed. Install: pip install crawl4ai")
 
 import sqlite3
-from pathlib import Path
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -65,33 +64,33 @@ class HarvesterSpider:
         )
         print(f"✅ Captured: {markdown[:200]}...")
     """
-    
+
     def __init__(self, db_path: str = DB_PATH):
         """Initialize spider with database connection."""
         if not CRAWL4AI_AVAILABLE:
             raise ImportError("Crawl4AI required. Install: pip install crawl4ai")
-        
+
         self.db_path = db_path
         self.browser_config = BrowserConfig(headless=True)
-        
+
         # PruningContentFilter removes non-essential elements
         # threshold=0.45: Keep content with >45% semantic density
         # min_word_count=50: Discard sections with <50 words
         self.content_filter = PruningContentFilter(
-            threshold=0.45, 
+            threshold=0.45,
             min_word_count=50
         )
-        
+
         # Crawler configuration for optimal compression
         self.run_config = CrawlerRunConfig(
             content_filter=self.content_filter,
             word_count_threshold=100,  # Skip pages with <100 words
             cache_mode="BYPASS"  # Always fresh (don't rely on browser cache)
         )
-        
+
         logger.info("🕸️ HarvesterSpider initialized (Crawl4AI + PruningContentFilter)")
-    
-    async def capture_site(self, url: str) -> Tuple[Optional[int], Optional[str]]:
+
+    async def capture_site(self, url: str) -> tuple[int | None, str | None]:
         """
         Fetch, clean, and archive web content.
         
@@ -110,18 +109,18 @@ class HarvesterSpider:
             # Async fetch with Crawl4AI
             async with AsyncWebCrawler(config=self.browser_config) as crawler:
                 result = await crawler.arun(url=url, config=self.run_config)
-            
+
             if not result.success:
                 logger.error(f"❌ Crawl failed for {url}: {result.error_message}")
                 return None, None
-            
+
             # Extract LLM-ready markdown (fit_markdown removes semantic noise)
             clean_md = result.markdown_v2.fit_markdown
-            
+
             if not clean_md or len(clean_md) < 100:
                 logger.warning(f"⚠️ Insufficient content from {url} ({len(clean_md or '')} chars)")
                 return None, None
-            
+
             # Archive to Centrifuge DB
             capture_id = self._archive_to_db(
                 url=url,
@@ -134,15 +133,15 @@ class HarvesterSpider:
                     'capture_time_ms': result.response_time * 1000
                 }
             )
-            
+
             logger.info(f"✅ Captured: {url} | ID: {capture_id} | {len(clean_md.split())} words")
             return capture_id, clean_md
-        
+
         except Exception as e:
             logger.error(f"❌ Error capturing {url}: {e}")
             return None, None
-    
-    async def batch_capture(self, urls: list) -> Dict[str, Any]:
+
+    async def batch_capture(self, urls: list) -> dict[str, Any]:
         """
         Capture multiple URLs concurrently.
         
@@ -170,12 +169,12 @@ class HarvesterSpider:
             'captures': [],
             'total_words': 0
         }
-        
+
         try:
             # Run captures concurrently (limited by system resources)
             tasks = [self.capture_site(url) for url in urls]
             responses = await asyncio.gather(*tasks)
-            
+
             for url, (capture_id, markdown) in zip(urls, responses):
                 if capture_id:
                     results['captured'] += 1
@@ -183,15 +182,15 @@ class HarvesterSpider:
                     results['total_words'] += len(markdown.split()) if markdown else 0
                 else:
                     results['failed'] += 1
-            
+
             logger.info(f"✅ Batch complete: {results['captured']} captured, {results['failed']} failed")
             return results
-        
+
         except Exception as e:
             logger.error(f"❌ Batch error: {e}")
             return results
-    
-    def _archive_to_db(self, url: str, clean_markdown: str, metadata: dict) -> Optional[int]:
+
+    def _archive_to_db(self, url: str, clean_markdown: str, metadata: dict) -> int | None:
         """
         Archive cleaned content to Centrifuge DB.
         
@@ -205,14 +204,14 @@ class HarvesterSpider:
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             # Ensure table exists
             self._ensure_table(cursor)
-            
+
             # Insert or update
             parsed = urlparse(url)
             domain = parsed.netloc
-            
+
             cursor.execute("""
                 INSERT OR REPLACE INTO raw_content 
                 (url, domain, markdown_content, extracted_schema, 
@@ -231,17 +230,17 @@ class HarvesterSpider:
                 self._score_quality(clean_markdown),
                 'crawl4ai'
             ))
-            
+
             conn.commit()
             capture_id = cursor.lastrowid
             conn.close()
-            
+
             return capture_id
-        
+
         except Exception as e:
             logger.error(f"❌ Archive error: {e}")
             return None
-    
+
     def _ensure_table(self, cursor):
         """Create raw_content table if it doesn't exist."""
         cursor.execute("""
@@ -261,32 +260,32 @@ class HarvesterSpider:
                 error_log TEXT
             )
         """)
-        
+
         # Create index for Loom pipeline (fast queries)
         cursor.execute("""
             CREATE INDEX IF NOT EXISTS idx_raw_content_loom 
             ON raw_content(processed_by_loom)
         """)
-    
+
     def _score_quality(self, markdown: str) -> int:
         """Score content quality 0-100."""
         score = 50  # Base score
-        
+
         # More content = higher quality
         word_count = len(markdown.split())
         score += min(30, word_count // 100)
-        
+
         # Structure indicates quality
         headers = markdown.count('#')
         score += min(20, headers)
-        
+
         return max(0, min(100, score))
-    
+
     def _detect_js(self, html: str) -> bool:
         """Detect if page has significant JavaScript."""
         import re
         return bool(re.search(r'<script|async|defer|fetch|XMLHttpRequest|React|Vue|Angular', html, re.I))
-    
+
     def get_unprocessed_content(self, limit: int = 50) -> list:
         """
         Get content ready for Loom semantic compression.
@@ -302,7 +301,7 @@ class HarvesterSpider:
             conn = sqlite3.connect(self.db_path)
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            
+
             cursor.execute("""
                 SELECT url, markdown_content, id 
                 FROM raw_content 
@@ -311,57 +310,57 @@ class HarvesterSpider:
                 ORDER BY source_quality DESC, timestamp DESC
                 LIMIT ?
             """, (limit,))
-            
+
             results = [dict(row) for row in cursor.fetchall()]
             conn.close()
-            
+
             return results
-        
+
         except Exception as e:
             logger.error(f"❌ Query error: {e}")
             return []
-    
+
     def mark_processed(self, url: str) -> bool:
         """Mark content as processed by Loom."""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             cursor.execute("""
                 UPDATE raw_content 
                 SET processed_by_loom = 1 
                 WHERE url = ?
             """, (url,))
-            
+
             conn.commit()
             conn.close()
-            
+
             return cursor.rowcount > 0
-        
+
         except Exception as e:
             logger.error(f"❌ Update error: {e}")
             return False
-    
+
     def get_stats(self) -> dict:
         """Get database statistics."""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            
+
             cursor.execute("SELECT COUNT(*) FROM raw_content")
             total = cursor.fetchone()[0]
-            
+
             cursor.execute("SELECT COUNT(*) FROM raw_content WHERE processed_by_loom = 1")
             processed = cursor.fetchone()[0]
-            
+
             cursor.execute("SELECT AVG(source_quality) FROM raw_content")
             avg_quality = cursor.fetchone()[0] or 0
-            
+
             cursor.execute("SELECT SUM(LENGTH(markdown_content)) FROM raw_content")
             total_bytes = cursor.fetchone()[0] or 0
-            
+
             conn.close()
-            
+
             return {
                 'total_captured': total,
                 'processed_by_loom': processed,
@@ -369,7 +368,7 @@ class HarvesterSpider:
                 'avg_quality': avg_quality,
                 'storage_mb': total_bytes / (1024 * 1024)
             }
-        
+
         except Exception as e:
             logger.error(f"❌ Stats error: {e}")
             return {}
@@ -384,7 +383,7 @@ async def harvest_url(url: str) -> str:
     import json
     spider = HarvesterSpider()
     capture_id, markdown = await spider.capture_site(url)
-    
+
     if capture_id:
         return json.dumps({
             'status': 'success',
@@ -401,7 +400,7 @@ async def harvest_batch(urls: list) -> str:
     import json
     spider = HarvesterSpider()
     results = await spider.batch_capture(urls)
-    
+
     return json.dumps({
         'status': 'success',
         'captured': results['captured'],
@@ -415,7 +414,7 @@ def harvest_stats() -> str:
     import json
     spider = HarvesterSpider()
     stats = spider.get_stats()
-    
+
     return json.dumps({
         'status': 'success',
         **stats
@@ -430,7 +429,7 @@ if __name__ == "__main__":
     async def demo():
         """Demonstrate HarvesterSpider workflow."""
         spider = HarvesterSpider()
-        
+
         # Example 1: Single capture
         print("\n1️⃣ Single URL capture:")
         capture_id, markdown = await spider.capture_site(
@@ -440,14 +439,14 @@ if __name__ == "__main__":
             print(f"✅ Captured (ID: {capture_id})")
             print(f"   Words: {len(markdown.split())}")
             print(f"   Preview: {markdown[:200]}...")
-        
+
         # Example 2: Get pending content for Loom
         print("\n2️⃣ Pending content for Loom:")
         pending = spider.get_unprocessed_content(limit=5)
         print(f"✅ Found {len(pending)} items ready for Loom")
         for item in pending[:2]:
             print(f"   • {item['url']}: {len(item['markdown_content'].split())} words")
-        
+
         # Example 3: Statistics
         print("\n3️⃣ Database statistics:")
         stats = spider.get_stats()
@@ -455,5 +454,5 @@ if __name__ == "__main__":
         print(f"   Processed: {stats['processed_by_loom']}")
         print(f"   Pending: {stats['pending']}")
         print(f"   Avg quality: {stats['avg_quality']:.0f}/100")
-    
+
     asyncio.run(demo())

@@ -1,18 +1,24 @@
-import os
 import json
 import logging
-from typing import Dict, Any, List, Set
-
-# Import optimized types
-from src.sme.epistemic_validator import DataNode
+import os
+from typing import Any
 
 # Import shared trust logic
-from gateway.gatekeeper_logic import calculate_trust_score, calculate_entropy, calculate_burstiness, calculate_vault_proximity, analyze_model_origin
+from gateway.gatekeeper_logic import (
+    analyze_model_origin,
+    calculate_burstiness,
+    calculate_entropy,
+    calculate_trust_score,
+    calculate_vault_proximity,
+)
 
 # NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
 from src.core.plugin_base import BasePlugin
-from src.utils.error_handling import ErrorHandler, create_error_response, OperationContext
-from src.utils.performance import get_performance_monitor, cache_result, LRUCache
+
+# Import optimized types
+from src.sme.epistemic_validator import DataNode
+from src.utils.error_handling import ErrorHandler
+from src.utils.performance import LRUCache, get_performance_monitor
 
 logger = logging.getLogger("LawnmowerMan.Gatekeeper")
 
@@ -21,7 +27,7 @@ class EpistemicGatekeeper(BasePlugin):
     Epistemic Gatekeeper Extension (v1.2.0).
     Provides volume-based trust auditing (Heat Maps) and governance.
     """
-    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+    def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
         self.error_handler = ErrorHandler(self.plugin_id)
         self.monitor = get_performance_monitor(self.plugin_id)
@@ -45,7 +51,7 @@ class EpistemicGatekeeper(BasePlugin):
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
 
-    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
         Epistemic Gatekeeper does not process on_ingestion directly.
         It provides tools for trust auditing and semantic analysis.
@@ -70,29 +76,29 @@ class EpistemicGatekeeper(BasePlugin):
         """
         if not os.path.exists(folder_path):
             return json.dumps({"error": f"Path not found: {folder_path}"})
-            
+
         file_stats = []
         total_files = 0
         synthetic_count = 0
         human_count = 0
-        
+
         for root, _, files in os.walk(folder_path):
             for file in files:
                 if file.lower().endswith(('.txt', '.md', '.log', '.json')):
                     file_path = os.path.join(root, file)
                     try:
-                        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        with open(file_path, encoding='utf-8', errors='ignore') as f:
                             content = f.read()
-                            
+
                         if len(content) < 50:
                             continue
-                            
+
                         # Calculate Metrics
                         entropy = calculate_entropy(content)
                         burstiness = calculate_burstiness(content)
                         proximity = calculate_vault_proximity(content)
                         trust_data = calculate_trust_score(entropy, burstiness, proximity)
-                        
+
                         # SDA Profiler v1.3.0 Attribution
                         attribution = analyze_model_origin(content)
                         attr_msg = ""
@@ -101,13 +107,13 @@ class EpistemicGatekeeper(BasePlugin):
 
                         nts = trust_data["nts"]
                         verdict = trust_data["label"]
-                        
+
                         # Updated Classifications for v1.2.0
                         if nts < 50:
                             synthetic_count += 1
                         elif nts > 80:
                             human_count += 1
-                            
+
                         node = DataNode(
                             file=file,
                             path=file_path,
@@ -121,7 +127,7 @@ class EpistemicGatekeeper(BasePlugin):
                         )
                         file_stats.append(node)
                         total_files += 1
-                        
+
                     except Exception as e:
                         logger.warning(f"Failed to audit {file}: {e}")
 
@@ -149,10 +155,10 @@ class EpistemicGatekeeper(BasePlugin):
             },
             "detailed_map": [n.to_dict() for n in sorted(file_stats, key=lambda x: x.nts)]
         }
-        
+
         return json.dumps(report, indent=2)
 
-    async def semantic_nexus_check(self, new_entities: List[str], nexus_entities: Set[str]) -> float:
+    async def semantic_nexus_check(self, new_entities: list[str], nexus_entities: set[str]) -> float:
         """
         Calculates a trust signal based on how well new data aligns 
         with the established 'Nexus' memory.
@@ -163,19 +169,19 @@ class EpistemicGatekeeper(BasePlugin):
 
         new_set = set(new_entities)
         intersection = new_set.intersection(nexus_entities)
-        
+
         # Jaccard Similarity: Intersection over Union
         union = new_set.union(nexus_entities)
         similarity = len(intersection) / len(union) if union else 0
-        
-        # Divergence Penalty: If new data introduces too many 
+
+        # Divergence Penalty: If new data introduces too many
         # unknown variables, we flag it.
         novelty_ratio = len(new_set - nexus_entities) / len(new_set) if new_set else 0
-        
+
         # Final Trust Signal (0.0 to 1.0)
         # We want high similarity and low novelty for "High Trust"
         trust_signal = (similarity * 0.7) + ((1 - novelty_ratio) * 0.3)
-        
+
         return round(trust_signal, 4)
 
     async def get_gatekeeper_stats(self) -> str:
@@ -183,7 +189,7 @@ class EpistemicGatekeeper(BasePlugin):
         try:
             cache_stats = self.file_cache.get_stats()
             performance_stats = self.monitor.get_all_stats()
-            
+
             stats = {
                 "plugin_id": self.plugin_id,
                 "cache_stats": cache_stats,
@@ -206,11 +212,11 @@ class EpistemicGatekeeper(BasePlugin):
             return self.error_handler.handle_tool_error(e, "clear_file_cache")
 
 
-def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
+def create_plugin(manifest: dict[str, Any], nexus_api: Any):
     """Factory function to create and return an EpistemicGatekeeper instance."""
     return EpistemicGatekeeper(manifest, nexus_api)
 
 
-def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+def register_extension(manifest: dict[str, Any], nexus_api: Any):
     """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
     return create_plugin(manifest, nexus_api)

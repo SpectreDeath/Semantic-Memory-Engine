@@ -1,6 +1,6 @@
-import pytest
-from src.core.redactor import Redactor
 from src.analysis.federation_gate import FederationGate
+from src.core.redactor import Redactor
+
 
 def test_basic_redaction():
     text = "Contact John Smith at john.smith@example.com or visit https://sme-forensics.com"

@@ -4,24 +4,21 @@
 # Refactored to use modular tasks from src/orchestration/tasks/
 # =============================================================================
 
-import sys
 
 from prefect import flow, get_run_logger, task
 
-
 # Import extracted tasks modules
 from src.orchestration.tasks import (
-    run_rss_bridge,
-    run_scholar_api,
-    run_osint_scan,
-    stream_bipartite,
     extract_targets,
     run_forensic_summary,
+    run_osint_scan,
+    run_rss_bridge,
+    run_scholar_api,
+    stream_bipartite,
 )
-from tests.verify_forensic_stack import main as run_verification
-from src.utils.loaders import load_intel_data
 from src.utils.alerts import check_for_threat_collision
-
+from src.utils.loaders import load_intel_data
+from tests.verify_forensic_stack import main as run_verification
 
 
 @task(name="Verify Forensic Stack")
@@ -38,7 +35,7 @@ def s_m_e_full_intel_run():
     """Automated intelligence gathering pipeline."""
     logger = get_run_logger()
     logger.info("SME Intelligence Run Initiated")
-    
+
     # 1. Health Check
     if not verify_stack():
         logger.error("System Unhealthy. Aborting Intel Run.")
@@ -47,7 +44,7 @@ def s_m_e_full_intel_run():
     # 2. Macro Ingestion
     run_rss_bridge()
     run_scholar_api()
-    
+
     # 3. Pivot & Scan
     targets = extract_targets()
     osint_hits = []
@@ -55,23 +52,23 @@ def s_m_e_full_intel_run():
         osint_hits = run_osint_scan.map(targets)
         # Bipartite streaming
         stream_bipartite(osint_hits)
-    
+
     # Agentic Intelligence & Alerts
     # Load raw data for packaging
     intel_package = {
         "osint": load_intel_data("data/raw/osint_results.json"),
         "news": load_intel_data("data/raw/forensic_news.json")
     }
-    
+
     # Trigger Brain (Langflow Simulation/Runtime)
     run_forensic_summary(intel_package)
-    
+
     # Trigger Active Defense Alerts
     try:
         check_for_threat_collision(intel_package)
     except Exception as e:
         logger.warning(f"Alert System Error: {e}")
-    
+
     logger.info("✅ SME Intelligence Run Complete.")
 
 

@@ -9,10 +9,10 @@ building blocks.
 import json
 import logging
 import time
+from collections.abc import Callable
 from dataclasses import asdict, is_dataclass
-from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -38,7 +38,7 @@ class InfluenceRequest(BaseModel):
 
 class JustifyRequest(BaseModel):
     claim: str = Field(..., description="The forensic conclusion to audit.")
-    evidence_sources: List[Dict[str, str]] = Field(
+    evidence_sources: list[dict[str, str]] = Field(
         ..., description="List of source metadata with 'id' and optional 'context'."
     )
 
@@ -109,7 +109,7 @@ def make_safe_tool_call(registry: Any, metrics_manager: Any) -> Callable:
     """
     _log = logging.getLogger("lawnmower.safe_tool_call")
 
-    def safe_tool_call(tool_name: str, method_name: str, *args, **kwargs) -> Dict[str, Any]:
+    def safe_tool_call(tool_name: str, method_name: str, *args, **kwargs) -> dict[str, Any]:
         """Safely call a registry tool method with circuit-breaker metrics."""
         start_time = time.perf_counter()
         try:
@@ -150,11 +150,11 @@ def make_safe_tool_call(registry: Any, metrics_manager: Any) -> Callable:
 
 
 def validate_access(
-    token: Optional[str],
+    token: str | None,
     client_id: str,
     auth_manager: Any,
     rate_limiter: Any,
-) -> Optional[str]:
+) -> str | None:
     """Return a JSON error string if access is denied, else None."""
     allowed, _ = rate_limiter.is_allowed(client_id)
     if not allowed:

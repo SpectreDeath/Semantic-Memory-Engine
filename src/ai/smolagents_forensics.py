@@ -9,11 +9,9 @@ v2.3.0: Added Smolagents for agentic AI workflows.
 
 import json
 import re
-from typing import List
 
 import smolagents
 from smolagents import tools as tools_mod
-
 
 # ============================================================================
 # Custom SME Tools for Smolagents
@@ -33,7 +31,7 @@ def analyze_stylometry(text: str) -> str:
     # This would call the actual SME stylometry tools
     words = text.split()
     unique_words = set(words)
-    
+
     return json.dumps({
         "word_count": len(words),
         "unique_words": len(unique_words),
@@ -55,10 +53,10 @@ def check_source_trust(url: str) -> str:
     """
     # Simulated trust checking
     trust_indicators = ["edu", "gov", "org"]  # Generally more trustworthy
-    
+
     base_domain = url.split("/")[2] if "/" in url else url
     trust_level = "high" if any(ind in base_domain for ind in trust_indicators) else "medium"
-    
+
     return json.dumps({
         "url": url,
         "trust_level": trust_level,
@@ -79,7 +77,7 @@ def extract_entities(text: str) -> str:
     """
     # Find potential entities (capitalized words)
     entities = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', text)
-    
+
     return json.dumps({
         "entities": list(set(entities)),
         "count": len(set(entities)),
@@ -87,7 +85,7 @@ def extract_entities(text: str) -> str:
 
 
 @tools_mod.tool
-def calculate_risk_score(indicators: List[str]) -> str:
+def calculate_risk_score(indicators: list[str]) -> str:
     """
     Calculate risk score from behavioral indicators.
     
@@ -103,20 +101,19 @@ def calculate_risk_score(indicators: List[str]) -> str:
         "medium": ["unusual", "anomaly", "warning"],
         "low": ["normal", "expected", "verified"],
     }
-    
+
     score = 0
     detected = []
-    
+
     for indicator in indicators:
         indicator_lower = indicator.lower()
         for level, keywords in risk_keywords.items():
             if any(kw in indicator_lower for kw in keywords):
                 level_score = {"critical": 100, "high": 75, "medium": 50, "low": 25}[level]
-                if level_score > score:
-                    score = level_score
+                score = max(score, level_score)
                 detected.append(level)
                 break
-    
+
     return json.dumps({
         "risk_score": score,
         "risk_level": "critical" if score > 75 else "high" if score > 50 else "medium" if score > 25 else "low",
@@ -209,10 +206,10 @@ if __name__ == "__main__":
     The user 'admin_svc' showed unusual activity patterns.
     Check if this is a potential security breach.
     """
-    
+
     # Note: Requires ollama or other LLM to be running
     # result = run_forensic_investigation(test_query)
     # print(result)
-    
+
     print("Smolagents forensic agent configured.")
     print("Tools available: analyze_stylometry, check_source_trust, extract_entities, calculate_risk_score")

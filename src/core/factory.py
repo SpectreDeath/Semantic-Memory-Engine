@@ -15,9 +15,8 @@ Usage:
     semantic_search = ToolFactory.create_search_engine()
 """
 
-from typing import Optional, Dict, Any
-from functools import lru_cache
 import logging
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -29,14 +28,37 @@ class ToolFactory:
     Provides lazy-loading and singleton-like caching for tools
     that are expensive to initialize.
     """
-    
-    _instances: Dict[str, Any] = {}
-    
+
+    _instances: dict[str, Any] = {}
+
+    @classmethod
+    def _check_vram_guardrail(cls, required_mb: int = 1000) -> bool:
+        """Check if enough VRAM is available for a heavy tool (GTX 1660 Ti optimization)."""
+        from src.core.config import Config
+        from src.monitoring.diagnostics import PerformanceProfiler
+        
+        config = Config()
+        vram_limit = config.get('hardware', {}).get('vram_limit_mb', 6144)
+        
+        try:
+            profiler = PerformanceProfiler()
+            gpu_info = profiler.profile_gpu_fallback()
+            
+            if gpu_info.get('gpus'):
+                free_vram = gpu_info['gpus'][0].get('memory_free_mb', 0)
+                if free_vram < required_mb:
+                    logger.warning(f"VRAM Guardrail Triggered: Only {free_vram}MB free, {required_mb}MB required.")
+                    return False
+            return True
+        except Exception as e:
+            logger.debug(f"GPU check skipped: {e}")
+            return True
+
     @classmethod
     def reset(cls):
         """Clear all cached instances (useful for testing)."""
         cls._instances.clear()
-    
+
     @classmethod
     def create_scribe(cls, reset: bool = False) -> 'ScribeEngine':
         """
@@ -57,7 +79,7 @@ class ToolFactory:
                 logger.error(f"Failed to create ScribeEngine: {e}")
                 raise
         return cls._instances['scribe']
-    
+
     @classmethod
     def create_lexicon_importer(cls, reset: bool = False) -> 'LexiconImporter':
         """
@@ -78,7 +100,7 @@ class ToolFactory:
                 logger.error(f"Failed to create LexiconImporter: {e}")
                 raise
         return cls._instances['lexicon_importer']
-    
+
     @classmethod
     def create_aifdb_connector(cls, reset: bool = False) -> 'AIFdbConnector':
         """
@@ -99,7 +121,7 @@ class ToolFactory:
                 logger.error(f"Failed to create AIFdbConnector: {e}")
                 raise
         return cls._instances['aifdb']
-    
+
     @classmethod
     def create_concept_resolver(cls, reset: bool = False) -> 'ConceptResolver':
         """
@@ -120,7 +142,7 @@ class ToolFactory:
                 logger.error(f"Failed to create ConceptResolver: {e}")
                 raise
         return cls._instances['concept_resolver']
-    
+
     @classmethod
     def create_stylo_wrapper(cls, reset: bool = False) -> 'StyloWrapper':
         """
@@ -141,7 +163,7 @@ class ToolFactory:
                 logger.error(f"Failed to create StyloWrapper: {e}")
                 raise
         return cls._instances['stylo_wrapper']
-    
+
     @classmethod
     def create_pystyl_wrapper(cls, reset: bool = False) -> 'PyStylWrapper':
         """
@@ -162,7 +184,7 @@ class ToolFactory:
                 logger.error(f"Failed to create PyStylWrapper: {e}")
                 raise
         return cls._instances['pystyl']
-    
+
     @classmethod
     def create_rolling_delta(cls, reset: bool = False) -> 'RollingDelta':
         """
@@ -183,7 +205,7 @@ class ToolFactory:
                 logger.error(f"Failed to create RollingDelta: {e}")
                 raise
         return cls._instances['rolling_delta']
-    
+
     @classmethod
     def create_adaptive_learner(cls, reset: bool = False) -> 'AdaptiveLearner':
         """
@@ -204,7 +226,7 @@ class ToolFactory:
                 logger.error(f"Failed to create AdaptiveLearner: {e}")
                 raise
         return cls._instances['adaptive_learner']
-    
+
     @classmethod
     def create_forensic_scout(cls, reset: bool = False) -> 'ForensicScout':
         """
@@ -225,7 +247,7 @@ class ToolFactory:
                 logger.error(f"Failed to create ForensicScout: {e}")
                 raise
         return cls._instances['forensic_scout']
-    
+
     @classmethod
     def create_contrastive_analyzer(cls, reset: bool = False) -> 'ContrastiveAnalyzer':
         """
@@ -246,7 +268,7 @@ class ToolFactory:
                 logger.error(f"Failed to create ContrastiveAnalyzer: {e}")
                 raise
         return cls._instances['contrastive_analyzer']
-    
+
     @classmethod
     def create_impostors_checker(cls, reset: bool = False) -> 'ImpostorsChecker':
         """
@@ -267,7 +289,7 @@ class ToolFactory:
                 logger.error(f"Failed to create ImpostorsChecker: {e}")
                 raise
         return cls._instances['impostors_checker']
-    
+
     @classmethod
     def create_network_generator(cls, reset: bool = False) -> 'NetworkGenerator':
         """
@@ -288,7 +310,7 @@ class ToolFactory:
                 logger.error(f"Failed to create NetworkGenerator: {e}")
                 raise
         return cls._instances['network_generator']
-    
+
     @classmethod
     def create_scout(cls, reset: bool = False) -> 'Scout':
         """
@@ -309,7 +331,7 @@ class ToolFactory:
                 logger.error(f"Failed to create Scout: {e}")
                 raise
         return cls._instances['scout']
-    
+
     @classmethod
     def create_search_engine(cls, reset: bool = False) -> 'SemanticSearchEngine':
         """
@@ -330,7 +352,7 @@ class ToolFactory:
                 logger.error(f"Failed to create SemanticSearchEngine: {e}")
                 raise
         return cls._instances['search']
-    
+
     @classmethod
     def create_synapse(cls, reset: bool = False) -> 'MemoryConsolidator':
         """
@@ -351,7 +373,7 @@ class ToolFactory:
                 logger.error(f"Failed to create MemoryConsolidator: {e}")
                 raise
         return cls._instances['synapse']
-    
+
     @classmethod
     def create_centrifuge(cls, reset: bool = False) -> 'Centrifuge':
         """
@@ -372,7 +394,7 @@ class ToolFactory:
                 logger.error(f"Failed to create Centrifuge: {e}")
                 raise
         return cls._instances['centrifuge']
-    
+
     @classmethod
     def create_event_bus(cls, reset: bool = False) -> 'EventBus':
         """
@@ -393,7 +415,7 @@ class ToolFactory:
                 logger.error(f"Failed to create EventBus: {e}")
                 raise
         return cls._instances['event_bus']
-    
+
     @classmethod
     def create_log_manager(cls, reset: bool = False) -> 'LogManager':
         """
@@ -407,7 +429,7 @@ class ToolFactory:
         """
         if reset or 'log_manager' not in cls._instances:
             try:
-                from src.core.logging_system import LogManager, setup_logging
+                from src.core.logging_system import LogManager
                 LogManager.setup()
                 cls._instances['log_manager'] = LogManager()
                 logger.info("Created LogManager instance")
@@ -415,7 +437,7 @@ class ToolFactory:
                 logger.error(f"Failed to create LogManager: {e}")
                 raise
         return cls._instances['log_manager']
-    
+
     @classmethod
     def create_semantic_db(cls, reset: bool = False) -> 'SemanticMemory':
         """
@@ -436,19 +458,17 @@ class ToolFactory:
                 logger.error(f"Failed to create SemanticMemory: {e}")
                 raise
         return cls._instances['semantic_db']
-    
+
     @classmethod
     def create_semantic_graph(cls, reset: bool = False) -> 'SemanticGraph':
         """
         Create or retrieve the SemanticGraph (WordNet) instance.
-        
-        Args:
-            reset: Force creation of new instance
-        
-        Returns:
-            SemanticGraph instance
         """
         if reset or 'semantic_graph' not in cls._instances:
+            # WordNet is relatively light but initialization can be slow
+            if not cls._check_vram_guardrail(required_mb=512):
+                raise RuntimeError("Insufficient VRAM to initialize SemanticGraph")
+
             try:
                 from src.core.semantic_graph import SemanticGraph
                 cls._instances['semantic_graph'] = SemanticGraph()
@@ -457,7 +477,7 @@ class ToolFactory:
                 logger.error(f"Failed to create SemanticGraph: {e}")
                 raise
         return cls._instances['semantic_graph']
-    
+
     @classmethod
     def create_data_manager(cls, reset: bool = False) -> 'DataManager':
         """
@@ -478,7 +498,7 @@ class ToolFactory:
                 logger.error(f"Failed to create DataManager: {e}")
                 raise
         return cls._instances['data_manager']
-    
+
     @classmethod
     def create_nlp_pipeline(cls, reset: bool = False) -> 'NLPPipeline':
         """
@@ -499,19 +519,17 @@ class ToolFactory:
                 logger.error(f"Failed to create NLPPipeline: {e}")
                 raise
         return cls._instances['nlp_pipeline']
-    
+
     @classmethod
     def create_advanced_nlp(cls, reset: bool = False) -> 'AdvancedNLPEngine':
         """
         Create or retrieve the AdvancedNLPEngine instance.
-        
-        Args:
-            reset: Force creation of new instance
-        
-        Returns:
-            AdvancedNLPEngine instance
         """
         if reset or 'advanced_nlp' not in cls._instances:
+            # NLP models are heavy
+            if not cls._check_vram_guardrail(required_mb=2048):
+                 raise RuntimeError("Insufficient VRAM to initialize AdvancedNLPEngine")
+
             try:
                 from src.core.advanced_nlp import AdvancedNLPEngine
                 cls._instances['advanced_nlp'] = AdvancedNLPEngine()
@@ -520,7 +538,7 @@ class ToolFactory:
                 logger.error(f"Failed to create AdvancedNLPEngine: {e}")
                 raise
         return cls._instances['advanced_nlp']
-    
+
     @classmethod
     def create_monitor(cls, reset: bool = False) -> 'SystemMonitor':
         """
@@ -541,7 +559,7 @@ class ToolFactory:
                 logger.error(f"Failed to create SystemMonitor: {e}")
                 raise
         return cls._instances['monitor']
-    
+
     @classmethod
     def create_orchestrator(cls, reset: bool = False) -> 'PipelineCoordinator':
         """
@@ -562,7 +580,7 @@ class ToolFactory:
                 logger.error(f"Failed to create PipelineCoordinator: {e}")
                 raise
         return cls._instances['orchestrator']
-    
+
     @classmethod
     def create_sentiment_analyzer(cls, reset: bool = False) -> 'SentimentAnalyzer':
         """
@@ -583,7 +601,7 @@ class ToolFactory:
                 logger.error(f"Failed to create SentimentAnalyzer: {e}")
                 raise
         return cls._instances['sentiment']
-    
+
     @classmethod
     def create_text_summarizer(cls, reset: bool = False) -> 'TextSummarizer':
         """
@@ -604,7 +622,7 @@ class ToolFactory:
                 logger.error(f"Failed to create TextSummarizer: {e}")
                 raise
         return cls._instances['summarizer']
-    
+
     @classmethod
     def create_entity_linker(cls, reset: bool = False) -> 'EntityLinker':
         """
@@ -625,7 +643,7 @@ class ToolFactory:
                 logger.error(f"Failed to create EntityLinker: {e}")
                 raise
         return cls._instances['entity_linker']
-    
+
     @classmethod
     def create_document_clusterer(cls, reset: bool = False) -> 'DocumentClusterer':
         """
@@ -646,7 +664,7 @@ class ToolFactory:
                 logger.error(f"Failed to create DocumentClusterer: {e}")
                 raise
         return cls._instances['clusterer']
-    
+
     @classmethod
     def create_knowledge_graph(cls, reset: bool = False) -> 'KnowledgeGraph':
         """
@@ -667,7 +685,7 @@ class ToolFactory:
                 logger.error(f"Failed to create KnowledgeGraph: {e}")
                 raise
         return cls._instances['knowledge_graph']
-    
+
     @classmethod
     def create_intelligence_reports(cls, reset: bool = False) -> 'IntelligenceReports':
         """
@@ -688,7 +706,7 @@ class ToolFactory:
                 logger.error(f"Failed to create IntelligenceReports: {e}")
                 raise
         return cls._instances['intelligence_reports']
-    
+
     @classmethod
     def create_overlap_discovery(cls, reset: bool = False) -> 'OverlapDiscovery':
         """
@@ -709,9 +727,9 @@ class ToolFactory:
                 logger.error(f"Failed to create OverlapDiscovery: {e}")
                 raise
         return cls._instances['overlap_discovery']
-    
+
     @classmethod
-    def get_instance(cls, tool_name: str) -> Optional[Any]:
+    def get_instance(cls, tool_name: str) -> Any | None:
         """
         Get a cached tool instance by name.
         
@@ -722,9 +740,9 @@ class ToolFactory:
             Tool instance or None if not found
         """
         return cls._instances.get(tool_name)
-    
+
     @classmethod
-    def list_instances(cls) -> Dict[str, str]:
+    def list_instances(cls) -> dict[str, str]:
         """
         List all cached tool instances.
         
@@ -735,9 +753,9 @@ class ToolFactory:
             name: type(instance).__name__
             for name, instance in cls._instances.items()
         }
-    
+
     @classmethod
-    def health_check(cls) -> Dict[str, bool]:
+    def health_check(cls) -> dict[str, bool]:
         """
         Check health status of all cached instances.
         

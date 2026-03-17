@@ -12,24 +12,32 @@ Usage:
 """
 
 import logging
-import sys
 import os
-import numpy as np
-from datetime import datetime
-from typing import Dict, Any, Callable, Optional, List, Tuple
-from dataclasses import dataclass, asdict, is_dataclass
-from nltk.tokenize import word_tokenize
+import sys
 from collections import Counter
+from collections.abc import Callable
+from dataclasses import dataclass
+from typing import Any
+
 import networkx as nx
-import src.sme.vendor.faststylometry as faststylometry
-from src.sme.vendor.faststylometry import Corpus
-from src.sme.vendor.faststylometry.probability import predict_proba, calibrate
-from src.sme.vendor.faststylometry.en import tokenise_remove_pronouns_en
-from gateway.hardware_security import get_hsm
-from src.sme.vendor import forensic_math, forensic_files, forensic_behavior, forensic_graph, forensic_signal, forensic_entropy
-from src.sme.bridge import crawler_sling
+import numpy as np
+from nltk.tokenize import word_tokenize
+
 from bin import credibility_scorer
+from src.sme.bridge import crawler_sling
+from src.sme.vendor import (
+    forensic_behavior,
+    forensic_entropy,
+    forensic_files,
+    forensic_graph,
+    forensic_math,
+    forensic_signal,
+)
+from src.sme.vendor.faststylometry import Corpus
+from src.sme.vendor.faststylometry.en import tokenise_remove_pronouns_en
+from src.sme.vendor.faststylometry.probability import calibrate, predict_proba
 from src.sme.vendor.forensic_math import dict_to_vectors
+from src.sme.epistemic_validator import EpistemicValidator
 
 # Ensure SME src is importable
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -42,16 +50,16 @@ class ToolDefinition:
     """Metadata for an MCP-exposed tool."""
     name: str
     description: str
-    factory_method: Optional[str]
+    factory_method: str | None
     category: str
-    parameters: Dict[str, Any]
-    handler: Optional[Callable] = None
+    parameters: dict[str, Any]
+    handler: Callable | None = None
     is_manual: bool = False
 
 
 # v1.1.0 Extension Hook: List of ToolDefinition provided by external plugins
 # NOTE: Must be declared AFTER ToolDefinition to avoid NameError at import time.
-EXTENSION_TOOLS: List[ToolDefinition] = []
+EXTENSION_TOOLS: list[ToolDefinition] = []
 
 class ScribeAuthorshipTool:
     """
@@ -69,29 +77,29 @@ class ScribeAuthorshipTool:
         tokens = [t.lower() for t in word_tokenize(text_sample) if t.isalpha()]
         if not tokens:
             return {"error": "No linguistic features detected in text sample"}
-            
+
         freqs = Counter(tokens)
         total = sum(freqs.values())
-        
+
         # Calculate Top-50 Function Word Frequencies (Linguistic Fingerprint)
         fingerprint = {word: count / total for word, count in freqs.most_common(50)}
-        
+
         # 2. Vector Comparison (Burrows' Delta Logic)
         if suspect_vector_id:
             # Retrieve the suspect vector from the session/bridge
             suspect_data = self.core.get_session_entry(suspect_vector_id)
             if not suspect_data:
                 return {
-                    "status": "Baseline Fingerprint Generated", 
+                    "status": "Baseline Fingerprint Generated",
                     "fingerprint": fingerprint,
                     "warning": f"Suspect vector '{suspect_vector_id}' not found in scratchpad."
                 }
-                
+
             # If suspect_data is a dict (fingerprint), calculate distance
             if isinstance(suspect_data, dict):
                 delta = self._calculate_delta(fingerprint, suspect_data)
                 confidence = "High" if delta < 0.5 else "Low"
-                
+
                 return {
                     "status": "Analysis Complete",
                     "match_confidence": confidence,
@@ -100,7 +108,7 @@ class ScribeAuthorshipTool:
                 }
             else:
                 return {"error": f"Invalid data format for suspect vector '{suspect_vector_id}'"}
-        
+
         return {"status": "Baseline Fingerprint Generated", "fingerprint": fingerprint}
 
     def _calculate_delta(self, f1, f2):
@@ -125,10 +133,10 @@ class ScribeProTool:
         session = self.core.get_session()
         if not session:
             return {"error": "No active session for forensic context."}
-            
+
         train_corpus = Corpus()
         baselines_found = 0
-        
+
         # Pull all Baseline_ entries from scratchpad
         for key, fingerprint in session.scratchpad.items():
             if key.startswith("Baseline_") and isinstance(fingerprint, dict):
@@ -139,7 +147,7 @@ class ScribeProTool:
                 # If these are fingerprints, we might need a special handler.
                 # For now, let's assume we have baseline texts or we use placeholders.
                 # Let's check if we can add 'books' to corpus.
-                # If we don't have the original text, we might need to fallback to 
+                # If we don't have the original text, we might need to fallback to
                 # a synthetic text generated from the fingerprint if possible.
                 # But let's look for 'Baseline_Text_...' keys too.
                 text_key = f"Text_{key}"
@@ -147,7 +155,7 @@ class ScribeProTool:
                 if baseline_text:
                     train_corpus.add_book(key, "Original", baseline_text)
                     baselines_found += 1
-        
+
         if baselines_found < 2:
             return {
                 "error": "Insufficient baselines found in scratchpad for Scribe Pro calibration.",
@@ -159,16 +167,16 @@ class ScribeProTool:
         try:
             train_corpus.tokenise(tokenise_remove_pronouns_en)
             calibrate(train_corpus)
-            
+
             test_corpus = Corpus()
             test_corpus.add_book("Unknown", "Sample", text)
             test_corpus.tokenise(tokenise_remove_pronouns_en)
-            
+
             probabilities = predict_proba(train_corpus, test_corpus)
-            
+
             # Convert probabilities to a readable dict
             res_dict = probabilities.to_dict()
-            
+
             # Extract probability for the unknown sample against candidates
             # The structure is usually {Author: {Unknown: Prob}} or similar
             # Let's simplify it for the user
@@ -180,7 +188,7 @@ class ScribeProTool:
                     # Alternative structure check
                     key = list(samples.keys())[0] if isinstance(samples, dict) else 0
                     final_probs[author] = round(float(samples[key]), 4)
-            
+
             return {
                 "status": "Probabilistic Analysis Complete",
                 "probabilities": final_probs,
@@ -212,26 +220,26 @@ class InfluenceTool:
         # 1. Query the core for relationships (Simulated ego-graph discovery)
         # In a real scenario, this would be a SQL query join on relationships table.
         # We simulate this by pulling related nodes from the core bridge.
-        
+
         # Let's assume the core bridge can provide a list of triples.
         triples = self.core.get_ego_triples(entity_name)
-        
+
         if not triples:
-            return {"error": f"No graph data found for entity: {entity_name}", "influence_score": 0.0}
-            
+            return {"nodes": [], "edges": [], "error": f"No graph data found for {entity_name}"}
+
         # 2. Build NetworkX graph
         G = nx.Graph()
         for head, rel, tail in triples:
             G.add_edge(head, tail, relation=rel)
-            
+
         # 3. Calculate Centrality
         try:
             pagerank = nx.pagerank(G)
             score = pagerank.get(entity_name, 0.0)
-            
+
             # Normalize/Scale score for readability
             influence_norm = round(score * 10, 4)
-            
+
             return {
                 "entity": entity_name,
                 "influence_score": influence_norm,
@@ -252,9 +260,9 @@ class ToolRegistry:
     Maps ToolFactory methods to MCP tool definitions with metadata
     for documentation and validation.
     """
-    
+
     # Tool definitions mapping MCP names to ToolFactory methods
-    TOOL_DEFINITIONS: Dict[str, ToolDefinition] = {
+    TOOL_DEFINITIONS: dict[str, ToolDefinition] = {
         # ===== TIER 1: Core Tools (Sprint 1) =====
         "verify_system": ToolDefinition(
             name="verify_system",
@@ -291,7 +299,7 @@ class ToolRegistry:
             category="diagnostics",
             parameters={}
         ),
-        
+
         # ===== TIER 2: Forensic Tools (Sprint 2) =====
         "analyze_authorship": ToolDefinition(
             name="analyze_authorship",
@@ -321,7 +329,7 @@ class ToolRegistry:
             category="analysis",
             parameters={"text": "str", "mode": "str", "max_sentences": "int"}
         ),
-        
+
         # ===== TIER 3: Advanced Tools (Sprint 3) =====
         "cluster_documents": ToolDefinition(
             name="cluster_documents",
@@ -460,7 +468,7 @@ class ToolRegistry:
         "entity_extractor": ToolDefinition(
             name="entity_extractor",
             description="Advanced entity cross-referencing against the 10GB ConceptNet knowledge graph.",
-            factory_method="create_concept_resolver", 
+            factory_method="create_concept_resolver",
             category="query",
             parameters={"text": "str"}
         ),
@@ -647,11 +655,11 @@ class ToolRegistry:
             is_manual=True
         ),
     }
-    
+
     def __init__(self):
-        self._tool_instances: Dict[str, Any] = {}
+        self._tool_instances: dict[str, Any] = {}
         self._factory = None
-        
+
     def _get_factory(self):
         """Lazy-load the ToolFactory to avoid import issues."""
         if self._factory is None:
@@ -663,8 +671,8 @@ class ToolRegistry:
                 logger.error(f"Failed to import ToolFactory: {e}")
                 raise
         return self._factory
-    
-    def get_tool(self, tool_name: str) -> Optional[Any]:
+
+    def get_tool(self, tool_name: str) -> Any | None:
         """
         Get or create a tool instance by name.
         
@@ -679,33 +687,33 @@ class ToolRegistry:
         if tool_name not in self.TOOL_DEFINITIONS:
             logger.warning(f"Unknown tool requested: {tool_name}")
             return None
-            
+
         if tool_name not in self._tool_instances:
             definition = self.TOOL_DEFINITIONS[tool_name]
-            
+
             if definition.is_manual:
                 # Manual tools must have been injected via add_tool
                 logger.error(f"Manual tool {tool_name} not found in instances. Did you call add_tool?")
                 return None
-                
+
             factory = self._get_factory()
-            
+
             # Get the factory method by name
             factory_method = getattr(factory, definition.factory_method, None)
             if factory_method is None:
                 logger.error(f"Factory method not found: {definition.factory_method}")
                 return None
-                
+
             try:
                 self._tool_instances[tool_name] = factory_method()
                 logger.info(f"Created tool instance: {tool_name}")
             except Exception as e:
                 logger.error(f"Failed to create tool {tool_name}: {e}")
                 return None
-                
+
         return self._tool_instances[tool_name]
-    
-    def list_tools(self, category: Optional[str] = None) -> list:
+
+    def list_tools(self, category: str | None = None) -> list:
         """
         List available tools, optionally filtered by category.
         
@@ -719,16 +727,16 @@ class ToolRegistry:
         if category:
             tools = [t for t in tools if t.category == category]
         return tools
-    
-    def get_tool_info(self, tool_name: str) -> Optional[ToolDefinition]:
+
+    def get_tool_info(self, tool_name: str) -> ToolDefinition | None:
         """Get metadata for a specific tool."""
         return self.TOOL_DEFINITIONS.get(tool_name)
-    
+
     def get_categories(self) -> list:
         """Get all unique tool categories."""
         return list(set(t.category for t in self.TOOL_DEFINITIONS.values()))
-    
-    def reset(self, tool_name: Optional[str] = None):
+
+    def reset(self, tool_name: str | None = None):
         """
         Clear cached tool instances.
         
@@ -744,12 +752,12 @@ class ToolRegistry:
     @property
     def tools(self):
         """Returns a mapping of tool names to their instances or definitions."""
-        # For the manifest architect script, we provide the definition 
+        # For the manifest architect script, we provide the definition
         # as the 'instance' if not yet instantiated, or the live instance.
-        return {name: self._tool_instances.get(name, self.TOOL_DEFINITIONS.get(name)) 
+        return {name: self._tool_instances.get(name, self.TOOL_DEFINITIONS.get(name))
                 for name in self.TOOL_DEFINITIONS}
 
-    def add_tool(self, name: str, instance: Any, description: str = "", parameters: Dict = None, handler: Optional[Callable] = None):
+    def add_tool(self, name: str, instance: Any, description: str = "", parameters: dict = None, handler: Callable | None = None):
         """
         Manually register a tool instance or handler.
         """
@@ -766,20 +774,19 @@ class ToolRegistry:
         logger.info(f"Manually registered tool: {name}")
 
 
-from src.sme.epistemic_validator import EpistemicValidator
 
 
 class ForensicMathTool:
     """
     Exposes high-performance vectorized forensic math algorithms.
     """
-    __slots__ = ('core', 'category')
-    
+    __slots__ = ('category', 'core')
+
     def __init__(self, core_bridge):
         self.core = core_bridge
         self.category = 'forensics'
 
-    def calculate_cosine_similarity(self, freq_dict_1: Dict[str, float], freq_dict_2: Dict[str, float]) -> Dict[str, Any]:
+    def calculate_cosine_similarity(self, freq_dict_1: dict[str, float], freq_dict_2: dict[str, float]) -> dict[str, Any]:
         """
         Compare two text vectors using vectorized cosine similarity.
         """
@@ -794,7 +801,7 @@ class ForensicMathTool:
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def calculate_typo_distance(self, word1: str, word2: str) -> Dict[str, Any]:
+    def calculate_typo_distance(self, word1: str, word2: str) -> dict[str, Any]:
         """
         Detect typo distance between two words using optimized Levenshtein.
         """
@@ -810,7 +817,7 @@ class ForensicMathTool:
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def calculate_set_overlap(self, tokens1: List[str], tokens2: List[str]) -> Dict[str, Any]:
+    def calculate_set_overlap(self, tokens1: list[str], tokens2: list[str]) -> dict[str, Any]:
         """
         Identify shared jargon using Jaccard Similarity.
         """
@@ -824,7 +831,7 @@ class ForensicMathTool:
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def calculate_tfidf(self, tokenized_docs: List[List[str]]) -> Dict[str, Any]:
+    def calculate_tfidf(self, tokenized_docs: list[list[str]]) -> dict[str, Any]:
         """Term significance mapping (TF-IDF)."""
         try:
             tfidf_matrix, vocabulary = forensic_math.calculate_tfidf(tokenized_docs)
@@ -836,7 +843,7 @@ class ForensicMathTool:
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def calculate_kl_divergence(self, p: List[float], q: List[float]) -> Dict[str, Any]:
+    def calculate_kl_divergence(self, p: list[float], q: list[float]) -> dict[str, Any]:
         """Relative entropy measurement (KL Divergence)."""
         try:
             divergence = forensic_math.calculate_kl_divergence(np.array(p), np.array(q))
@@ -844,21 +851,21 @@ class ForensicMathTool:
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def calculate_phonetic_hash(self, word: str) -> Dict[str, Any]:
+    def calculate_phonetic_hash(self, word: str) -> dict[str, Any]:
         """Double Metaphone phonetic hashing."""
         try:
             return forensic_math.calculate_phonetic_hash(word)
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def audit_benford_distribution(self, data: List[float]) -> Dict[str, Any]:
+    def audit_benford_distribution(self, data: list[float]) -> dict[str, Any]:
         """Benford's Law distribution analysis."""
         try:
             return forensic_math.audit_benford_distribution(data)
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def calculate_simhash(self, tokens: List[str], hash_size: int = 64) -> Dict[str, Any]:
+    def calculate_simhash(self, tokens: list[str], hash_size: int = 64) -> dict[str, Any]:
         """SimHash calculation for near-duplicate detection."""
         try:
             simhash_val = forensic_math.calculate_simhash(tokens, hash_size)
@@ -866,7 +873,7 @@ class ForensicMathTool:
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def calculate_entropy_divergence(self, p: List[float], q: List[float]) -> Dict[str, Any]:
+    def calculate_entropy_divergence(self, p: list[float], q: list[float]) -> dict[str, Any]:
         """Relative entropy measurement (Data Drift)."""
         try:
             divergence = forensic_math.calculate_entropy_divergence(p, q)
@@ -876,7 +883,7 @@ class ForensicMathTool:
 
 
 # Global registry instance
-_registry: Optional[ToolRegistry] = None
+_registry: ToolRegistry | None = None
 
 
 def get_registry() -> ToolRegistry:
@@ -891,20 +898,20 @@ class ForensicFilesTool:
     """
     Exposes structural and integrity tools for files.
     """
-    __slots__ = ('core', 'category')
-    
+    __slots__ = ('category', 'core')
+
     def __init__(self, core_bridge):
         self.core = core_bridge
         self.category = 'forensics'
 
-    def verify_file_signature(self, file_path: str) -> Dict[str, Any]:
+    def verify_file_signature(self, file_path: str) -> dict[str, Any]:
         """Verify file integrity by checking magic numbers."""
         try:
             return forensic_files.verify_file_signature(file_path)
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def calculate_structural_complexity(self, file_path: str) -> Dict[str, Any]:
+    def calculate_structural_complexity(self, file_path: str) -> dict[str, Any]:
         """Calculate compression ratio as structural entropy proxy."""
         try:
             return forensic_files.calculate_structural_complexity(file_path)
@@ -916,20 +923,20 @@ class ForensicBehaviorTool:
     """
     Exposes behavioral and leakage analysis tools.
     """
-    __slots__ = ('core', 'category')
-    
+    __slots__ = ('category', 'core')
+
     def __init__(self, core_bridge):
         self.core = core_bridge
         self.category = 'forensics'
 
-    def calculate_burstiness(self, timestamps: List[float]) -> Dict[str, Any]:
+    def calculate_burstiness(self, timestamps: list[float]) -> dict[str, Any]:
         """Calculate temporal burstiness score."""
         try:
             return forensic_behavior.calculate_burstiness(timestamps)
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def validate_luhn_checksum(self, numeric_string: str) -> Dict[str, Any]:
+    def validate_luhn_checksum(self, numeric_string: str) -> dict[str, Any]:
         """Validate numeric leakage via Luhn algorithm."""
         try:
             return forensic_behavior.validate_luhn_checksum(numeric_string)
@@ -941,23 +948,50 @@ class ForensicGraphTool:
     """
     Exposes graph pathfinding and centrality tools.
     """
-    __slots__ = ('core', 'category')
-    
+    __slots__ = ('category', 'core')
+
     def __init__(self, core_bridge):
         self.core = core_bridge
         self.category = 'forensics'
 
-    def calculate_node_path(self, graph: Dict[str, List[Tuple[str, float]]], start_node: str, end_node: str) -> Dict[str, Any]:
+    def calculate_node_path(self, graph: dict[str, list[tuple[str, float]]], start_node: str, end_node: str) -> dict[str, Any]:
         """Find the shortest path between nodes."""
         try:
             return forensic_graph.calculate_node_path(graph, start_node, end_node)
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def identify_central_hubs(self, adjacency_matrix: List[List[float]], node_labels: List[str]) -> Dict[str, Any]:
+    def identify_central_hubs(self, adjacency_matrix: list[list[float]], node_labels: list[str]) -> dict[str, Any]:
         """Identify influential hubs via Eigenvector Centrality."""
         try:
             return forensic_graph.identify_central_hubs(adjacency_matrix, node_labels)
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def get_ego_triples(self, entity_name: str) -> dict[str, Any]:
+        """Live WordNet-based discovery of an entity's semantic neighborhood."""
+        try:
+            triples = self.core.get_ego_triples(entity_name)
+            return {
+                "entity": entity_name,
+                "neighborhood": triples,
+                "count": len(triples),
+                "status": "Success"
+            }
+        except Exception as e:
+            return {"error": str(e), "status": "Error"}
+
+    def detect_knowledge_gaps(self, central_concept: str) -> dict[str, Any]:
+        """Identify missing conceptual relationships in semantic memory."""
+        try:
+            from src.core.factory import ToolFactory
+            sm = ToolFactory.create_semantic_db()
+            gaps = sm.detect_knowledge_gaps(central_concept)
+            return {
+                "concept": central_concept,
+                "gaps": gaps,
+                "status": "Success"
+            }
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
@@ -966,20 +1000,20 @@ class ForensicSignalTool:
     """
     Exposes signal sequence and frequency analysis tools.
     """
-    __slots__ = ('core', 'category')
-    
+    __slots__ = ('category', 'core')
+
     def __init__(self, core_bridge):
         self.core = core_bridge
         self.category = 'forensics'
 
-    def calculate_sequence_similarity(self, seq1: List[float], seq2: List[float]) -> Dict[str, Any]:
+    def calculate_sequence_similarity(self, seq1: list[float], seq2: list[float]) -> dict[str, Any]:
         """Find similarity between time-series sequences."""
         try:
             return forensic_signal.calculate_sequence_similarity(seq1, seq2)
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def detect_event_periodicity(self, data: List[float]) -> Dict[str, Any]:
+    def detect_event_periodicity(self, data: list[float]) -> dict[str, Any]:
         """Identify dominant periodicities via DFT."""
         try:
             return forensic_signal.detect_event_periodicity(data)
@@ -991,20 +1025,20 @@ class ForensicEntropyTool:
     """
     Exposes byte-level entropy mapping and obfuscation detection tools.
     """
-    __slots__ = ('core', 'category')
-    
+    __slots__ = ('category', 'core')
+
     def __init__(self, core_bridge):
         self.core = core_bridge
         self.category = 'forensics'
 
-    def map_stream_entropy(self, stream: List[int], window_size: int = 256) -> Dict[str, Any]:
+    def map_stream_entropy(self, stream: list[int], window_size: int = 256) -> dict[str, Any]:
         """Map Shannon entropy across a byte-stream."""
         try:
             return forensic_entropy.map_stream_entropy(stream, window_size)
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def analyze_obfuscation_score(self, content: str) -> Dict[str, Any]:
+    def analyze_obfuscation_score(self, content: str) -> dict[str, Any]:
         """Detect obfuscated scripts via Hamming Weight and Complexity."""
         try:
             return forensic_entropy.analyze_obfuscation_score(content)
@@ -1016,13 +1050,13 @@ class ForensicCrawlerTool:
     """
     Bridges automated crawling with SME forensic analysis.
     """
-    __slots__ = ('core', 'category')
-    
+    __slots__ = ('category', 'core')
+
     def __init__(self, core_bridge):
         self.core = core_bridge
         self.category = 'bridge'
 
-    async def ingest_forensic_target(self, url: str) -> Dict[str, Any]:
+    async def ingest_forensic_target(self, url: str) -> dict[str, Any]:
         """Automated ingestion and fingerprinting."""
         try:
             return await crawler_sling.ingest_forensic_target(url)
@@ -1034,13 +1068,13 @@ class ForensicScorerTool:
     """
     Exposes high-level forensic scoring and visualization tools.
     """
-    __slots__ = ('core', 'category')
-    
+    __slots__ = ('category', 'core')
+
     def __init__(self, core_bridge):
         self.core = core_bridge
         self.category = 'forensics'
 
-    def get_forensic_report(self, target_text: str) -> Dict[str, Any]:
+    def get_forensic_report(self, target_text: str) -> dict[str, Any]:
         """Generate a structured visualization report."""
         try:
             return credibility_scorer.get_forensic_report(target_text)

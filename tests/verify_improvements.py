@@ -1,4 +1,3 @@
-import os
 import sys
 
 # Add the directory to path so we can import the logic
@@ -7,7 +6,7 @@ sys.path.append("D:/mcp_servers")
 def test_file_service():
     print("--- Testing File Service Jail ---")
     from file_service import get_safe_path
-    
+
     # Test valid path
     try:
         path = get_safe_path("test.txt")
@@ -39,7 +38,7 @@ def test_file_service():
 def test_web_search():
     print("\n--- Testing Web Search Logic ---")
     from web_search import search_duckduckgo
-    
+
     # Minimal test to see if it runs (might fail without internet, but logic should be sound)
     try:
         result = search_duckduckgo("test query")

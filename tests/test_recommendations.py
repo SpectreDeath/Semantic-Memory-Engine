@@ -4,20 +4,20 @@ Tests for caching, validation, and resilience components.
 Verifies performance, fault tolerance, and security enhancements.
 """
 
-import pytest
 import time
-from unittest.mock import Mock, patch
-from src.core.cache import CacheManager, LRUCache, cache_decorator, get_cache_manager
-from src.core.validation import Validator, ValidationError, validate_input
-from src.core.resilience import (
-    CircuitBreaker,
-    retry_with_backoff,
-    TimeoutManager,
-    BulkheadIsolation,
-    ResilientExecutor,
-    CircuitBreakerError,
-)
 
+import pytest
+
+from src.core.cache import CacheManager, LRUCache, cache_decorator
+from src.core.resilience import (
+    BulkheadIsolation,
+    CircuitBreaker,
+    CircuitBreakerError,
+    ResilientExecutor,
+    TimeoutManager,
+    retry_with_backoff,
+)
+from src.core.validation import ValidationError, Validator
 
 # ============================================================================
 # CACHE TESTS
@@ -53,7 +53,7 @@ class TestLRUCache:
         cache.set("key2", "value2")
         cache.set("key3", "value3")
         cache.set("key4", "value4")  # Should evict key1
-        
+
         assert cache.get("key1") is None
         assert cache.get("key4") == "value4"
 
@@ -63,7 +63,7 @@ class TestLRUCache:
         cache.set("key1", "value1")
         cache.get("key1")  # Hit
         cache.get("key2")  # Miss
-        
+
         stats = cache.get_stats()
         assert stats["hits"] == 1
         assert stats["misses"] == 1
@@ -76,18 +76,18 @@ class TestCacheDecorator:
     def test_decorator_caches_results(self):
         """Test that decorator caches function results."""
         call_count = 0
-        
+
         @cache_decorator(ttl_seconds=10)
         def expensive_function(x, y):
             nonlocal call_count
             call_count += 1
             return x + y
-        
+
         # First call - executes function
         result1 = expensive_function(1, 2)
         assert result1 == 3
         assert call_count == 1
-        
+
         # Second call - returns cached result
         result2 = expensive_function(1, 2)
         assert result2 == 3
@@ -96,16 +96,16 @@ class TestCacheDecorator:
     def test_decorator_different_args(self):
         """Test that decorator distinguishes different arguments."""
         call_count = 0
-        
+
         @cache_decorator(ttl_seconds=10)
         def add(x, y):
             nonlocal call_count
             call_count += 1
             return x + y
-        
+
         result1 = add(1, 2)
         result2 = add(2, 3)
-        
+
         assert result1 == 3
         assert result2 == 5
         assert call_count == 2  # Called twice with different args
@@ -201,18 +201,18 @@ class TestCircuitBreaker:
     def test_circuit_breaker_opens_on_failure(self):
         """Test circuit breaker opens after failures."""
         breaker = CircuitBreaker("test", failure_threshold=0.5)
-        
+
         def failing_func():
             raise ValueError("test error")
-        
+
         # Fail once
         with pytest.raises(ValueError):
             breaker.call(failing_func)
-        
+
         # Circuit should open after 2 failures (failure rate > 0.5)
         with pytest.raises(ValueError):
             breaker.call(failing_func)
-        
+
         # Should now raise CircuitBreakerError
         with pytest.raises(CircuitBreakerError):
             breaker.call(lambda: "success")
@@ -220,15 +220,15 @@ class TestCircuitBreaker:
     def test_circuit_breaker_recovery(self):
         """Test circuit breaker recovery."""
         breaker = CircuitBreaker("test", failure_threshold=0.5, recovery_timeout=1)
-        
+
         # Open the circuit
         for _ in range(2):
             with pytest.raises(ValueError):
                 breaker.call(lambda: 1/0)
-        
+
         # Wait for recovery timeout
         time.sleep(1.1)
-        
+
         # Should be in HALF_OPEN state and allow recovery
         result = breaker.call(lambda: "recovered")
         assert result == "recovered"
@@ -238,7 +238,7 @@ class TestCircuitBreaker:
         breaker = CircuitBreaker("test")
         breaker.call(lambda: "success")
         breaker.call(lambda: "success")
-        
+
         stats = breaker.get_stats()
         assert stats["successes"] == 2
         assert stats["state"] == "closed"
@@ -250,13 +250,13 @@ class TestRetryWithBackoff:
     def test_retry_succeeds_on_first_attempt(self):
         """Test retry decorator on successful call."""
         call_count = 0
-        
+
         @retry_with_backoff(max_attempts=3)
         def success_func():
             nonlocal call_count
             call_count += 1
             return "success"
-        
+
         result = success_func()
         assert result == "success"
         assert call_count == 1
@@ -264,7 +264,7 @@ class TestRetryWithBackoff:
     def test_retry_retries_on_failure(self):
         """Test retry decorator retries on failure."""
         call_count = 0
-        
+
         @retry_with_backoff(max_attempts=3, base_delay=0.01)
         def failing_func():
             nonlocal call_count
@@ -272,7 +272,7 @@ class TestRetryWithBackoff:
             if call_count < 3:
                 raise ValueError("not yet")
             return "success"
-        
+
         result = failing_func()
         assert result == "success"
         assert call_count == 3
@@ -282,7 +282,7 @@ class TestRetryWithBackoff:
         @retry_with_backoff(max_attempts=2, base_delay=0.01)
         def always_fails():
             raise ValueError("always fails")
-        
+
         with pytest.raises(ValueError):
             always_fails()
 
@@ -298,7 +298,7 @@ class TestTimeoutManager:
     def test_timeout_check_expires(self):
         """Test timeout check raises when exceeded."""
         from src.core.resilience import TimeoutError
-        
+
         with TimeoutManager(0.1) as tm:
             time.sleep(0.15)
             with pytest.raises(TimeoutError):
@@ -317,11 +317,11 @@ class TestBulkheadIsolation:
     def test_bulkhead_allows_up_to_limit(self):
         """Test bulkhead allows concurrent requests up to limit."""
         bulkhead = BulkheadIsolation(max_concurrent=2)
-        
+
         assert bulkhead.acquire()
         assert bulkhead.acquire()
         assert not bulkhead.acquire()  # Max reached
-        
+
         bulkhead.release()
         assert bulkhead.acquire()
 
@@ -330,7 +330,7 @@ class TestBulkheadIsolation:
         bulkhead = BulkheadIsolation(max_concurrent=5)
         bulkhead.acquire()
         bulkhead.acquire()
-        
+
         stats = bulkhead.get_stats()
         assert stats["active_count"] == 2
         assert stats["available"] == 3
@@ -348,24 +348,24 @@ class TestIntegration:
         """Test that caching improves performance."""
         cache = CacheManager()
         call_count = 0
-        
+
         @cache_decorator(ttl_seconds=10)
         def expensive_op():
             nonlocal call_count
             call_count += 1
             time.sleep(0.1)
             return "result"
-        
+
         # First call is slow
         start = time.time()
         expensive_op()
         first_duration = time.time() - start
-        
+
         # Second call should be fast (cached)
         start = time.time()
         expensive_op()
         cached_duration = time.time() - start
-        
+
         assert cached_duration < first_duration / 2
 
     def test_validation_prevents_injection(self):
@@ -375,7 +375,7 @@ class TestIntegration:
             "<script>alert('xss')</script>",
             "'; DROP TABLE users; --",
         ]
-        
+
         for dangerous in dangerous_inputs:
             with pytest.raises(ValidationError):
                 Validator.validate_query(dangerous)
@@ -384,14 +384,14 @@ class TestIntegration:
         """Test resilience patterns handle failures gracefully."""
         executor = ResilientExecutor(max_retries=2)
         call_count = 0
-        
+
         def sometimes_fails():
             nonlocal call_count
             call_count += 1
             if call_count < 2:
                 raise ValueError("temp error")
             return "success"
-        
+
         result = executor.execute(sometimes_fails)
         assert result == "success"
 

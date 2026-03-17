@@ -4,7 +4,6 @@ Note: Full OCR testing requires actual image/PDF files and PaddleOCR models.
 """
 
 import pytest
-from fastapi.testclient import TestClient
 
 
 def test_health_endpoint():

@@ -4,7 +4,7 @@
 # Generate agentic forensic summaries and run alerts
 # =============================================================================
 
-from prefect import task, get_run_logger
+from prefect import get_run_logger, task
 
 
 @task(name="Generate Forensic Summary")

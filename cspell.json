@@ -5,12 +5,13 @@
         "cocoindex",
         "coreference",
         "Coreference",
-        "sents",
-        "Ollama",
-        "venv",
-        "pycache",
+        "getpid",
         "mypy",
-        "getpid"
+        "Ollama",
+        "pycache",
+        "scrapegraphai",
+        "sents",
+        "venv"
     ],
     "ignorePaths": [
         "**/node_modules/**",

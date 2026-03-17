@@ -12,9 +12,9 @@ Uses Scribe + Loom output to:
 """
 
 import logging
-from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 from datetime import datetime
+
 import numpy as np
 from scribe_authorship import ScribeEngine
 
@@ -35,7 +35,7 @@ class TrendDriver:
     article_count: int
     first_mention: str
     last_mention: str
-    aggregate_signal_strength: Dict[str, float]
+    aggregate_signal_strength: dict[str, float]
     estimated_reach: int  # Estimated readers/followers
     role: str  # "Primary Driver", "Amplifier", "Adopter"
 
@@ -46,8 +46,8 @@ class TrendAnalysis:
     topic: str
     trend_start_date: str
     trend_intensity: float  # 0-100
-    primary_drivers: List[TrendDriver]
-    amplifiers: List[TrendDriver]
+    primary_drivers: list[TrendDriver]
+    amplifiers: list[TrendDriver]
     article_count: int
     unique_authors: int
     estimated_total_reach: int
@@ -60,7 +60,7 @@ class InfluenceChain:
     """Chain of how a trend spreads author-to-author"""
     trend_topic: str
     chain_length: int
-    influencers: List[Tuple[str, float]]  # (author, timestamp)
+    influencers: list[tuple[str, float]]  # (author, timestamp)
     estimated_spread_velocity: str  # "Rapid", "Moderate", "Slow"
     amplification_factor: float
 
@@ -85,7 +85,7 @@ class TrendCorrelator:
     def identify_trend_drivers(
         self,
         trend_topic: str,
-        article_data: List[Dict],  # [{author_id, text, timestamp, url}, ...]
+        article_data: list[dict],  # [{author_id, text, timestamp, url}, ...]
         min_attribution_score: float = 70.0
     ) -> TrendAnalysis:
         """
@@ -215,7 +215,7 @@ class TrendCorrelator:
             return analysis
 
         except Exception as e:
-            logger.error(f"❌ Trend driver identification failed: {str(e)}")
+            logger.error(f"❌ Trend driver identification failed: {e!s}")
             raise
 
     # ========================================================================
@@ -225,7 +225,7 @@ class TrendCorrelator:
     def trace_influence_chain(
         self,
         trend_topic: str,
-        article_data: List[Dict],  # Sorted by timestamp
+        article_data: list[dict],  # Sorted by timestamp
         max_chain_length: int = 10
     ) -> InfluenceChain:
         """
@@ -316,7 +316,7 @@ class TrendCorrelator:
             return chain
 
         except Exception as e:
-            logger.error(f"❌ Influence chain tracing failed: {str(e)}")
+            logger.error(f"❌ Influence chain tracing failed: {e!s}")
             raise
 
     # ========================================================================
@@ -326,9 +326,9 @@ class TrendCorrelator:
     def detect_campaign_patterns(
         self,
         trend_topic: str,
-        article_data: List[Dict],
+        article_data: list[dict],
         similarity_threshold: float = 0.75
-    ) -> Dict:
+    ) -> dict:
         """
         Detect coordinated promotion patterns (multiple authors pushing same narrative).
         
@@ -405,14 +405,14 @@ class TrendCorrelator:
             return result
 
         except Exception as e:
-            logger.error(f"❌ Campaign detection failed: {str(e)}")
+            logger.error(f"❌ Campaign detection failed: {e!s}")
             return {"detected": False, "patterns": [], "error": str(e)}
 
     # ========================================================================
     # REPORTING
     # ========================================================================
 
-    def generate_trend_report(self, analysis: TrendAnalysis) -> Dict:
+    def generate_trend_report(self, analysis: TrendAnalysis) -> dict:
         """Generate comprehensive trend analysis report"""
         return {
             "report_type": "Trend Analysis",
@@ -458,7 +458,7 @@ class TrendCorrelator:
         else:
             return "Adopter"
 
-    def _detect_coordination(self, top_authors, fingerprints) -> Dict:
+    def _detect_coordination(self, top_authors, fingerprints) -> dict:
         """Detect if top authors are coordinated"""
         if len(top_authors) < 2:
             return {"detected": False, "confidence": 0}
@@ -492,7 +492,7 @@ class TrendCorrelator:
 # MCP TOOL FUNCTIONS
 # ============================================================================
 
-def identify_trend_drivers_tool(trend_topic: str, articles: List[Dict]) -> Dict:
+def identify_trend_drivers_tool(trend_topic: str, articles: list[dict]) -> dict:
     """MCP Tool: Identify authors driving a trend"""
     correlator = TrendCorrelator()
     analysis = correlator.identify_trend_drivers(trend_topic, articles)
@@ -516,7 +516,7 @@ def identify_trend_drivers_tool(trend_topic: str, articles: List[Dict]) -> Dict:
     }
 
 
-def trace_influence_tool(trend_topic: str, articles: List[Dict]) -> Dict:
+def trace_influence_tool(trend_topic: str, articles: list[dict]) -> dict:
     """MCP Tool: Trace influence chain"""
     correlator = TrendCorrelator()
     chain = correlator.trace_influence_chain(trend_topic, articles)

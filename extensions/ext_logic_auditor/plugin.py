@@ -1,11 +1,8 @@
-import os
 import json
 import logging
 import re
-import math
-from typing import Dict, Any, List, Tuple, Optional
 from datetime import datetime
-from collections import defaultdict
+from typing import Any
 
 # NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
 from src.core.plugin_base import BasePlugin
@@ -18,10 +15,10 @@ class LogicAuditor(BasePlugin):
     Detects logical inconsistencies and hallucinations through round-robin claim contradiction analysis.
     Flags "Logic Hallucinations" when contradictions are found with >90% confidence.
     """
-    
-    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+
+    def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
-        
+
         # Claim extraction patterns
         self.claim_patterns = [
             r'\b(assert|claim|state|declare|affirm|maintain|argue|suggest|indicate|demonstrate)\b.*?that\b',
@@ -29,7 +26,7 @@ class LogicAuditor(BasePlugin):
             r'\b(is|are|was|were|will be|has been|have been)\b.*?\.',
             r'\b(must|should|could|would|can|may|might)\b.*?\.',
         ]
-        
+
         # Contradiction indicators
         self.contradiction_indicators = [
             r'\b(contradict|conflict|inconsistent|opposite|different|disagree|deny|refute)\b',
@@ -61,7 +58,7 @@ class LogicAuditor(BasePlugin):
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Failed to init DB table: {e}")
 
-    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
         Logic Auditor analysis for on_ingestion pipeline.
         Performs round-robin claim contradiction analysis and flags Logic Hallucinations.
@@ -71,27 +68,27 @@ class LogicAuditor(BasePlugin):
 
         # Perform logical consistency audit
         audit_result = self.audit_logical_consistency(raw_data)
-        
+
         # Extract key results
         hallucination_detected = audit_result.get("hallucination_detected", False)
         contradiction_confidence = audit_result.get("contradiction_confidence", 0.0)
         contradiction_details = audit_result.get("contradiction_details", [])
-        
+
         # Log significant findings
         if hallucination_detected:
             logger.warning(f"[{self.plugin_id}] LOGIC HALLUCINATION DETECTED - "
                           f"Confidence: {contradiction_confidence:.2%}")
             for detail in contradiction_details:
                 logger.warning(f"[{self.plugin_id}] Contradiction: {detail['claim_a']} vs {detail['claim_b']}")
-        
+
         # Store result in database if significant
         if hallucination_detected:
             await self._store_logic_hallucination(
-                raw_data, 
+                raw_data,
                 audit_result,
                 metadata.get("source_id", "INGESTION_PIPELINE")
             )
-        
+
         # Return analysis results
         return {
             "status": "analyzed",
@@ -114,7 +111,7 @@ class LogicAuditor(BasePlugin):
             result = self.audit_logical_consistency(text)
             return json.dumps(result, indent=2)
         except Exception as e:
-            return json.dumps({"error": f"Logical consistency audit failed: {str(e)}"})
+            return json.dumps({"error": f"Logical consistency audit failed: {e!s}"})
 
     async def get_logic_statistics(self) -> str:
         """
@@ -125,12 +122,12 @@ class LogicAuditor(BasePlugin):
             sql_count = "SELECT COUNT(*) as total_hallucinations FROM nexus_logic_hallucinations"
             count_result = self.nexus.nexus.query(sql_count)
             total_hallucinations = count_result[0]["total_hallucinations"] if count_result else 0
-            
+
             # Count high confidence hallucinations
             sql_high_confidence = "SELECT COUNT(*) as high_confidence FROM nexus_logic_hallucinations WHERE contradiction_confidence >= 0.9"
             high_confidence_result = self.nexus.nexus.query(sql_high_confidence)
             high_confidence_count = high_confidence_result[0]["high_confidence"] if high_confidence_result else 0
-            
+
             # Get recent hallucinations
             sql_recent = """
                 SELECT text_hash, contradiction_confidence, claims_analyzed, timestamp 
@@ -139,7 +136,7 @@ class LogicAuditor(BasePlugin):
                 LIMIT 10
             """
             recent_hallucinations = self.nexus.nexus.query(sql_recent)
-            
+
             stats = {
                 "total_hallucinations_detected": total_hallucinations,
                 "high_confidence_hallucinations": high_confidence_count,
@@ -154,11 +151,11 @@ class LogicAuditor(BasePlugin):
                     for hallucination in recent_hallucinations
                 ]
             }
-            
+
             return json.dumps(stats, indent=2)
-            
+
         except Exception as e:
-            return json.dumps({"error": f"Failed to get logic statistics: {str(e)}"})
+            return json.dumps({"error": f"Failed to get logic statistics: {e!s}"})
 
     async def analyze_claim_consistency(self, text: str) -> str:
         """
@@ -166,14 +163,14 @@ class LogicAuditor(BasePlugin):
         """
         try:
             claims = self._extract_claims(text)
-            
+
             analysis = {
                 "total_claims": len(claims),
                 "claims": [],
                 "contradiction_pairs": [],
                 "consistency_score": 0.0
             }
-            
+
             # Analyze each claim
             for i, claim in enumerate(claims):
                 claim_analysis = {
@@ -183,23 +180,23 @@ class LogicAuditor(BasePlugin):
                     "logical_structure": self._analyze_logical_structure(claim)
                 }
                 analysis["claims"].append(claim_analysis)
-            
+
             # Perform round-robin comparison
             contradiction_pairs = self._perform_round_robin_comparison(claims)
             analysis["contradiction_pairs"] = contradiction_pairs
-            
+
             # Calculate consistency score
             if len(claims) > 1:
                 total_comparisons = len(claims) * (len(claims) - 1) // 2
                 consistency_score = 1.0 - (len(contradiction_pairs) / total_comparisons)
                 analysis["consistency_score"] = round(consistency_score, 4)
-            
-            return json.dumps(analysis, indent=2)
-            
-        except Exception as e:
-            return json.dumps({"error": f"Claim consistency analysis failed: {str(e)}"})
 
-    def audit_logical_consistency(self, text: str) -> Dict[str, Any]:
+            return json.dumps(analysis, indent=2)
+
+        except Exception as e:
+            return json.dumps({"error": f"Claim consistency analysis failed: {e!s}"})
+
+    def audit_logical_consistency(self, text: str) -> dict[str, Any]:
         """
         Main method to audit logical consistency and detect hallucinations.
         
@@ -213,10 +210,10 @@ class LogicAuditor(BasePlugin):
                 "claims_analyzed": 0,
                 "contradiction_details": []
             }
-        
+
         # Extract claims from text
         claims = self._extract_claims(text)
-        
+
         if len(claims) < 2:
             return {
                 "hallucination_detected": False,
@@ -225,16 +222,16 @@ class LogicAuditor(BasePlugin):
                 "claims_analyzed": len(claims),
                 "contradiction_details": []
             }
-        
+
         # Perform round-robin comparison
         contradiction_pairs = self._perform_round_robin_comparison(claims)
-        
+
         # Calculate contradiction confidence
         contradiction_confidence = self._calculate_contradiction_confidence(contradiction_pairs, len(claims))
-        
+
         # Determine if hallucination is detected
         hallucination_detected = contradiction_confidence >= 0.45  # Even lower threshold for better detection
-        
+
         return {
             "hallucination_detected": hallucination_detected,
             "contradiction_confidence": round(contradiction_confidence, 4),
@@ -242,30 +239,24 @@ class LogicAuditor(BasePlugin):
             "contradiction_details": contradiction_pairs
         }
 
-    def _extract_claims(self, text: str) -> List[str]:
+    def _extract_claims(self, text: str) -> list[str]:
         """
         Extract key claims from text using pattern matching and sentence analysis.
         """
         # Split into sentences
         sentences = self._split_into_sentences(text)
-        
+
         claims = []
-        
+
         for sentence in sentences:
             sentence = sentence.strip()
             if not sentence:
                 continue
-                
+
             # Check if sentence contains claim indicators
-            if self._is_claim_sentence(sentence):
+            if self._is_claim_sentence(sentence) or self._is_substantive_sentence(sentence) or len(sentence.split()) >= 4:
                 claims.append(sentence)
-            # Also include sentences that seem substantive
-            elif self._is_substantive_sentence(sentence):
-                claims.append(sentence)
-            # Include all sentences that have substantive content
-            elif len(sentence.split()) >= 4:  # At least 4 words
-                claims.append(sentence)
-        
+
         # Remove duplicates while preserving order
         seen = set()
         unique_claims = []
@@ -274,43 +265,43 @@ class LogicAuditor(BasePlugin):
             if normalized not in seen:
                 seen.add(normalized)
                 unique_claims.append(claim)
-        
+
         return unique_claims
 
-    def _split_into_sentences(self, text: str) -> List[str]:
+    def _split_into_sentences(self, text: str) -> list[str]:
         """Split text into sentences."""
         # More sophisticated sentence splitting
         sentence_endings = re.compile(r'[.!?]+')
         sentences = sentence_endings.split(text)
-        
+
         # Clean up sentences
         cleaned_sentences = []
         for sentence in sentences:
             sentence = sentence.strip()
             if sentence:
                 cleaned_sentences.append(sentence)
-        
+
         return cleaned_sentences
 
     def _is_claim_sentence(self, sentence: str) -> bool:
         """Check if sentence contains claim indicators."""
         sentence_lower = sentence.lower()
-        
+
         # Check for claim patterns
         for pattern in self.claim_patterns:
             if re.search(pattern, sentence_lower):
                 return True
-        
+
         # Check for substantive content
         words = sentence.split()
         if len(words) < 3:
             return False
-            
+
         # Check for contradiction indicators (these often signal claims)
         for pattern in self.contradiction_indicators:
             if re.search(pattern, sentence_lower):
                 return True
-        
+
         return False
 
     def _is_substantive_sentence(self, sentence: str) -> bool:
@@ -321,30 +312,30 @@ class LogicAuditor(BasePlugin):
             r'\b(is|are|was|were|be|been|being)\s+',
             r'\b(of|in|on|at|by|for|with|to|from)\s+',
         ]
-        
+
         cleaned = sentence.lower()
         for pattern in filler_phrases:
             cleaned = re.sub(pattern, ' ', cleaned)
-        
+
         # Check if there's meaningful content left
         meaningful_words = [word for word in cleaned.split() if len(word) > 2]
-        
+
         return len(meaningful_words) >= 2
 
-    def _perform_round_robin_comparison(self, claims: List[str]) -> List[Dict[str, Any]]:
+    def _perform_round_robin_comparison(self, claims: list[str]) -> list[dict[str, Any]]:
         """
         Perform round-robin comparison of all claims to detect contradictions.
         """
         contradiction_pairs = []
-        
+
         for i in range(len(claims)):
             for j in range(i + 1, len(claims)):
                 claim_a = claims[i]
                 claim_b = claims[j]
-                
+
                 # Analyze for contradiction
                 contradiction_result = self._analyze_contradiction(claim_a, claim_b)
-                
+
                 if contradiction_result["is_contradiction"]:
                     contradiction_pairs.append({
                         "claim_a": claim_a,
@@ -353,17 +344,17 @@ class LogicAuditor(BasePlugin):
                         "confidence": contradiction_result["confidence"],
                         "evidence": contradiction_result["evidence"]
                     })
-        
+
         return contradiction_pairs
 
-    def _analyze_contradiction(self, claim_a: str, claim_b: str) -> Dict[str, Any]:
+    def _analyze_contradiction(self, claim_a: str, claim_b: str) -> dict[str, Any]:
         """
         Analyze two claims for contradiction.
         """
         # Normalize claims
         claim_a_lower = claim_a.lower().strip(' .')
         claim_b_lower = claim_b.lower().strip(' .')
-        
+
         # Check for direct negation
         if self._check_direct_negation(claim_a_lower, claim_b_lower):
             return {
@@ -372,7 +363,7 @@ class LogicAuditor(BasePlugin):
                 "confidence": 0.95,
                 "evidence": "Direct negation detected"
             }
-        
+
         # Check for opposite terms
         opposite_score = self._check_opposite_terms(claim_a_lower, claim_b_lower)
         if opposite_score > 0.3:  # Lowered threshold
@@ -382,7 +373,7 @@ class LogicAuditor(BasePlugin):
                 "confidence": opposite_score,
                 "evidence": f"Opposite terms detected (score: {opposite_score:.2f})"
             }
-        
+
         # Check for exclusive terms
         if self._check_exclusive_terms(claim_a_lower, claim_b_lower):
             return {
@@ -391,7 +382,7 @@ class LogicAuditor(BasePlugin):
                 "confidence": 0.85,
                 "evidence": "Exclusive terms detected"
             }
-        
+
         # Check for temporal contradictions
         if self._check_temporal_contradiction(claim_a_lower, claim_b_lower):
             return {
@@ -400,7 +391,7 @@ class LogicAuditor(BasePlugin):
                 "confidence": 0.80,
                 "evidence": "Temporal contradiction detected"
             }
-        
+
         # Check for semantic contradiction using keyword analysis
         semantic_score = self._check_semantic_contradiction(claim_a_lower, claim_b_lower)
         if semantic_score > 0.4:  # Semantic contradiction detected
@@ -410,7 +401,7 @@ class LogicAuditor(BasePlugin):
                 "confidence": semantic_score,
                 "evidence": f"Semantic contradiction detected (score: {semantic_score:.2f})"
             }
-        
+
         return {
             "is_contradiction": False,
             "contradiction_type": None,
@@ -423,33 +414,33 @@ class LogicAuditor(BasePlugin):
         # Remove common words for comparison
         clean_a = re.sub(r'\b(the|a|an|this|that|these|those|is|are|was|were|be|been|being|of|in|on|at|by|for|with|to|from)\b', '', claim_a)
         clean_b = re.sub(r'\b(the|a|an|this|that|these|those|is|are|was|were|be|been|being|of|in|on|at|by|for|with|to|from)\b', '', claim_b)
-        
+
         # Check if one is negation of the other
         negation_patterns = [
             r'\b(not|no|never|none|neither|nor)\b',
             r'\b(does not|do not|did not|is not|are not|was not|were not)\b',
         ]
-        
+
         has_negation_a = any(re.search(pattern, clean_a) for pattern in negation_patterns)
         has_negation_b = any(re.search(pattern, clean_b) for pattern in negation_patterns)
-        
+
         # If one has negation and the other doesn't, check similarity
         if has_negation_a != has_negation_b:
             # Remove negation and compare
             clean_a_no_neg = re.sub(r'\b(not|no|never|none|neither|nor|does not|do not|did not|is not|are not|was not|were not)\b', '', clean_a)
             clean_b_no_neg = re.sub(r'\b(not|no|never|none|neither|nor|does not|do not|did not|is not|are not|was not|were not)\b', '', clean_b)
-            
+
             # Simple similarity check
             words_a = set(clean_a_no_neg.split())
             words_b = set(clean_b_no_neg.split())
-            
+
             if words_a and words_b:
                 intersection = words_a.intersection(words_b)
                 union = words_a.union(words_b)
                 similarity = len(intersection) / len(union)
-                
+
                 return similarity > 0.6
-        
+
         return False
 
     def _check_opposite_terms(self, claim_a: str, claim_b: str) -> float:
@@ -462,15 +453,15 @@ class LogicAuditor(BasePlugin):
             ('begin', 'end'), ('start', 'stop'), ('accept', 'reject'), ('include', 'exclude'),
             ('same', 'different'), ('similar', 'opposite')
         ]
-        
+
         score = 0.0
         words_a = set(claim_a.split())
         words_b = set(claim_b.split())
-        
+
         for term_a, term_b in opposite_pairs:
             if (term_a in words_a and term_b in words_b) or (term_b in words_a and term_a in words_b):
                 score += 0.3
-        
+
         return min(score, 1.0)
 
     def _check_exclusive_terms(self, claim_a: str, claim_b: str) -> bool:
@@ -480,10 +471,10 @@ class LogicAuditor(BasePlugin):
             r'\b(unique|singular|one and only)\b',
             r'\b(none|never|nothing|nowhere)\b',
         ]
-        
+
         has_exclusive_a = any(re.search(pattern, claim_a) for pattern in exclusive_terms)
         has_exclusive_b = any(re.search(pattern, claim_b) for pattern in exclusive_terms)
-        
+
         return has_exclusive_a and has_exclusive_b
 
     def _check_temporal_contradiction(self, claim_a: str, claim_b: str) -> bool:
@@ -494,16 +485,16 @@ class LogicAuditor(BasePlugin):
             r'\b(before|after|during)\b',
             r'\b(then|now|later)\b',
         ]
-        
+
         times_a = []
         times_b = []
-        
+
         for pattern in temporal_patterns:
             matches_a = re.findall(pattern, claim_a)
             matches_b = re.findall(pattern, claim_b)
             times_a.extend(matches_a)
             times_b.extend(matches_b)
-        
+
         # Check for contradictory time references
         if times_a and times_b:
             # Simple check for obvious contradictions
@@ -511,7 +502,7 @@ class LogicAuditor(BasePlugin):
                ('past' in times_a and 'future' in times_b) or \
                ('before' in times_a and 'after' in times_b):
                 return True
-        
+
         return False
 
     def _check_semantic_contradiction(self, claim_a: str, claim_b: str) -> float:
@@ -519,55 +510,55 @@ class LogicAuditor(BasePlugin):
         # Keywords that indicate completion vs non-completion
         completion_keywords = ['completed', 'finished', 'done', 'accomplished', 'achieved', 'executed']
         non_completion_keywords = ['not started', 'planning', 'beginning', 'initiating', 'starting']
-        
+
         # Keywords that indicate submission vs non-submission
         submission_keywords = ['submitted', 'delivered', 'provided', 'sent', 'given']
         non_submission_keywords = ['not written', 'not prepared', 'not created', 'not done']
-        
+
         score = 0.0
-        
+
         # Check for completion vs non-completion contradiction
         has_completion = any(keyword in claim_a for keyword in completion_keywords)
         has_non_completion = any(keyword in claim_b for keyword in non_completion_keywords)
-        
+
         if has_completion and has_non_completion:
             score += 0.5
-        
+
         # Check reverse
         has_completion_b = any(keyword in claim_b for keyword in completion_keywords)
         has_non_completion_a = any(keyword in claim_a for keyword in non_completion_keywords)
-        
+
         if has_completion_b and has_non_completion_a:
             score += 0.5
-        
+
         # Check for submission vs non-submission contradiction
         has_submission = any(keyword in claim_a for keyword in submission_keywords)
         has_non_submission = any(keyword in claim_b for keyword in non_submission_keywords)
-        
+
         if has_submission and has_non_submission:
             score += 0.4
-        
+
         # Check reverse
         has_submission_b = any(keyword in claim_b for keyword in submission_keywords)
         has_non_submission_a = any(keyword in claim_a for keyword in non_submission_keywords)
-        
+
         if has_submission_b and has_non_submission_a:
             score += 0.4
-        
+
         return min(score, 1.0)
 
-    def _check_contradiction_indicators(self, claim: str) -> List[str]:
+    def _check_contradiction_indicators(self, claim: str) -> list[str]:
         """Check for contradiction indicators in a claim."""
         indicators = []
         claim_lower = claim.lower()
-        
+
         for pattern in self.contradiction_indicators:
             if re.search(pattern, claim_lower):
                 indicators.append(pattern)
-        
+
         return indicators
 
-    def _analyze_logical_structure(self, claim: str) -> Dict[str, Any]:
+    def _analyze_logical_structure(self, claim: str) -> dict[str, Any]:
         """Analyze the logical structure of a claim."""
         structure = {
             "has_conditionals": bool(re.search(r'\b(if|when|unless|provided that)\b', claim.lower())),
@@ -576,7 +567,7 @@ class LogicAuditor(BasePlugin):
             "has_modals": bool(re.search(r'\b(must|should|could|would|can|may|might)\b', claim.lower())),
             "complexity_score": self._calculate_complexity_score(claim)
         }
-        
+
         return structure
 
     def _calculate_complexity_score(self, claim: str) -> float:
@@ -584,67 +575,67 @@ class LogicAuditor(BasePlugin):
         words = claim.split()
         if not words:
             return 0.0
-        
+
         # Length score
         length_score = min(1.0, len(words) / 20.0)
-        
+
         # Complexity indicators
         complexity_indicators = [
             r'\b(because|since|therefore|thus|consequently|however|nevertheless)\b',
             r'\b(analysis|examination|investigation|evaluation)\b',
             r'\b(complex|complicated|intricate|sophisticated)\b',
         ]
-        
+
         complexity_score = 0.0
         for pattern in complexity_indicators:
             if re.search(pattern, claim.lower()):
                 complexity_score += 0.2
-        
+
         return min(length_score + complexity_score, 1.0)
 
-    def _calculate_contradiction_confidence(self, contradiction_pairs: List[Dict[str, Any]], total_claims: int) -> float:
+    def _calculate_contradiction_confidence(self, contradiction_pairs: list[dict[str, Any]], total_claims: int) -> float:
         """
         Calculate overall contradiction confidence based on detected contradictions.
         """
         if not contradiction_pairs or total_claims < 2:
             return 0.0
-        
+
         # Calculate confidence based on number and strength of contradictions
         total_confidence = sum(pair["confidence"] for pair in contradiction_pairs)
         max_possible_confidence = len(contradiction_pairs)
-        
+
         # Normalize by number of claims (more claims = more potential contradictions)
         base_confidence = total_confidence / max_possible_confidence if max_possible_confidence > 0 else 0.0
-        
+
         # Adjust for claim density
         total_comparisons = total_claims * (total_claims - 1) // 2
         contradiction_density = len(contradiction_pairs) / total_comparisons if total_comparisons > 0 else 0.0
-        
+
         # Combine scores with emphasis on individual contradiction strength
         final_confidence = (base_confidence * 0.6) + (contradiction_density * 0.4)
-        
+
         # If we have any high-confidence individual contradictions, boost the overall confidence
         max_individual_confidence = max(pair["confidence"] for pair in contradiction_pairs)
         if max_individual_confidence >= 0.5:  # Lower threshold for boosting
             final_confidence = max(final_confidence, max_individual_confidence * 0.95)
-        
+
         return min(final_confidence, 1.0)
 
-    async def _store_logic_hallucination(self, text: str, audit_result: Dict[str, Any], source_id: str):
+    async def _store_logic_hallucination(self, text: str, audit_result: dict[str, Any], source_id: str):
         """
         Store logic hallucination detection result in the database.
         """
         try:
             timestamp = datetime.now().isoformat()
             text_hash = hash(text)  # Simple hash for demo
-            
+
             sql = """
                 INSERT INTO nexus_logic_hallucinations 
                 (text_hash, text_sample, hallucination_detected, contradiction_confidence, 
                  contradiction_details, claims_analyzed, timestamp, source_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """
-            
+
             self.nexus.nexus.execute(sql, (
                 str(text_hash),
                 text[:5000],  # Limit text size
@@ -655,18 +646,18 @@ class LogicAuditor(BasePlugin):
                 timestamp,
                 source_id
             ))
-            
+
             logger.info(f"[{self.plugin_id}] Stored logic hallucination: {text_hash} (Confidence: {audit_result.get('contradiction_confidence', 0):.2%})")
-            
+
         except Exception as e:
             logger.error(f"[{self.plugin_id}] Failed to store logic hallucination: {e}")
 
 
-def create_plugin(manifest: Dict[str, Any], nexus_api: Any):
+def create_plugin(manifest: dict[str, Any], nexus_api: Any):
     """Factory function to create and return a LogicAuditor instance."""
     return LogicAuditor(manifest, nexus_api)
 
 
-def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+def register_extension(manifest: dict[str, Any], nexus_api: Any):
     """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
     return create_plugin(manifest, nexus_api)

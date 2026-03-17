@@ -1,9 +1,9 @@
-import os
+import hashlib
 import json
 import logging
-import hashlib
+import os
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any
 
 # NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
 from src.core.plugin_base import BasePlugin
@@ -15,13 +15,13 @@ class ForensicEchoExtension(BasePlugin):
     Migrated Forensic Echo Extension (v1.1.1).
     Standard Boilerplate for Lawnmower Man Extensions.
     """
-    def __init__(self, manifest: Dict[str, Any], nexus_api: Any):
+    def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
 
     async def on_startup(self):
         logger.info(f"[{self.plugin_id}] Forensic Echo activation sequence complete.")
 
-    async def on_ingestion(self, raw_data: str, metadata: Dict[str, Any]):
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         # Echo logic: Just log the ingestion
         logger.debug(f"[{self.plugin_id}] Ingestion event detected: {len(raw_data)} chars.")
         return {"plugin": self.plugin_id, "status": "processed"}
@@ -35,7 +35,7 @@ class ForensicEchoExtension(BasePlugin):
         """
         if not os.path.exists(file_path):
             return json.dumps({"error": f"File not found: {file_path}"})
-        
+
         stats = os.stat(file_path)
         metadata = {
             "file_path": os.path.abspath(file_path),
@@ -44,17 +44,17 @@ class ForensicEchoExtension(BasePlugin):
             "modified": datetime.fromtimestamp(stats.st_mtime).isoformat(),
             "plugin": "Forensic Echo v1.1.1"
         }
-        
+
         # NexusAPI: use nexus_api.get_hsm() — no gateway imports
         hsm = self.nexus.get_hsm()
-        
+
         data_hash = hashlib.sha256(json.dumps(metadata, sort_keys=True).encode()).hexdigest()
         signature = hsm.sign_evidence("ForensicEcho", data_hash)
-        
+
         metadata["hw_signature"] = signature
         metadata["integrity_status"] = "Hardware-Signed"
-        
+
         return json.dumps(metadata, indent=2)
 
-def register_extension(manifest: Dict[str, Any], nexus_api: Any):
+def register_extension(manifest: dict[str, Any], nexus_api: Any):
     return ForensicEchoExtension(manifest, nexus_api)

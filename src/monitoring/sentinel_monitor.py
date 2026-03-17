@@ -15,10 +15,10 @@ import logging
 import os
 import signal
 import subprocess
-import sys
 import time
-import httpx
 from datetime import datetime, timezone
+
+import httpx
 
 # ---------------------------------------------------------------------------
 # Configuration

@@ -12,13 +12,13 @@ Features:
 - Density and central entity analysis
 """
 
-import logging
 import json
-from typing import Dict, List, Optional, Set, Any, Tuple
-from dataclasses import dataclass, asdict
+import logging
+from dataclasses import asdict, dataclass
+from typing import Any
 
+from src.core.entity_linker import EntityType, LinkedEntity
 from src.core.factory import ToolFactory
-from src.core.entity_linker import LinkedEntity, EntityLink, EntityType
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class GraphNode:
     id: str
     label: str
     type: str
-    properties: Dict[str, Any]
+    properties: dict[str, Any]
     weight: float = 1.0
 
 
@@ -40,7 +40,7 @@ class GraphEdge:
     target: str
     relation: str
     confidence: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class KnowledgeGraph:
@@ -50,16 +50,16 @@ class KnowledgeGraph:
     Orchestrates lower-level tools to synthesize entities and relations
     into a cohesive graph structure.
     """
-    
+
     def __init__(self):
         """Initialize KnowledgeGraph with required tools."""
         self.entity_linker = ToolFactory.create_entity_linker()
         self.semantic_graph = ToolFactory.create_semantic_graph()
-        self.nodes: Dict[str, GraphNode] = {}
-        self.edges: List[GraphEdge] = []
-        
+        self.nodes: dict[str, GraphNode] = {}
+        self.edges: list[GraphEdge] = []
+
         logger.info("KnowledgeGraph engine initialized")
-    
+
     def clear(self):
         """Clear the current graph state."""
         self.nodes.clear()
@@ -75,7 +75,7 @@ class KnowledgeGraph:
             context_id: Identifier for the source context
         """
         result = self.entity_linker.link_entities(text)
-        
+
         # Add entities as nodes
         for linked in result.linked_entities:
             node_id = linked.kb_id
@@ -88,7 +88,7 @@ class KnowledgeGraph:
                 )
             else:
                 self.nodes[node_id].weight += 0.5  # Increase weight on co-occurrence
-                
+
         # Add relationships as edges
         for link in result.entity_links:
             self.add_edge(
@@ -98,19 +98,19 @@ class KnowledgeGraph:
                 confidence=link.confidence,
                 metadata={"context": context_id}
             )
-            
+
         # Semantic enrichment
         if self.semantic_graph.is_available():
             self._enrich_semantically(result.linked_entities)
 
-    def add_edge(self, source: str, target: str, relation: str, 
-                 confidence: float = 1.0, metadata: Dict[str, Any] = None):
+    def add_edge(self, source: str, target: str, relation: str,
+                 confidence: float = 1.0, metadata: dict[str, Any] = None):
         """Add a directed edge to the graph if it doesn't already exist."""
         # Avoid duplicate edges with same relation
         for edge in self.edges:
             if edge.source == source and edge.target == target and edge.relation == relation:
                 return
-        
+
         self.edges.append(GraphEdge(
             source=source,
             target=target,
@@ -119,7 +119,7 @@ class KnowledgeGraph:
             metadata=metadata or {}
         ))
 
-    def _enrich_semantically(self, linked_entities: List[LinkedEntity]):
+    def _enrich_semantically(self, linked_entities: list[LinkedEntity]):
         """Enrich the graph by finding semantic relations between entity concepts."""
         for i, ent1 in enumerate(linked_entities):
             for ent2 in linked_entities[i+1:]:
@@ -127,7 +127,7 @@ class KnowledgeGraph:
                 similarity = self.semantic_graph.calculate_semantic_similarity(
                     ent1.entity.text, ent2.entity.text
                 )
-                
+
                 if similarity > 0.7:  # High semantic relation
                     self.add_edge(
                         source=ent1.kb_id,
@@ -140,7 +140,7 @@ class KnowledgeGraph:
     def to_mermaid(self, direction: str = "LR") -> str:
         """Export graph as a Mermaid diagram string."""
         lines = [f"graph {direction}"]
-        
+
         # Node definitions with types (using Mermaid styles)
         for node in self.nodes.values():
             safe_label = node.label.replace('"', "'")
@@ -150,13 +150,13 @@ class KnowledgeGraph:
                 bracket_open, bracket_close = ("(", ")")
             elif node.type == EntityType.ORGANIZATION.value:
                 bracket_open, bracket_close = ("[[", "]]")
-            
+
             lines.append(f'    {node.id}{bracket_open}"{safe_label}"{bracket_close}')
-            
+
         # Edge definitions
         for edge in self.edges:
             lines.append(f'    {edge.source} -- "{edge.relation}" --> {edge.target}')
-            
+
         return "\n".join(lines)
 
     def to_json(self) -> str:
@@ -167,7 +167,7 @@ class KnowledgeGraph:
         }
         return json.dumps(data, indent=2)
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get high-level graph statistics."""
         return {
             "node_count": len(self.nodes),
@@ -176,18 +176,18 @@ class KnowledgeGraph:
             "central_entities": self._get_central_entities()
         }
 
-    def _get_type_distribution(self) -> Dict[str, int]:
+    def _get_type_distribution(self) -> dict[str, int]:
         dist = {}
         for node in self.nodes.values():
             dist[node.type] = dist.get(node.type, 0) + 1
         return dist
 
-    def _get_central_entities(self, top_n: int = 5) -> List[Tuple[str, int]]:
+    def _get_central_entities(self, top_n: int = 5) -> list[tuple[str, int]]:
         """Calculate degree centrality (simple count of edges per node)."""
         counts = {}
         for edge in self.edges:
             counts[edge.source] = counts.get(edge.source, 0) + 1
             counts[edge.target] = counts.get(edge.target, 0) + 1
-            
+
         sorted_counts = sorted(counts.items(), key=lambda x: x[1], reverse=True)
         return sorted_counts[:top_n]

@@ -1,8 +1,7 @@
+import logging
 import os
 import re
-import json
-import logging
-from typing import Dict, List, Any, Optional
+from typing import Any
 
 logger = logging.getLogger("lawnmower.harvester")
 
@@ -28,7 +27,7 @@ class EvidenceHarvester:
         """ Recursively harvests text from supported files. """
         combined_text = []
         supported_exts = {'.txt', '.log', '.md'}
-        
+
         if not os.path.exists(root_path):
             raise FileNotFoundError(f"Path not found: {root_path}")
 
@@ -37,15 +36,15 @@ class EvidenceHarvester:
                 if any(file.endswith(ext) for ext in supported_exts):
                     file_path = os.path.join(root, file)
                     try:
-                        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        with open(file_path, encoding='utf-8', errors='ignore') as f:
                             content = f.read()
                             combined_text.append(content)
                     except Exception as e:
                         logger.warning(f"Harvester: Failed to read {file_path}: {e}")
-        
+
         return "\n\n".join(combined_text)
 
-    def generate_stylometric_fingerprint(self, text: str) -> Dict[str, Any]:
+    def generate_stylometric_fingerprint(self, text: str) -> dict[str, Any]:
         """
         Creates a basic token frequency profile compatible with Scribe Pro.
         In a production SME system, this would use NLTK or spacy.
@@ -53,7 +52,7 @@ class EvidenceHarvester:
         cleaned = self.clean_text(text)
         # Simplified tokenization for the simulation
         tokens = re.findall(r'\b\w+\b', cleaned.lower())
-        
+
         total = len(tokens)
         if total == 0:
             return {"tokens": {}, "total": 0}
@@ -61,7 +60,7 @@ class EvidenceHarvester:
         counts = {}
         for t in tokens:
             counts[t] = counts.get(t, 0) + 1
-        
+
         # Relative frequency for normalization
         fingerprint = {
             "token_counts": counts,
@@ -71,7 +70,7 @@ class EvidenceHarvester:
         }
         return fingerprint
 
-    def harvest(self, path: str) -> Dict[str, Any]:
+    def harvest(self, path: str) -> dict[str, Any]:
         """ Main entry point for harvesting a path. """
         logger.info(f"Harvester: Starting scan of {path}")
         raw_text = self.walk_directory(path)

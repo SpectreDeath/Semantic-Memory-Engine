@@ -27,16 +27,16 @@ __version__ = "1.0.0"
 __author__ = "SME Team"
 __description__ = "Social Media Intelligence Crawler for disinformation detection"
 
-from .plugin import SocialIntelligenceCrawler
 from .api_manager import SocialMediaAPIManager
-from .sentiment_analyzer import SentimentAnalyzer
 from .campaign_detector import CampaignDetector
 from .content_moderator import ContentModerator
+from .plugin import SocialIntelligenceCrawler
+from .sentiment_analyzer import SentimentAnalyzer
 
 __all__ = [
-    'SocialIntelligenceCrawler',
-    'SocialMediaAPIManager', 
-    'SentimentAnalyzer',
     'CampaignDetector',
-    'ContentModerator'
+    'ContentModerator',
+    'SentimentAnalyzer',
+    'SocialIntelligenceCrawler',
+    'SocialMediaAPIManager'
 ]

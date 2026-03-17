@@ -5,7 +5,7 @@ Converts PDF pages to images using PyMuPDF (fitz).
 
 import io
 import logging
-from typing import Iterator
+from collections.abc import Iterator
 
 import fitz  # PyMuPDF
 

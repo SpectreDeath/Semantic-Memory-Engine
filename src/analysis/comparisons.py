@@ -23,7 +23,7 @@ Usage:
 import logging
 import os
 import sqlite3
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import polars as pl
 
@@ -50,7 +50,7 @@ class SignatureCompare:
         All filtering happens before .collect() to minimize RAM usage.
     """
 
-    def __init__(self, db_path: Optional[str] = None) -> None:
+    def __init__(self, db_path: str | None = None) -> None:
         """
         Initialize the comparison engine.
 
@@ -91,9 +91,9 @@ class SignatureCompare:
 
     def load_reference_corpus(
         self,
-        source_filter: Optional[str] = None,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
+        source_filter: str | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
     ) -> pl.LazyFrame:
         """
         Load the reference corpus as a Polars LazyFrame with optional filters.
@@ -141,7 +141,7 @@ class SignatureCompare:
 
     @staticmethod
     def manhattan_distance(
-        live: Dict[str, Any], reference: Dict[str, Any]
+        live: dict[str, Any], reference: dict[str, Any]
     ) -> float:
         """
         Compute Manhattan Distance between two rhetorical signatures.
@@ -170,12 +170,12 @@ class SignatureCompare:
 
     def compare_live_vs_corpus(
         self,
-        live_signature: Dict[str, Any],
-        source_filter: Optional[str] = None,
-        start_date: Optional[str] = None,
-        end_date: Optional[str] = None,
+        live_signature: dict[str, Any],
+        source_filter: str | None = None,
+        start_date: str | None = None,
+        end_date: str | None = None,
         top_n: int = 10,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Compare a live signature against the reference corpus.
 

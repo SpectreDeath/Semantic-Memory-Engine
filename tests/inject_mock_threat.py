@@ -41,7 +41,7 @@ def inject_threat():
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=4)
-    
+
     print(f"✅ Threat Injected: '{target_alias}' is now a cross-referenced target in the SME ecosystem.")
 
 if __name__ == "__main__":

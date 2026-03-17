@@ -20,12 +20,13 @@ from __future__ import annotations
 
 import logging
 import os
-import sqlite3
 import sys
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-# Ensure SME is importable when run as a script
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Standard bootstrap
+import src.bootstrap
+
+src.bootstrap.initialize()
 
 try:
     from fastmcp import FastMCP
@@ -39,9 +40,9 @@ from gateway.hardware_security import get_hsm
 from gateway.metrics import get_metrics_manager
 from gateway.nexus_db import get_nexus
 from gateway.rate_limiter import get_rate_limiter
+from gateway.routers import register_all_routers
 from gateway.session_manager import get_session_manager
 from gateway.tool_registry import get_registry
-from gateway.routers import register_all_routers
 
 # =============================================================================
 # Logging — structured JSON format for log aggregators
@@ -73,7 +74,7 @@ rate_limiter = get_rate_limiter()
 # =============================================================================
 # Extension manager (lazy singleton)
 # =============================================================================
-_extension_manager: Optional[ExtensionManager] = None
+_extension_manager: ExtensionManager | None = None
 
 
 def get_extension_manager(nexus_api: Any = None) -> ExtensionManager:
@@ -87,6 +88,7 @@ def get_extension_manager(nexus_api: Any = None) -> ExtensionManager:
 # SmeCoreBridge — Dependency injection bridge for all tool classes
 # =============================================================================
 
+
 class SmeCoreBridge:
     """
     Bridges tool classes to the gateway's session and data layers.
@@ -95,19 +97,21 @@ class SmeCoreBridge:
     ``nexus_api.get_hsm()`` instead of importing gateway internals directly.
     """
 
-    def __init__(self, session_id: Optional[str] = None) -> None:
+    def __init__(self, session_id: str | None = None) -> None:
         self.session_id = session_id
         self._nexus = None
 
     def get_hsm(self):
         """Return the HardwareSecurity module for evidence signing (NexusAPI)."""
         from gateway.hardware_security import get_hsm as _get_hsm
+
         return _get_hsm()
 
     @property
     def nexus(self):
         if self._nexus is None:
             from gateway.nexus_db import get_nexus as _get_nexus
+
             self._nexus = _get_nexus()
         return self._nexus
 
@@ -123,42 +127,50 @@ class SmeCoreBridge:
             return None
         return session_manager.get_session(self.session_id).scratchpad.get(key)
 
-    def get_session(self) -> Optional[Any]:
+    def get_session(self) -> Any | None:
         """Get the full session object."""
         if not self.session_id:
             return None
         return session_manager.get_session(self.session_id)
 
-    def get_ego_triples(self, entity_name: str) -> List[tuple]:
+    def get_ego_triples(self, entity_name: str) -> list[tuple]:
         """
-        Simulated ego-graph discovery from the ConceptNet core.
-        In a real scenario, this would query the SQLite/HDF5 backend.
-
-        TODO: Replace hardcoded simulation_data with a live query against the
-              Centrifuge SQLite or PostgreSQL Nexus knowledge graph.
-              Tracked in: https://github.com/SpectreDeath/Semantic-Memory-Engine/issues
+        Live ego-graph discovery from the SemanticGraph (WordNet).
+        Queries real semantic relationships to build the entity's network.
         """
-        simulation_data = {
-            "Administrative Account": [
-                ("Administrative Account", "is_a", "System Identity"),
-                ("Administrative Account", "part_of", "Access Control"),
-                ("System Identity", "granted_to", "User_Alpha"),
-                ("Access Control", "protects", "Perimeter"),
-                ("User_Alpha", "modified", "Security Policy"),
-            ],
-            "Perimeter Breach": [
-                ("Perimeter Breach", "is_a", "Security Event"),
-                ("Perimeter Breach", "caused_by", "Unauthorized Entry"),
-                ("Security Event", "triggers", "Audit Log"),
-                ("Audit Log", "monitored_by", "Security Analyst"),
-            ],
-        }
-        return simulation_data.get(entity_name, [
-            (entity_name, "is_a", "Concept"),
-            (entity_name, "related_to", "Knowledge Base"),
-        ])
+        from src.core.factory import ToolFactory
 
-    def get_source_reliability(self, source_id: str) -> Dict[str, Any]:
+        try:
+            sg = ToolFactory.create_semantic_graph()
+            meaning = sg.explore_meaning(entity_name)
+
+            if not meaning:
+                return [(entity_name, "is_a", "Concept"), (entity_name, "status", "unresolved")]
+
+            triples = []
+            # Add definition
+            if meaning.definitions:
+                triples.append((entity_name, "definition", meaning.definitions[0]))
+
+            # Add synonyms
+            for syn in meaning.synonyms[:3]:
+                triples.append((entity_name, "synonym", syn))
+
+            # Add hypernyms (broader)
+            for hyper in meaning.hypernyms[:2]:
+                triples.append((entity_name, "is_a", hyper))
+
+            # Add hyponyms (narrower)
+            for hypo in meaning.hyponyms[:2]:
+                triples.append((hypo, "is_a", entity_name))
+
+            return triples
+
+        except Exception as e:
+            logger.error(f"Ego-graph discovery error: {e}")
+            return [(entity_name, "error", str(e))]
+
+    def get_source_reliability(self, source_id: str) -> dict[str, Any]:
         """Query the Nexus core for source provenance reliability."""
         try:
             sql = (
@@ -205,30 +217,36 @@ sme_core = SmeCoreBridge()
 # This avoids asyncio.run() at import time which breaks uvicorn (raises
 # RuntimeError when a loop is already running) and Jupyter environments.
 # =============================================================================
+# =============================================================================
+# Extension Loading — moved to a manual call to avoid FastMCP hook issues
+# =============================================================================
 extension_manager = get_extension_manager(nexus_api=sme_core)
 
 
-@mcp.on_startup()
-async def _load_extensions() -> None:
-    """Discover and register all hot-swappable extension plugins on server start."""
+async def load_extensions() -> None:
+    """Discover and register all hot-swappable extension plugins."""
     await extension_manager.discover_and_load()
 
     for tool_info in extension_manager.get_extension_tools():
-        registry.add_tool(
-            tool_info["name"],
-            tool_info["handler"],
-            description=tool_info["description"],
-            parameters=tool_info.get("parameters", {}),
-            handler=tool_info["handler"],
-        )
-        mcp.tool(
-            name=tool_info["name"],
-            description=tool_info["description"],
-        )(tool_info["handler"])
-        logger.info(
-            f"ExtensionManager: Registered plugin tool '{tool_info['name']}' "
-            f"(Plugin: {tool_info['plugin_id']})"
-        )
+        try:
+            registry.add_tool(
+                tool_info["name"],
+                tool_info["handler"],
+                description=tool_info["description"],
+                parameters=tool_info.get("parameters", {}),
+            )
+            # Register with FastMCP
+            mcp.tool(
+                name=tool_info["name"],
+                description=tool_info["description"],
+            )(tool_info["handler"])
+            logger.info(
+                f"ExtensionManager: Registered plugin tool '{tool_info['name']}' "
+                f"(Plugin: {tool_info['plugin_id']})"
+            )
+        except Exception as e:
+            logger.error(f"ExtensionManager: Failed to register tool '{tool_info['name']}': {e}")
+            continue  # Graceful degradation - continue with other tools
 
 
 # =============================================================================

@@ -2,63 +2,80 @@
 SimpleMem Laboratory - Core Package
 """
 
-import sys
 import logging
+import sys
 import typing
+
 
 # --- PYDANTIC V1 PATCH FOR PYTHON 3.14 ---
 # Required for spacy and other Pydantic v1-dependent libraries on Python 3.14
-def _patch_pydantic_v1():
+def apply_python314_patches():
+    """
+    Apply Python 3.14 compatibility patches.
+    Call this explicitly after imports if needed.
+    This is separated to avoid import-time side effects.
+    """
     try:
         import pydantic.v1.main as pydantic_main
         from pydantic.v1.errors import ConfigError
-        
+
         original_new = pydantic_main.ModelMetaclass.__new__
-        
+
         def patched_new(mcs, name, bases, namespace, **kwargs):
             try:
                 return original_new(mcs, name, bases, namespace, **kwargs)
             except (ConfigError, TypeError, Exception) as e:
                 err_msg = str(e)
-                if 'unable to infer type' in err_msg:
+                if "unable to infer type" in err_msg:
                     import re
+
                     match = re.search(r'attribute "([^"]+)"', err_msg)
                     if match:
                         attr_name = match.group(1)
-                        if '__annotations__' not in namespace:
-                            namespace['__annotations__'] = {}
-                        namespace['__annotations__'][attr_name] = typing.Any
+                        if "__annotations__" not in namespace:
+                            namespace["__annotations__"] = {}
+                        namespace["__annotations__"][attr_name] = typing.Any
                         try:
                             return original_new(mcs, name, bases, namespace, **kwargs)
-                        except: pass
+                        except Exception:
+                            pass
                 raise
-        
+
         pydantic_main.ModelMetaclass.__new__ = patched_new
-        
+
         # Also mock spacy.schemas if spacy is not yet imported
         # to prevent it from failing during later imports
-        if 'spacy' not in sys.modules:
+        if "spacy" not in sys.modules:
+
             class MockModel:
-                def __init__(self, **kwargs): pass
+                def __init__(self, **kwargs):
+                    pass
+
                 @classmethod
-                def validate(cls, v): return v
-            
+                def validate(cls, v):
+                    return v
+
             # Create a mock spacy.schemas module
             from types import ModuleType
-            spacy_mock = ModuleType('spacy')
-            schemas_mock = ModuleType('spacy.schemas')
+
+            spacy_mock = ModuleType("spacy")
+            schemas_mock = ModuleType("spacy.schemas")
             spacy_mock.schemas = schemas_mock
-            
+
             # This is a bit risky but might help collection
             # sys.modules['spacy.schemas'] = schemas_mock
-            
-    except: pass
 
-_patch_pydantic_v1()
+    except Exception:
+        pass
+
+
+# Apply patches on module load for backward compatibility
+# This can be removed once all consumers call apply_python314_patches() explicitly
+apply_python314_patches()
 # -----------------------------------------
 
 # Configuration & Factory
-from src.core.config import Config, get_config, ConfigError
+from src.core.config import Config, ConfigError, get_config
 from src.core.factory import ToolFactory
 
 # Core Utilities
@@ -72,13 +89,13 @@ try:
 except ImportError:
     SemanticMemory = None
 
-from src.core.semantic_graph import SemanticGraph
 from src.core.data_manager import DataManager
 from src.core.nlp_pipeline import NLPPipeline
+from src.core.semantic_graph import SemanticGraph
 
 # Tier 2 - Event Bus Infrastructure
 try:
-    from src.core.events import EventBus, Event, EventType, get_event_bus, reset_event_bus
+    from src.core.events import Event, EventBus, EventType, get_event_bus, reset_event_bus
 except ImportError:
     EventBus = None
     Event = None
@@ -89,14 +106,14 @@ except ImportError:
 # Tier 2 - Structured Logging Infrastructure
 try:
     from src.core.logging_system import (
-        StructuredLogger,
+        LogContext,
         LogLevel,
         LogManager,
-        LogContext,
-        get_logger,
-        setup_logging,
+        StructuredLogger,
         get_log_context,
+        get_logger,
         reset_logging,
+        setup_logging,
     )
 except ImportError:
     StructuredLogger = None
@@ -109,35 +126,35 @@ except ImportError:
     reset_logging = None
 
 try:
-    from src.core.advanced_nlp import AdvancedNLPEngine, AdvancedNLPAnalyzer
+    from src.core.advanced_nlp import AdvancedNLPAnalyzer, AdvancedNLPEngine
 except Exception:
     AdvancedNLPEngine = None
     AdvancedNLPAnalyzer = None
 
 # Phase 5 - Enhanced Analytics
 try:
-    from src.core.sentiment_analyzer import SentimentAnalyzer, SentimentAnalysis, EmotionType
+    from src.core.sentiment_analyzer import EmotionType, SentimentAnalysis, SentimentAnalyzer
 except ImportError:
     SentimentAnalyzer = None
     SentimentAnalysis = None
     EmotionType = None
 
 try:
-    from src.core.text_summarizer import TextSummarizer, Summary, SummarizationType
+    from src.core.text_summarizer import SummarizationType, Summary, TextSummarizer
 except ImportError:
     TextSummarizer = None
     Summary = None
     SummarizationType = None
 
 try:
-    from src.core.entity_linker import EntityLinker, LinkedEntity, EntityType
+    from src.core.entity_linker import EntityLinker, EntityType, LinkedEntity
 except ImportError:
     EntityLinker = None
     LinkedEntity = None
     EntityType = None
 
 try:
-    from src.core.document_clusterer import DocumentClusterer, ClusteringResult
+    from src.core.document_clusterer import ClusteringResult, DocumentClusterer
 except ImportError:
     DocumentClusterer = None
     ClusteringResult = None
@@ -148,7 +165,7 @@ except ImportError:
     KnowledgeGraph = None
 
 try:
-    from src.analysis.intelligence_reports import IntelligenceReports, IntelligenceReport
+    from src.analysis.intelligence_reports import IntelligenceReport, IntelligenceReports
 except Exception:
     IntelligenceReports = None
     IntelligenceReport = None
@@ -165,16 +182,16 @@ except ImportError:
 
 # Scribe - Authorship Analysis
 try:
-    from src.scribe.engine import ScribeEngine, LinguisticFingerprint
+    from src.scribe.engine import LinguisticFingerprint, ScribeEngine
 except ImportError:
     ScribeEngine = None
     LinguisticFingerprint = None
 
 # Scout - Adaptive Query System
 try:
-    from src.query.scout_integration import Scout
-    from src.query.scout import AdaptiveRetriever, QueryComplexityEstimator
     from src.query.engine import SemanticSearchEngine
+    from src.query.scout import AdaptiveRetriever, QueryComplexityEstimator
+    from src.query.scout_integration import Scout
 except ImportError:
     Scout = None
     AdaptiveRetriever = None
@@ -183,7 +200,7 @@ except ImportError:
 
 # Synapse - Memory Consolidation
 try:
-    from src.synapse.synapse import MemoryConsolidator, BehavioralProfiler
+    from src.synapse.synapse import BehavioralProfiler, MemoryConsolidator
 except ImportError:
     MemoryConsolidator = None
     BehavioralProfiler = None
@@ -204,11 +221,11 @@ except ImportError:
 try:
     from src.utils import (
         detect_outliers,
-        load_audit_data,
         get_persona,
-        update_persona,
+        load_audit_data,
         stream_project_mode,
         stream_trust_mode,
+        update_persona,
     )
 except ImportError:
     detect_outliers = None
@@ -235,7 +252,6 @@ __all__ = [
     "get_config",
     "ConfigError",
     "ToolFactory",
-    
     # Core
     "Centrifuge",
     "SemanticMemory",
@@ -245,14 +261,12 @@ __all__ = [
     "AdvancedNLPEngine",
     "AdvancedNLPAnalyzer",
     "SemanticLoom",
-    
     # Tier 2 - Event Bus
     "EventBus",
     "Event",
     "EventType",
     "get_event_bus",
     "reset_event_bus",
-    
     # Tier 2 - Structured Logging
     "StructuredLogger",
     "LogLevel",
@@ -262,7 +276,6 @@ __all__ = [
     "setup_logging",
     "get_log_context",
     "reset_logging",
-    
     # Phase 5 - Enhanced Analytics
     "SentimentAnalyzer",
     "SentimentAnalysis",
@@ -279,27 +292,21 @@ __all__ = [
     "IntelligenceReports",
     "IntelligenceReport",
     "OverlapDiscovery",
-    
     # Scribe
     "ScribeEngine",
     "LinguisticFingerprint",
-    
     # Scout
     "Scout",
     "AdaptiveRetriever",
     "QueryComplexityEstimator",
     "SemanticSearchEngine",
-    
     # Synapse
     "MemoryConsolidator",
     "BehavioralProfiler",
-    
     # Visualization
     "RhetoricAnalyzer",
-    
     # Monitoring
     "SystemMonitor",
-    
     # Forensic Utilities
     "detect_outliers",
     "load_audit_data",
@@ -307,7 +314,6 @@ __all__ = [
     "update_persona",
     "stream_project_mode",
     "stream_trust_mode",
-    
     # Orchestration
     "PipelineCoordinator",
     "PipelineJobQueue",

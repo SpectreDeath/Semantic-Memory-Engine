@@ -1,4 +1,7 @@
-# SME AI Sidecar - AI Heavyweights (Python 3.13)
+# SME AI Sidecar - AI Heavyweights
+# Python 3.13 used here to avoid Pydantic v1 monkey-patching requirements.
+# The operator uses 3.14 with the patch; this is intentional to minimize
+# dependencies in the sidecar container.
 FROM python:3.13-slim
 
 WORKDIR /app

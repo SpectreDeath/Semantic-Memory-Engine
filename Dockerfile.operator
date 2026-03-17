@@ -1,4 +1,8 @@
-# SME Operator - Core Application (Python 3.14)
+# SME Operator - Core Application
+# Python 3.14 required for operator due to:
+# - Pydantic v1 monkey-patching for Python 3.14 compatibility (see src/__init__.py)
+# - Latest async/await improvements in 3.14
+# Note: Sidecar uses Python 3.13 to minimize dependencies; this is intentional.
 FROM python:3.14-slim
 
 WORKDIR /app

@@ -231,7 +231,7 @@ class LogManager:
     and context support.
     """
 
-    _instance: Optional["LogManager"] = None
+    _instance: "LogManager" | None = None
     _configured: bool = False
 
     def __new__(cls) -> "LogManager":

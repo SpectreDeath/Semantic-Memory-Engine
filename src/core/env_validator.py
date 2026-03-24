@@ -12,14 +12,14 @@ class EnvValidationError(Exception):
     pass
 
 
-def validate_non_empty_string(value: Optional[str]) -> Optional[str]:
+def validate_non_empty_string(value: str | None) -> str | None:
     """Validate that a string is non-empty."""
     if value is None or value == "":
         return None
     return value
 
 
-def validate_port(value: Optional[str]) -> Optional[int]:
+def validate_port(value: str | None) -> int | None:
     """Validate that a value is a valid port number (1-65535)."""
     if value is None or value == "":
         return None
@@ -32,7 +32,7 @@ def validate_port(value: Optional[str]) -> Optional[int]:
         return None
 
 
-def validate_url(value: Optional[str]) -> Optional[str]:
+def validate_url(value: str | None) -> str | None:
     """Validate that a value is a valid URL."""
     if value is None or value == "":
         return None
@@ -45,7 +45,7 @@ def validate_url(value: Optional[str]) -> Optional[str]:
         return None
 
 
-def validate_boolean(value: Optional[str]) -> Optional[bool]:
+def validate_boolean(value: str | None) -> bool | None:
     """Validate that a value is a valid boolean."""
     if value is None or value == "":
         return None
@@ -65,7 +65,7 @@ def is_docker_environment() -> bool:
     return False
 
 
-def validate_docker_postgres_enforcement(values: dict[str, Any]) -> Optional[str]:
+def validate_docker_postgres_enforcement(values: dict[str, Any]) -> str | None:
     """
     Validate PostgreSQL enforcement for Docker multi-container deployments.
 
@@ -85,7 +85,7 @@ def validate_docker_postgres_enforcement(values: dict[str, Any]) -> Optional[str
     return None
 
 
-EnvVarSpec = tuple[str, bool, Callable[[Optional[str]], Optional[Any]], str]
+EnvVarSpec = tuple[str, bool, Callable[[str | None], Any | None], str]
 
 
 env_registry: list[EnvVarSpec] = [
@@ -105,10 +105,10 @@ env_registry: list[EnvVarSpec] = [
 class EnvValidator:
     """Registry and validation for environment variables."""
 
-    def __init__(self, registry: Optional[list[EnvVarSpec]] = None):
+    def __init__(self, registry: list[EnvVarSpec | None] = None):
         self._registry = registry or env_registry
 
-    def get_spec(self, name: str) -> Optional[EnvVarSpec]:
+    def get_spec(self, name: str) -> EnvVarSpec | None:
         """Get the spec for a named variable."""
         for spec in self._registry:
             if spec[0] == name:

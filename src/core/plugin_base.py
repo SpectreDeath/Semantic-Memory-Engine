@@ -100,7 +100,7 @@ class BasePlugin(ABC):
         Initialize the plugin with its manifest configuration and the Nexus API.
 
         Args:
-            manifest (Dict[str, Any]): The configuration parsed from the plugin's manifest.json.
+            manifest (dict[str, Any]): The configuration parsed from the plugin's manifest.json.
             nexus_api (Any): Standard interface (SmeCoreBridge or similar) to the database/core engine.
         """
         self.manifest = manifest

@@ -28,7 +28,7 @@ class BatchJob:
         self.results = []
         self.errors = []
         self.created_at = datetime.now()
-        self.completed_at = Optional[datetime]
+        self.completed_at = datetime | None
         self.progress = 0.0
 
 class BatchProcessor:

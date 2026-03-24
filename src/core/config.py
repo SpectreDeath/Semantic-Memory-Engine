@@ -33,7 +33,7 @@ class Config:
     to settings with sensible defaults.
     """
 
-    _instance: Optional['Config'] = None
+    _instance: 'Config' | None = None
     _config: dict[str, Any] = {}
 
     def __new__(cls):

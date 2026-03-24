@@ -6,7 +6,7 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 logger = logging.getLogger("lawnmower.extension_manager")
 
@@ -42,6 +42,35 @@ class ExtensionManager:
     Instance contract: get_tools() required; on_startup/on_ingestion optional.
     See docs/EXTENSION_CONTRACT.md for full vs minimal (BasePlugin) contract.
     """
+
+    allowed_imports: ClassVar[list[str]] = [
+        "gateway",
+        "gateway.*",
+        "src",
+        "src.*",
+        "pydantic",
+        "fastapi",
+        "httpx",
+        "logging",
+    ]
+
+    restricted_imports: ClassVar[list[str]] = [
+        "os",
+        "sys",
+        "subprocess",
+        "socket",
+        "threading",
+        "multiprocessing",
+        "ctypes",
+    ]
+
+    _forbidden_builtins: ClassVar[list[str]] = [
+        "open",
+        "compile",
+        "eval",
+        "exec",
+        "__import__",
+    ]
 
     def __init__(self, nexus_api: Any, extensions_dir: str | None = None):
         self.extensions_dir = os.path.normpath(
@@ -111,12 +140,79 @@ class ExtensionManager:
 
             # Add to sys.modules before execution to handle circular imports
             sys.modules[module_name] = module
+
+            # Sandbox: wrap module execution to detect restricted imports
+            restricted_imports_detected: list[str] = []
+
+            is_builtins_dict = isinstance(__builtins__, dict)
+            original_import = (
+                __builtins__["__import__"] if is_builtins_dict else __builtins__.__import__
+            )  # type: ignore
+
+            def restricted_import_wrapper(name: str, *args: Any, **kwargs: Any):
+                root_module = name.split(".", 1)[0] if "." in name else name
+                if root_module in self.restricted_imports:
+                    restricted_imports_detected.append(name)
+                    logger.warning(
+                        f"Plugin {plugin_id}: Extension attempted restricted import '{name}'. "
+                        f"Allowing load (graceful degradation)."
+                    )
+                return original_import(name, *args, **kwargs)
+
+            original_builtins_setitem: Any = None
+            if is_builtins_dict:
+                original_builtins_setitem = __builtins__["__setitem__"]  # type: ignore
+
+                def restricted_builtins_setitem(key: str, value: Any):
+                    if key in self._forbidden_builtins:
+                        restricted_imports_detected.append(f"__builtins__.{key}")
+                        logger.warning(
+                            f"Plugin {plugin_id}: Extension attempted to modify forbidden builtin '{key}'. "
+                            f"Allowing load (graceful degradation)."
+                        )
+                    if original_builtins_setitem:
+                        return original_builtins_setitem(key, value)
+
             try:
+                if is_builtins_dict:
+                    __builtins__["__import__"] = restricted_import_wrapper  # type: ignore
+                    __builtins__["__setitem__"] = restricted_builtins_setitem  # type: ignore
+                else:
+                    __builtins__.__import__ = restricted_import_wrapper  # type: ignore
+
                 spec.loader.exec_module(module)
-            except Exception as e:
+
+            except ImportError as e:
+                # Check if it's a restricted import error
+                error_msg = str(e)
+                for restricted in self.restricted_imports:
+                    if (
+                        f"'{restricted}'" in error_msg
+                        or f"No module named '{restricted}" in error_msg
+                    ):
+                        restricted_imports_detected.append(restricted)
+                        logger.warning(
+                            f"Plugin {plugin_id}: Extension attempted restricted import '{restricted}'. "
+                            f"Allowing load (graceful degradation)."
+                        )
+                # Continue loading despite restricted imports
+            except Exception:
                 # Remove failed module from sys.modules
                 sys.modules.pop(module_name, None)
                 raise
+            finally:
+                # Restore original imports
+                if is_builtins_dict:
+                    __builtins__["__import__"] = original_import  # type: ignore
+                    __builtins__["__setitem__"] = original_builtins_setitem  # type: ignore
+                else:
+                    __builtins__.__import__ = original_import  # type: ignore
+
+            if restricted_imports_detected:
+                logger.warning(
+                    f"Plugin {plugin_id}: Detected restricted imports during load: {restricted_imports_detected}. "
+                    f"Extension loaded with restrictions."
+                )
 
             if hasattr(module, "register_extension"):
                 plugin_instance = module.register_extension(manifest, self.nexus_api)

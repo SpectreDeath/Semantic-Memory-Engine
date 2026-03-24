@@ -1,3 +1,4 @@
+import logging
 import re
 import typing
 
@@ -33,8 +34,9 @@ def patch_pydantic_v1():
                 raise
 
         pydantic.v1.main.ModelMetaclass.__new__ = patched_new
-    except Exception:
-        pass
+        logging.info("Pydantic v1 monkey-patch applied successfully")
+    except Exception as e:
+        logging.warning(f"Pydantic v1 monkey-patch failed to apply: {e}")
 
 
 def pytest_configure(config):

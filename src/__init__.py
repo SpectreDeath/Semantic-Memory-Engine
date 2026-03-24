@@ -65,13 +65,23 @@ def apply_python314_patches():
             # This is a bit risky but might help collection
             # sys.modules['spacy.schemas'] = schemas_mock
 
-    except Exception:
-        pass
+    except Exception as e:
+        logging.warning(f"Python 3.14 Pydantic patches failed to apply: {e}")
+    else:
+        logging.info("Python 3.14 Pydantic patches applied successfully")
 
 
-# Apply patches on module load for backward compatibility
-# This can be removed once all consumers call apply_python314_patches() explicitly
-apply_python314_patches()
+def enable_python314_patches():
+    """
+    Enable Python 3.14 compatibility patches.
+    Call this explicitly to enable patching for spacy and other Pydantic v1-dependent
+    libraries on Python 3.14.
+    """
+    apply_python314_patches()
+
+
+# Patching is now opt-in by default. Uncomment the line below to enable automatic patching:
+# enable_python314_patches()
 # -----------------------------------------
 
 # Configuration & Factory

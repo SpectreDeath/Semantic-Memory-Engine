@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import secrets
 import sys
 from typing import Any
 
@@ -33,8 +34,7 @@ class AuthManager:
         admin_password = admin_password or os.environ.get("SME_ADMIN_PASSWORD")
         if not admin_password:
             logger.critical(
-                "SME_ADMIN_PASSWORD is not set. Exiting to prevent running "
-                "with insecure defaults."
+                "SME_ADMIN_PASSWORD is not set. Exiting to prevent running with insecure defaults."
             )
             sys.exit(1)
         self.admin_password = admin_password
@@ -42,7 +42,7 @@ class AuthManager:
 
     def login(self, username: str, password: str) -> str | None:
         """Verify credentials and return a JWT token."""
-        if password == self.admin_password:
+        if secrets.compare_digest(password, self.admin_password):
             now = datetime.datetime.now(datetime.timezone.utc)
             payload = {
                 "sub": username,

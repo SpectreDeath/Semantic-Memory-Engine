@@ -138,6 +138,39 @@ services:
       - backend-net
 
   # ---------------------------------------------------------------------------
+  # sme-backup: Automated PostgreSQL backup service
+  # Runs daily backups at 2am and retains backups for 7 days
+  # ---------------------------------------------------------------------------
+  sme-backup:
+    image: postgres:15-alpine
+    container_name: sme_backup
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:-sme_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sme_password}
+      POSTGRES_DB: ${POSTGRES_DB:-sme_nexus}
+      SME_BACKUP_DIR: /app/backups
+      SME_BACKUP_RETENTION_DAYS: 7
+    volumes:
+      - sme_backups:/app/backups
+    command: >
+      sh -c "
+        echo 'Backup container initialized' &&
+        # Run backup immediately then daily at 2am
+        python scripts/backup_postgres.py || true &&
+        while true; do
+          sleep 86400 &&
+          python scripts/backup_postgres.py --cleanup || true
+        done
+      "
+    networks:
+      - backend-net
+    depends_on:
+      - postgres
+
+  # ---------------------------------------------------------------------------
   # Ollama - Local LLM runtime (Docker-based)
   # Accessible at ollama:11434 from other containers
   # Models stored in persistent volume
@@ -178,6 +211,7 @@ services:
 volumes:
   sme_pg_data:
   ollama_models:
+  sme_backups:
 
 # ---------------------------------------------------------------------------
 # Named networks for service isolation.

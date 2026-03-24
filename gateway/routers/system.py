@@ -16,12 +16,15 @@ try:
 except ImportError:
     psutil = None
 
+from gateway.health_check import deep_health_check
+
 logger = logging.getLogger("lawnmower.system")
 
 
 # ---------------------------------------------------------------------------
 # Internal helper — shared by verify_system AND check_health without .fn hack
 # ---------------------------------------------------------------------------
+
 
 def _get_system_status(registry: Any) -> dict:
     """Collect system health data and return as a plain dict."""
@@ -38,8 +41,8 @@ def _get_system_status(registry: Any) -> dict:
         memory = psutil.virtual_memory()
         result["telemetry"] = {
             "cpu_percent": cpu_usage,
-            "memory_total_gb": round(memory.total / (1024 ** 3), 2),
-            "memory_available_gb": round(memory.available / (1024 ** 3), 2),
+            "memory_total_gb": round(memory.total / (1024**3), 2),
+            "memory_available_gb": round(memory.available / (1024**3), 2),
             "memory_used_percent": memory.percent,
         }
 
@@ -47,16 +50,14 @@ def _get_system_status(registry: Any) -> dict:
     result["data_integrity"]["knowledge_db"] = {
         "path": db_path,
         "exists": os.path.exists(db_path),
-        "size_gb": round(os.path.getsize(db_path) / (1024 ** 3), 3)
-        if os.path.exists(db_path)
-        else 0,
+        "size_gb": round(os.path.getsize(db_path) / (1024**3), 3) if os.path.exists(db_path) else 0,
     }
 
     csv_path = "data/conceptnet-assertions-5.7.0.csv"
     result["data_integrity"]["conceptnet"] = {
         "path": csv_path,
         "exists": os.path.exists(csv_path),
-        "size_gb": round(os.path.getsize(csv_path) / (1024 ** 3), 2)
+        "size_gb": round(os.path.getsize(csv_path) / (1024**3), 2)
         if os.path.exists(csv_path)
         else 0,
     }
@@ -80,6 +81,7 @@ def _get_system_status(registry: Any) -> dict:
 # ---------------------------------------------------------------------------
 # Router registration
 # ---------------------------------------------------------------------------
+
 
 def register(
     mcp: Any,
@@ -155,6 +157,26 @@ def register(
             "extensions": extension_manager.get_status(),
         }
         return json.dumps(health, indent=2)
+
+    @mcp.tool()
+    def deep_health() -> str:
+        """
+        Comprehensive deep health check for all system dependencies.
+
+        Checks:
+        - PostgreSQL connectivity
+        - SQLite database accessibility
+        - Sidecar service availability
+        - Environment variables
+        - Disk space
+        - Extension loading
+
+        Returns:
+            JSON with detailed status of all subsystems
+        """
+        logger.info("deep_health called")
+        result = deep_health_check()
+        return json.dumps(result, indent=2)
 
     @mcp.tool()
     def get_system_latency() -> str:

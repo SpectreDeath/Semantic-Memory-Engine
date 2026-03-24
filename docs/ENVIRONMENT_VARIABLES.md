@@ -115,3 +115,25 @@
 - **Required**: No
 - **Default**: `1`
 - **Description**: Disable Python output buffering for live logging.
+
+## Validation
+
+As of v3.0.1, environment variables are validated at startup via `src/core/env_validator.py`. The system will:
+
+- **Warn** for missing optional variables
+- **Error** for missing required variables
+- **Validate** port numbers, URLs, and boolean values
+
+To run validation manually:
+```python
+from src.core.env_validator import validate_environment
+issues = validate_environment()
+print(issues)  # {'values': {...}, 'errors': {...}, 'warnings': {...}}
+```
+
+## Security Notes
+
+1. **Never commit `.env`** - It's in `.gitignore` for a reason
+2. **Use Docker secrets** - In production, use Docker secrets or a vault
+3. **Rotate credentials** - Change default passwords and secrets regularly
+4. **Validate at startup** - The bootstrap process validates all required variables

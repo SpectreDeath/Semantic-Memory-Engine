@@ -253,7 +253,7 @@ Our utilities are specifically optimized for the 1660 Ti's 6GB VRAM limitations:
 
 ## 📦 Requirements
 
-- Python 3.10+ (3.14 compatible)
+- Python 3.12+ (3.13 recommended for spacy compatibility)
 - `fastmcp`
 - `pydantic`
 - `faststylometry`

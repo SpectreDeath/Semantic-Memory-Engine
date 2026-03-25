@@ -31,7 +31,7 @@ Once tagged, use the GitHub UI to create a "Release":
 
 ## 3. GitHub Container Registry (GHCR) - *Critical for SME*
 
-Since SME interacts with complex dependencies (R, Python 3.14, GPU drivers), pushing your images to GHCR is the **only way** to bypass local Win32/versioning errors for end-users.
+Since SME interacts with complex dependencies (R, Python 3.13, GPU drivers), pushing your images to GHCR is the **only way** to bypass local Win32/versioning errors for end-users.
 
 ```bash
 docker pull ghcr.io/spectredeath/sme-operator:v2.0.0

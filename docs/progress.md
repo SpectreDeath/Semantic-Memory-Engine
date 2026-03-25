@@ -1,9 +1,12 @@
 # Project Progress Tracking
 
 ## Current Status: Maintenance Mode
-**Last Updated:** February 4, 2026  
+**Last Updated:** March 25, 2026  
 **Active Persona:** Maintenance Mode  
 **Hardware:** NVIDIA GeForce GTX 1660 Ti 6GB VRAM
+
+## Python Version: 3.13 (Recommended)
+- **Note**: Python 3.14 has compatibility issues with spacy (Pydantic v1). Use Python 3.12+ for compatibility.
 
 ## Completed Utility Suite
 

@@ -1,6 +1,31 @@
 
 # Changelog
 
+## [v3.0.1] - Bug Fixes & Compatibility - 2026-03-25
+
+### Summary
+
+Fixed critical compatibility issues and improved test coverage.
+
+### Fixed
+
+- **Python 3.14 Compatibility**: Switched to Python 3.13 due to spacy/Pydantic v1 incompatibility with Python 3.14
+- **Extension Manager Sandbox Bug**: Removed sandbox that caused `__builtins__` module vs dict issue
+- **Extension Return Types**: Fixed `ext_scrapegraph_harvester` and `ext_social_intel` returning dict instead of str
+- **Test Fixtures**: Fixed auth.py test fixtures, cache TTL parameter, circuit breaker recovery timeout
+
+### Changed
+
+- Updated `requires-python` to `>=3.12` in pyproject.toml
+- Updated Dockerfile.operator to use Python 3.13
+- Added type annotations across codebase (100+ files)
+
+### Added
+
+- New extensions: ext_ai_bridge, ext_analysis_core, ext_core_utils, ext_data_storage, ext_gateway, ext_gathering, ext_harvester, ext_logging, ext_monitoring, ext_nlp_core, ext_query_engine, ext_scribe, ext_validation
+
+---
+
 ## [v3.0.0] - Odyssey Release & Arch Improvements - 2026-02-24
 
 ### Summary

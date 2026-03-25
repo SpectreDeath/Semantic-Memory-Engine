@@ -24,11 +24,11 @@ The SME system is orchestrated using Docker Compose with the following services:
 
 ### **1. SME Operator (`sme-operator`)**
 **Purpose**: Core application API server
-**Base Image**: `python:3.14-slim`
+**Base Image**: `python:3.13-slim`
 **Port**: 8000
 
 **Key Features:**
-- ✅ **Modern Python**: Uses Python 3.14 for latest features
+- ✅ **Modern Python**: Uses Python 3.13 for best compatibility with ML dependencies
 - ✅ **Security**: Environment-based secrets management
 - ✅ **Health Dependencies**: Waits for sidecar and PostgreSQL
 - ✅ **Volume Mounts**: Persistent data storage

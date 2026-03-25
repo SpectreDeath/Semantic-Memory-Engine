@@ -17,6 +17,7 @@ Key Features:
 """
 
 import asyncio
+import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime
@@ -33,17 +34,21 @@ from .sentiment_analyzer import SentimentAnalyzer
 
 logger = logging.getLogger("SME.SocialIntelligence")
 
+
 class PlatformType(Enum):
     """Supported social media platforms."""
+
     TWITTER = "twitter"
     REDDIT = "reddit"
     FACEBOOK = "facebook"
     YOUTUBE = "youtube"
     TIKTOK = "tiktok"
 
+
 @dataclass
 class HashtagCampaign:
     """Represents a tracked hashtag campaign."""
+
     hashtag: str
     platform: PlatformType
     start_time: datetime
@@ -55,9 +60,11 @@ class HashtagCampaign:
     geolocation_data: dict[str, int]
     related_hashtags: list[str]
 
+
 @dataclass
 class SentimentAnalysis:
     """Represents sentiment analysis results."""
+
     platform: PlatformType
     topic: str
     time_window: int
@@ -68,9 +75,11 @@ class SentimentAnalysis:
     influential_posts: list[dict]
     user_engagement: dict[str, int]
 
+
 @dataclass
 class CoordinatedCampaign:
     """Represents a detected coordinated campaign."""
+
     campaign_id: str
     platforms_involved: list[PlatformType]
     start_time: datetime
@@ -82,10 +91,11 @@ class CoordinatedCampaign:
     source_accounts: list[str]
     content_samples: list[dict]
 
+
 class SocialIntelligenceCrawler(BasePlugin):
     """
     Main plugin class for the Social Media Intelligence Crawler extension.
-    
+
     This extension provides comprehensive social media monitoring capabilities
     for detecting disinformation campaigns, analyzing sentiment patterns, and
     identifying coordinated activities across multiple platforms.
@@ -132,19 +142,20 @@ class SocialIntelligenceCrawler(BasePlugin):
             self.detect_coordinated_campaigns,
             self.track_influencer_activity,
             self.analyze_geolocation_patterns,
-            self.generate_social_media_report
+            self.generate_social_media_report,
         ]
 
-    async def monitor_hashtag_campaign(self, hashtag: str, time_window: int = 24,
-                                     platforms: list[str] | None = None) -> dict:
+    async def monitor_hashtag_campaign(
+        self, hashtag: str, time_window: int = 24, platforms: list[str] | None = None
+    ) -> str:
         """
         Track hashtag usage patterns and bot activity across specified platforms.
-        
+
         Args:
             hashtag: The hashtag to monitor (without # symbol)
             time_window: Time window in hours to analyze
             platforms: List of platforms to monitor (defaults to all configured)
-            
+
         Returns:
             Dict containing campaign analysis results
         """
@@ -152,13 +163,17 @@ class SocialIntelligenceCrawler(BasePlugin):
             logger.info(f"Starting hashtag campaign monitoring: #{hashtag}")
 
             # Validate and normalize hashtag
-            clean_hashtag = hashtag.lstrip('#').lower()
+            clean_hashtag = hashtag.lstrip("#").lower()
             if not clean_hashtag:
-                return {"error": "Invalid hashtag provided"}
+                return json.dumps({"error": "Invalid hashtag provided"})
 
             # Determine platforms to monitor
             target_platforms = platforms or list(PlatformType.__members__.keys())
-            platform_types = [PlatformType[p.upper()] for p in target_platforms if p.upper() in PlatformType.__members__]
+            platform_types = [
+                PlatformType[p.upper()]
+                for p in target_platforms
+                if p.upper() in PlatformType.__members__
+            ]
 
             # Collect data from all specified platforms
             campaign_data = {}
@@ -173,8 +188,8 @@ class SocialIntelligenceCrawler(BasePlugin):
 
                     if platform_data:
                         campaign_data[platform.value] = platform_data
-                        total_posts += platform_data.get('post_count', 0)
-                        unique_users.update(platform_data.get('unique_users', []))
+                        total_posts += platform_data.get("post_count", 0)
+                        unique_users.update(platform_data.get("unique_users", []))
 
                 except Exception as e:
                     logger.warning(f"Failed to fetch data for {platform.value}: {e}")
@@ -194,10 +209,10 @@ class SocialIntelligenceCrawler(BasePlugin):
                 end_time=None,
                 total_posts=total_posts,
                 unique_users=len(unique_users),
-                sentiment_score=sentiment_analysis.get('overall_sentiment', 0.0),
-                bot_activity_score=bot_analysis.get('bot_score', 0.0),
+                sentiment_score=sentiment_analysis.get("overall_sentiment", 0.0),
+                bot_activity_score=bot_analysis.get("bot_score", 0.0),
                 geolocation_data=self._extract_geolocation_data(campaign_data),
-                related_hashtags=self._extract_related_hashtags(campaign_data)
+                related_hashtags=self._extract_related_hashtags(campaign_data),
             )
 
             self.active_campaigns[clean_hashtag] = campaign
@@ -216,26 +231,27 @@ class SocialIntelligenceCrawler(BasePlugin):
                 "geolocation_distribution": campaign.geolocation_data,
                 "related_hashtags": campaign.related_hashtags,
                 "campaign_id": clean_hashtag,
-                "status": "active"
+                "status": "active",
             }
 
             logger.info(f"Hashtag campaign monitoring completed: #{clean_hashtag}")
-            return result
+            return json.dumps(result)
 
         except Exception as e:
             logger.error(f"Error in hashtag campaign monitoring: {e}")
-            return {"error": str(e), "hashtag": hashtag}
+            return json.dumps({"error": str(e), "hashtag": hashtag})
 
-    async def analyze_sentiment_spread(self, topic: str, platforms: list[str] | None = None,
-                                     time_range: int = 48) -> dict:
+    async def analyze_sentiment_spread(
+        self, topic: str, platforms: list[str] | None = None, time_range: int = 48
+    ) -> str:
         """
         Analyze sentiment propagation across platforms for a given topic.
-        
+
         Args:
             topic: Topic to analyze sentiment for
             platforms: List of platforms to analyze
             time_range: Time range in hours to analyze
-            
+
         Returns:
             Dict containing sentiment analysis results
         """
@@ -244,7 +260,11 @@ class SocialIntelligenceCrawler(BasePlugin):
 
             # Determine platforms
             target_platforms = platforms or list(PlatformType.__members__.keys())
-            platform_types = [PlatformType[p.upper()] for p in target_platforms if p.upper() in PlatformType.__members__]
+            platform_types = [
+                PlatformType[p.upper()]
+                for p in target_platforms
+                if p.upper() in PlatformType.__members__
+            ]
 
             sentiment_results = {}
 
@@ -280,27 +300,27 @@ class SocialIntelligenceCrawler(BasePlugin):
                 "platform_sentiment": sentiment_results,
                 "cross_platform_correlation": correlation_analysis,
                 "sentiment_trends": trend_analysis,
-                "analysis_timestamp": datetime.now().isoformat()
+                "analysis_timestamp": datetime.now().isoformat(),
             }
 
             logger.info(f"Sentiment analysis completed for topic: {topic}")
-            return result
+            return json.dumps(result)
 
         except Exception as e:
             logger.error(f"Error in sentiment analysis: {e}")
-            return {"error": str(e), "topic": topic}
+            return json.dumps({"error": str(e), "topic": topic})
 
-    async def detect_coordinated_campaigns(self, keywords: list[str],
-                                         time_window: int = 24,
-                                         platforms: list[str] | None = None) -> dict:
+    async def detect_coordinated_campaigns(
+        self, keywords: list[str], time_window: int = 24, platforms: list[str] | None = None
+    ) -> str:
         """
         Identify coordinated disinformation campaigns using pattern recognition.
-        
+
         Args:
             keywords: List of keywords to monitor for coordination
             time_window: Time window in hours to analyze
             platforms: List of platforms to monitor
-            
+
         Returns:
             Dict containing coordinated campaign detection results
         """
@@ -309,7 +329,11 @@ class SocialIntelligenceCrawler(BasePlugin):
 
             # Determine platforms
             target_platforms = platforms or list(PlatformType.__members__.keys())
-            platform_types = [PlatformType[p.upper()] for p in target_platforms if p.upper() in PlatformType.__members__]
+            platform_types = [
+                PlatformType[p.upper()]
+                for p in target_platforms
+                if p.upper() in PlatformType.__members__
+            ]
 
             # Collect data across platforms
             campaign_data = {}
@@ -341,26 +365,27 @@ class SocialIntelligenceCrawler(BasePlugin):
                 "coordination_analysis": coordination_analysis,
                 "amplification_networks": network_analysis,
                 "risk_assessment": risk_assessment,
-                "detected_campaigns": coordination_analysis.get('detected_campaigns', []),
-                "analysis_timestamp": datetime.now().isoformat()
+                "detected_campaigns": coordination_analysis.get("detected_campaigns", []),
+                "analysis_timestamp": datetime.now().isoformat(),
             }
 
             logger.info(f"Coordinated campaign detection completed for keywords: {keywords}")
-            return result
+            return json.dumps(result)
 
         except Exception as e:
             logger.error(f"Error in coordinated campaign detection: {e}")
-            return {"error": str(e), "keywords": keywords}
+            return json.dumps({"error": str(e), "keywords": keywords})
 
-    async def track_influencer_activity(self, influencer_handles: list[str],
-                                      time_window: int = 168) -> dict:
+    async def track_influencer_activity(
+        self, influencer_handles: list[str], time_window: int = 168
+    ) -> str:
         """
         Track activity and influence patterns of specific accounts.
-        
+
         Args:
             influencer_handles: List of influencer handles to track
             time_window: Time window in hours to analyze
-            
+
         Returns:
             Dict containing influencer activity analysis
         """
@@ -372,9 +397,7 @@ class SocialIntelligenceCrawler(BasePlugin):
             for handle in influencer_handles:
                 try:
                     # Fetch influencer data across platforms
-                    platform_data = await self.api_manager.get_influencer_data(
-                        handle, time_window
-                    )
+                    platform_data = await self.api_manager.get_influencer_data(handle, time_window)
 
                     if platform_data:
                         # Analyze influence metrics
@@ -384,7 +407,7 @@ class SocialIntelligenceCrawler(BasePlugin):
 
                         influencer_data[handle] = {
                             "platform_data": platform_data,
-                            "influence_metrics": influence_metrics
+                            "influence_metrics": influence_metrics,
                         }
 
                 except Exception as e:
@@ -399,24 +422,26 @@ class SocialIntelligenceCrawler(BasePlugin):
                 "time_window_hours": time_window,
                 "influencer_data": influencer_data,
                 "cross_platform_analysis": cross_platform_analysis,
-                "tracking_timestamp": datetime.now().isoformat()
+                "tracking_timestamp": datetime.now().isoformat(),
             }
 
             logger.info(f"Influencer tracking completed for {len(influencer_handles)} accounts")
-            return result
+            return json.dumps(result)
 
         except Exception as e:
             logger.error(f"Error in influencer tracking: {e}")
-            return {"error": str(e), "influencers": influencer_handles}
+            return json.dumps({"error": str(e), "influencers": influencer_handles})
 
-    async def analyze_geolocation_patterns(self, topic: str, platforms: list[str] | None = None) -> dict:
+    async def analyze_geolocation_patterns(
+        self, topic: str, platforms: list[str] | None = None
+    ) -> str:
         """
         Analyze geographic distribution and patterns of social media activity.
-        
+
         Args:
             topic: Topic to analyze geolocation patterns for
             platforms: List of platforms to analyze
-            
+
         Returns:
             Dict containing geolocation analysis results
         """
@@ -425,16 +450,18 @@ class SocialIntelligenceCrawler(BasePlugin):
 
             # Determine platforms
             target_platforms = platforms or list(PlatformType.__members__.keys())
-            platform_types = [PlatformType[p.upper()] for p in target_platforms if p.upper() in PlatformType.__members__]
+            platform_types = [
+                PlatformType[p.upper()]
+                for p in target_platforms
+                if p.upper() in PlatformType.__members__
+            ]
 
             geolocation_data = {}
 
             for platform in platform_types:
                 try:
                     # Fetch geotagged content
-                    geo_content = await self.api_manager.get_geotagged_content(
-                        platform, topic
-                    )
+                    geo_content = await self.api_manager.get_geotagged_content(platform, topic)
 
                     if geo_content:
                         # Analyze geographic patterns
@@ -456,25 +483,26 @@ class SocialIntelligenceCrawler(BasePlugin):
                 "platforms_analyzed": [p.value for p in platform_types],
                 "geolocation_analysis": geolocation_data,
                 "geographic_heatmap": heatmap_data,
-                "analysis_timestamp": datetime.now().isoformat()
+                "analysis_timestamp": datetime.now().isoformat(),
             }
 
             logger.info(f"Geolocation analysis completed for topic: {topic}")
-            return result
+            return json.dumps(result)
 
         except Exception as e:
             logger.error(f"Error in geolocation analysis: {e}")
-            return {"error": str(e), "topic": topic}
+            return json.dumps({"error": str(e), "topic": topic})
 
-    async def generate_social_media_report(self, report_type: str,
-                                         parameters: dict[str, Any]) -> dict:
+    async def generate_social_media_report(
+        self, report_type: str, parameters: dict[str, Any]
+    ) -> str:
         """
         Generate comprehensive social media intelligence reports.
-        
+
         Args:
             report_type: Type of report to generate
             parameters: Parameters for the report generation
-            
+
         Returns:
             Dict containing the generated report
         """
@@ -493,18 +521,18 @@ class SocialIntelligenceCrawler(BasePlugin):
             elif report_type == "geographic_distribution":
                 result = await self._generate_geographic_report(parameters)
             else:
-                return {"error": f"Unknown report type: {report_type}"}
+                return json.dumps({"error": f"Unknown report type: {report_type}"})
 
             result["report_type"] = report_type
             result["generated_at"] = datetime.now().isoformat()
             result["plugin_version"] = self.manifest.get("version", "1.0.0")
 
             logger.info(f"Social media report generated: {report_type}")
-            return result
+            return json.dumps(result)
 
         except Exception as e:
             logger.error(f"Error generating social media report: {e}")
-            return {"error": str(e), "report_type": report_type}
+            return json.dumps({"error": str(e), "report_type": report_type})
 
     # Helper methods
 
@@ -513,21 +541,17 @@ class SocialIntelligenceCrawler(BasePlugin):
         return {
             "rate_limits": {
                 "twitter": 300,  # requests per 15 minutes
-                "reddit": 60,    # requests per minute
-                "facebook": 200, # requests per hour
-                "youtube": 10000, # requests per day
-                "tiktok": 1000   # requests per hour
+                "reddit": 60,  # requests per minute
+                "facebook": 200,  # requests per hour
+                "youtube": 10000,  # requests per day
+                "tiktok": 1000,  # requests per hour
             },
-            "content_filters": {
-                "nsfw_threshold": 0.8,
-                "spam_threshold": 0.7,
-                "bot_threshold": 0.6
-            },
+            "content_filters": {"nsfw_threshold": 0.8, "spam_threshold": 0.7, "bot_threshold": 0.6},
             "analysis_settings": {
                 "sentiment_model": "bert-base-multilingual",
                 "coordination_window": 3600,  # 1 hour
-                "geolocation_precision": "city"
-            }
+                "geolocation_precision": "city",
+            },
         }
 
     async def _analyze_bot_activity(self, campaign_data: dict) -> dict:
@@ -542,16 +566,20 @@ class SocialIntelligenceCrawler(BasePlugin):
                 bot_scores.append(bot_score)
 
                 if bot_score > self.config["content_filters"]["bot_threshold"]:
-                    suspicious_patterns.append({
-                        "platform": platform,
-                        "bot_score": bot_score,
-                        "patterns": await self.campaign_detector.identify_suspicious_patterns(data)
-                    })
+                    suspicious_patterns.append(
+                        {
+                            "platform": platform,
+                            "bot_score": bot_score,
+                            "patterns": await self.campaign_detector.identify_suspicious_patterns(
+                                data
+                            ),
+                        }
+                    )
 
         return {
             "bot_score": sum(bot_scores) / len(bot_scores) if bot_scores else 0.0,
             "suspicious_patterns": suspicious_patterns,
-            "total_suspicious_accounts": len(suspicious_patterns)
+            "total_suspicious_accounts": len(suspicious_patterns),
         }
 
     async def _analyze_campaign_sentiment(self, campaign_data: dict) -> dict:
@@ -571,7 +599,7 @@ class SocialIntelligenceCrawler(BasePlugin):
         return {
             "overall_sentiment": sentiment_result.get("average_sentiment", 0.0),
             "sentiment_breakdown": sentiment_result.get("sentiment_distribution", {}),
-            "confidence": sentiment_result.get("confidence", 0.0)
+            "confidence": sentiment_result.get("confidence", 0.0),
         }
 
     def _extract_geolocation_data(self, campaign_data: dict) -> dict[str, int]:
@@ -608,8 +636,11 @@ class SocialIntelligenceCrawler(BasePlugin):
 
         platforms = list(sentiment_results.keys())
         for i, platform1 in enumerate(platforms):
-            for platform2 in platforms[i+1:]:
-                if "error" not in sentiment_results[platform1] and "error" not in sentiment_results[platform2]:
+            for platform2 in platforms[i + 1 :]:
+                if (
+                    "error" not in sentiment_results[platform1]
+                    and "error" not in sentiment_results[platform2]
+                ):
                     correlation = await self.sentiment_analyzer.calculate_sentiment_correlation(
                         sentiment_results[platform1], sentiment_results[platform2]
                     )
@@ -617,8 +648,10 @@ class SocialIntelligenceCrawler(BasePlugin):
 
         return {
             "platform_correlations": correlations,
-            "average_correlation": sum(correlations.values()) / len(correlations) if correlations else 0.0,
-            "high_correlation_pairs": [k for k, v in correlations.items() if v > 0.7]
+            "average_correlation": sum(correlations.values()) / len(correlations)
+            if correlations
+            else 0.0,
+            "high_correlation_pairs": [k for k, v in correlations.items() if v > 0.7],
         }
 
     async def _analyze_sentiment_trends(self, sentiment_results: dict) -> dict:
@@ -660,7 +693,7 @@ class SocialIntelligenceCrawler(BasePlugin):
             "risk_score": risk_score,
             "risk_level": risk_level,
             "risk_factors": risk_factors,
-            "recommendations": await self._generate_risk_recommendations(risk_level)
+            "recommendations": await self._generate_risk_recommendations(risk_level),
         }
 
     async def _analyze_influence_metrics(self, handle: str, platform_data: dict) -> dict:
@@ -681,14 +714,17 @@ class SocialIntelligenceCrawler(BasePlugin):
 
         for handle, data in influencer_data.items():
             if "error" not in data:
-                cross_platform_metrics[handle] = await self.campaign_detector.analyze_cross_platform_influence(
+                cross_platform_metrics[
+                    handle
+                ] = await self.campaign_detector.analyze_cross_platform_influence(
                     handle, data["platform_data"]
                 )
 
         return cross_platform_metrics
 
-    async def _analyze_geographic_patterns(self, platform: PlatformType,
-                                         geo_content: list[dict], topic: str) -> dict:
+    async def _analyze_geographic_patterns(
+        self, platform: PlatformType, geo_content: list[dict], topic: str
+    ) -> dict:
         """Analyze geographic patterns in geotagged content."""
         return await self.campaign_detector.analyze_geographic_patterns(
             platform, geo_content, topic
@@ -724,11 +760,11 @@ class SocialIntelligenceCrawler(BasePlugin):
                 "total_posts": campaign_data.total_posts,
                 "unique_users": campaign_data.unique_users,
                 "sentiment_score": campaign_data.sentiment_score,
-                "bot_activity_score": campaign_data.bot_activity_score
+                "bot_activity_score": campaign_data.bot_activity_score,
             },
             "geographic_distribution": campaign_data.geolocation_data,
             "related_hashtags": campaign_data.related_hashtags,
-            "time_range": f"{time_window} hours"
+            "time_range": f"{time_window} hours",
         }
 
     async def _generate_sentiment_report(self, parameters: dict) -> dict:
@@ -743,7 +779,7 @@ class SocialIntelligenceCrawler(BasePlugin):
             "topic": topic,
             "platforms": platforms,
             "summary": "Sentiment analysis report generated",
-            "details": "Full sentiment breakdown available in detailed analysis"
+            "details": "Full sentiment breakdown available in detailed analysis",
         }
 
     async def _generate_coordination_report(self, parameters: dict) -> dict:
@@ -756,7 +792,7 @@ class SocialIntelligenceCrawler(BasePlugin):
         return {
             "keywords": keywords,
             "summary": "Coordination assessment report generated",
-            "details": "Full coordination analysis available in detailed assessment"
+            "details": "Full coordination analysis available in detailed assessment",
         }
 
     async def _generate_influencer_report(self, parameters: dict) -> dict:
@@ -769,7 +805,7 @@ class SocialIntelligenceCrawler(BasePlugin):
         return {
             "influencers": influencers,
             "summary": "Influencer impact report generated",
-            "details": "Full influencer analysis available in detailed report"
+            "details": "Full influencer analysis available in detailed report",
         }
 
     async def _generate_geographic_report(self, parameters: dict) -> dict:
@@ -782,7 +818,7 @@ class SocialIntelligenceCrawler(BasePlugin):
         return {
             "topic": topic,
             "summary": "Geographic distribution report generated",
-            "details": "Full geographic analysis available in detailed report"
+            "details": "Full geographic analysis available in detailed report",
         }
 
     async def _generate_risk_recommendations(self, risk_level: str) -> list[str]:
@@ -790,26 +826,26 @@ class SocialIntelligenceCrawler(BasePlugin):
         recommendations = {
             "LOW": [
                 "Continue monitoring for changes in activity patterns",
-                "Maintain current defensive measures"
+                "Maintain current defensive measures",
             ],
             "MEDIUM": [
                 "Increase monitoring frequency",
                 "Prepare response protocols",
-                "Engage with community to counter misinformation"
+                "Engage with community to counter misinformation",
             ],
             "HIGH": [
                 "Activate incident response team",
                 "Implement enhanced monitoring",
                 "Coordinate with platform moderators",
-                "Prepare public communication strategy"
+                "Prepare public communication strategy",
             ],
             "CRITICAL": [
                 "Immediate escalation to senior management",
                 "Activate full incident response protocol",
                 "Coordinate with law enforcement if necessary",
                 "Implement emergency communication plan",
-                "Consider platform-level countermeasures"
-            ]
+                "Consider platform-level countermeasures",
+            ],
         }
 
         return recommendations.get(risk_level, ["Monitor situation closely"])
@@ -828,6 +864,7 @@ class SocialIntelligenceCrawler(BasePlugin):
         """Save campaign data to database."""
         # Implementation would save to database
         pass
+
 
 def register_extension(manifest: dict[str, Any], nexus_api: Any):
     """Register the Social Intelligence Crawler extension."""

@@ -1,5 +1,5 @@
 {
-  "plugin_id": "scrapegraph_harvester",
+  "plugin_id": "ext_scrapegraph_harvester",
   "name": "ScrapeGraphAI Harvester",
   "version": "1.0.0",
   "description": "Agentic web scraping and forensic data harvesting using ScrapeGraphAI",

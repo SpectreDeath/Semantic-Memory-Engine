@@ -26,6 +26,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 EXTENSIONS_DIR = PROJECT_ROOT / "extensions"
 
+
 # Collect every extension folder that contains a Python file
 def _discover_extension_dirs() -> list[Path]:
     dirs = []
@@ -36,6 +37,7 @@ def _discover_extension_dirs() -> list[Path]:
                 dirs.append(entry)
     return dirs
 
+
 EXTENSION_DIRS = _discover_extension_dirs()
 EXTENSION_NAMES = [d.name for d in EXTENSION_DIRS]
 
@@ -44,12 +46,20 @@ EXTENSION_NAMES = [d.name for d in EXTENSION_DIRS]
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture(scope="session")
 def extension_manager():
     """
     Build a real ExtensionManager instance and run discovery once for the
     whole test session so we don't pay the startup cost 18 times.
     """
+    import os
+
+    # Set required environment variables for tests
+    os.environ.setdefault("SME_GATEWAY_SECRET", "test_secret_key_12345678901234567890")
+    os.environ.setdefault("SME_ADMIN_PASSWORD", "test_admin_password")
+    os.environ.setdefault("SME_HSM_SECRET", "test_hsm_secret_key")
+
     from gateway.extension_manager import ExtensionManager
 
     manager = ExtensionManager(nexus_api=None)
@@ -60,6 +70,7 @@ def extension_manager():
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 def test_extension_dirs_found():
     """Sanity check — the extensions directory must contain at least one entry."""
@@ -73,7 +84,11 @@ def test_all_extensions_discovered(extension_manager):
     """Every extension folder must appear in the manager's loaded registry."""
     loaded = extension_manager.get_status()
     # get_status() returns List[Dict] with "id" per extension
-    loaded_ids = {s["id"] for s in loaded} if isinstance(loaded, list) else set(loaded.get("loaded_extensions", []))
+    loaded_ids = (
+        {s["id"] for s in loaded}
+        if isinstance(loaded, list)
+        else set(loaded.get("loaded_extensions", []))
+    )
 
     missing = [name for name in EXTENSION_NAMES if name not in loaded_ids]
     assert not missing, (

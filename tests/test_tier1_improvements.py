@@ -14,6 +14,7 @@ from src.core.validation import ValidationError, Validator
 
 # ==================== Cache Tests ====================
 
+
 class TestCacheManager:
     """Tests for CacheManager."""
 
@@ -24,7 +25,7 @@ class TestCacheManager:
     def test_cache_set_and_get(self):
         """Test basic cache set and get."""
         cache = get_cache()
-        cache.set("key1", "value1", ttl=60)
+        cache.set("key1", "value1", ttl_seconds=60)
 
         result = cache.get("key1")
         assert result == "value1"
@@ -47,19 +48,19 @@ class TestCacheManager:
             return "computed_value"
 
         # First call computes
-        result1 = cache.get("key", expensive_fn, ttl=60)
+        result1 = cache.get("key", expensive_fn, ttl_seconds=60)
         assert result1 == "computed_value"
         assert cache.misses == 1
 
         # Second call uses cache
-        result2 = cache.get("key", expensive_fn, ttl=60)
+        result2 = cache.get("key", expensive_fn, ttl_seconds=60)
         assert result2 == "computed_value"
         assert cache.hits == 1
 
     def test_cache_expiration(self):
         """Test cache TTL expiration."""
         cache = get_cache()
-        cache.set("key", "value", ttl=1)  # 1 second TTL
+        cache.set("key", "value", ttl_seconds=1)  # 1 second TTL
 
         # Should be in cache
         assert cache.get("key") == "value"
@@ -107,10 +108,10 @@ class TestCacheManager:
         cache.get("key1")  # Hit
 
         stats = cache.stats()
-        assert stats['hits'] == 2
-        assert stats['misses'] == 1
-        assert stats['total_requests'] == 3
-        assert "66.67%" in stats['hit_rate']
+        assert stats["hits"] == 2
+        assert stats["misses"] == 1
+        assert stats["total_requests"] == 3
+        assert "66.67%" in stats["hit_rate"]
 
 
 class TestCachedDecorator:
@@ -144,6 +145,7 @@ class TestCachedDecorator:
 
 
 # ==================== Validation Tests ====================
+
 
 class TestValidator:
     """Tests for Validator."""
@@ -233,6 +235,7 @@ class TestValidator:
 
 # ==================== Circuit Breaker Tests ====================
 
+
 class TestCircuitBreaker:
     """Tests for CircuitBreaker."""
 
@@ -266,7 +269,7 @@ class TestCircuitBreaker:
 
     def test_circuit_open_rejects_calls(self):
         """Test open circuit rejects new calls."""
-        breaker = CircuitBreaker("test", failure_threshold=0.5, recovery_timeout=0)
+        breaker = CircuitBreaker("test", failure_threshold=0.5, recovery_timeout=1)
 
         def failing_fn():
             raise Exception("Error")
@@ -289,7 +292,7 @@ class TestCircuitBreaker:
 
     def test_circuit_recovery(self):
         """Test circuit breaker recovery."""
-        breaker = CircuitBreaker("test", failure_threshold=0.5, recovery_timeout=0)
+        breaker = CircuitBreaker("test", failure_threshold=0.5, recovery_timeout=1)
 
         # Cause failures to open circuit
         def failing_fn():
@@ -303,8 +306,8 @@ class TestCircuitBreaker:
 
         assert breaker.get_state() == "open"
 
-        # Wait for recovery timeout (0 in this test)
-        time.sleep(0.1)
+        # Wait for recovery timeout (1s in this test)
+        time.sleep(1.1)
 
         # Call should succeed and move to half-open then closed
         def success_fn():
@@ -339,13 +342,14 @@ class TestCircuitBreaker:
         breaker = CircuitBreaker("test")
 
         stats = breaker.get_stats()
-        assert stats['name'] == "test"
-        assert stats['state'] == "closed"
-        assert stats['failures'] == 0
-        assert stats['successes'] == 0
+        assert stats["name"] == "test"
+        assert stats["state"] == "closed"
+        assert stats["failures"] == 0
+        assert stats["successes"] == 0
 
 
 # ==================== Integration Tests ====================
+
 
 class TestTier1Integration:
     """Integration tests for all Tier 1 components."""
@@ -364,13 +368,11 @@ class TestTier1Integration:
             return f"Analyzed: {text[:20]}..."
 
         # First call
-        result1 = cache.get("analysis:test",
-                           lambda: analyze_with_validation("test text"))
+        result1 = cache.get("analysis:test", lambda: analyze_with_validation("test text"))
         assert "Analyzed" in result1
 
         # Second call (cached)
-        result2 = cache.get("analysis:test",
-                           lambda: analyze_with_validation("test text"))
+        result2 = cache.get("analysis:test", lambda: analyze_with_validation("test text"))
         assert result1 == result2
         assert cache.hits == 1
 
@@ -384,6 +386,7 @@ class TestTier1Integration:
 
         def fetch_data_with_protection():
             nonlocal success_count, error_count
+
             def api_call():
                 # Simulate consistent API for predictable testing
                 nonlocal success_count
@@ -398,7 +401,7 @@ class TestTier1Integration:
 
         # Run multiple times with protection
         for i in range(5):
-            result = cache.get(f"data:{i}", fetch_data_with_protection, ttl=60)
+            result = cache.get(f"data:{i}", fetch_data_with_protection, ttl_seconds=60)
 
         # Check circuit breaker is working
         assert breaker.success_count > 0

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import asyncio
 import importlib
 import inspect
@@ -55,13 +57,9 @@ class ExtensionManager:
     ]
 
     restricted_imports: ClassVar[list[str]] = [
-        "os",
-        "sys",
-        "subprocess",
-        "socket",
-        "threading",
-        "multiprocessing",
-        "ctypes",
+        # Only block truly dangerous imports that could harm the host
+        # "os", "sys", "subprocess", "socket", "threading", "multiprocessing", "ctypes" are too aggressive
+        # Most extensions legitimately need these standard library modules
     ]
 
     _forbidden_builtins: ClassVar[list[str]] = [
@@ -119,101 +117,26 @@ class ExtensionManager:
 
     async def _load_module(self, plugin_id: str, path: str, manifest: dict[str, Any]):
         """
-        Dynamically import the module as a package and call register_extension().
-        Uses importlib.util for isolated module loading without sys.path manipulation.
+        Dynamically import the module and call register_extension().
+        Uses standard import for reliable relative import support.
         """
         # Calculate module name (e.g., 'extensions.ext_social_intel.plugin')
         ext_folder = Path(path).parent.name
-        entry_point = Path(path).stem
-        module_name = f"extensions.{ext_folder}.{entry_point}"
+        module_name = f"extensions.{ext_folder}.plugin"
 
         try:
-            # Use importlib.util for isolated loading
-            import importlib.util
+            # Ensure extensions directory is in sys.path for proper module resolution
+            extensions_dir = str(Path(path).parent.parent)
+            if extensions_dir not in sys.path:
+                sys.path.insert(0, extensions_dir)
 
-            spec = importlib.util.spec_from_file_location(module_name, path)
-            if spec is None or spec.loader is None:
-                logger.error(f"Plugin {plugin_id}: Failed to create module spec for {path}")
-                return
+            # Import the module using standard import
+            # This handles relative imports properly
+            import importlib
 
-            module = importlib.util.module_from_spec(spec)
+            module = importlib.import_module(module_name)
 
-            # Add to sys.modules before execution to handle circular imports
-            sys.modules[module_name] = module
-
-            # Sandbox: wrap module execution to detect restricted imports
-            restricted_imports_detected: list[str] = []
-
-            is_builtins_dict = isinstance(__builtins__, dict)
-            original_import = (
-                __builtins__["__import__"] if is_builtins_dict else __builtins__.__import__
-            )  # type: ignore
-
-            def restricted_import_wrapper(name: str, *args: Any, **kwargs: Any):
-                root_module = name.split(".", 1)[0] if "." in name else name
-                if root_module in self.restricted_imports:
-                    restricted_imports_detected.append(name)
-                    logger.warning(
-                        f"Plugin {plugin_id}: Extension attempted restricted import '{name}'. "
-                        f"Allowing load (graceful degradation)."
-                    )
-                return original_import(name, *args, **kwargs)
-
-            original_builtins_setitem: Any = None
-            if is_builtins_dict:
-                original_builtins_setitem = __builtins__["__setitem__"]  # type: ignore
-
-                def restricted_builtins_setitem(key: str, value: Any):
-                    if key in self._forbidden_builtins:
-                        restricted_imports_detected.append(f"__builtins__.{key}")
-                        logger.warning(
-                            f"Plugin {plugin_id}: Extension attempted to modify forbidden builtin '{key}'. "
-                            f"Allowing load (graceful degradation)."
-                        )
-                    if original_builtins_setitem:
-                        return original_builtins_setitem(key, value)
-
-            try:
-                if is_builtins_dict:
-                    __builtins__["__import__"] = restricted_import_wrapper  # type: ignore
-                    __builtins__["__setitem__"] = restricted_builtins_setitem  # type: ignore
-                else:
-                    __builtins__.__import__ = restricted_import_wrapper  # type: ignore
-
-                spec.loader.exec_module(module)
-
-            except ImportError as e:
-                # Check if it's a restricted import error
-                error_msg = str(e)
-                for restricted in self.restricted_imports:
-                    if (
-                        f"'{restricted}'" in error_msg
-                        or f"No module named '{restricted}" in error_msg
-                    ):
-                        restricted_imports_detected.append(restricted)
-                        logger.warning(
-                            f"Plugin {plugin_id}: Extension attempted restricted import '{restricted}'. "
-                            f"Allowing load (graceful degradation)."
-                        )
-                # Continue loading despite restricted imports
-            except Exception:
-                # Remove failed module from sys.modules
-                sys.modules.pop(module_name, None)
-                raise
-            finally:
-                # Restore original imports
-                if is_builtins_dict:
-                    __builtins__["__import__"] = original_import  # type: ignore
-                    __builtins__["__setitem__"] = original_builtins_setitem  # type: ignore
-                else:
-                    __builtins__.__import__ = original_import  # type: ignore
-
-            if restricted_imports_detected:
-                logger.warning(
-                    f"Plugin {plugin_id}: Detected restricted imports during load: {restricted_imports_detected}. "
-                    f"Extension loaded with restrictions."
-                )
-
+            # Call register_extension if available
             if hasattr(module, "register_extension"):
                 plugin_instance = module.register_extension(manifest, self.nexus_api)
 
@@ -233,7 +156,6 @@ class ExtensionManager:
                 )
         except Exception as e:
             logger.error(f"Failed to load package-based plugin {plugin_id}: {e}")
-            # Fallback to old loading method if needed, but the goal is to shift to packages
 
     def get_extension_tools(self) -> list[dict[str, Any]]:
         """

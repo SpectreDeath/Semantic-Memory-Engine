@@ -5,6 +5,9 @@ Handles integration with the Governor system to ensure text-only scans
 run on CPU to keep the GPU free for rnj-1 operations.
 """
 
+from __future__ import annotations
+
+
 import json
 import logging
 from collections.abc import Callable

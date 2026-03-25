@@ -19,6 +19,9 @@ Constraints:
     • Does NOT touch vendored faststylometry (which uses pandas internally)
 """
 
+from __future__ import annotations
+
+
 import logging
 import math
 import os

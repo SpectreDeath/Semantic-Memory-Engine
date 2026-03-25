@@ -6,6 +6,9 @@ router modules. Nothing in this file registers MCP tools — it only provides
 building blocks.
 """
 
+from __future__ import annotations
+
+
 import json
 import logging
 import time

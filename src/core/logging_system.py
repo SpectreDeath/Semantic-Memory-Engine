@@ -12,6 +12,9 @@ Type: Core Infrastructure
 Status: Production Ready
 """
 
+from __future__ import annotations
+
+
 import json
 import logging
 import logging.handlers

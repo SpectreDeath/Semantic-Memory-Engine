@@ -9,6 +9,9 @@ This module provides a unified interface for all AI providers with:
 - Streaming support
 """
 
+from __future__ import annotations
+
+
 import asyncio
 import hashlib
 import logging

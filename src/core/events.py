@@ -8,6 +8,9 @@ Type: Core Infrastructure
 Status: Production Ready
 """
 
+from __future__ import annotations
+
+
 import asyncio
 import logging
 from collections.abc import Callable

@@ -9,6 +9,9 @@ Supports fetching content from various cloud storage providers:
 - Generic HTTP/HTTPS URLs
 """
 
+from __future__ import annotations
+
+
 import hashlib
 import logging
 import os

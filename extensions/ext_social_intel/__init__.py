@@ -16,7 +16,7 @@ Architecture:
 
 Integration:
     Layer 0 (Harvester) → Layer 2 (Loom) → Layer 3 (Synapse) → Layer 7 (Beacon)
-    
+
     Social media content → Harvester.fetch_semantic_markdown() → Clean content
     → Loom.distill_web_content() → Atomic facts about sentiment/trends
     → Synapse consolidation for pattern detection
@@ -30,13 +30,14 @@ __description__ = "Social Media Intelligence Crawler for disinformation detectio
 from .api_manager import SocialMediaAPIManager
 from .campaign_detector import CampaignDetector
 from .content_moderator import ContentModerator
-from .plugin import SocialIntelligenceCrawler
+from .plugin import SocialIntelligenceCrawler, register_extension
 from .sentiment_analyzer import SentimentAnalyzer
 
 __all__ = [
-    'CampaignDetector',
-    'ContentModerator',
-    'SentimentAnalyzer',
-    'SocialIntelligenceCrawler',
-    'SocialMediaAPIManager'
+    "CampaignDetector",
+    "ContentModerator",
+    "SentimentAnalyzer",
+    "SocialIntelligenceCrawler",
+    "SocialMediaAPIManager",
+    "register_extension",
 ]

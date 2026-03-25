@@ -5,6 +5,9 @@ Authorship, math, file-integrity, behavior, graph, signal, entropy,
 crawler, and scorer tools — plus the autonomous audit pipeline.
 """
 
+from __future__ import annotations
+
+
 import json
 import logging
 from typing import Any

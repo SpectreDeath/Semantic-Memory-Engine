@@ -5,6 +5,9 @@ Provides utilities for performance monitoring, caching, and optimization
 patterns to improve extension performance and resource usage.
 """
 
+from __future__ import annotations
+
+
 import asyncio
 import collections
 import functools

@@ -5,6 +5,9 @@ Detects invisible unicode markers and performs Z-Score analysis on token frequen
 to identify statistical watermarks in text content.
 """
 
+from __future__ import annotations
+
+
 import logging
 import re
 import statistics

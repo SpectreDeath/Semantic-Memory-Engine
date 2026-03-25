@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_data_storage",
+    "name": "Data Storage",
+    "version": "1.0",
+    "description": "Data storage and management including semantic database, centrifuge storage, and data management.",
+    "entry_point": "plugin.py",
+    "author": "SME Integration",
+    "category": "storage"
+}

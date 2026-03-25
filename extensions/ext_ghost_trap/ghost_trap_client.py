@@ -8,6 +8,9 @@ This module can be used by other extensions (like NUR) to query
 Ghost-Trap events.
 """
 
+from __future__ import annotations
+
+
 import json
 import logging
 import os

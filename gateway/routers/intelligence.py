@@ -7,6 +7,9 @@ generation, rolling delta analysis, batch processing, deep analysis,
 red-team auditing, and evidence harvesting.
 """
 
+from __future__ import annotations
+
+
 import json
 import logging
 from datetime import datetime

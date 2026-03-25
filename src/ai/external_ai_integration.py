@@ -5,6 +5,9 @@ Provides integration with external AI services like OpenAI, Anthropic,
 Google AI, and other LLM providers for enhanced extension capabilities.
 """
 
+from __future__ import annotations
+
+
 import asyncio
 import logging
 import time

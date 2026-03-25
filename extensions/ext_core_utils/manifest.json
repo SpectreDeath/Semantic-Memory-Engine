@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_core_utils",
+    "name": "Core Utilities",
+    "version": "1.0",
+    "description": "Core utility functions including file service, configuration, caching, batch processing, and authentication.",
+    "entry_point": "plugin.py",
+    "author": "SME Integration",
+    "category": "utilities"
+}

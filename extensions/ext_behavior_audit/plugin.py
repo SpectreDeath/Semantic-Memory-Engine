@@ -5,6 +5,7 @@ Main plugin entry point that integrates the Rhetorical Behavior Audit extension
 with the SME system.
 """
 
+import json
 import sys
 from collections.abc import Callable
 from pathlib import Path
@@ -61,13 +62,13 @@ class RhetoricalBehaviorAuditPlugin:
 
         # Plugin configuration
         self.config = {
-            'sentiment_threshold': 0.5,  # Threshold for high sentiment volatility
-            'ttr_threshold': 0.5,        # Threshold for low lexical diversity
-            'emphatic_threshold': 2,     # Minimum emphatic qualifiers to flag
-            'governor_integration': True,  # Enable Governor status checking
-            'gpu_monitoring': True,      # Enable GPU usage monitoring
-            'cpu_only_mode': True,       # Ensure CPU-only operation for GPU conservation
-            'log_detailed_results': True
+            "sentiment_threshold": 0.5,  # Threshold for high sentiment volatility
+            "ttr_threshold": 0.5,  # Threshold for low lexical diversity
+            "emphatic_threshold": 2,  # Minimum emphatic qualifiers to flag
+            "governor_integration": True,  # Enable Governor status checking
+            "gpu_monitoring": True,  # Enable GPU usage monitoring
+            "cpu_only_mode": True,  # Ensure CPU-only operation for GPU conservation
+            "log_detailed_results": True,
         }
 
         # State tracking
@@ -81,15 +82,15 @@ class RhetoricalBehaviorAuditPlugin:
             print(f"Description: {self.description}")
 
             # Initialize Governor integration
-            if self.config.get('governor_integration', True):
+            if self.config.get("governor_integration", True):
                 print("✅ Governor integration enabled")
 
             # Initialize GPU monitoring
-            if self.config.get('gpu_monitoring', True):
+            if self.config.get("gpu_monitoring", True):
                 print("✅ GPU monitoring enabled (to keep GPU free for rnj-1)")
 
             # Verify CPU-only operation
-            if self.config.get('cpu_only_mode', True):
+            if self.config.get("cpu_only_mode", True):
                 print("✅ CPU-only mode enforced (GPU conservation for rnj-1)")
 
             self.is_active = True
@@ -116,11 +117,11 @@ class RhetoricalBehaviorAuditPlugin:
     def get_status(self) -> dict[str, Any]:
         """Get current plugin status."""
         return {
-            'name': self.name,
-            'version': self.version,
-            'is_active': self.is_active,
-            'config': self.config,
-            'governor_status': self.governor_integration.get_status_info()
+            "name": self.name,
+            "version": self.version,
+            "is_active": self.is_active,
+            "config": self.config,
+            "governor_status": self.governor_integration.get_status_info(),
         }
 
     def configure(self, **kwargs) -> bool:
@@ -142,29 +143,30 @@ class RhetoricalBehaviorAuditPlugin:
         """Get available tools provided by this plugin."""
         tools = {}
 
-        if self.config.get('cpu_only_mode', True):
+        if self.config.get("cpu_only_mode", True):
             # Use safe wrapper that checks Governor status and GPU usage
-            tools['audit_rhetorical_behavior'] = self._create_safe_audit_tool()
+            tools["audit_rhetorical_behavior"] = self._create_safe_audit_tool()
         else:
             # Use direct audit function
-            tools['audit_rhetorical_behavior'] = self._create_direct_audit_tool()
+            tools["audit_rhetorical_behavior"] = self._create_direct_audit_tool()
 
         # Add Provenance Profiler tool
-        tools['profile_rhetorical_motive'] = self._create_provenance_profiler_tool()
+        tools["profile_rhetorical_motive"] = self._create_provenance_profiler_tool()
 
         return tools
 
     def _create_safe_audit_tool(self) -> Callable:
         """Create the safe audit tool with Governor and GPU status checking."""
-        def safe_audit_tool(text: str) -> dict[str, Any]:
+
+        def safe_audit_tool(text: str) -> str:
             """
             Safe rhetorical behavior audit tool that checks Governor status and GPU usage.
-            
+
             Args:
                 text: Text to analyze for rhetorical anomalies.
-                
+
             Returns:
-                Dictionary containing audit results.
+                JSON string containing audit results.
             """
             print("🔍 Rhetorical Behavior Audit: Starting safe analysis")
 
@@ -175,13 +177,14 @@ class RhetoricalBehaviorAuditPlugin:
 
     def _create_direct_audit_tool(self) -> Callable:
         """Create the direct audit tool without Governor checking."""
-        def direct_audit_tool(text: str) -> dict[str, Any]:
+
+        def direct_audit_tool(text: str) -> str:
             """
             Direct rhetorical behavior audit tool without Governor status checking.
-            
+
             Args:
                 text: Text to analyze for rhetorical anomalies.
-                
+
             Returns:
                 Dictionary containing audit results.
             """
@@ -194,27 +197,25 @@ class RhetoricalBehaviorAuditPlugin:
 
     def get_hooks(self) -> dict[str, Callable]:
         """Get available hooks provided by this plugin."""
-        return {
-            'governor_status_check': create_behavior_audit_governor_hook()
-        }
+        return {"governor_status_check": create_behavior_audit_governor_hook()}
 
     def get_events(self) -> list[str]:
         """Get list of events this plugin can handle."""
         return [
-            'governor_status_changed',
-            'gpu_usage_changed',
-            'audit_started',
-            'audit_completed',
-            'rhetorical_anomaly_detected',
-            'provenance_profile_started',
-            'provenance_profile_completed',
-            'commercial_policy_profile_detected'
+            "governor_status_changed",
+            "gpu_usage_changed",
+            "audit_started",
+            "audit_completed",
+            "rhetorical_anomaly_detected",
+            "provenance_profile_started",
+            "provenance_profile_completed",
+            "commercial_policy_profile_detected",
         ]
 
     def handle_event(self, event_name: str, **kwargs) -> Any:
         """Handle plugin-specific events."""
-        if event_name == 'governor_status_changed':
-            new_status = kwargs.get('status', 'UNKNOWN')
+        if event_name == "governor_status_changed":
+            new_status = kwargs.get("status", "UNKNOWN")
             print(f"📊 Governor status changed to: {new_status}")
 
             # Update our Governor integration
@@ -227,12 +228,12 @@ class RhetoricalBehaviorAuditPlugin:
             else:
                 self.governor_integration._governor_status = GovernorStatus.UNKNOWN
 
-            self.governor_integration._last_status_check = kwargs.get('timestamp')
+            self.governor_integration._last_status_check = kwargs.get("timestamp")
 
-            return {'status_updated': True, 'new_status': new_status}
+            return {"status_updated": True, "new_status": new_status}
 
-        elif event_name == 'gpu_usage_changed':
-            gpu_level = kwargs.get('gpu_level', 'UNKNOWN')
+        elif event_name == "gpu_usage_changed":
+            gpu_level = kwargs.get("gpu_level", "UNKNOWN")
             print(f"💻 GPU usage level changed to: {gpu_level}")
 
             # Update our GPU usage tracking
@@ -245,66 +246,75 @@ class RhetoricalBehaviorAuditPlugin:
             else:
                 self.governor_integration._gpu_usage_level = GPUUsageLevel.UNKNOWN
 
-            return {'gpu_level_updated': True, 'new_level': gpu_level}
+            return {"gpu_level_updated": True, "new_level": gpu_level}
 
-        elif event_name == 'audit_started':
+        elif event_name == "audit_started":
             print("🔍 Rhetorical behavior audit started")
-            return {'audit_started': True}
+            return {"audit_started": True}
 
-        elif event_name == 'audit_completed':
-            result = kwargs.get('result', {})
-            print(f"✅ Rhetorical behavior audit completed. Status: {result.get('status', 'unknown')}")
-            return {'audit_completed': True}
+        elif event_name == "audit_completed":
+            result = kwargs.get("result", {})
+            print(
+                f"✅ Rhetorical behavior audit completed. Status: {result.get('status', 'unknown')}"
+            )
+            return {"audit_completed": True}
 
-        elif event_name == 'rhetorical_anomaly_detected':
-            anomaly_info = kwargs.get('anomaly_info', {})
+        elif event_name == "rhetorical_anomaly_detected":
+            anomaly_info = kwargs.get("anomaly_info", {})
             print(f"🚨 Rhetorical anomaly detected: {anomaly_info}")
-            return {'anomaly_handled': True}
+            return {"anomaly_handled": True}
 
-        elif event_name == 'provenance_profile_started':
+        elif event_name == "provenance_profile_started":
             print("🔍 Provenance profiling started")
-            return {'profile_started': True}
+            return {"profile_started": True}
 
-        elif event_name == 'provenance_profile_completed':
-            result = kwargs.get('result', {})
+        elif event_name == "provenance_profile_completed":
+            result = kwargs.get("result", {})
             print(f"✅ Provenance profiling completed. Status: {result.get('status', 'unknown')}")
-            return {'profile_completed': True}
+            return {"profile_completed": True}
 
-        elif event_name == 'commercial_policy_profile_detected':
-            profile_info = kwargs.get('profile_info', {})
+        elif event_name == "commercial_policy_profile_detected":
+            profile_info = kwargs.get("profile_info", {})
             print(f"🚨 Commercial policy profile detected: {profile_info}")
-            return {'profile_handled': True}
+            return {"profile_handled": True}
 
-        return {'event_handled': False}
+        return {"event_handled": False}
 
     def _create_provenance_profiler_tool(self) -> Callable:
         """Create the Provenance Profiler tool with background thread execution."""
-        def provenance_profiler_tool(text: str, async_mode: bool = True) -> dict[str, Any]:
+
+        def provenance_profiler_tool(text: str, async_mode: bool = False) -> str:
             """
             Provenance profiler tool that analyzes rhetorical motives and commercial policy-aligned LLM patterns.
-            
+
             Args:
                 text: Text to analyze for rhetorical motives.
-                async_mode: Whether to run in background thread (default: True).
-                
+                async_mode: Whether to run in background thread (default: False for sync behavior).
+
             Returns:
-                Dictionary containing profiling results.
+                JSON string containing profiling results.
             """
             print("🔍 Provenance Profiler: Starting analysis")
 
             if async_mode:
                 # Run on background thread to avoid blocking main inference
                 def callback(result):
-                    print(f"✅ Background profiling completed. Status: {result.get('status', 'unknown')}")
-                    if result.get('profile_detected', False):
-                        print(f"🚨 Commercial policy profile detected: {result.get('confidence_score', 0.0)}")
+                    print(
+                        f"✅ Background profiling completed. Status: {result.get('status', 'unknown')}"
+                    )
+                    if result.get("profile_detected", False):
+                        print(
+                            f"🚨 Commercial policy profile detected: {result.get('confidence_score', 0.0)}"
+                        )
 
                 thread = profile_rhetorical_motive_async(text, callback)
-                return {
-                    'status': 'BACKGROUND_PROFILING_STARTED',
-                    'thread_id': thread.ident,
-                    'message': 'Provenance profiling started in background thread'
-                }
+                return json.dumps(
+                    {
+                        "status": "BACKGROUND_PROFILING_STARTED",
+                        "thread_id": thread.ident,
+                        "message": "Provenance profiling started in background thread",
+                    }
+                )
             else:
                 # Run synchronously
                 return json.dumps(profile_rhetorical_motive(text), indent=2)
@@ -335,4 +345,9 @@ def register_extension(manifest: dict, nexus_api: Any) -> RhetoricalBehaviorAudi
 
 
 # Export for use by the extension system
-__all__ = ['RhetoricalBehaviorAuditPlugin', 'get_plugin', 'register_extension', 'rhetorical_behavior_audit_plugin']
+__all__ = [
+    "RhetoricalBehaviorAuditPlugin",
+    "get_plugin",
+    "register_extension",
+    "rhetorical_behavior_audit_plugin",
+]

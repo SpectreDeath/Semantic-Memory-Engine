@@ -27,6 +27,9 @@ Constraints:
     • Targets local model to stay within 6GB VRAM budget
 """
 
+from __future__ import annotations
+
+
 import asyncio
 import logging
 import os

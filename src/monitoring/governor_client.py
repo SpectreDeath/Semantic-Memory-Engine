@@ -11,6 +11,9 @@ Provides real-time system monitoring for SME extensions including:
 This replaces placeholder implementations in extensions.
 """
 
+from __future__ import annotations
+
+
 import logging
 import threading
 import time

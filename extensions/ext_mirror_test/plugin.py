@@ -5,6 +5,9 @@ Main plugin entry point that integrates the Cross-Modal Auditor extension
 with the SME system.
 """
 
+from __future__ import annotations
+
+
 import json
 import sys
 from collections.abc import Callable

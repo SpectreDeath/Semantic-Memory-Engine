@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 #!/usr/bin/env python3
 """
 🛰️ Sentinel Monitor v2.2.0 — Hardware-Aware VRAM Guardian

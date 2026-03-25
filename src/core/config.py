@@ -6,12 +6,14 @@ all SimpleMem Laboratory settings from config/config.yaml.
 
 Usage:
     from src.core.config import Config
-    
+
     config = Config()
     db_path = config.get('storage.db_path')
     # or with defaults:
     timeout = config.get('mcp.timeout', default=30)
 """
+
+from __future__ import annotations
 
 import os
 from pathlib import Path
@@ -22,18 +24,19 @@ import yaml
 
 class ConfigError(Exception):
     """Raised when configuration is invalid or missing."""
+
     pass
 
 
 class Config:
     """
     Singleton configuration manager for SimpleMem Laboratory.
-    
+
     Loads configuration from config/config.yaml and provides typed access
     to settings with sensible defaults.
     """
 
-    _instance: 'Config' | None = None
+    _instance: "Config" | None = None
     _config: dict[str, Any] = {}
 
     def __new__(cls):
@@ -54,9 +57,7 @@ class Config:
         config_path = self._find_config_file()
 
         if not config_path:
-            raise ConfigError(
-                "config.yaml not found. Expected at: config/config.yaml"
-            )
+            raise ConfigError("config.yaml not found. Expected at: config/config.yaml")
 
         try:
             with open(config_path) as f:
@@ -82,19 +83,19 @@ class Config:
     def get(self, key: str, default: Any = None) -> Any:
         """
         Get a configuration value using dot notation.
-        
+
         Args:
             key: Configuration key in dot notation (e.g., 'storage.db_path')
             default: Default value if key not found
-        
+
         Returns:
             Configuration value or default
-        
+
         Example:
             db_path = config.get('storage.db_path')
             timeout = config.get('mcp.timeout', default=30)
         """
-        keys = key.split('.')
+        keys = key.split(".")
         value = self._config
 
         try:
@@ -109,11 +110,11 @@ class Config:
     def get_safe(self, key: str, default: Any = None) -> Any:
         """
         Safely get a configuration value, always returning default if not found.
-        
+
         Args:
             key: Configuration key in dot notation
             default: Default value if key not found
-        
+
         Returns:
             Configuration value or default (never raises)
         """
@@ -125,13 +126,13 @@ class Config:
     def get_path(self, key: str, default: str | None = None) -> Path:
         """
         Get a configuration path value and return as Path object.
-        
+
         Automatically expands environment variables and handles Windows paths.
-        
+
         Args:
             key: Configuration key in dot notation
             default: Default path if key not found
-        
+
         Returns:
             pathlib.Path object
         """
@@ -168,7 +169,7 @@ class Config:
         if isinstance(value, bool):
             return value
         if isinstance(value, str):
-            return value.lower() in ('true', 'yes', '1', 'on')
+            return value.lower() in ("true", "yes", "1", "on")
         return bool(value)
 
     def get_list(self, key: str, default: list | None = None) -> list:

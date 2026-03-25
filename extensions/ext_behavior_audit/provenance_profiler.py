@@ -5,6 +5,9 @@ Analyzes text for rhetorical motives including Ultimate Terms (God/Devil terms)
 and Distance Markers to identify commercial policy-aligned LLM patterns.
 """
 
+from __future__ import annotations
+
+
 import logging
 import re
 import threading

@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_gathering",
+    "name": "Data Gathering",
+    "version": "1.0",
+    "description": "Data gathering tools including web researcher, OSINT toolkit, RSS bridge, scholar API, and cloud fetching.",
+    "entry_point": "plugin.py",
+    "author": "SME Integration",
+    "category": "gathering"
+}

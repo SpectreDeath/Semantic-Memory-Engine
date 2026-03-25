@@ -5,6 +5,9 @@ Provides AI-powered capabilities for enterprise-grade extension management,
 performance optimization, and intelligent recommendations.
 """
 
+from __future__ import annotations
+
+
 import json
 import logging
 import threading

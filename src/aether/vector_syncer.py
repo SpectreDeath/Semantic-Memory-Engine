@@ -13,6 +13,9 @@ Technical Targets:
 - Scalability: 1M+ signatures using Polars native IPC
 """
 
+from __future__ import annotations
+
+
 import hashlib
 import json
 import os

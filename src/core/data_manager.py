@@ -24,6 +24,9 @@ Usage:
     available = dm.list_available_resources()
 """
 
+from __future__ import annotations
+
+
 import logging
 from dataclasses import dataclass
 from pathlib import Path

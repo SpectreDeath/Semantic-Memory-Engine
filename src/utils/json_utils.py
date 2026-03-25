@@ -13,6 +13,9 @@ Usage:
     parsed = loads(json_str)
 """
 
+from __future__ import annotations
+
+
 try:
     import orjson
 

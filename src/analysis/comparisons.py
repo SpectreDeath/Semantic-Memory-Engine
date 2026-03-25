@@ -20,6 +20,9 @@ Usage:
     results = engine.compare_live_vs_corpus(live, source_filter="speech")
 """
 
+from __future__ import annotations
+
+
 import logging
 import os
 import sqlite3

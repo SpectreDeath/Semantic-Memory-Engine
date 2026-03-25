@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_harvester",
+    "name": "Web Harvester",
+    "version": "1.0",
+    "description": "Web harvesting and ingestion tools including spider, crawler, forensic scout, search, and schema conversion.",
+    "entry_point": "plugin.py",
+    "author": "SME Integration",
+    "category": "gathering"
+}

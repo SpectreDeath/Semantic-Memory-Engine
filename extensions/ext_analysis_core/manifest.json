@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_analysis_core",
+    "name": "Analysis Core",
+    "version": "1.0",
+    "description": "Analysis tools including analysis engine, document comparison, knowledge graph operations, semantic overlap detection, data correlation, rhetorical analysis, polars forensics, intelligence reporting, and federation gate control.",
+    "entry_point": "plugin.py",
+    "author": "SME Integration",
+    "category": "analysis"
+}

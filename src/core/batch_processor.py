@@ -8,6 +8,9 @@ Features:
 - Error handling at item level
 """
 
+from __future__ import annotations
+
+
 import asyncio
 import logging
 import uuid

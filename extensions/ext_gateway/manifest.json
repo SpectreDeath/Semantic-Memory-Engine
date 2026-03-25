@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_gateway",
+    "name": "MCP Gateway",
+    "version": "1.0",
+    "description": "MCP Gateway connection and management for SME server communication and tool exposure.",
+    "entry_point": "plugin.py",
+    "author": "SME Integration",
+    "category": "core"
+}

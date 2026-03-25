@@ -7,6 +7,9 @@ using Pydantic-AI for validated, type-safe AI responses.
 v2.1.0: Added Pydantic-AI integration for agentic forensic workflows.
 """
 
+from __future__ import annotations
+
+
 # cSpell:ignore agentic ollama Ollama exfiltration
 
 import json

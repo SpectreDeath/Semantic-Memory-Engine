@@ -28,6 +28,9 @@ Usage:
     analysis = advanced.analyze_advanced(text)
 """
 
+from __future__ import annotations
+
+
 import logging
 import typing
 

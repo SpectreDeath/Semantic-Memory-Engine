@@ -5,23 +5,28 @@ Provides the scan_for_ghosts() tool to detect unauthorized large .bin or .json f
 that might contain hidden model weights or other suspicious data.
 """
 
+from __future__ import annotations
+
+
+import json
 import logging
 import os
 import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 # Configure logging for the ghost detector
-logger = logging.getLogger('ghost_trap.ghost_detector')
+logger = logging.getLogger("ghost_trap.ghost_detector")
 logger.setLevel(logging.INFO)
 
 # Create file handler for ghost detection events
-ghost_detector_handler = logging.FileHandler('ghost_detection_events.log')
+ghost_detector_handler = logging.FileHandler("ghost_detection_events.log")
 ghost_detector_handler.setLevel(logging.INFO)
 
 # Create formatter and add it to handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 ghost_detector_handler.setFormatter(formatter)
 
 # Add handler to logger
@@ -31,6 +36,7 @@ logger.addHandler(ghost_detector_handler)
 @dataclass
 class GhostFile:
     """Represents a detected ghost file."""
+
     path: str
     size_mb: float
     file_type: str
@@ -45,18 +51,18 @@ class GhostDetector:
     def __init__(self, project_root: str | None = None, size_threshold_mb: int = 100):
         """
         Initialize the ghost detector.
-        
+
         Args:
             project_root: Root directory to scan. If None, uses current working directory.
             size_threshold_mb: Minimum file size in MB to consider as suspicious.
         """
         self.project_root = Path(project_root or os.getcwd()).resolve()
         self.size_threshold_bytes = size_threshold_mb * 1024 * 1024  # Convert MB to bytes
-        self.target_extensions = {'.bin', '.json'}
+        self.target_extensions = {".bin", ".json"}
         self.suspicious_patterns = {
-            'model_weights': ['model', 'weight', 'checkpoint', 'param'],
-            'hidden_indicators': ['hidden', 'secret', 'private', 'internal'],
-            'suspicious_names': ['ghost', 'trap', 'monitor', 'surveillance']
+            "model_weights": ["model", "weight", "checkpoint", "param"],
+            "hidden_indicators": ["hidden", "secret", "private", "internal"],
+            "suspicious_names": ["ghost", "trap", "monitor", "surveillance"],
         }
 
     def _get_file_size_mb(self, file_path: Path) -> float:
@@ -70,13 +76,14 @@ class GhostDetector:
         """Check if a file is hidden."""
         # Check for dot-prefixed files/directories
         for part in file_path.parts:
-            if part.startswith('.') and len(part) > 1:  # Exclude '.' and '..'
+            if part.startswith(".") and len(part) > 1:  # Exclude '.' and '..'
                 return True
 
         # On Windows, check file attributes
-        if sys.platform == 'win32':
+        if sys.platform == "win32":
             try:
                 import ctypes
+
                 attrs = ctypes.windll.kernel32.GetFileAttributesW(str(file_path))
                 return attrs != -1 and attrs & 2  # FILE_ATTRIBUTE_HIDDEN = 2
             except (AttributeError, ImportError):
@@ -113,14 +120,16 @@ class GhostDetector:
 
         return True
 
-    def scan_directory(self, directory: str | None = None, recursive: bool = True) -> list[GhostFile]:
+    def scan_directory(
+        self, directory: str | None = None, recursive: bool = True
+    ) -> list[GhostFile]:
         """
         Scan a directory for ghost files.
-        
+
         Args:
             directory: Directory to scan. If None, uses project root.
             recursive: Whether to scan subdirectories recursively.
-            
+
         Returns:
             List of detected ghost files.
         """
@@ -132,7 +141,7 @@ class GhostDetector:
 
         try:
             if recursive:
-                files_to_scan = [f for f in scan_dir.rglob('*') if f.is_file()]
+                files_to_scan = [f for f in scan_dir.rglob("*") if f.is_file()]
             else:
                 files_to_scan = [f for f in scan_dir.iterdir() if f.is_file()]
 
@@ -148,7 +157,7 @@ class GhostDetector:
                         file_type=file_path.suffix.lower(),
                         is_hidden=is_hidden,
                         last_modified=datetime.fromtimestamp(file_path.stat().st_mtime),
-                        suspicious_indicators=suspicious_indicators
+                        suspicious_indicators=suspicious_indicators,
                     )
 
                     ghost_files.append(ghost_file)
@@ -182,10 +191,10 @@ class GhostDetector:
         """Generate a summary report of ghost detection results."""
         if not ghost_files:
             return {
-                'status': 'clean',
-                'message': 'No suspicious files detected.',
-                'total_files_scanned': 0,
-                'suspicious_files': []
+                "status": "clean",
+                "message": "No suspicious files detected.",
+                "total_files_scanned": 0,
+                "suspicious_files": [],
             }
 
         # Sort by size (largest first)
@@ -196,25 +205,25 @@ class GhostDetector:
         hidden_count = sum(1 for f in ghost_files if f.is_hidden)
 
         report = {
-            'status': 'suspicious_activity_detected',
-            'message': f'Found {len(ghost_files)} potentially unauthorized files.',
-            'scan_summary': {
-                'total_suspicious_files': len(ghost_files),
-                'total_suspicious_size_mb': round(total_size, 2),
-                'hidden_files_count': hidden_count,
-                'largest_file_mb': round(ghost_files[0].size_mb, 2) if ghost_files else 0
+            "status": "suspicious_activity_detected",
+            "message": f"Found {len(ghost_files)} potentially unauthorized files.",
+            "scan_summary": {
+                "total_suspicious_files": len(ghost_files),
+                "total_suspicious_size_mb": round(total_size, 2),
+                "hidden_files_count": hidden_count,
+                "largest_file_mb": round(ghost_files[0].size_mb, 2) if ghost_files else 0,
             },
-            'suspicious_files': [
+            "suspicious_files": [
                 {
-                    'path': f.path,
-                    'size_mb': round(f.size_mb, 2),
-                    'file_type': f.file_type,
-                    'is_hidden': f.is_hidden,
-                    'last_modified': f.last_modified.isoformat(),
-                    'suspicious_indicators': f.suspicious_indicators
+                    "path": f.path,
+                    "size_mb": round(f.size_mb, 2),
+                    "file_type": f.file_type,
+                    "is_hidden": f.is_hidden,
+                    "last_modified": f.last_modified.isoformat(),
+                    "suspicious_indicators": f.suspicious_indicators,
                 }
                 for f in ghost_files
-            ]
+            ],
         }
 
         return report
@@ -225,9 +234,9 @@ class GhostDetector:
             print("✅ No suspicious files detected in the scan.")
             return
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("GHOST DETECTION DETAILED REPORT")
-        print("="*80)
+        print("=" * 80)
 
         for i, ghost_file in enumerate(ghost_files, 1):
             print(f"\n{i}. File: {ghost_file.path}")
@@ -240,24 +249,28 @@ class GhostDetector:
             else:
                 print("   Suspicious Indicators: None detected")
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("END OF REPORT")
-        print("="*80)
+        print("=" * 80)
 
 
-def scan_for_ghosts(project_root: str | None = None, size_threshold_mb: int = 100,
-                   recursive: bool = True, detailed_report: bool = True) -> dict[str, Any]:
+def scan_for_ghosts(
+    project_root: str | None = None,
+    size_threshold_mb: int = 100,
+    recursive: bool = True,
+    detailed_report: bool = True,
+) -> str:
     """
     Main function to scan for ghost files.
-    
+
     Args:
         project_root: Root directory to scan. If None, uses current working directory.
         size_threshold_mb: Minimum file size in MB to consider as suspicious.
         recursive: Whether to scan subdirectories recursively.
         detailed_report: Whether to print a detailed report.
-        
+
     Returns:
-        Dictionary containing scan results and summary.
+        JSON string containing scan results and summary.
     """
     detector = GhostDetector(project_root=project_root, size_threshold_mb=size_threshold_mb)
     ghost_files = detector.scan_directory(recursive=recursive)
@@ -267,8 +280,8 @@ def scan_for_ghosts(project_root: str | None = None, size_threshold_mb: int = 10
     if detailed_report:
         detector.print_detailed_report(ghost_files)
 
-    return report
+    return json.dumps(report, indent=2)
 
 
 # Export the main function for use as a tool
-__all__ = ['GhostDetector', 'GhostFile', 'scan_for_ghosts']
+__all__ = ["GhostDetector", "GhostFile", "scan_for_ghosts"]

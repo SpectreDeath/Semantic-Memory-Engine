@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_nlp_core",
+    "name": "NLP Core Processing",
+    "version": "1.0",
+    "description": "Natural language processing tools including sentiment analysis, text summarization, entity linking, document clustering, and NLP pipeline.",
+    "entry_point": "plugin.py",
+    "author": "SME Integration",
+    "category": "nlp"
+}

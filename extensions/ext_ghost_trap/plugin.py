@@ -5,6 +5,9 @@ Main plugin entry point that integrates the Ghost Trap extension
 with the SME system.
 """
 
+from __future__ import annotations
+
+
 import os
 import sys
 from collections.abc import Callable

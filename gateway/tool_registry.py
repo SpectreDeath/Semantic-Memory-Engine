@@ -11,6 +11,9 @@ Usage:
     tools = registry.get_all_tools()
 """
 
+from __future__ import annotations
+
+
 import logging
 import os
 import sys

@@ -17,6 +17,9 @@ This is your "forensic fingerprint" layer—useful for:
 ✓ Authenticity verification (did this really come from who we think?)
 """
 
+from __future__ import annotations
+
+
 import asyncio
 import json
 import logging

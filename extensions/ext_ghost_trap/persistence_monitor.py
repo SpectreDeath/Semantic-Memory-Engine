@@ -6,6 +6,9 @@ Hooks into task execution to detect calls to os.system, shutil.copy, or pickle.d
 in hidden directories.
 """
 
+from __future__ import annotations
+
+
 import functools
 import logging
 import os

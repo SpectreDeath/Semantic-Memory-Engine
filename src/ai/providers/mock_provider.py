@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from src.ai.provider import SME_AI_Provider

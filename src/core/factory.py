@@ -15,6 +15,9 @@ Usage:
     semantic_search = ToolFactory.create_search_engine()
 """
 
+from __future__ import annotations
+
+
 import logging
 from typing import Any
 

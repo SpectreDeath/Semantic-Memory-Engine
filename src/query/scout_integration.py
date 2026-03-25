@@ -10,6 +10,9 @@ Uses all layers to:
 ✓ Learn from previous queries
 """
 
+from __future__ import annotations
+
+
 import logging
 import sqlite3
 from dataclasses import dataclass

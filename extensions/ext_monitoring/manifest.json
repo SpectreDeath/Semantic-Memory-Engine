@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_monitoring",
+    "name": "System Monitoring",
+    "version": "1.0",
+    "description": "Monitoring and diagnostics tools including performance monitoring, alert management, log analysis, and database auditing.",
+    "entry_point": "plugin.py",
+    "author": "SME Integration",
+    "category": "monitoring"
+}

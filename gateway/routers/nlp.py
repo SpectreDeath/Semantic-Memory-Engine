@@ -5,6 +5,9 @@ Natural Language Processing tools: entity extraction, sentiment analysis,
 text summarisation, deep NLP analysis, and concept resolution.
 """
 
+from __future__ import annotations
+
+
 import json
 import logging
 import string

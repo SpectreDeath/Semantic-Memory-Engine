@@ -1,0 +1,9 @@
+{
+    "plugin_id": "ext_query_engine",
+    "name": "Query Engine",
+    "version": "1.0",
+    "description": "Query and search tools including query engine, scout discovery, query verification, concept resolution, and AIFDB connector.",
+    "entry_point": "plugin.py",
+    "author": "SME Integration",
+    "category": "query"
+}

@@ -29,3 +29,9 @@ hardware:
   lora_dir: "models/adapters"
   gguf_dir: "models/gguf"
   base_model: "models/gguf/mistral-7b-v0.1.Q4_K_M.gguf"
+
+skills:
+  enabled: true
+  directory: "./skills"
+  registry_path: "./skills/registry.json"
+  auto_rebuild: false

@@ -30,7 +30,7 @@ CACHE_DIR = os.environ.get("SME_CLOUD_CACHE_DIR", "data/cloud_cache")
 class CloudFetcher:
     """
     Fetches content from cloud storage shared links.
-    
+
     Supports:
     - Google Drive (drive.google.com/file/... or drive.google.com/open?id=...)
     - Dropbox (dropbox.com/s/... or dropbox.com/home/...)
@@ -97,12 +97,12 @@ class CloudFetcher:
     ) -> dict[str, Any]:
         """
         Fetch content from a cloud storage URL.
-        
+
         Args:
             url: The shared link URL
             use_cache: Whether to use cached content if available
             force_download: Force re-download even if cached
-        
+
         Returns:
             Dict with keys: content, filename, mime_type, provider, cached
         """
@@ -147,7 +147,7 @@ class CloudFetcher:
             return result
 
         except Exception as e:
-            logger.error(f"CloudFetcher: Failed to fetch {url}: {e}")
+            logger.exception(f"CloudFetcher: Failed to fetch {url}: {e}")
             return {
                 "error": str(e),
                 "provider": provider,

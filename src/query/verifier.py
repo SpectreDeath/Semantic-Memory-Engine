@@ -103,11 +103,11 @@ class FactVerifier:
     def extract_claims(self, text: str, author_id: str = "unknown") -> list[ExtractedClaim]:
         """
         Extract factual claims from text.
-        
+
         Args:
             text: Source text
             author_id: Author identifier
-            
+
         Returns:
             List of extracted claims
         """
@@ -151,21 +151,21 @@ class FactVerifier:
             return claims
 
         except Exception as e:
-            logger.error(f"❌ Claim extraction failed: {e!s}")
+            logger.exception(f"❌ Claim extraction failed: {e!s}")
             return []
 
     # ========================================================================
     # TOOL 2: VERIFY INDIVIDUAL CLAIMS
     # ========================================================================
 
-    def verify_claim(self, claim: ExtractedClaim, knowledge_sources: list[str] = None) -> VerificationResult:
+    def verify_claim(self, claim: ExtractedClaim, knowledge_sources: list[str] | None = None) -> VerificationResult:
         """
         Verify a single factual claim.
-        
+
         Args:
             claim: ExtractedClaim to verify
             knowledge_sources: Additional sources to check
-            
+
         Returns:
             VerificationResult
         """
@@ -208,7 +208,7 @@ class FactVerifier:
             return result
 
         except Exception as e:
-            logger.error(f"❌ Verification failed: {e!s}")
+            logger.exception(f"❌ Verification failed: {e!s}")
             return VerificationResult(
                 claim_text=claim.claim_text,
                 verified=False,
@@ -231,11 +231,11 @@ class FactVerifier:
     ) -> AuthorConsistency:
         """
         Analyze whether author contradicts themselves over time.
-        
+
         Args:
             author_id: Author to analyze
             claim_history: List of (claim, timestamp) tuples
-            
+
         Returns:
             AuthorConsistency analysis
         """
@@ -322,7 +322,7 @@ class FactVerifier:
             return consistency
 
         except Exception as e:
-            logger.error(f"❌ Consistency analysis failed: {e!s}")
+            logger.exception(f"❌ Consistency analysis failed: {e!s}")
             raise
 
     # ========================================================================
@@ -335,10 +335,10 @@ class FactVerifier:
     ) -> list[dict]:
         """
         Find contradictions between sources.
-        
+
         Args:
             sources: List of source documents
-            
+
         Returns:
             List of detected contradictions
         """
@@ -397,7 +397,7 @@ class FactVerifier:
             return contradictions
 
         except Exception as e:
-            logger.error(f"❌ Contradiction detection failed: {e!s}")
+            logger.exception(f"❌ Contradiction detection failed: {e!s}")
             return []
 
     # ========================================================================
@@ -472,7 +472,7 @@ class FactVerifier:
         claim_lower = claim.claim_text.lower()
 
         # Check verified facts
-        for fact, value in self.knowledge_base['verified_facts'].items():
+        for fact in self.knowledge_base['verified_facts']:
             if fact in claim_lower:
                 return ("Verified", 95)
 

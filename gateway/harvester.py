@@ -31,7 +31,7 @@ class EvidenceHarvester:
         if not os.path.exists(root_path):
             raise FileNotFoundError(f"Path not found: {root_path}")
 
-        for root, dirs, files in os.walk(root_path):
+        for root, _dirs, files in os.walk(root_path):
             for file in files:
                 if any(file.endswith(ext) for ext in supported_exts):
                     file_path = os.path.join(root, file)

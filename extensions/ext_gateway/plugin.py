@@ -68,7 +68,7 @@ class GatewayExtension(BasePlugin):
         ]
         return json.dumps({"tools": tools, "count": len(tools)})
 
-    async def call_tool(self, tool_name: str, params: dict = None) -> str:
+    async def call_tool(self, tool_name: str, params: dict | None = None) -> str:
         """Call a tool on the gateway."""
         if not self.connected:
             return json.dumps({"error": "Gateway not connected"})

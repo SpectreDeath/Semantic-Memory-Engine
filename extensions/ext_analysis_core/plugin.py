@@ -177,7 +177,7 @@ class AnalysisCoreExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def federation_control(self, action: str, system_id: str, params: dict = None) -> str:
+    async def federation_control(self, action: str, system_id: str, params: dict | None = None) -> str:
         """Control inter-system federation gate."""
         if not self.federation:
             return json.dumps({"error": "FederationGate not available"})

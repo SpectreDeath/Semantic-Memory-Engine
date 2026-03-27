@@ -123,9 +123,9 @@ def test_signature_library():
 
         # Create test text
         test_text = """
-        The quick brown fox jumps over the lazy dog. This is a sample 
-        paragraph used for testing rhetorical signature extraction. 
-        Machine learning models often produce text with different 
+        The quick brown fox jumps over the lazy dog. This is a sample
+        paragraph used for testing rhetorical signature extraction.
+        Machine learning models often produce text with different
         statistical properties than human-written content.
         """
 

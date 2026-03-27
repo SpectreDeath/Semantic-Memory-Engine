@@ -40,7 +40,7 @@ class TestImportStructure:
             # These modules were removed in v3.0 - test passes with warning
             import warnings
 
-            warnings.warn(f"Legacy modules not available (removed in v3.0): {missing}")
+            warnings.warn(f"Legacy modules not available (removed in v3.0): {missing}", stacklevel=2)
 
     def test_new_imports(self):
         """Test that new import paths work."""
@@ -237,7 +237,7 @@ class TestLegacyCompatibility:
         ]
 
         for file in old_files:
-            file_path = legacy_path / file
+            legacy_path / file
             # File may not exist in all cases, but directory should
             # This is just a structural test
 

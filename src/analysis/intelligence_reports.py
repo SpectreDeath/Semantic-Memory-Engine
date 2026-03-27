@@ -53,7 +53,7 @@ class IntelligenceReports:
     def generate_briefing(self, text: str, title: str = "Intelligence Briefing") -> IntelligenceReport:
         """
         Generate a comprehensive intelligence report from a single text source.
-        
+
         Args:
             text: Input text
             title: Title for the report

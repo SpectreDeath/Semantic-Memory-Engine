@@ -166,7 +166,7 @@ class SmeCoreBridge:
             return triples
 
         except Exception as e:
-            logger.error(f"Ego-graph discovery error: {e}")
+            logger.exception(f"Ego-graph discovery error: {e}")
             return [(entity_name, "error", str(e))]
 
     def get_source_reliability(self, source_id: str) -> dict[str, Any]:
@@ -186,7 +186,7 @@ class SmeCoreBridge:
                 }
             return {"tier": 1, "hash": "Unknown", "tamper_evident": False}
         except Exception as e:
-            logger.error(f"Nexus visibility error: {e}")
+            logger.exception(f"Nexus visibility error: {e}")
             return {"tier": 0, "hash": "Error", "tamper_evident": False}
 
     def register_provenance(
@@ -202,7 +202,7 @@ class SmeCoreBridge:
             self.nexus.execute(sql, (source_id, path, hash_val, tier, method))
             return True
         except Exception as e:
-            logger.error(f"Nexus registration error: {e}")
+            logger.exception(f"Nexus registration error: {e}")
             return False
 
 
@@ -244,7 +244,7 @@ async def load_extensions() -> None:
                 f"(Plugin: {tool_info['plugin_id']})"
             )
         except Exception as e:
-            logger.error(f"ExtensionManager: Failed to register tool '{tool_info['name']}': {e}")
+            logger.exception(f"ExtensionManager: Failed to register tool '{tool_info['name']}': {e}")
             continue  # Graceful degradation - continue with other tools
 
 

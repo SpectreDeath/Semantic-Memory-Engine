@@ -21,7 +21,7 @@ def plot_sentiment_history(days: int = 7) -> str:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT timestamp, compound FROM sentiment_logs 
+            SELECT timestamp, compound FROM sentiment_logs
             WHERE timestamp >= datetime('now', ?)
             ORDER BY timestamp ASC
         ''', (f'-{days} days',))

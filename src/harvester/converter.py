@@ -178,7 +178,7 @@ class DocumentProcessor:
         except MemoryError:
             raise  # Re-raise OOM without wrapping
         except Exception as e:
-            logger.error(f"MarkItDown conversion failed for {path.name}: {e}")
+            logger.exception(f"MarkItDown conversion failed for {path.name}: {e}")
             raise RuntimeError(
                 f"Failed to convert '{path.name}': {e}"
             ) from e

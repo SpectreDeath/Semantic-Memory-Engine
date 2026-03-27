@@ -63,7 +63,7 @@ class RhetoricAnalyzer:
         mean_compound = df["compound"].mean()
         std_compound = df["compound"].std()
 
-        for idx, row in df.iterrows():
+        for _idx, row in df.iterrows():
             z_score = abs((row["compound"] - mean_compound) / (std_compound + 0.001))
 
             if z_score > threshold:
@@ -194,9 +194,9 @@ def main():
                     y=df["compound"],
                     mode="markers",
                     name="Daily Sentiment",
-                    marker=dict(
-                        size=8, color=df["compound"], colorscale="RdYlGn_r", showscale=True
-                    ),
+                    marker={
+                        "size": 8, "color": df["compound"], "colorscale": "RdYlGn_r", "showscale": True
+                    },
                     hovertemplate="<b>%{x|%Y-%m-%d}</b><br>Compound: %{y:.3f}<extra></extra>",
                 )
             )
@@ -207,7 +207,7 @@ def main():
                     y=df["ma7"],
                     mode="lines",
                     name="7-Day MA",
-                    line=dict(color="blue", width=2),
+                    line={"color": "blue", "width": 2},
                 )
             )
 
@@ -217,7 +217,7 @@ def main():
                     y=df["ma30"],
                     mode="lines",
                     name="30-Day MA",
-                    line=dict(color="red", width=2, dash="dash"),
+                    line={"color": "red", "width": 2, "dash": "dash"},
                 )
             )
 
@@ -291,7 +291,7 @@ def main():
                         y=recent_trend,
                         mode="lines+markers",
                         name="Historical (14d)",
-                        line=dict(color="blue"),
+                        line={"color": "blue"},
                     )
                 )
 
@@ -304,7 +304,7 @@ def main():
                         y=projected,
                         mode="lines+markers",
                         name="Projected (7d)",
-                        line=dict(color="red", dash="dash"),
+                        line={"color": "red", "dash": "dash"},
                     )
                 )
 
@@ -337,7 +337,7 @@ def main():
         )
 
         fig.update_layout(
-            polar=dict(radialaxis=dict(visible=True)),
+            polar={"radialaxis": {"visible": True}},
             title="Moral Foundation Distribution",
             height=500,
         )

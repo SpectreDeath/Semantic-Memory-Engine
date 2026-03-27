@@ -78,13 +78,12 @@ async def get_current_user(
 ) -> User:
     """
     Validate credentials (JWT or API Key) and return current user.
-    
+
     This is used as a FastAPI dependency.
     """
     # Simple API Key check
-    if api_key and ADMIN_API_KEY:
-        if api_key == ADMIN_API_KEY:
-            return User(username="admin", roles=["admin"], tenant_id="system")
+    if api_key and ADMIN_API_KEY and api_key == ADMIN_API_KEY:
+        return User(username="admin", roles=["admin"], tenant_id="system")
         # In a real app, look up API key in database
 
     # JWT check

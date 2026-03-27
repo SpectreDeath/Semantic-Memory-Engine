@@ -126,13 +126,13 @@ class GhostTrapPlugin:
                      detailed_report: bool | None = None) -> dict[str, Any]:
             """
             Scan for ghost files in the project.
-            
+
             Args:
                 project_root: Root directory to scan. If None, uses current working directory.
                 size_threshold_mb: Minimum file size in MB to consider as suspicious.
                 recursive: Whether to scan subdirectories recursively.
                 detailed_report: Whether to print a detailed report.
-                
+
             Returns:
                 Dictionary containing scan results and summary.
             """

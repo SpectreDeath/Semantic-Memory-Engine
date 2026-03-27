@@ -6,7 +6,7 @@ ToolFactory methods as MCP-callable tools.
 
 Usage:
     from gateway.tool_registry import ToolRegistry
-    
+
     registry = ToolRegistry()
     tools = registry.get_all_tools()
 """
@@ -70,7 +70,7 @@ class ScribeAuthorshipTool:
         self.core = core_bridge
         self.category = 'forensics'
 
-    def analyze_authorship(self, text_sample: str, suspect_vector_id: str = None):
+    def analyze_authorship(self, text_sample: str, suspect_vector_id: str | None = None):
         """
         Performs stylometric fingerprinting using Burrows' Delta (Manhattan distance).
         """
@@ -187,7 +187,7 @@ class ScribeProTool:
                     final_probs[author] = round(float(samples["Sample"]), 4)
                 else:
                     # Alternative structure check
-                    key = list(samples.keys())[0] if isinstance(samples, dict) else 0
+                    key = next(iter(samples.keys())) if isinstance(samples, dict) else 0
                     final_probs[author] = round(float(samples[key]), 4)
 
             return {
@@ -197,7 +197,7 @@ class ScribeProTool:
                 "baselines_used": baselines_found
             }
         except Exception as e:
-            logger.error(f"Scribe Pro error: {e}")
+            logger.exception(f"Scribe Pro error: {e}")
             # Fallback to simple Delta analysis if calibration fails
             return {
                 "status": "Probabilistic Calibration Failed (Falling back to Delta)",
@@ -250,14 +250,14 @@ class InfluenceTool:
                 "neighbors": list(G.neighbors(entity_name))[:5]
             }
         except Exception as e:
-            logger.error(f"Influence Tool error: {e}")
+            logger.exception(f"Influence Tool error: {e}")
             return {"error": str(e), "entity": entity_name}
 
 
 class ToolRegistry:
     """
     Central registry for discovering and managing SME tools.
-    
+
     Maps ToolFactory methods to MCP tool definitions with metadata
     for documentation and validation.
     """
@@ -669,19 +669,19 @@ class ToolRegistry:
                 self._factory = ToolFactory
                 logger.info("ToolFactory loaded successfully")
             except ImportError as e:
-                logger.error(f"Failed to import ToolFactory: {e}")
+                logger.exception(f"Failed to import ToolFactory: {e}")
                 raise
         return self._factory
 
     def get_tool(self, tool_name: str) -> Any | None:
         """
         Get or create a tool instance by name.
-        
+
         Uses singleton pattern to cache expensive tool instances.
-        
+
         Args:
             tool_name: The MCP tool name (e.g., 'semantic_search')
-            
+
         Returns:
             The tool instance, or None if not found
         """
@@ -709,7 +709,7 @@ class ToolRegistry:
                 self._tool_instances[tool_name] = factory_method()
                 logger.info(f"Created tool instance: {tool_name}")
             except Exception as e:
-                logger.error(f"Failed to create tool {tool_name}: {e}")
+                logger.exception(f"Failed to create tool {tool_name}: {e}")
                 return None
 
         return self._tool_instances[tool_name]
@@ -717,10 +717,10 @@ class ToolRegistry:
     def list_tools(self, category: str | None = None) -> list:
         """
         List available tools, optionally filtered by category.
-        
+
         Args:
             category: Filter by category (diagnostics, query, memory, forensics, analysis)
-            
+
         Returns:
             List of tool definitions
         """
@@ -735,12 +735,12 @@ class ToolRegistry:
 
     def get_categories(self) -> list:
         """Get all unique tool categories."""
-        return list(set(t.category for t in self.TOOL_DEFINITIONS.values()))
+        return list({t.category for t in self.TOOL_DEFINITIONS.values()})
 
     def reset(self, tool_name: str | None = None):
         """
         Clear cached tool instances.
-        
+
         Args:
             tool_name: Specific tool to reset, or None for all tools
         """
@@ -758,7 +758,7 @@ class ToolRegistry:
         return {name: self._tool_instances.get(name, self.TOOL_DEFINITIONS.get(name))
                 for name in self.TOOL_DEFINITIONS}
 
-    def add_tool(self, name: str, instance: Any, description: str = "", parameters: dict = None, handler: Callable | None = None):
+    def add_tool(self, name: str, instance: Any, description: str = "", parameters: dict | None = None, handler: Callable | None = None):
         """
         Manually register a tool instance or handler.
         """

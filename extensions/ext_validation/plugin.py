@@ -87,7 +87,7 @@ class ValidationExtension(BasePlugin):
         logger.info(f"[{self.plugin_id}] Unloading plugin: {plugin_id}")
         return json.dumps({"status": "unloaded", "plugin_id": plugin_id})
 
-    async def get_plugin_status(self, plugin_id: str = None) -> str:
+    async def get_plugin_status(self, plugin_id: str | None = None) -> str:
         """Get status of loaded plugins."""
         if plugin_id:
             return json.dumps({"plugin_id": plugin_id, "status": "active"})

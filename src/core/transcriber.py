@@ -4,6 +4,7 @@ GPU-accelerated Whisper transcription on 1660 Ti.
 Converts YouTube URLs and audio files to text for Loom processing.
 """
 
+import contextlib
 import json
 import os
 from datetime import datetime
@@ -168,10 +169,8 @@ class WhisperTranscriber:
                 json.dump(transcript_data, f, indent=2, ensure_ascii=False)
 
             # Clean up audio file
-            try:
+            with contextlib.suppress(BaseException):
                 os.remove(audio_file)
-            except:
-                pass
 
             return {
                 'status': 'complete',

@@ -101,7 +101,7 @@ class NLPCoreExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def process_nlp_pipeline(self, text: str, steps: list[str] = None) -> str:
+    async def process_nlp_pipeline(self, text: str, steps: list[str] | None = None) -> str:
         """Process text through NLP pipeline."""
         if not self.nlp_pipeline:
             return json.dumps({"error": "NLPPipeline not available"})

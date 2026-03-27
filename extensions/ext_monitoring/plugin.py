@@ -71,7 +71,7 @@ class MonitoringExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def manage_alerts(self, action: str, alert_config: dict = None) -> str:
+    async def manage_alerts(self, action: str, alert_config: dict | None = None) -> str:
         """Manage alerts (create, dismiss, list, configure)."""
         if not self.alerts:
             return json.dumps({"error": "AlertManager not available"})
@@ -81,7 +81,7 @@ class MonitoringExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def analyze_logs(self, log_path: str, filter_pattern: str = None) -> str:
+    async def analyze_logs(self, log_path: str, filter_pattern: str | None = None) -> str:
         """Analyze log files for patterns and anomalies."""
         if not self.logs:
             return json.dumps({"error": "LogAnalyzer not available"})

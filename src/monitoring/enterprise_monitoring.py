@@ -149,7 +149,7 @@ class EnterpriseMonitoringSystem:
                 time.sleep(30)  # Check every 30 seconds
 
             except Exception as e:
-                logger.error(f"Error in monitoring loop: {e}")
+                logger.exception(f"Error in monitoring loop: {e}")
                 time.sleep(60)  # Wait 1 minute before retrying
 
     def _setup_default_thresholds(self):
@@ -284,7 +284,6 @@ class EnterpriseMonitoringSystem:
 
     def _is_in_cooldown(self, threshold: MetricThreshold, current_time: datetime) -> bool:
         """Check if we're in cooldown period for this threshold."""
-        metric_key = f"{threshold.extension_id or '*'}:{threshold.metric_type}"
 
         # Check recent alerts for this threshold
         recent_alerts = [
@@ -348,7 +347,7 @@ class EnterpriseMonitoringSystem:
             try:
                 callback(alert)
             except Exception as e:
-                logger.error(f"Error in alert callback: {e}")
+                logger.exception(f"Error in alert callback: {e}")
 
         # Trigger extension-specific callbacks
         if alert.extension_id:
@@ -356,7 +355,7 @@ class EnterpriseMonitoringSystem:
                 try:
                     callback(alert)
                 except Exception as e:
-                    logger.error(f"Error in alert callback for {alert.extension_id}: {e}")
+                    logger.exception(f"Error in alert callback for {alert.extension_id}: {e}")
 
     def _send_notifications(self, alert: Alert):
         """Send notifications for an alert."""
@@ -419,7 +418,7 @@ Alert ID: {alert.alert_id}
             logger.info(f"Email notification sent for alert {alert.alert_id}")
 
         except Exception as e:
-            logger.error(f"Failed to send email notification: {e}")
+            logger.exception(f"Failed to send email notification: {e}")
 
     def _send_webhook_notification(self, alert: Alert, message: str):
         """Send webhook notification for an alert."""
@@ -450,7 +449,7 @@ Alert ID: {alert.alert_id}
             logger.info(f"Webhook notification sent for alert {alert.alert_id}")
 
         except Exception as e:
-            logger.error(f"Failed to send webhook notification: {e}")
+            logger.exception(f"Failed to send webhook notification: {e}")
 
     def acknowledge_alert(self, alert_id: str, acknowledged_by: str):
         """Acknowledge an alert."""
@@ -626,8 +625,8 @@ Alert ID: {alert.alert_id}
             'avg_response_time': sum(response_times) / len(response_times) if response_times else 0.0,
             'avg_error_rate': sum(error_rates) / len(error_rates) if error_rates else 0.0,
             'total_metrics': sum(len(buffer) for buffer in self.metrics_buffer.values()),
-            'active_extensions': len(set(m['extension_id'] for buffer in self.metrics_buffer.values()
-                                       for m in buffer))
+            'active_extensions': len({m['extension_id'] for buffer in self.metrics_buffer.values()
+                                       for m in buffer})
         }
 
     def export_monitoring_data(self) -> dict[str, Any]:

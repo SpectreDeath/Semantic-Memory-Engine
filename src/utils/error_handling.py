@@ -50,13 +50,13 @@ class ErrorHandler:
                               log_level: str = "ERROR") -> dict[str, Any]:
         """
         Handle extension errors with standardized logging and response format.
-        
+
         Args:
             error: The exception that occurred
             operation: Description of the operation that failed
             user_data: Additional context data to include in logs
             log_level: Logging level ('DEBUG', 'INFO', 'WARNING', 'ERROR')
-        
+
         Returns:
             Standardized error response dictionary
         """
@@ -95,12 +95,12 @@ class ErrorHandler:
                          user_data: dict[str, Any] | None = None) -> str:
         """
         Handle tool execution errors and return JSON response.
-        
+
         Args:
             error: The exception that occurred
             tool_name: Name of the tool that failed
             user_data: Additional context data
-        
+
         Returns:
             JSON string error response
         """
@@ -113,12 +113,12 @@ class ErrorHandler:
                     *args, **kwargs) -> Any:
         """
         Safely execute a function with error handling.
-        
+
         Args:
             func: Function to execute
             operation: Description of the operation
             *args, **kwargs: Arguments to pass to the function
-        
+
         Returns:
             Function result or error response
         """
@@ -181,13 +181,13 @@ def create_error_response(message: str, error_code: str = "UNKNOWN_ERROR",
                          plugin_id: str = "UNKNOWN", operation: str = "UNKNOWN") -> str:
     """
     Create a standardized JSON error response.
-    
+
     Args:
         message: Error message
         error_code: Error code identifier
         plugin_id: Plugin identifier
         operation: Operation that failed
-    
+
     Returns:
         JSON string error response
     """
@@ -285,7 +285,7 @@ def handle_errors(plugin_id: str, operation_name: str | None = None):
 def handle_async_errors(plugin_id: str, operation_name: str | None = None):
     """
     Decorator to automatically handle errors in async functions.
-    
+
     Args:
         plugin_id: Plugin identifier for logging.
         operation_name: Optional operation name (defaults to function name).

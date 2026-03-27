@@ -235,7 +235,7 @@ class ContextWindowOptimizer:
         token_budget = max_tokens
         selected = []
 
-        for i, fact in enumerate(facts):
+        for _i, fact in enumerate(facts):
             fact_text = json.dumps(fact)
             fact_tokens = len(fact_text.split()) * 1.33
 

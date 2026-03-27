@@ -29,7 +29,7 @@ SOFTWARE.
 
 class Corpus:
 
-    def __init__(self, authors: list = None, books: list = None, tokens: list = None):
+    def __init__(self, authors: list | None = None, books: list | None = None, tokens: list | None = None):
         """
         Create a new corpus object, which is empty by default, but which can be initialised optionally with a set of books.
         :param authors: A list of strings representing author names. If a set of books are being used to initialise the corpus, len(authors) must equal len(books) and len(tokens)

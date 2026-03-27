@@ -14,7 +14,7 @@ class NetworkGenerator:
     Uses stylometric distance matrices to create consensus networks.
     """
 
-    def __init__(self, db_path: str = None):
+    def __init__(self, db_path: str | None = None):
         from src.core.config import Config
         config = Config()
         base_dir = config.get_path('storage.base_dir')
@@ -23,10 +23,10 @@ class NetworkGenerator:
     def _get_all_authors(self, limit: int = 100) -> list[str]:
         """
         Retrieves all author IDs from the database.
-        
+
         Args:
             limit: Maximum number of authors to include
-            
+
         Returns:
             List of author IDs
         """
@@ -34,7 +34,7 @@ class NetworkGenerator:
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT DISTINCT author_id FROM author_profiles 
+            SELECT DISTINCT author_id FROM author_profiles
             LIMIT ?
         """, (limit,))
 
@@ -46,13 +46,13 @@ class NetworkGenerator:
     def _calculate_distance_matrix(self, authors: list[str]) -> np.ndarray:
         """
         Calculates pairwise stylometric distances between all authors.
-        
+
         In production, this would use actual Delta scores from StyloWrapper.
         For now, returns a symmetric random matrix for structure testing.
-        
+
         Args:
             authors: List of author IDs
-            
+
         Returns:
             NxN distance matrix
         """
@@ -73,12 +73,12 @@ class NetworkGenerator:
     ) -> str:
         """
         Generates an interactive network visualization.
-        
+
         Args:
             threshold: Maximum distance for edge creation (Delta < threshold = similar)
             max_nodes: Maximum number of nodes to display
             output_path: Path to save HTML file (optional)
-            
+
         Returns:
             Path to generated HTML file
         """
@@ -86,7 +86,7 @@ class NetworkGenerator:
             import networkx as nx
             from pyvis.network import Network
         except ImportError:
-            logger.error("networkx or pyvis not installed. Run: pip install networkx pyvis")
+            logger.exception("networkx or pyvis not installed. Run: pip install networkx pyvis")
             return ""
 
         logger.info(f"🕸️ Generating forensic network (threshold={threshold})")

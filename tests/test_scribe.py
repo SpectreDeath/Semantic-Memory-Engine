@@ -28,20 +28,20 @@ from src.scribe.engine import ScribeEngine
 
 # YOUR WRITING (Replace with a paragraph of your own text)
 sample_human = """
-The intersection of cognitive science and digital communication reveals 
-a fascinating paradox: while technology enables unprecedented information 
-dissemination, it simultaneously fragments our collective attention. I've 
-always found it curious how algorithmic curation shapes what we consider 
+The intersection of cognitive science and digital communication reveals
+a fascinating paradox: while technology enables unprecedented information
+dissemination, it simultaneously fragments our collective attention. I've
+always found it curious how algorithmic curation shapes what we consider
 important. The challenge isn't just technological—it's profoundly human.
 """
 
 # AI-GENERATED TEXT (Replace with ChatGPT/Claude output)
 sample_ai = """
-The intersection of cognitive science and digital communication represents 
-a significant area of contemporary research. Digital technologies have 
-facilitated information distribution on a scale previously unimaginable. 
-Additionally, algorithmic systems play a substantial role in content 
-curation. This phenomenon raises important considerations regarding attention 
+The intersection of cognitive science and digital communication represents
+a significant area of contemporary research. Digital technologies have
+facilitated information distribution on a scale previously unimaginable.
+Additionally, algorithmic systems play a substantial role in content
+curation. This phenomenon raises important considerations regarding attention
 mechanisms and information processing in modern societies.
 """
 

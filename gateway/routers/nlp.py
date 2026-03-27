@@ -117,7 +117,7 @@ def register(
             return json.dumps(serialized, indent=2, default=str)
 
         except Exception as e:
-            logger.error(f"analyze_sentiment error: {e}")
+            logger.exception(f"analyze_sentiment error: {e}")
             return json.dumps({"error": str(e)})
 
     @mcp.tool()
@@ -168,7 +168,7 @@ def register(
             return json.dumps(serialized, indent=2, default=str)
 
         except Exception as e:
-            logger.error(f"link_entities error: {e}")
+            logger.exception(f"link_entities error: {e}")
             return json.dumps({"error": str(e)})
 
     @mcp.tool()
@@ -222,7 +222,7 @@ def register(
             return json.dumps(serialized, indent=2, default=str)
 
         except Exception as e:
-            logger.error(f"summarize_text error: {e}")
+            logger.exception(f"summarize_text error: {e}")
             return json.dumps({"error": str(e)})
 
     @mcp.tool()

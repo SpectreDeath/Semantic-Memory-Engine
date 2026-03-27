@@ -114,7 +114,7 @@ class ForensicNexus:
         except Exception as e:
             if "already in use" in str(e):
                 return  # Already attached — not an error
-            logger.error(f"Nexus Attach Error: {e}")
+            logger.exception(f"Nexus Attach Error: {e}")
             raise
 
     def query(self, sql: str, params: tuple = ()) -> list[dict[str, Any]]:
@@ -125,7 +125,7 @@ class ForensicNexus:
             rows = cursor.fetchall()
             return [dict(row) for row in rows]
         except Exception as e:
-            logger.error(f"Nexus Query Error: {e}\nSQL: {sql}")
+            logger.exception(f"Nexus Query Error: {e}\nSQL: {sql}")
             return []
 
     def execute(self, sql: str, params: tuple = ()):
@@ -134,7 +134,7 @@ class ForensicNexus:
             self.conn.execute(sql, params)
             self.conn.commit()
         except Exception as e:
-            logger.error(f"Nexus Execution Error: {e}\nSQL: {sql}")
+            logger.exception(f"Nexus Execution Error: {e}\nSQL: {sql}")
             self.conn.rollback()
             raise
 

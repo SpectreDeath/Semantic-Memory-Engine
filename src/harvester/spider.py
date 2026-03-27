@@ -51,14 +51,14 @@ DB_PATH = "d:/mcp_servers/storage/laboratory.db"
 class HarvesterSpider:
     """
     Streamlined web scraper optimized for LLM context windows.
-    
+
     Workflow:
         1. Fetch HTML (headless browser)
         2. Apply PruningContentFilter (remove nav, footer, ads, scripts)
         3. Extract fit_markdown (optimized for LLM)
         4. Archive to Centrifuge DB (raw_content table)
         5. Mark ready for Loom semantic compression
-    
+
     Example:
         spider = HarvesterSpider()
         capture_id, markdown = asyncio.run(
@@ -95,13 +95,13 @@ class HarvesterSpider:
     async def capture_site(self, url: str) -> tuple[int | None, str | None]:
         """
         Fetch, clean, and archive web content.
-        
+
         Args:
             url: Target URL to capture
-        
+
         Returns:
             (capture_id, clean_markdown) or (None, None) on failure
-        
+
         Example:
             capture_id, markdown = await spider.capture_site("https://example.com")
             if capture_id:
@@ -140,16 +140,16 @@ class HarvesterSpider:
             return capture_id, clean_md
 
         except Exception as e:
-            logger.error(f"❌ Error capturing {url}: {e}")
+            logger.exception(f"❌ Error capturing {url}: {e}")
             return None, None
 
     async def batch_capture(self, urls: list) -> dict[str, Any]:
         """
         Capture multiple URLs concurrently.
-        
+
         Args:
             urls: List of URLs to capture
-        
+
         Returns:
             {
                 'captured': count,
@@ -157,7 +157,7 @@ class HarvesterSpider:
                 'captures': [(url, capture_id, markdown), ...],
                 'total_words': int
             }
-        
+
         Example:
             results = await spider.batch_capture([
                 "https://arxiv.org/abs/2301.13688",
@@ -177,7 +177,7 @@ class HarvesterSpider:
             tasks = [self.capture_site(url) for url in urls]
             responses = await asyncio.gather(*tasks)
 
-            for url, (capture_id, markdown) in zip(urls, responses):
+            for url, (capture_id, markdown) in zip(urls, responses, strict=False):
                 if capture_id:
                     results['captured'] += 1
                     results['captures'].append((url, capture_id, markdown))
@@ -189,13 +189,13 @@ class HarvesterSpider:
             return results
 
         except Exception as e:
-            logger.error(f"❌ Batch error: {e}")
+            logger.exception(f"❌ Batch error: {e}")
             return results
 
     def _archive_to_db(self, url: str, clean_markdown: str, metadata: dict) -> int | None:
         """
         Archive cleaned content to Centrifuge DB.
-        
+
         Database workflow:
             raw_content table ← stores HTML + markdown
             ↓ (processed_by_loom = False initially)
@@ -215,9 +215,9 @@ class HarvesterSpider:
             domain = parsed.netloc
 
             cursor.execute("""
-                INSERT OR REPLACE INTO raw_content 
-                (url, domain, markdown_content, extracted_schema, 
-                 content_type, js_required, timestamp, processed_by_loom, 
+                INSERT OR REPLACE INTO raw_content
+                (url, domain, markdown_content, extracted_schema,
+                 content_type, js_required, timestamp, processed_by_loom,
                  source_quality, fetch_method)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, (
@@ -240,7 +240,7 @@ class HarvesterSpider:
             return capture_id
 
         except Exception as e:
-            logger.error(f"❌ Archive error: {e}")
+            logger.exception(f"❌ Archive error: {e}")
             return None
 
     def _ensure_table(self, cursor):
@@ -265,7 +265,7 @@ class HarvesterSpider:
 
         # Create index for Loom pipeline (fast queries)
         cursor.execute("""
-            CREATE INDEX IF NOT EXISTS idx_raw_content_loom 
+            CREATE INDEX IF NOT EXISTS idx_raw_content_loom
             ON raw_content(processed_by_loom)
         """)
 
@@ -291,7 +291,7 @@ class HarvesterSpider:
     def get_unprocessed_content(self, limit: int = 50) -> list:
         """
         Get content ready for Loom semantic compression.
-        
+
         Typical workflow for Loom:
             urls = spider.get_unprocessed_content(limit=50)
             for url, markdown in urls:
@@ -305,9 +305,9 @@ class HarvesterSpider:
             cursor = conn.cursor()
 
             cursor.execute("""
-                SELECT url, markdown_content, id 
-                FROM raw_content 
-                WHERE processed_by_loom = 0 
+                SELECT url, markdown_content, id
+                FROM raw_content
+                WHERE processed_by_loom = 0
                 AND source_quality >= 70
                 ORDER BY source_quality DESC, timestamp DESC
                 LIMIT ?
@@ -319,7 +319,7 @@ class HarvesterSpider:
             return results
 
         except Exception as e:
-            logger.error(f"❌ Query error: {e}")
+            logger.exception(f"❌ Query error: {e}")
             return []
 
     def mark_processed(self, url: str) -> bool:
@@ -329,8 +329,8 @@ class HarvesterSpider:
             cursor = conn.cursor()
 
             cursor.execute("""
-                UPDATE raw_content 
-                SET processed_by_loom = 1 
+                UPDATE raw_content
+                SET processed_by_loom = 1
                 WHERE url = ?
             """, (url,))
 
@@ -340,7 +340,7 @@ class HarvesterSpider:
             return cursor.rowcount > 0
 
         except Exception as e:
-            logger.error(f"❌ Update error: {e}")
+            logger.exception(f"❌ Update error: {e}")
             return False
 
     def get_stats(self) -> dict:
@@ -372,7 +372,7 @@ class HarvesterSpider:
             }
 
         except Exception as e:
-            logger.error(f"❌ Stats error: {e}")
+            logger.exception(f"❌ Stats error: {e}")
             return {}
 
 

@@ -71,7 +71,7 @@ class AuthManager:
             logger.warning("Invalid token")
             return None
         except Exception as e:
-            logger.error(f"Token verification error: {e}")
+            logger.exception(f"Token verification error: {e}")
             return None
 
 

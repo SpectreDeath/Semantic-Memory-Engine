@@ -43,7 +43,7 @@ class OverlapDiscovery:
     def find_connections(self, context_id: str, limit: int = 5) -> list[SemanticConnection]:
         """
         Find other contexts that overlap semantically with the given context.
-        
+
         Args:
             context_id: The context to search around
             limit: Max number of connections to return

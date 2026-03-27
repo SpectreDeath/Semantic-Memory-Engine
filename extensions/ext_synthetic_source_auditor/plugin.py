@@ -55,7 +55,7 @@ class AnalyticAuditor:
             self.nexus.nexus.execute(sql)
             logger.info(f"[{self.plugin_id}] 'nexus_synthetic_baselines' table initialized.")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to init DB table: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to init DB table: {e}")
 
     async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """

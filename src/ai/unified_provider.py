@@ -94,7 +94,7 @@ class ResponseCache:
 class UnifiedAIProvider:
     """
     Unified AI Provider with automatic failover and smart routing.
-    
+
     Features:
     - Automatic provider fallback
     - Response caching
@@ -172,11 +172,11 @@ class UnifiedAIProvider:
     ) -> AIResponse:
         """
         Generate AI response with automatic failover.
-        
+
         Args:
             request: The AI request
             prefer_providers: Preferred providers in order (falls back to defaults)
-        
+
         Returns:
             AIResponse with content and metadata
         """

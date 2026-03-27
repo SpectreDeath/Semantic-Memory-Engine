@@ -5,10 +5,10 @@ import numpy as np
 def calculate_tfidf(tokenized_docs: list[list[str]]) -> tuple[np.ndarray, list[str]]:
     """
     Lightweight, vectorized TF-IDF calculator.
-    
+
     Args:
         tokenized_docs: A list of documents, where each document is a list of tokens.
-        
+
     Returns:
         A tuple of (tfidf_matrix, vocabulary).
     """
@@ -16,7 +16,7 @@ def calculate_tfidf(tokenized_docs: list[list[str]]) -> tuple[np.ndarray, list[s
         return np.array([]), []
 
     # 1. Build vocabulary
-    vocabulary = sorted(list(set(token for doc in tokenized_docs for token in doc)))
+    vocabulary = sorted({token for doc in tokenized_docs for token in doc})
     vocab_index = {word: i for i, word in enumerate(vocabulary)}
     num_docs = len(tokenized_docs)
     num_words = len(vocabulary)
@@ -47,11 +47,11 @@ def calculate_kl_divergence(p: np.ndarray, q: np.ndarray) -> float:
     """
     Measures relative entropy (Kullback-Leibler divergence) between two distributions.
     P is the target distribution, Q is the reference (baseline) distribution.
-    
+
     Args:
         p: Probability distribution P.
         q: Probability distribution Q.
-        
+
     Returns:
         The KL divergence value.
     """

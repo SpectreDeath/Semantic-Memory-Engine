@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 class ManifestManager:
-    def __init__(self, manifest_path: str = None):
+    def __init__(self, manifest_path: str | None = None):
         if manifest_path is None:
             self.path = os.getenv("MANIFEST_PATH", "data/manifest.json")
         else:

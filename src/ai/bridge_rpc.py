@@ -68,11 +68,11 @@ class AsyncSMEBridge:
             try:
                 results = self.memory.collection.get()
                 nodes = []
-                for i, id_ in enumerate(results["ids"]):
+                for _i, id_ in enumerate(results["ids"]):
                     nodes.append({"id": id_, "label": f"Node {id_}", "type": "document"})
                 return nodes
             except Exception as e:
-                logger.error(f"Error fetching memory nodes: {e}")
+                logger.exception(f"Error fetching memory nodes: {e}")
 
         # Fallback to mock
         return [
@@ -102,7 +102,7 @@ class AsyncSMEBridge:
                 if matches:
                     return matches
             except Exception as e:
-                logger.error(f"Error searching memory: {e}")
+                logger.exception(f"Error searching memory: {e}")
 
         # Fallback to mock
         return [{"id": "match_1", "text": f"Found semantic alignment for '{query}' in Cluster: Forensics"}]
@@ -114,7 +114,7 @@ class AsyncSMEBridge:
         return {"status": "success", "message": f"Successfully indexed {path} into SME Vector Store."}
 
     async def analyze_document(self, params: dict) -> Any:
-        path = params.get("path", "unknown")
+        params.get("path", "unknown")
         # Mocking forensic outliers (burstiness, entropy) for testing UI decorations
         return {
             "markers": [
@@ -212,9 +212,9 @@ async def process_messages(bridge: AsyncSMEBridge):
             asyncio.create_task(handle_and_respond(bridge, request))
 
         except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse line: {e}")
+            logger.exception(f"Failed to parse line: {e}")
         except Exception as e:
-            logger.error(f"Unexpected error: {e}")
+            logger.exception(f"Unexpected error: {e}")
 
 async def handle_and_respond(bridge: AsyncSMEBridge, request: dict):
     loop = asyncio.get_running_loop()
@@ -225,7 +225,7 @@ async def handle_and_respond(bridge: AsyncSMEBridge, request: dict):
         await loop.run_in_executor(None, sys.stdout.write, response_str)
         await loop.run_in_executor(None, sys.stdout.flush)
     except Exception as e:
-         logger.error(f"Error handling request and responding: {e}")
+         logger.exception(f"Error handling request and responding: {e}")
 
 
 async def main():

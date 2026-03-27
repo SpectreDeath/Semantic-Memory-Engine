@@ -11,7 +11,7 @@ import re
 def is_valid_username(username: str) -> bool:
     """
     Check if a string looks like a valid username/alias.
-    
+
     Criteria:
     - Length between 3 and 32 characters.
     - Contains only alphanumeric characters, underscores, or hyphens.
@@ -43,14 +43,11 @@ def is_valid_username(username: str) -> bool:
         return False
 
     # 4. Pattern check for common citation junk (e.g., "pp.32-45", "1990-202X")
-    if re.search(r'\d{1,2}-\d{1,2}', username) or re.search(r'[0-9]{4}', username):
-        return False
-
-    return True
+    return not (re.search(r'\d{1,2}-\d{1,2}', username) or re.search(r'[0-9]{4}', username))
 
 def filter_targets(targets: list) -> list:
     """Filter a list of potential targets for OSINT pivoting."""
-    unique_targets = sorted(list(set(targets)))
+    unique_targets = sorted(set(targets))
     valid_targets = [t for t in unique_targets if is_valid_username(t)]
     return valid_targets
 

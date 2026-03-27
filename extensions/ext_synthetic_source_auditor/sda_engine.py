@@ -69,7 +69,7 @@ class SourceDeAnonymizationEngine:
             return 0.0
 
         # Calculate dot product
-        dot_product = sum(a * b for a, b in zip(vector_a, vector_b))
+        dot_product = sum(a * b for a, b in zip(vector_a, vector_b, strict=False))
 
         # Calculate cosine similarity
         similarity = dot_product / (norm_a * norm_b)
@@ -131,10 +131,7 @@ class SourceDeAnonymizationEngine:
         confidence = round(max_similarity * 100, 1)
 
         # Apply attribution threshold (80% confidence required for attribution)
-        if confidence < 80.0:
-            detected_family = "Unknown"
-        else:
-            detected_family = best_family
+        detected_family = "Unknown" if confidence < 80.0 else best_family
 
         return {
             "detected_family": detected_family,

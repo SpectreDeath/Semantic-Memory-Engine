@@ -8,10 +8,10 @@ def audit_benford_distribution(data: list[float]) -> dict[str, Any]:
     vectorized Benford's Law calculator.
     Measures how well the leading digits of a dataset follow the expected logarithmic distribution.
     Useful for detecting potential fraud or manual manipulation in numeric logs.
-    
+
     Args:
         data: A list of numbers to audit.
-        
+
     Returns:
         A dictionary containing the audit results and a 'Confidence Score'.
     """
@@ -47,8 +47,8 @@ def audit_benford_distribution(data: list[float]) -> dict[str, Any]:
 
     return {
         "confidence_score": round(confidence_score, 4),
-        "actual_distribution": {int(d): round(float(p), 4) for d, p in zip(digits, actual_probs)},
-        "expected_distribution": {int(d): round(float(p), 4) for d, p in zip(digits, expected_probs)},
+        "actual_distribution": {int(d): round(float(p), 4) for d, p in zip(digits, actual_probs, strict=False)},
+        "expected_distribution": {int(d): round(float(p), 4) for d, p in zip(digits, expected_probs, strict=False)},
         "mean_absolute_error": round(float(mae), 4),
         "sample_size": int(arr.size),
         "status": "Success"

@@ -177,7 +177,7 @@ class OpenAIProvider(AIProviderInterface):
 
         except Exception as e:
             self.usage_stats["errors"] += 1
-            logger.error(f"OpenAI API error: {e}")
+            logger.exception(f"OpenAI API error: {e}")
             raise
 
     async def health_check(self) -> bool:
@@ -193,7 +193,7 @@ class OpenAIProvider(AIProviderInterface):
                 return response.status == 200
 
         except Exception as e:
-            logger.error(f"OpenAI health check failed: {e}")
+            logger.exception(f"OpenAI health check failed: {e}")
             return False
 
     def get_usage_stats(self) -> dict[str, Any]:
@@ -321,7 +321,7 @@ class AnthropicProvider(AIProviderInterface):
 
         except Exception as e:
             self.usage_stats["errors"] += 1
-            logger.error(f"Anthropic API error: {e}")
+            logger.exception(f"Anthropic API error: {e}")
             raise
 
     async def health_check(self) -> bool:
@@ -337,7 +337,7 @@ class AnthropicProvider(AIProviderInterface):
                 return response.status == 200
 
         except Exception as e:
-            logger.error(f"Anthropic health check failed: {e}")
+            logger.exception(f"Anthropic health check failed: {e}")
             return False
 
     def get_usage_stats(self) -> dict[str, Any]:
@@ -439,7 +439,7 @@ class LocalOllamaProvider(AIProviderInterface):
 
         except Exception as e:
             self.usage_stats["errors"] += 1
-            logger.error(f"Ollama API error: {e}")
+            logger.exception(f"Ollama API error: {e}")
             raise
 
     async def health_check(self) -> bool:
@@ -452,7 +452,7 @@ class LocalOllamaProvider(AIProviderInterface):
                     return response.status == 200
 
         except Exception as e:
-            logger.error(f"Ollama health check failed: {e}")
+            logger.exception(f"Ollama health check failed: {e}")
             return False
 
     def get_usage_stats(self) -> dict[str, Any]:
@@ -604,7 +604,7 @@ class ExternalAIIntegration:
 
             except Exception as e:
                 last_error = e
-                logger.error(f"Provider {provider_type.value} failed: {e}")
+                logger.exception(f"Provider {provider_type.value} failed: {e}")
                 continue
 
         # If we get here, all providers failed
@@ -627,7 +627,7 @@ class ExternalAIIntegration:
                 )
                 responses.append(response)
             except Exception as e:
-                logger.error(f"Batch request failed: {e}")
+                logger.exception(f"Batch request failed: {e}")
                 responses.append(
                     AIResponse(
                         provider=request.provider,
@@ -695,7 +695,7 @@ class ExternalAIIntegration:
             try:
                 results[provider_type.value] = await provider.health_check()
             except Exception as e:
-                logger.error(f"Health check failed for {provider_type.value}: {e}")
+                logger.exception(f"Health check failed for {provider_type.value}: {e}")
                 results[provider_type.value] = False
 
         return results

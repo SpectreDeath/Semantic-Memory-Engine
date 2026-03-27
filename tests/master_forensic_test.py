@@ -33,7 +33,7 @@ def test_data_guard_auditor():
     """Test the Data Guard Auditor."""
     print("🔍 Testing Data Guard Auditor...")
     # Test with a sample CSV file or create one for testing
-    returncode, stdout, stderr = run_command("python src/utils/auditor.py data/results/trust_scores_results.csv --contamination 0.1", timeout=30)
+    returncode, _stdout, stderr = run_command("python src/utils/auditor.py data/results/trust_scores_results.csv --contamination 0.1", timeout=30)
 
     if returncode == 0:
         print("✅ Data Guard Auditor: PASSED")
@@ -50,7 +50,7 @@ def test_context_sniffer():
     print("🔍 Testing Context Sniffer...")
     # Test with a sample Python file
     # cSpell:ignore gephi
-    returncode, stdout, stderr = run_command("python src/utils/context_sniffer.py src/utils/gephi_bridge.py", timeout=30)
+    returncode, _stdout, stderr = run_command("python src/utils/context_sniffer.py src/utils/gephi_bridge.py", timeout=30)
 
     if returncode == 0:
         print("✅ Context Sniffer: PASSED")
@@ -71,7 +71,7 @@ def test_gephi_bridge_modes():
 
     for mode in modes:
         print(f"  Testing {mode} mode...")
-        returncode, stdout, stderr = run_command(f"python src/utils/gephi_bridge.py --mode {mode}", timeout=45)
+        returncode, stdout, _stderr = run_command(f"python src/utils/gephi_bridge.py --mode {mode}", timeout=45)
 
         if returncode == 0:
             # Check for expected output patterns
@@ -108,7 +108,7 @@ def generate_forensic_report():
     }
 
     # Count results
-    for test_name, passed in report["tests"].items():
+    for passed in report["tests"].values():
         if passed:
             report["summary"]["passed_tests"] += 1
         else:

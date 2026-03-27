@@ -4,6 +4,7 @@ Test suite for Tier 1 improvements.
 Tests cache layer, input validation, circuit breaker, and rate limiting.
 """
 
+import contextlib
 import time
 
 import pytest
@@ -258,11 +259,9 @@ class TestCircuitBreaker:
             raise Exception("Service error")
 
         # Cause failures
-        for i in range(10):
-            try:
+        for _i in range(10):
+            with contextlib.suppress(Exception):
                 breaker.call(failing_fn)
-            except Exception:
-                pass
 
         # Circuit should open
         assert breaker.get_state() == "open"
@@ -275,11 +274,9 @@ class TestCircuitBreaker:
             raise Exception("Error")
 
         # Open circuit
-        for i in range(10):
-            try:
+        for _i in range(10):
+            with contextlib.suppress(BaseException):
                 breaker.call(failing_fn)
-            except:
-                pass
 
         assert breaker.get_state() == "open"
 
@@ -298,11 +295,9 @@ class TestCircuitBreaker:
         def failing_fn():
             raise Exception("Error")
 
-        for i in range(10):
-            try:
+        for _i in range(10):
+            with contextlib.suppress(BaseException):
                 breaker.call(failing_fn)
-            except:
-                pass
 
         assert breaker.get_state() == "open"
 
@@ -325,11 +320,9 @@ class TestCircuitBreaker:
             raise Exception("Error")
 
         # Cause failures
-        for i in range(10):
-            try:
+        for _i in range(10):
+            with contextlib.suppress(BaseException):
                 breaker.call(failing_fn)
-            except:
-                pass
 
         assert breaker.get_state() == "open"
 
@@ -401,7 +394,7 @@ class TestTier1Integration:
 
         # Run multiple times with protection
         for i in range(5):
-            result = cache.get(f"data:{i}", fetch_data_with_protection, ttl_seconds=60)
+            cache.get(f"data:{i}", fetch_data_with_protection, ttl_seconds=60)
 
         # Check circuit breaker is working
         assert breaker.success_count > 0

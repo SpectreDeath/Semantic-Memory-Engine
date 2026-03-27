@@ -1,7 +1,7 @@
 """
 SME Forensic Utilities Package
 
-Provides tools for data auditing, project context sniffing, 
+Provides tools for data auditing, project context sniffing,
 and Gephi visualization streaming.
 """
 

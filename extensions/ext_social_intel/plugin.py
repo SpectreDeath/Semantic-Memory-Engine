@@ -131,7 +131,7 @@ class SocialIntelligenceCrawler(BasePlugin):
 
             logger.info(f"[{self.plugin_id}] Social Intelligence Crawler started successfully")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to start: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to start: {e}")
             raise
 
     def get_tools(self) -> list[Any]:
@@ -238,7 +238,7 @@ class SocialIntelligenceCrawler(BasePlugin):
             return json.dumps(result)
 
         except Exception as e:
-            logger.error(f"Error in hashtag campaign monitoring: {e}")
+            logger.exception(f"Error in hashtag campaign monitoring: {e}")
             return json.dumps({"error": str(e), "hashtag": hashtag})
 
     async def analyze_sentiment_spread(
@@ -307,7 +307,7 @@ class SocialIntelligenceCrawler(BasePlugin):
             return json.dumps(result)
 
         except Exception as e:
-            logger.error(f"Error in sentiment analysis: {e}")
+            logger.exception(f"Error in sentiment analysis: {e}")
             return json.dumps({"error": str(e), "topic": topic})
 
     async def detect_coordinated_campaigns(
@@ -373,7 +373,7 @@ class SocialIntelligenceCrawler(BasePlugin):
             return json.dumps(result)
 
         except Exception as e:
-            logger.error(f"Error in coordinated campaign detection: {e}")
+            logger.exception(f"Error in coordinated campaign detection: {e}")
             return json.dumps({"error": str(e), "keywords": keywords})
 
     async def track_influencer_activity(
@@ -429,7 +429,7 @@ class SocialIntelligenceCrawler(BasePlugin):
             return json.dumps(result)
 
         except Exception as e:
-            logger.error(f"Error in influencer tracking: {e}")
+            logger.exception(f"Error in influencer tracking: {e}")
             return json.dumps({"error": str(e), "influencers": influencer_handles})
 
     async def analyze_geolocation_patterns(
@@ -490,7 +490,7 @@ class SocialIntelligenceCrawler(BasePlugin):
             return json.dumps(result)
 
         except Exception as e:
-            logger.error(f"Error in geolocation analysis: {e}")
+            logger.exception(f"Error in geolocation analysis: {e}")
             return json.dumps({"error": str(e), "topic": topic})
 
     async def generate_social_media_report(
@@ -531,7 +531,7 @@ class SocialIntelligenceCrawler(BasePlugin):
             return json.dumps(result)
 
         except Exception as e:
-            logger.error(f"Error generating social media report: {e}")
+            logger.exception(f"Error generating social media report: {e}")
             return json.dumps({"error": str(e), "report_type": report_type})
 
     # Helper methods
@@ -586,7 +586,7 @@ class SocialIntelligenceCrawler(BasePlugin):
         """Analyze overall sentiment for a hashtag campaign."""
         all_content = []
 
-        for platform, data in campaign_data.items():
+        for data in campaign_data.values():
             if "error" not in data:
                 all_content.extend(data.get("posts", []))
 
@@ -606,7 +606,7 @@ class SocialIntelligenceCrawler(BasePlugin):
         """Extract geographic distribution from campaign data."""
         geo_distribution = {}
 
-        for platform, data in campaign_data.items():
+        for data in campaign_data.values():
             if "error" not in data:
                 for post in data.get("posts", []):
                     location = post.get("location", "Unknown")
@@ -618,7 +618,7 @@ class SocialIntelligenceCrawler(BasePlugin):
         """Extract related hashtags from campaign data."""
         related_hashtags = set()
 
-        for platform, data in campaign_data.items():
+        for data in campaign_data.values():
             if "error" not in data:
                 for post in data.get("posts", []):
                     hashtags = post.get("hashtags", [])

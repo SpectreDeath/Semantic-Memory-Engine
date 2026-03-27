@@ -58,7 +58,7 @@ class StethoGovernorIntegration:
     def get_governor_status(self) -> GovernorStatus:
         """
         Get current Governor status.
-        
+
         This method should be implemented to query the actual Governor system.
         For now, it returns a mock status or can be overridden by subclasses.
         """
@@ -87,13 +87,13 @@ class StethoGovernorIntegration:
             logger.warning("Governor system not available, assuming NORMAL status")
             return GovernorStatus.NORMAL
         except Exception as e:
-            logger.error(f"Failed to get Governor status: {e}")
+            logger.exception(f"Failed to get Governor status: {e}")
             return GovernorStatus.UNKNOWN
 
     def get_cpu_usage_level(self) -> CPUUsageLevel:
         """
         Get current CPU usage level.
-        
+
         This method should be implemented to query actual CPU usage.
         For now, it returns a mock status or can be overridden by subclasses.
         """
@@ -119,13 +119,13 @@ class StethoGovernorIntegration:
             logger.warning("psutil not available, assuming MEDIUM CPU usage")
             return CPUUsageLevel.MEDIUM
         except Exception as e:
-            logger.error(f"Failed to get CPU usage: {e}")
+            logger.exception(f"Failed to get CPU usage: {e}")
             return CPUUsageLevel.UNKNOWN
 
     def is_safe_to_detect(self) -> bool:
         """
         Check if it's safe to run watermark detection based on Governor status and CPU usage.
-        
+
         Returns:
             True if safe to detect (Governor status is NORMAL and CPU usage is LOW/MEDIUM), False otherwise.
         """
@@ -170,11 +170,11 @@ def safe_detect_watermark_pulse(text: str,
                                governor_check: StethoGovernorIntegration | None = None) -> dict[str, Any]:
     """
     Safe wrapper for detect_watermark_pulse that checks Governor status and CPU usage.
-    
+
     Args:
         text: Text to analyze for watermarks.
         governor_check: StethoGovernorIntegration instance to use for status checking.
-        
+
     Returns:
         Dictionary containing detection results or error information.
     """
@@ -225,7 +225,7 @@ def safe_detect_watermark_pulse(text: str,
         return result
 
     except ImportError as e:
-        logger.error(f"Failed to import detection function: {e}")
+        logger.exception(f"Failed to import detection function: {e}")
         return {
             'has_invisible_markers': False,
             'z_score_analysis': {},
@@ -237,7 +237,7 @@ def safe_detect_watermark_pulse(text: str,
             'error': str(e)
         }
     except Exception as e:
-        logger.error(f"Detection execution failed: {e}")
+        logger.exception(f"Detection execution failed: {e}")
         return {
             'has_invisible_markers': False,
             'z_score_analysis': {},
@@ -253,7 +253,7 @@ def safe_detect_watermark_pulse(text: str,
 def create_stetho_governor_hook() -> Callable:
     """
     Create a hook function that can be used by the Governor system.
-    
+
     This function returns a hook that can be registered with the Governor
     to monitor status changes and take appropriate action.
     """
@@ -262,11 +262,11 @@ def create_stetho_governor_hook() -> Callable:
     def stetho_governor_status_hook(status: str, **kwargs) -> dict[str, Any]:
         """
         Hook function called by Governor when status changes.
-        
+
         Args:
             status: New Governor status.
             **kwargs: Additional status information.
-            
+
         Returns:
             Dictionary with hook execution results.
         """
@@ -303,7 +303,7 @@ def create_stetho_governor_hook() -> Callable:
             }
 
         except Exception as e:
-            logger.error(f"Stetho Governor status hook failed: {e}")
+            logger.exception(f"Stetho Governor status hook failed: {e}")
             return {
                 'status': 'hook_failed',
                 'error': str(e),

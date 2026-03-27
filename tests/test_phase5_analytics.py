@@ -54,7 +54,7 @@ class TestSentimentAnalyzerBasics:
         analyzer = SentimentAnalyzer()
         result = analyzer.analyze("This is absolutely amazing and wonderful!")
 
-        assert result.polarity == SentimentPolarity.POSITIVE or result.polarity == SentimentPolarity.VERY_POSITIVE
+        assert result.polarity in (SentimentPolarity.POSITIVE, SentimentPolarity.VERY_POSITIVE)
         assert result.polarity_score > 0.2
         assert result.intensity > 0.0
 
@@ -63,7 +63,7 @@ class TestSentimentAnalyzerBasics:
         analyzer = SentimentAnalyzer()
         result = analyzer.analyze("This is terrible and awful!")
 
-        assert result.polarity == SentimentPolarity.NEGATIVE or result.polarity == SentimentPolarity.VERY_NEGATIVE
+        assert result.polarity in (SentimentPolarity.NEGATIVE, SentimentPolarity.VERY_NEGATIVE)
         assert result.polarity_score < -0.2
 
     def test_analyze_neutral_sentiment(self):
@@ -116,14 +116,14 @@ class TestSentimentAnalyzerEmotions:
         analyzer = SentimentAnalyzer()
         result = analyzer.analyze("I am so happy and joyful!")
 
-        assert result.dominant_emotion in [e for e in EmotionType]
+        assert result.dominant_emotion in list(EmotionType)
 
     def test_emotion_scores_normalized(self):
         """Test emotion scores are in valid range."""
         analyzer = SentimentAnalyzer()
         result = analyzer.analyze("Test text")
 
-        for emotion_type, emotion_score in result.emotions.items():
+        for emotion_score in result.emotions.values():
             assert 0.0 <= emotion_score.score <= 1.0
             assert 0.0 <= emotion_score.confidence <= 1.0
 

@@ -61,7 +61,7 @@ class HarvesterExtension(BasePlugin):
             self.convert_schema,
         ]
 
-    async def crawl_url(self, url: str, depth: int = 2, pattern: str = None) -> str:
+    async def crawl_url(self, url: str, depth: int = 2, pattern: str | None = None) -> str:
         """Crawl URL to specified depth."""
         if not self.crawler:
             return json.dumps({"error": "Crawler not available"})
@@ -71,7 +71,7 @@ class HarvesterExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def spider_scrape(self, url: str, selectors: list[str] = None) -> str:
+    async def spider_scrape(self, url: str, selectors: list[str] | None = None) -> str:
         """Scrape URL using spider with CSS/XPath selectors."""
         if not self.spider:
             return json.dumps({"error": "Spider not available"})

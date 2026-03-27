@@ -50,7 +50,7 @@ class GovernorIntegration:
     def get_governor_status(self) -> GovernorStatus:
         """
         Get current Governor status.
-        
+
         This method should be implemented to query the actual Governor system.
         For now, it returns a mock status or can be overridden by subclasses.
         """
@@ -81,13 +81,13 @@ class GovernorIntegration:
             logger.warning("Governor system not available, assuming NORMAL status")
             return GovernorStatus.NORMAL
         except Exception as e:
-            logger.error(f"Failed to get Governor status: {e}")
+            logger.exception(f"Failed to get Governor status: {e}")
             return GovernorStatus.UNKNOWN
 
     def is_safe_to_audit(self) -> bool:
         """
         Check if it's safe to run cross-modal audits based on Governor status.
-        
+
         Returns:
             True if safe to audit (Governor status is NORMAL), False otherwise.
         """
@@ -127,13 +127,13 @@ def safe_audit_multimodal_sync(image_path: str, prompt: str,
                               governor_check: GovernorIntegration | None = None) -> dict[str, Any]:
     """
     Safe wrapper for audit_multimodal_sync that checks Governor status.
-    
+
     Args:
         image_path: Path to the image file.
         prompt: Text prompt describing the image.
         threshold: Sync score threshold for hallucination detection.
         governor_check: GovernorIntegration instance to use for status checking.
-        
+
     Returns:
         Dictionary containing audit results or error information.
     """
@@ -183,7 +183,7 @@ def safe_audit_multimodal_sync(image_path: str, prompt: str,
         return result
 
     except ImportError as e:
-        logger.error(f"Failed to import audit function: {e}")
+        logger.exception(f"Failed to import audit function: {e}")
         return {
             'sync_score': 0.0,
             'hallucination_detected': False,
@@ -195,7 +195,7 @@ def safe_audit_multimodal_sync(image_path: str, prompt: str,
             'error': str(e)
         }
     except Exception as e:
-        logger.error(f"Audit execution failed: {e}")
+        logger.exception(f"Audit execution failed: {e}")
         return {
             'sync_score': 0.0,
             'hallucination_detected': False,
@@ -219,7 +219,7 @@ def safe_audit_multimodal_sync_tool(image_path: str, prompt: str,
 def create_governor_aware_hook() -> Callable:
     """
     Create a hook function that can be used by the Governor system.
-    
+
     This function returns a hook that can be registered with the Governor
     to monitor status changes and take appropriate action.
     """
@@ -228,11 +228,11 @@ def create_governor_aware_hook() -> Callable:
     def governor_status_hook(status: str, **kwargs) -> dict[str, Any]:
         """
         Hook function called by Governor when status changes.
-        
+
         Args:
             status: New Governor status.
             **kwargs: Additional status information.
-            
+
         Returns:
             Dictionary with hook execution results.
         """
@@ -269,7 +269,7 @@ def create_governor_aware_hook() -> Callable:
             }
 
         except Exception as e:
-            logger.error(f"Governor status hook failed: {e}")
+            logger.exception(f"Governor status hook failed: {e}")
             return {
                 'status': 'hook_failed',
                 'error': str(e),

@@ -63,9 +63,7 @@ def is_docker_environment() -> bool:
     """Check if running inside a Docker container."""
     if os.path.exists("/.dockerenv"):
         return True
-    if os.environ.get("DOCKER") is not None:
-        return True
-    return False
+    return os.environ.get("DOCKER") is not None
 
 
 def validate_docker_postgres_enforcement(values: dict[str, Any]) -> str | None:
@@ -108,7 +106,7 @@ env_registry: list[EnvVarSpec] = [
 class EnvValidator:
     """Registry and validation for environment variables."""
 
-    def __init__(self, registry: list[EnvVarSpec | None] = None):
+    def __init__(self, registry: list[EnvVarSpec | None] | None = None):
         self._registry = registry or env_registry
 
     def get_spec(self, name: str) -> EnvVarSpec | None:

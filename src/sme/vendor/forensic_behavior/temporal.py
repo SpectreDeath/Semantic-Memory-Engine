@@ -16,7 +16,7 @@ class TemporalAnalyzer:
         """
         Calculates the Burstiness Score (B) for a series of events.
         B = (r - 1) / (r + 1), where r = std_dev / mean of inter-event times.
-        
+
         Score ranges from -1 (perfectly periodic) to 1 (extremely bursty).
         0 indicates a memory-less Poisson process.
         """

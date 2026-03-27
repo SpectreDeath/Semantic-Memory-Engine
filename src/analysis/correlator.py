@@ -90,12 +90,12 @@ class TrendCorrelator:
     ) -> TrendAnalysis:
         """
         Find which authors are driving a specific trend.
-        
+
         Args:
             trend_topic: The trending topic (e.g., "AI Regulation")
             article_data: List of articles with {author_id, text, timestamp, url}
             min_attribution_score: Minimum confidence to list as driver
-            
+
         Returns:
             TrendAnalysis with identified drivers
         """
@@ -215,7 +215,7 @@ class TrendCorrelator:
             return analysis
 
         except Exception as e:
-            logger.error(f"❌ Trend driver identification failed: {e!s}")
+            logger.exception(f"❌ Trend driver identification failed: {e!s}")
             raise
 
     # ========================================================================
@@ -230,12 +230,12 @@ class TrendCorrelator:
     ) -> InfluenceChain:
         """
         Trace how a trend spreads author-to-author over time.
-        
+
         Args:
             trend_topic: Trending topic
             article_data: Articles in chronological order
             max_chain_length: Maximum influencers to track
-            
+
         Returns:
             InfluenceChain showing spread pattern
         """
@@ -270,12 +270,12 @@ class TrendCorrelator:
                     if influencers:
                         prev_fp = fingerprints_by_author[influencers[-1][0]]
                         curr_fp = fingerprints_by_author[author_id]
-                        similarity = self.scribe._calculate_signal_similarity(
+                        self.scribe._calculate_signal_similarity(
                             prev_fp.signal_vector,
                             curr_fp.signal_vector
                         )
                     else:
-                        similarity = 1.0  # First in chain
+                        pass  # First in chain
 
                     influencers.append((author_id, timestamp))
 
@@ -285,7 +285,7 @@ class TrendCorrelator:
             # Calculate spread velocity
             if len(influencers) > 1:
                 time_diffs = []
-                for i in range(1, len(influencers)):
+                for _i in range(1, len(influencers)):
                     # Parse timestamps (simplified)
                     diff = 1  # Placeholder
                     time_diffs.append(diff)
@@ -316,7 +316,7 @@ class TrendCorrelator:
             return chain
 
         except Exception as e:
-            logger.error(f"❌ Influence chain tracing failed: {e!s}")
+            logger.exception(f"❌ Influence chain tracing failed: {e!s}")
             raise
 
     # ========================================================================
@@ -331,12 +331,12 @@ class TrendCorrelator:
     ) -> dict:
         """
         Detect coordinated promotion patterns (multiple authors pushing same narrative).
-        
+
         Args:
             trend_topic: Topic to analyze
             article_data: Articles with full content
             similarity_threshold: Message similarity threshold
-            
+
         Returns:
             Campaign pattern analysis
         """
@@ -405,7 +405,7 @@ class TrendCorrelator:
             return result
 
         except Exception as e:
-            logger.error(f"❌ Campaign detection failed: {e!s}")
+            logger.exception(f"❌ Campaign detection failed: {e!s}")
             return {"detected": False, "patterns": [], "error": str(e)}
 
     # ========================================================================

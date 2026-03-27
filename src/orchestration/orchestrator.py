@@ -145,7 +145,7 @@ class PipelineJobQueue:
             return {"error": str(e)}
 
     def update_job_status(
-        self, job_id: str, status: str, result: dict = None, error: str = None
+        self, job_id: str, status: str, result: dict | None = None, error: str | None = None
     ) -> bool:
         """Updates job status."""
         try:

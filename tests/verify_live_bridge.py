@@ -40,7 +40,7 @@ def verify_live_triples():
 def verify_vram_guardrail():
     print("\n[*] Verifying VRAM Guardrail...")
     from src.core.config import Config
-    config = Config()
+    Config()
 
     # Temporarily force a low limit in the config object if possible,
     # or just check if the logic executes.
@@ -51,7 +51,7 @@ def verify_vram_guardrail():
         # We'll try to create a tool that requires lots of VRAM
         # and see if it logs a warning or raises if we were to force it.
         # For now, just ensuring it doesn't crash.
-        sg = ToolFactory.create_semantic_graph()
+        ToolFactory.create_semantic_graph()
         print("[SUCCESS] ToolFactory initialized SemanticGraph successfully.")
     except RuntimeError as e:
         print(f"[INFO] Guardrail likely triggered (expected if VRAM low): {e}")

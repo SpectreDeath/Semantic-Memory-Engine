@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 
-class SME_AI_Provider(ABC):
+class SMEAIProvider(ABC):
     """
     Abstract Base Class for AI inference providers in the Semantic Memory Engine.
     Ensures 'Silicon Agnosticism' by defining a standard interface for execution

@@ -55,7 +55,7 @@ class AdversarialGenerator:
 
 class ThresholdTuner:
     """
-    Automates the process of finding the 'Break-Even' probability 
+    Automates the process of finding the 'Break-Even' probability
     threshold for forensic verification.
     """
     def __init__(self, analyze_fn: Any):
@@ -63,7 +63,7 @@ class ThresholdTuner:
 
     def tune_threshold(self, baseline_text: str, adversary_samples: list[str], **kwargs) -> float:
         """
-        Analyzes a set of adversarial samples and returns the average 
+        Analyzes a set of adversarial samples and returns the average
         'Attack Success' probability.
         """
         probs = []
@@ -80,7 +80,7 @@ class ThresholdTuner:
                     max_prob = max(res["probabilities"].values(), default=0.0)
                     probs.append(float(max_prob))
             except Exception as e:
-                logger.error(f"Tuning error: {e}")
+                logger.exception(f"Tuning error: {e}")
 
         if not probs:
             return 0.8 # Default baseline

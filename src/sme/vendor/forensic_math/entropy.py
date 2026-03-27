@@ -8,11 +8,11 @@ def calculate_entropy_divergence(p: list[float] | np.ndarray, q: list[float] | n
     Calculates the Kullback-Leibler (KL) Divergence (Relative Entropy) between two distributions.
     P is the 'observed' distribution, Q is the 'baseline' distribution.
     Useful for detecting 'drift' in log data or stylistic patterns.
-    
+
     Args:
         p: Observed probability distribution.
         q: Baseline/Reference probability distribution.
-        
+
     Returns:
         The KL divergence value (Relative Entropy in bits if using log2).
         This implementation uses natural logarithm (nats).

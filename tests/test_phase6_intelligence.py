@@ -22,10 +22,10 @@ class TestPhase6Intelligence:
     @pytest.fixture
     def sample_text(self):
         return """
-        Albert Einstein was a theoretical physicist who developed the theory of relativity. 
-        He worked in Princeton at the Institute for Advanced Study. 
-        Einstein's work has had a profound impact on science, though he expressed 
-        concerns about the technological applications of nuclear physics. 
+        Albert Einstein was a theoretical physicist who developed the theory of relativity.
+        He worked in Princeton at the Institute for Advanced Study.
+        Einstein's work has had a profound impact on science, though he expressed
+        concerns about the technological applications of nuclear physics.
         The world remembers him as a symbol of human intelligence.
         """
 

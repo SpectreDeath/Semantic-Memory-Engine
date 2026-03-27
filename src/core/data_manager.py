@@ -13,13 +13,13 @@ Features:
 
 Usage:
     from src.core.data_manager import DataManager
-    
+
     dm = DataManager()
     dm.ensure_required_data()  # Auto-download if missing
-    
+
     # Get corpus
     lemmas = dm.get_wordnet_lemmas("intelligence")
-    
+
     # List available data
     available = dm.list_available_resources()
 """
@@ -57,7 +57,7 @@ class CorpusInfo:
 class DataManager:
     """
     Centralized management of NLTK data and linguistic resources.
-    
+
     Handles corpus discovery, installation, and caching for all
     linguistic analysis in SimpleMem.
     """
@@ -105,12 +105,12 @@ class DataManager:
     def ensure_required_data(self, verbose: bool = True) -> bool:
         """
         Ensure all required NLTK data is installed.
-        
+
         Downloads and installs required corpora if not present.
-        
+
         Args:
             verbose: Print download progress
-        
+
         Returns:
             True if all required data available, False if issues
         """
@@ -141,7 +141,7 @@ class DataManager:
                     if verbose:
                         logger.info(f"  ✅ Downloaded: {resource_id}")
                 except Exception as e:
-                    logger.error(f"  ❌ Failed to download {resource_id}: {e}")
+                    logger.exception(f"  ❌ Failed to download {resource_id}: {e}")
                     all_present = False
 
         if verbose and all_present:
@@ -152,10 +152,10 @@ class DataManager:
     def install_optional_resources(self, resources: list[str] | None = None) -> bool:
         """
         Install optional resources for enhanced functionality.
-        
+
         Args:
             resources: Specific resources to install, or None for all
-        
+
         Returns:
             True if all requested resources installed successfully
         """
@@ -180,10 +180,10 @@ class DataManager:
     def get_wordnet_lemmas(self, word: str) -> list[str]:
         """
         Get all lemmas for a word from WordNet.
-        
+
         Args:
             word: The word to look up
-        
+
         Returns:
             List of lemmas
         """
@@ -194,16 +194,16 @@ class DataManager:
             return [lemma.name() for synset in wordnet.synsets(word)
                     for lemma in synset.lemmas()]
         except Exception as e:
-            logger.error(f"Error getting lemmas for '{word}': {e}")
+            logger.exception(f"Error getting lemmas for '{word}': {e}")
             return []
 
     def get_stopwords(self, language: str = 'english') -> set[str]:
         """
         Get stopwords for a language.
-        
+
         Args:
             language: Language code (default: english)
-        
+
         Returns:
             Set of stopwords
         """
@@ -219,16 +219,16 @@ class DataManager:
             self._cache[cache_key] = stop_set
             return stop_set
         except Exception as e:
-            logger.error(f"Error getting stopwords for '{language}': {e}")
+            logger.exception(f"Error getting stopwords for '{language}': {e}")
             return set()
 
     def tokenize(self, text: str) -> list[str]:
         """
         Tokenize text using Punkt tokenizer.
-        
+
         Args:
             text: Text to tokenize
-        
+
         Returns:
             List of tokens
         """
@@ -239,16 +239,16 @@ class DataManager:
             from nltk.tokenize import word_tokenize
             return word_tokenize(text)
         except Exception as e:
-            logger.error(f"Error tokenizing text: {e}")
+            logger.exception(f"Error tokenizing text: {e}")
             return text.split()
 
     def sentence_tokenize(self, text: str) -> list[str]:
         """
         Split text into sentences using Punkt.
-        
+
         Args:
             text: Text to split
-        
+
         Returns:
             List of sentences
         """
@@ -259,13 +259,13 @@ class DataManager:
             from nltk.tokenize import sent_tokenize
             return sent_tokenize(text)
         except Exception as e:
-            logger.error(f"Error sentence tokenizing: {e}")
+            logger.exception(f"Error sentence tokenizing: {e}")
             return text.split('.')
 
     def list_available_resources(self) -> dict[str, list[CorpusInfo]]:
         """
         List all available NLTK resources.
-        
+
         Returns:
             Dictionary with 'required', 'optional', 'other' resource lists
         """
@@ -304,7 +304,7 @@ class DataManager:
     def health_check(self) -> dict[str, bool]:
         """
         Check health of all required resources.
-        
+
         Returns:
             Dictionary mapping resource IDs to health status
         """
@@ -312,7 +312,7 @@ class DataManager:
             return {}
 
         health = {}
-        for resource_id in self.REQUIRED_RESOURCES.keys():
+        for resource_id in self.REQUIRED_RESOURCES:
             health[resource_id] = self._check_resource(resource_id)
 
         return health

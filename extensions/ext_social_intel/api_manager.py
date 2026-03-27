@@ -89,7 +89,7 @@ class RateLimiter:
 class SocialMediaAPIManager:
     """
     Manages API connections and requests for multiple social media platforms.
-    
+
     Handles authentication, rate limiting, and provides a unified interface
     for accessing different social media APIs.
     """
@@ -151,7 +151,7 @@ class SocialMediaAPIManager:
                     )
 
             # Create client sessions
-            for platform in self.platform_configs.keys():
+            for platform in self.platform_configs:
                 if self.platform_configs[platform].enabled:
                     self.active_sessions[platform] = aiohttp.ClientSession(
                         headers=self._get_default_headers(platform)
@@ -161,7 +161,7 @@ class SocialMediaAPIManager:
             logger.info("Social Media API Manager initialized successfully")
 
         except Exception as e:
-            logger.error(f"Failed to initialize API manager: {e}")
+            logger.exception(f"Failed to initialize API manager: {e}")
             raise
 
     async def shutdown(self):
@@ -176,18 +176,18 @@ class SocialMediaAPIManager:
             logger.info("Social Media API Manager shutdown complete")
 
         except Exception as e:
-            logger.error(f"Error during API manager shutdown: {e}")
+            logger.exception(f"Error during API manager shutdown: {e}")
 
     async def get_hashtag_data(self, platform: PlatformType, hashtag: str,
                              time_window: int = 24) -> dict:
         """
         Get hashtag data from a specific platform.
-        
+
         Args:
             platform: Target platform
             hashtag: Hashtag to search for
             time_window: Time window in hours
-            
+
         Returns:
             Dict containing hashtag data
         """
@@ -200,7 +200,7 @@ class SocialMediaAPIManager:
                 await self.rate_limiters[platform].acquire()
 
             # Get platform-specific endpoint and parameters
-            endpoint_config = self.api_endpoints[platform]
+            self.api_endpoints[platform]
             url = self._build_hashtag_url(platform, hashtag, time_window)
 
             # Make request
@@ -215,19 +215,19 @@ class SocialMediaAPIManager:
                     return {"error": f"HTTP {response.status}: {response.reason}"}
 
         except Exception as e:
-            logger.error(f"Error fetching hashtag data for {platform.value}: {e}")
+            logger.exception(f"Error fetching hashtag data for {platform.value}: {e}")
             return {"error": str(e)}
 
     async def get_topic_content(self, platform: PlatformType, topic: str,
                               time_range: int = 48) -> dict:
         """
         Get content related to a topic from a specific platform.
-        
+
         Args:
             platform: Target platform
             topic: Topic to search for
             time_range: Time range in hours
-            
+
         Returns:
             Dict containing topic content
         """
@@ -254,19 +254,19 @@ class SocialMediaAPIManager:
                     return {"error": f"HTTP {response.status}: {response.reason}"}
 
         except Exception as e:
-            logger.error(f"Error fetching topic content for {platform.value}: {e}")
+            logger.exception(f"Error fetching topic content for {platform.value}: {e}")
             return {"error": str(e)}
 
     async def get_keyword_data(self, platform: PlatformType, keywords: list[str],
                              time_window: int = 24) -> dict:
         """
         Get data for multiple keywords from a platform.
-        
+
         Args:
             platform: Target platform
             keywords: List of keywords to search for
             time_window: Time window in hours
-            
+
         Returns:
             Dict containing keyword data
         """
@@ -293,24 +293,24 @@ class SocialMediaAPIManager:
                     return {"error": f"HTTP {response.status}: {response.reason}"}
 
         except Exception as e:
-            logger.error(f"Error fetching keyword data for {platform.value}: {e}")
+            logger.exception(f"Error fetching keyword data for {platform.value}: {e}")
             return {"error": str(e)}
 
     async def get_influencer_data(self, influencer_handle: str,
                                 time_window: int = 168) -> dict:
         """
         Get data for specific influencers across platforms.
-        
+
         Args:
             influencer_handle: Influencer handle to search for
             time_window: Time window in hours
-            
+
         Returns:
             Dict containing influencer data across platforms
         """
         results = {}
 
-        for platform in self.active_sessions.keys():
+        for platform in self.active_sessions:
             try:
                 # Acquire rate limit
                 if platform in self.rate_limiters:
@@ -333,7 +333,7 @@ class SocialMediaAPIManager:
                         results[platform.value] = {"error": f"HTTP {response.status}: {response.reason}"}
 
             except Exception as e:
-                logger.error(f"Error fetching influencer data for {platform.value}: {e}")
+                logger.exception(f"Error fetching influencer data for {platform.value}: {e}")
                 results[platform.value] = {"error": str(e)}
 
         return results
@@ -341,11 +341,11 @@ class SocialMediaAPIManager:
     async def get_geotagged_content(self, platform: PlatformType, topic: str) -> list[dict]:
         """
         Get geotagged content for a topic from a platform.
-        
+
         Args:
             platform: Target platform
             topic: Topic to search for
-            
+
         Returns:
             List of geotagged content items
         """
@@ -373,7 +373,7 @@ class SocialMediaAPIManager:
                     return []
 
         except Exception as e:
-            logger.error(f"Error fetching geotagged content for {platform.value}: {e}")
+            logger.exception(f"Error fetching geotagged content for {platform.value}: {e}")
             return []
 
     # Private helper methods
@@ -475,9 +475,8 @@ class SocialMediaAPIManager:
             if config.api_key:
                 base_headers["X-API-Key"] = config.api_key
 
-        elif platform == PlatformType.TIKTOK:
-            if config.access_token:
-                base_headers["Authorization"] = f"Bearer {config.access_token}"
+        elif platform == PlatformType.TIKTOK and config.access_token:
+            base_headers["Authorization"] = f"Bearer {config.access_token}"
 
         return base_headers
 
@@ -714,7 +713,7 @@ class SocialMediaAPIManager:
             return {
                 "hashtag": hashtag,
                 "post_count": len(tweets),
-                "unique_users": list(set(tweet.get("author_id") for tweet in tweets)),
+                "unique_users": list({tweet.get("author_id") for tweet in tweets}),
                 "posts": [
                     {
                         "id": tweet.get("id"),
@@ -746,7 +745,7 @@ class SocialMediaAPIManager:
             return {
                 "hashtag": hashtag,
                 "post_count": len(posts),
-                "unique_users": list(set(post.get("data", {}).get("author") for post in posts)),
+                "unique_users": list({post.get("data", {}).get("author") for post in posts}),
                 "posts": [
                     {
                         "id": post.get("data", {}).get("id"),

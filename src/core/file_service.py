@@ -22,7 +22,7 @@ def get_safe_path(requested_path: str) -> str:
 @mcp.tool()
 def read_local_file(file_path: str) -> str:
     """
-    Reads the contents of a file at the given path. 
+    Reads the contents of a file at the given path.
     Paths should be relative to the storage directory.
     """
     try:
@@ -35,7 +35,7 @@ def read_local_file(file_path: str) -> str:
 @mcp.tool()
 def list_directory_contents(dir_path: str = ".") -> str:
     """
-    Lists all files and folders in a directory. 
+    Lists all files and folders in a directory.
     Paths should be relative to the storage directory.
     """
     try:

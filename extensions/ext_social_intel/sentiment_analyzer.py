@@ -58,7 +58,7 @@ class SentimentCorrelation:
 class SentimentAnalyzer:
     """
     Advanced sentiment analysis component for social media content.
-    
+
     Provides multi-language sentiment detection, bias analysis, and
     cross-platform sentiment correlation for disinformation detection.
     """
@@ -148,12 +148,12 @@ class SentimentAnalyzer:
                                        topic: str) -> dict:
         """
         Analyze sentiment for content from a specific platform.
-        
+
         Args:
             platform: Platform name
             content_data: Content data from the platform
             topic: Topic being analyzed
-            
+
         Returns:
             Dict containing sentiment analysis results
         """
@@ -182,7 +182,7 @@ class SentimentAnalyzer:
             return aggregated
 
         except Exception as e:
-            logger.error(f"Error analyzing platform sentiment for {platform}: {e}")
+            logger.exception(f"Error analyzing platform sentiment for {platform}: {e}")
             return {
                 "platform": platform,
                 "topic": topic,
@@ -192,10 +192,10 @@ class SentimentAnalyzer:
     async def analyze_content_sentiment(self, content: list[dict]) -> dict:
         """
         Analyze sentiment for a list of content items.
-        
+
         Args:
             content: List of content items with text
-            
+
         Returns:
             Dict containing aggregated sentiment analysis
         """
@@ -251,7 +251,7 @@ class SentimentAnalyzer:
             }
 
         except Exception as e:
-            logger.error(f"Error analyzing content sentiment: {e}")
+            logger.exception(f"Error analyzing content sentiment: {e}")
             return {
                 "error": str(e),
                 "average_sentiment": 0.0,
@@ -264,11 +264,11 @@ class SentimentAnalyzer:
                                             platform2_data: dict) -> float:
         """
         Calculate sentiment correlation between two platforms.
-        
+
         Args:
             platform1_data: Sentiment data for platform 1
             platform2_data: Sentiment data for platform 2
-            
+
         Returns:
             Correlation coefficient (-1 to 1)
         """
@@ -298,16 +298,16 @@ class SentimentAnalyzer:
             return float(correlation)
 
         except Exception as e:
-            logger.error(f"Error calculating sentiment correlation: {e}")
+            logger.exception(f"Error calculating sentiment correlation: {e}")
             return 0.0
 
     async def analyze_sentiment_trend(self, sentiment_data: dict) -> dict:
         """
         Analyze sentiment trends over time.
-        
+
         Args:
             sentiment_data: Sentiment data with timestamps
-            
+
         Returns:
             Dict containing trend analysis
         """
@@ -389,7 +389,7 @@ class SentimentAnalyzer:
             }
 
         except Exception as e:
-            logger.error(f"Error analyzing sentiment trend: {e}")
+            logger.exception(f"Error analyzing sentiment trend: {e}")
             return {
                 "error": str(e),
                 "trend_direction": "stable",
@@ -444,7 +444,7 @@ class SentimentAnalyzer:
             )
 
         except Exception as e:
-            logger.error(f"Error analyzing single text: {e}")
+            logger.exception(f"Error analyzing single text: {e}")
             return SentimentResult(
                 text=text,
                 sentiment_score=0.0,
@@ -528,7 +528,7 @@ class SentimentAnalyzer:
         """Extract entities from text."""
         entities = []
 
-        for entity_type, pattern in self.entity_extractor.items():
+        for pattern in self.entity_extractor.values():
             matches = pattern.findall(text)
             entities.extend(matches)
 

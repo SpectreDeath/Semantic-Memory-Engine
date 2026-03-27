@@ -92,7 +92,7 @@ class TextSummarizer:
                  query: str | None = None) -> Summary:
         """
         Summarize text with specified approach.
-        
+
         Args:
             text: Text to summarize
             ratio: Compression ratio (0-1, e.g., 0.3 = 30% of original)

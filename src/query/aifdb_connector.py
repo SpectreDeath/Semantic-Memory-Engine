@@ -29,7 +29,7 @@ class AIFdbConnector:
             response.raise_for_status()
             return response.json()
         except Exception as e:
-            logger.error(f"❌ Failed to fetch NodeSet {nodeset_id}: {e}")
+            logger.exception(f"❌ Failed to fetch NodeSet {nodeset_id}: {e}")
             return None
 
     def map_to_sme(self, aif_data: dict[str, Any]) -> dict[str, int]:
@@ -98,7 +98,7 @@ class AIFdbConnector:
 
         except Exception as e:
             conn.rollback()
-            logger.error(f"❌ Error mapping AIF data: {e}")
+            logger.exception(f"❌ Error mapping AIF data: {e}")
         finally:
             conn.close()
 

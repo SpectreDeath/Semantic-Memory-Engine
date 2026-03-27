@@ -103,7 +103,7 @@ class AIBridgeExtension(BasePlugin):
             self.async_bridge_call,
         ]
 
-    async def manage_providers(self, action: str, provider: str, config: dict = None) -> str:
+    async def manage_providers(self, action: str, provider: str, config: dict | None = None) -> str:
         """Manage LLM providers (add, remove, update, list)."""
         if not self.provider_manager:
             return json.dumps({"error": "LLMProviderManager not available"})
@@ -113,7 +113,7 @@ class AIBridgeExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def execute_sidecar(self, task: str, context: dict = None) -> str:
+    async def execute_sidecar(self, task: str, context: dict | None = None) -> str:
         """Execute task via sidecar agent."""
         if not self.sidecar:
             return json.dumps({"error": "SidecarAgent not available"})
@@ -163,7 +163,7 @@ class AIBridgeExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def smolagents_run(self, task: str, tools: list[str] = None) -> str:
+    async def smolagents_run(self, task: str, tools: list[str] | None = None) -> str:
         """Run smolagents with specified tools."""
         if not self.smolagents:
             return json.dumps({"error": "SmolAgentsForensics not available"})
@@ -184,7 +184,7 @@ class AIBridgeExtension(BasePlugin):
             return json.dumps({"error": str(e)})
 
     async def manage_brain_workers(
-        self, action: str, worker_id: str = None, config: dict = None
+        self, action: str, worker_id: str | None = None, config: dict | None = None
     ) -> str:
         """Manage distributed brain workers."""
         if not self.brain_worker:

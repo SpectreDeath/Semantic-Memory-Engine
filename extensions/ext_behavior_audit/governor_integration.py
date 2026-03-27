@@ -59,7 +59,7 @@ class BehaviorAuditGovernorIntegration:
     def get_governor_status(self) -> GovernorStatus:
         """
         Get current Governor status.
-        
+
         This method should be implemented to query the actual Governor system.
         For now, it returns a mock status or can be overridden by subclasses.
         """
@@ -88,13 +88,13 @@ class BehaviorAuditGovernorIntegration:
             logger.warning("Governor system not available, assuming NORMAL status")
             return GovernorStatus.NORMAL
         except Exception as e:
-            logger.error(f"Failed to get Governor status: {e}")
+            logger.exception(f"Failed to get Governor status: {e}")
             return GovernorStatus.UNKNOWN
 
     def get_gpu_usage_level(self) -> GPUUsageLevel:
         """
         Get current GPU usage level.
-        
+
         This method should be implemented to query actual GPU usage.
         For now, it returns a mock status or can be overridden by subclasses.
         """
@@ -115,13 +115,13 @@ class BehaviorAuditGovernorIntegration:
             logger.warning("GPU monitoring not available, assuming LOW usage")
             return GPUUsageLevel.LOW
         except Exception as e:
-            logger.error(f"Failed to get GPU usage: {e}")
+            logger.exception(f"Failed to get GPU usage: {e}")
             return GPUUsageLevel.UNKNOWN
 
     def is_safe_to_analyze(self) -> bool:
         """
         Check if it's safe to run rhetorical analysis based on Governor status and GPU usage.
-        
+
         Returns:
             True if safe to analyze (Governor status is NORMAL and GPU usage is LOW/MEDIUM), False otherwise.
         """
@@ -166,11 +166,11 @@ def safe_audit_rhetorical_behavior(text: str,
                                   governor_check: BehaviorAuditGovernorIntegration | None = None) -> dict[str, Any]:
     """
     Safe wrapper for audit_rhetorical_behavior that checks Governor status and GPU usage.
-    
+
     Args:
         text: Text to analyze for rhetorical anomalies.
         governor_check: BehaviorAuditGovernorIntegration instance to use for status checking.
-        
+
     Returns:
         Dictionary containing analysis results or error information.
     """
@@ -225,7 +225,7 @@ def safe_audit_rhetorical_behavior(text: str,
         return result
 
     except ImportError as e:
-        logger.error(f"Failed to import analysis function: {e}")
+        logger.exception(f"Failed to import analysis function: {e}")
         return {
             'sentiment_volatility': 0.0,
             'type_token_ratio': 0.0,
@@ -241,7 +241,7 @@ def safe_audit_rhetorical_behavior(text: str,
             'error': str(e)
         }
     except Exception as e:
-        logger.error(f"Analysis execution failed: {e}")
+        logger.exception(f"Analysis execution failed: {e}")
         return {
             'sentiment_volatility': 0.0,
             'type_token_ratio': 0.0,
@@ -268,7 +268,7 @@ def safe_audit_rhetorical_behavior_tool(text: str,
 def create_behavior_audit_governor_hook() -> Callable:
     """
     Create a hook function that can be used by the Governor system.
-    
+
     This function returns a hook that can be registered with the Governor
     to monitor status changes and take appropriate action.
     """
@@ -277,11 +277,11 @@ def create_behavior_audit_governor_hook() -> Callable:
     def behavior_audit_governor_status_hook(status: str, **kwargs) -> dict[str, Any]:
         """
         Hook function called by Governor when status changes.
-        
+
         Args:
             status: New Governor status.
             **kwargs: Additional status information.
-            
+
         Returns:
             Dictionary with hook execution results.
         """
@@ -318,7 +318,7 @@ def create_behavior_audit_governor_hook() -> Callable:
             }
 
         except Exception as e:
-            logger.error(f"Behavior Audit Governor status hook failed: {e}")
+            logger.exception(f"Behavior Audit Governor status hook failed: {e}")
             return {
                 'status': 'hook_failed',
                 'error': str(e),

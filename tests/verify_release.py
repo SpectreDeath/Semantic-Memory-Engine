@@ -32,8 +32,8 @@ class TestReleaseCriteria(unittest.TestCase):
         # Entropy of repetitive text is low.
         # Burstiness of similar length sentences is low.
 
-        entropy = TrustScorer.calculate_entropy(grok_text)
-        burstiness = TrustScorer.calculate_burstiness(grok_text)
+        TrustScorer.calculate_entropy(grok_text)
+        TrustScorer.calculate_burstiness(grok_text)
         # For now, proximity might be 0 unless I add it to vault.
         # But 'Grok-style' usually implies the heuristic check should catch it too.
         # BUT, the prompt explicitly said "Vault Proximity" is a component.

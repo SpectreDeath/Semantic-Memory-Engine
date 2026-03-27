@@ -181,7 +181,7 @@ class OperationTimer:
 def cache_result(max_size: int = 100, ttl_seconds: int = 300):
     """
     Decorator to cache function results with LRU and TTL.
-    
+
     Args:
         max_size: Maximum number of cached items
         ttl_seconds: Time to live in seconds
@@ -300,7 +300,7 @@ class ResourceMonitor:
 
                 time.sleep(interval_seconds)
             except Exception as e:
-                logger.error(f"Error in resource monitoring: {e}")
+                logger.exception(f"Error in resource monitoring: {e}")
                 time.sleep(5)  # Wait before retrying
 
     def _collect_resource_stats(self) -> dict[str, Any]:
@@ -337,7 +337,7 @@ class ResourceMonitor:
                 'process_cpu_percent': process_cpu
             }
         except Exception as e:
-            logger.error(f"Failed to collect resource stats: {e}")
+            logger.exception(f"Failed to collect resource stats: {e}")
             return {'error': str(e)}
 
     def get_current_stats(self) -> dict[str, Any]:
@@ -398,12 +398,12 @@ class AsyncBatchProcessor:
                           progress_callback: None | Callable = None) -> list:
         """
         Process items in batches with concurrency control.
-        
+
         Args:
             items: List of items to process
             process_func: Async function to process each item
             progress_callback: Optional callback for progress updates
-        
+
         Returns:
             List of results
         """

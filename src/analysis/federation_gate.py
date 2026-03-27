@@ -1,7 +1,7 @@
 """
 🛰️ Federation Gate v2.2.5 — Anonymity Middleware
 
-Ensures that any data intended for the Federated Vector Store 
+Ensures that any data intended for the Federated Vector Store
 or external export is aggressively redacted.
 """
 
@@ -21,10 +21,10 @@ class FederationGate:
     def prepare_for_federation(content: str) -> str:
         """
         Hardens content for shared memory by applying strict redaction.
-        
+
         Args:
             content: The forensic data or rhetorical signature text.
-        
+
         Returns:
             Strictly sanitized content.
         """

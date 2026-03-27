@@ -56,7 +56,7 @@ class LogicAuditor(BasePlugin):
             self.nexus.nexus.execute(sql)
             logger.info(f"[{self.plugin_id}] 'nexus_logic_hallucinations' table initialized.")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to init DB table: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to init DB table: {e}")
 
     async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
@@ -130,9 +130,9 @@ class LogicAuditor(BasePlugin):
 
             # Get recent hallucinations
             sql_recent = """
-                SELECT text_hash, contradiction_confidence, claims_analyzed, timestamp 
-                FROM nexus_logic_hallucinations 
-                ORDER BY timestamp DESC 
+                SELECT text_hash, contradiction_confidence, claims_analyzed, timestamp
+                FROM nexus_logic_hallucinations
+                ORDER BY timestamp DESC
                 LIMIT 10
             """
             recent_hallucinations = self.nexus.nexus.query(sql_recent)
@@ -199,7 +199,7 @@ class LogicAuditor(BasePlugin):
     def audit_logical_consistency(self, text: str) -> dict[str, Any]:
         """
         Main method to audit logical consistency and detect hallucinations.
-        
+
         Returns comprehensive analysis with hallucination detection and confidence.
         """
         if not text or len(text) < 100:  # Minimum text length for analysis
@@ -298,11 +298,7 @@ class LogicAuditor(BasePlugin):
             return False
 
         # Check for contradiction indicators (these often signal claims)
-        for pattern in self.contradiction_indicators:
-            if re.search(pattern, sentence_lower):
-                return True
-
-        return False
+        return any(re.search(pattern, sentence_lower) for pattern in self.contradiction_indicators)
 
     def _is_substantive_sentence(self, sentence: str) -> bool:
         """Check if sentence contains substantive content worth analyzing."""
@@ -630,8 +626,8 @@ class LogicAuditor(BasePlugin):
             text_hash = hash(text)  # Simple hash for demo
 
             sql = """
-                INSERT INTO nexus_logic_hallucinations 
-                (text_hash, text_sample, hallucination_detected, contradiction_confidence, 
+                INSERT INTO nexus_logic_hallucinations
+                (text_hash, text_sample, hallucination_detected, contradiction_confidence,
                  contradiction_details, claims_analyzed, timestamp, source_id)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """
@@ -650,7 +646,7 @@ class LogicAuditor(BasePlugin):
             logger.info(f"[{self.plugin_id}] Stored logic hallucination: {text_hash} (Confidence: {audit_result.get('contradiction_confidence', 0):.2%})")
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to store logic hallucination: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to store logic hallucination: {e}")
 
 
 def create_plugin(manifest: dict[str, Any], nexus_api: Any):

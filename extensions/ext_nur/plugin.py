@@ -57,12 +57,12 @@ class UnifiedForensicReporterPlugin(BasePlugin):
 
         # Plugin configuration
         self.config = {
-            'analysis_period_hours': 24,  # Hours to look back in logs
-            'max_events_displayed': 20,   # Maximum events to show in detailed log
-            'report_format': 'markdown',  # Report format (markdown, json, etc.)
-            'auto_generate': False,       # Whether to auto-generate reports
-            'cpu_bound_only': True,       # Ensure VRAM constraint compliance
-            'log_parsing_enabled': True   # Enable log file parsing
+            "analysis_period_hours": 24,  # Hours to look back in logs
+            "max_events_displayed": 20,  # Maximum events to show in detailed log
+            "report_format": "markdown",  # Report format (markdown, json, etc.)
+            "auto_generate": False,  # Whether to auto-generate reports
+            "cpu_bound_only": True,  # Ensure VRAM constraint compliance
+            "log_parsing_enabled": True,  # Enable log file parsing
         }
 
         logger.info(f"[{self.plugin_id}] Unified Forensic Reporter initialized")
@@ -74,7 +74,7 @@ class UnifiedForensicReporterPlugin(BasePlugin):
         try:
             logger.info(f"[{self.plugin_id}] Unified Forensic Reporter started successfully")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to start Unified Forensic Reporter: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to start Unified Forensic Reporter: {e}")
 
     async def on_shutdown(self):
         """
@@ -83,7 +83,7 @@ class UnifiedForensicReporterPlugin(BasePlugin):
         try:
             logger.info(f"[{self.plugin_id}] Unified Forensic Reporter shutdown complete")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
+            logger.exception(f"[{self.plugin_id}] Error during shutdown: {e}")
 
     async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
@@ -92,7 +92,7 @@ class UnifiedForensicReporterPlugin(BasePlugin):
         """
         return {
             "status": "skipped",
-            "reason": "Unified Forensic Reporter provides reporting tools, not direct ingestion processing"
+            "reason": "Unified Forensic Reporter provides reporting tools, not direct ingestion processing",
         }
 
     def get_tools(self) -> list:
@@ -100,7 +100,7 @@ class UnifiedForensicReporterPlugin(BasePlugin):
             self.generate_nexus_summary,
             self.generate_forensic_intelligence_summary,
             self.get_unified_stats,
-            self.clear_reporter_cache
+            self.clear_reporter_cache,
         ]
 
     async def generate_nexus_summary(self) -> str:
@@ -110,14 +110,14 @@ class UnifiedForensicReporterPlugin(BasePlugin):
         try:
             with self.monitor.time_operation("nexus_summary_generation"):
                 # Verify CPU-bound operation
-                if self.config.get('cpu_bound_only', True):
+                if self.config.get("cpu_bound_only", True):
                     logger.info("Using CPU-bound processing (VRAM constraint compliant)")
 
                 # Generate the report
                 result = generate_nexus_summary()
 
                 # Update status
-                if result.get('status') == 'SUCCESS':
+                if result.get("status") == "SUCCESS":
                     logger.info("Nexus summary generated successfully")
                 else:
                     logger.warning("Failed to generate nexus summary")
@@ -134,16 +134,18 @@ class UnifiedForensicReporterPlugin(BasePlugin):
         try:
             with self.monitor.time_operation("forensic_intelligence_generation"):
                 # Verify CPU-bound operation
-                if self.config.get('cpu_bound_only', True):
+                if self.config.get("cpu_bound_only", True):
                     logger.info("Using CPU-bound processing (VRAM constraint compliant)")
 
                 # Generate the forensic intelligence report
                 result = generate_forensic_intelligence_summary(text_sample)
 
                 # Update status
-                if result.get('status') == 'FORENSIC_ANALYSIS_COMPLETED':
+                if result.get("status") == "FORENSIC_ANALYSIS_COMPLETED":
                     logger.info("Forensic intelligence analysis completed")
-                    logger.info(f"Intelligence Bucket: {result.get('intelligence_bucket', 'unknown')}")
+                    logger.info(
+                        f"Intelligence Bucket: {result.get('intelligence_bucket', 'unknown')}"
+                    )
                     logger.info(f"Confidence Score: {result.get('confidence_score', 0.0)}")
                     logger.info(f"Report saved to: {result.get('report_path', 'unknown')}")
                 else:
@@ -152,7 +154,11 @@ class UnifiedForensicReporterPlugin(BasePlugin):
                 return json.dumps(result, indent=2)
 
         except Exception as e:
-            return self.error_handler.handle_tool_error(e, "generate_forensic_intelligence_summary", {"text_sample_length": len(text_sample)})
+            return self.error_handler.handle_tool_error(
+                e,
+                "generate_forensic_intelligence_summary",
+                {"text_sample_length": len(text_sample)},
+            )
 
     async def get_unified_stats(self) -> str:
         """Get statistics about the Unified Forensic Reporter's performance."""
@@ -162,15 +168,15 @@ class UnifiedForensicReporterPlugin(BasePlugin):
                 "config": self.config,
                 "reporter_stats": {
                     "report_dir": str(self.reporter.report_dir),
-                    "analysis_period_hours": self.config.get('analysis_period_hours', 24),
-                    "max_events_displayed": self.config.get('max_events_displayed', 20)
+                    "analysis_period_hours": self.config.get("analysis_period_hours", 24),
+                    "max_events_displayed": self.config.get("max_events_displayed", 20),
                 },
                 "forensic_reporter_stats": {
-                    "cpu_bound_only": self.config.get('cpu_bound_only', True),
-                    "log_parsing_enabled": self.config.get('log_parsing_enabled', True)
+                    "cpu_bound_only": self.config.get("cpu_bound_only", True),
+                    "log_parsing_enabled": self.config.get("log_parsing_enabled", True),
                 },
                 "performance_stats": self.monitor.get_all_stats(),
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
             return json.dumps(stats, indent=2)
         except Exception as e:
@@ -180,18 +186,16 @@ class UnifiedForensicReporterPlugin(BasePlugin):
         """Clear any cached data in the reporter instances."""
         try:
             # Clear any internal caches if they exist
-            if hasattr(self.reporter, 'clear_cache'):
+            if hasattr(self.reporter, "clear_cache"):
                 self.reporter.clear_cache()
-            if hasattr(self.forensic_reporter, 'clear_cache'):
+            if hasattr(self.forensic_reporter, "clear_cache"):
                 self.forensic_reporter.clear_cache()
 
-            return json.dumps({
-                "status": "success",
-                "message": "Reporter caches cleared successfully"
-            }, indent=2)
+            return json.dumps(
+                {"status": "success", "message": "Reporter caches cleared successfully"}, indent=2
+            )
         except Exception as e:
             return self.error_handler.handle_tool_error(e, "clear_reporter_cache")
-
 
 
 # The extension is instantiated via register_extension(manifest, nexus_api)
@@ -209,4 +213,4 @@ def register_extension(manifest: dict, nexus_api: Any) -> UnifiedForensicReporte
 
 
 # Export for use by the extension system
-__all__ = ['UnifiedForensicReporterPlugin', 'get_plugin', 'register_extension', 'unified_forensic_reporter_plugin']
+__all__ = ["UnifiedForensicReporterPlugin", "register_extension"]

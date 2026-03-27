@@ -33,10 +33,10 @@ class ForensicScout:
         """
         Cleans HTML but preserves paragraph structure and order.
         Critical for sequential analysis (Rolling Delta).
-        
+
         Args:
             raw_html: The raw HTML content.
-            
+
         Returns:
             List of text segments (paragraphs).
         """
@@ -62,11 +62,11 @@ class ForensicScout:
     def harvest(self, url: str, author_id: str | None = None) -> Generator[dict[str, Any], None, None]:
         """
         Streams harvested content in memory-efficient chunks.
-        
+
         Args:
             url: Target URL.
             author_id: Known author ID (optional).
-            
+
         Yields:
             Dictionary containing chunk text and metadata.
         """
@@ -116,7 +116,7 @@ class ForensicScout:
                 }
 
         except Exception as e:
-            logger.error(f"❌ Scout failed on {url}: {e}")
+            logger.exception(f"❌ Scout failed on {url}: {e}")
             yield {"error": str(e), "url": url}
 
     def process_and_store(self, url: str, author_id: str):
@@ -126,7 +126,7 @@ class ForensicScout:
         from src.core.factory import ToolFactory
 
         scribe = ToolFactory.create_scribe()
-        rolling = ToolFactory.create_rolling_delta()
+        ToolFactory.create_rolling_delta()
         adaptive = ToolFactory.create_adaptive_learner()
         # db = ToolFactory.create_centrifuge() # Placeholder if DB interaction needed directly
 

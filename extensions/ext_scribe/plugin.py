@@ -68,7 +68,7 @@ class ScribeExtension(BasePlugin):
             self.stylo_integrate,
         ]
 
-    async def analyze_style(self, text: str, author: str = None) -> str:
+    async def analyze_style(self, text: str, author: str | None = None) -> str:
         """Analyze writing style of text."""
         if not self.engine:
             return json.dumps({"error": "StylometryEngine not available"})

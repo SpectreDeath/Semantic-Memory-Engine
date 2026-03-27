@@ -46,10 +46,10 @@ ENTITY_RELATIONSHIP_SCHEMA = {
 def load_forensic_events(file_path: str) -> pl.DataFrame:
     """
     Load forensic events from CSV or Parquet.
-    
+
     Args:
         file_path: Path to data file
-        
+
     Returns:
         Polars DataFrame with forensic events
     """
@@ -67,12 +67,12 @@ def load_forensic_events(file_path: str) -> pl.DataFrame:
 def detect_anomalies(df: pl.DataFrame, column: str = "risk_score", threshold: float = 0.8) -> pl.DataFrame:
     """
     Detect anomalies in forensic data based on risk score.
-    
+
     Args:
         df: Polars DataFrame
         column: Column to check for anomalies
         threshold: Threshold for anomaly detection
-        
+
     Returns:
         DataFrame containing only anomalous records
     """
@@ -82,10 +82,10 @@ def detect_anomalies(df: pl.DataFrame, column: str = "risk_score", threshold: fl
 def calculate_entity_centrality(relationships: pl.DataFrame) -> pl.DataFrame:
     """
     Calculate entity centrality from relationship graph.
-    
+
     Args:
         relationships: DataFrame with source, target, weight columns
-        
+
     Returns:
         DataFrame with entity centrality scores
     """
@@ -111,11 +111,11 @@ def calculate_entity_centrality(relationships: pl.DataFrame) -> pl.DataFrame:
 def detect_synthetic_patterns(df: pl.DataFrame, probability_column: str = "synthetic_probability") -> dict[str, Any]:
     """
     Detect synthetic patterns in forensic data.
-    
+
     Args:
         df: Polars DataFrame
         probability_column: Column containing synthetic probability scores
-        
+
     Returns:
         Dictionary with synthetic pattern analysis
     """
@@ -139,11 +139,11 @@ def detect_synthetic_patterns(df: pl.DataFrame, probability_column: str = "synth
 def temporal_pattern_analysis(df: pl.DataFrame, timestamp_col: str = "timestamp") -> dict[str, Any]:
     """
     Analyze temporal patterns in forensic events.
-    
+
     Args:
         df: Polars DataFrame with timestamp column
         timestamp_col: Name of timestamp column
-        
+
     Returns:
         Dictionary with temporal analysis
     """
@@ -169,10 +169,10 @@ def temporal_pattern_analysis(df: pl.DataFrame, timestamp_col: str = "timestamp"
 def calculate_trust_scores(df: pl.DataFrame) -> pl.DataFrame:
     """
     Calculate normalized trust scores for forensic entities.
-    
+
     Args:
         df: DataFrame with risk and synthetic probability columns
-        
+
     Returns:
         DataFrame with added trust_score column
     """
@@ -185,11 +185,11 @@ def calculate_trust_scores(df: pl.DataFrame) -> pl.DataFrame:
 def group_by_entity_type(df: pl.DataFrame, entity_col: str = "user") -> dict[str, int]:
     """
     Group forensic events by entity type.
-    
+
     Args:
         df: Polars DataFrame
         entity_col: Column to group by
-        
+
     Returns:
         Dictionary with entity counts
     """
@@ -208,10 +208,10 @@ def group_by_entity_type(df: pl.DataFrame, entity_col: str = "user") -> dict[str
 def process_forensic_batch(data: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Process a batch of forensic data using Polars.
-    
+
     Args:
         data: List of forensic event dictionaries
-        
+
     Returns:
         Analysis results dictionary
     """
@@ -243,11 +243,11 @@ def process_forensic_batch(data: list[dict[str, Any]]) -> dict[str, Any]:
 def export_to_parquet(df: pl.DataFrame, output_path: str) -> str:
     """
     Export Polars DataFrame to Parquet format.
-    
+
     Args:
         df: Polars DataFrame
         output_path: Output file path
-        
+
     Returns:
         Success message
     """

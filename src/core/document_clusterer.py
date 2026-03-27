@@ -98,7 +98,7 @@ class DocumentClusterer:
                algorithm: ClusteringAlgorithm = ClusteringAlgorithm.KMEANS) -> ClusteringResult:
         """
         Cluster documents into groups.
-        
+
         Args:
             documents: List of documents to cluster
             num_clusters: Number of clusters (auto-estimate if None)
@@ -539,7 +539,7 @@ class DocumentClusterer:
     def _create_single_cluster_result(self, documents: list[str],
                                      algorithm: ClusteringAlgorithm) -> ClusteringResult:
         """Create result for single cluster."""
-        all_text = " ".join(documents)
+        " ".join(documents)
         doc_vecs = self._vectorize_documents(documents)
         centroid = self._calculate_centroid(doc_vecs)
 

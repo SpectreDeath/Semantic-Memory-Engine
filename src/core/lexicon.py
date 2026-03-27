@@ -186,7 +186,7 @@ class SignalCurator:
             return {'error': 'Not enough calibration history'}
 
         reverted = []
-        for i in range(steps):
+        for _i in range(steps):
             record = self.calibration_history.pop()
             # Restore original weight
             self.signals[record['term']] = record['old_weight']

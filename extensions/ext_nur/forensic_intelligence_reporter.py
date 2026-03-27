@@ -112,10 +112,10 @@ class ForensicIntelligenceReporter:
     def generate_forensic_intelligence_summary(self, text_sample: str) -> dict[str, Any]:
         """
         Generate comprehensive forensic intelligence summary.
-        
+
         Args:
             text_sample: Text sample to analyze and categorize.
-            
+
         Returns:
             Dictionary containing forensic analysis results and report path.
         """
@@ -205,11 +205,11 @@ class ForensicIntelligenceReporter:
                                       provenance_results: dict[str, Any]) -> tuple[IntelligenceBucket, float, list[str]]:
         """
         Categorize text source into intelligence bucket based on 2026 signatures.
-        
+
         Args:
             behavior_results: Results from Behavior Auditor.
             provenance_results: Results from Provenance Profiler.
-            
+
         Returns:
             Tuple of (IntelligenceBucket, confidence_score, supporting_evidence).
         """
@@ -979,7 +979,7 @@ Based on 2026 intelligence signatures for source categorization:
                         # Return empty structure if file doesn't exist
                         self._model_signatures_cache = {"model_signatures": {}, "metadata": {}}
                 except Exception as e:
-                    logger.error(f"Failed to load model signatures: {e}")
+                    logger.exception(f"Failed to load model signatures: {e}")
                     self._model_signatures_cache = {"model_signatures": {}, "metadata": {}}
 
             return self._model_signatures_cache
@@ -988,10 +988,10 @@ Based on 2026 intelligence signatures for source categorization:
 def generate_forensic_intelligence_summary(text_sample: str) -> dict[str, Any]:
     """
     Main function to generate forensic intelligence summary.
-    
+
     Args:
         text_sample: Text sample to analyze and categorize.
-        
+
     Returns:
         Dictionary containing forensic analysis results and report path.
     """

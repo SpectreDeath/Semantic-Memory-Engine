@@ -54,7 +54,7 @@ def run_script(command_list, label):
     log_area = st.empty()
     try:
         # Use sys.executable to ensure we use the same environment
-        full_command = [sys.executable] + command_list
+        full_command = [sys.executable, *command_list]
         proc = subprocess.Popen(
             full_command,
             stdout=subprocess.PIPE,

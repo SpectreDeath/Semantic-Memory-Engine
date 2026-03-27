@@ -24,9 +24,11 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # ============================================================================
 
+
 @dataclass
 class FingerprintCluster:
     """Group of accounts with similar linguistic fingerprints"""
+
     cluster_id: int
     accounts: list[str]
     avg_similarity: float
@@ -44,6 +46,7 @@ class FingerprintCluster:
 @dataclass
 class CoauthorNetwork:
     """Relationship between authors based on signal similarity"""
+
     author_a: str
     author_b: str
     similarity_score: float  # 0-1
@@ -54,6 +57,7 @@ class CoauthorNetwork:
 @dataclass
 class AnomalyAlert:
     """Suspicious pattern detected in account network"""
+
     alert_type: str  # "Sockpuppet", "BotFarm", "Campaign", "Anomaly"
     severity: str  # "Critical", "High", "Medium", "Low"
     confidence: float  # 0-100
@@ -71,6 +75,7 @@ class AnomalyAlert:
 # NETWORK ANALYZER ENGINE
 # ============================================================================
 
+
 class NetworkAnalyzer:
     """
     Detect coordinated inauthentic behavior using forensic fingerprints.
@@ -86,17 +91,15 @@ class NetworkAnalyzer:
     # ========================================================================
 
     def detect_sockpuppet_accounts(
-        self,
-        account_texts: dict[str, str],
-        similarity_threshold: float = 0.85
+        self, account_texts: dict[str, str], similarity_threshold: float = 0.85
     ) -> list[FingerprintCluster]:
         """
         Find accounts likely run by same person (sockpuppets).
-        
+
         Args:
             account_texts: {account_id: text}
             similarity_threshold: 0.85 = 85% fingerprint match
-            
+
         Returns:
             List of FingerprintCluster objects
         """
@@ -135,8 +138,7 @@ class NetworkAnalyzer:
 
                     # Calculate similarity
                     similarity = self.scribe._calculate_signal_similarity(
-                        fp1.signal_vector,
-                        fp2.signal_vector
+                        fp1.signal_vector, fp2.signal_vector
                     )
 
                     if similarity > similarity_threshold:
@@ -150,7 +152,7 @@ class NetworkAnalyzer:
                             confidence=min(100, similarity * 100),
                             suspected_operator=f"Unknown (Fingerprint Match: {similarity:.0%})",
                             severity=self._classify_severity(similarity),
-                            evidence=evidence
+                            evidence=evidence,
                         )
                         clusters.append(cluster)
                         logger.info(f"🚨 SOCKPUPPET DETECTED: {acc1} ↔ {acc2} ({similarity:.0%})")
@@ -159,7 +161,7 @@ class NetworkAnalyzer:
             return clusters
 
         except Exception as e:
-            logger.error(f"❌ Sockpuppet detection failed: {e!s}")
+            logger.exception(f"❌ Sockpuppet detection failed: {e!s}")
             raise
 
     # ========================================================================
@@ -170,16 +172,16 @@ class NetworkAnalyzer:
         self,
         account_texts: dict[str, str],
         min_farm_size: int = 3,
-        similarity_threshold: float = 0.80
+        similarity_threshold: float = 0.80,
     ) -> list[FingerprintCluster]:
         """
         Detect bot farms (3+ coordinated accounts with similar patterns).
-        
+
         Args:
             account_texts: {account_id: text}
             min_farm_size: Minimum accounts to be considered a farm
             similarity_threshold: Pattern match threshold
-            
+
         Returns:
             List of FingerprintCluster objects (bot farms)
         """
@@ -212,7 +214,7 @@ class NetworkAnalyzer:
 
                     sim = self.scribe._calculate_signal_similarity(
                         fingerprints[seed_account].signal_vector,
-                        fingerprints[other_account].signal_vector
+                        fingerprints[other_account].signal_vector,
                     )
 
                     if sim > similarity_threshold:
@@ -221,13 +223,15 @@ class NetworkAnalyzer:
 
                 # Only report if 3+ members
                 if len(cluster_members) >= min_farm_size:
-                    avg_sim = np.mean([
-                        self.scribe._calculate_signal_similarity(
-                            fingerprints[cluster_members[0]].signal_vector,
-                            fingerprints[m].signal_vector
-                        )
-                        for m in cluster_members[1:]
-                    ])
+                    avg_sim = np.mean(
+                        [
+                            self.scribe._calculate_signal_similarity(
+                                fingerprints[cluster_members[0]].signal_vector,
+                                fingerprints[m].signal_vector,
+                            )
+                            for m in cluster_members[1:]
+                        ]
+                    )
 
                     farm = FingerprintCluster(
                         cluster_id=len(bot_farms),
@@ -240,17 +244,19 @@ class NetworkAnalyzer:
                             f"{len(cluster_members)} accounts with {avg_sim:.0%} fingerprint match",
                             "Uniform linguistic patterns across accounts",
                             "Coordinated signal distribution",
-                            "Likely automated or managed network"
-                        ]
+                            "Likely automated or managed network",
+                        ],
                     )
                     bot_farms.append(farm)
-                    logger.info(f"🤖 BOT FARM DETECTED: {len(cluster_members)} accounts, {avg_sim:.0%} similarity")
+                    logger.info(
+                        f"🤖 BOT FARM DETECTED: {len(cluster_members)} accounts, {avg_sim:.0%} similarity"
+                    )
 
             logger.info(f"✅ Found {len(bot_farms)} potential bot farms")
             return bot_farms
 
         except Exception as e:
-            logger.error(f"❌ Bot farm detection failed: {e!s}")
+            logger.exception(f"❌ Bot farm detection failed: {e!s}")
             raise
 
     # ========================================================================
@@ -258,17 +264,15 @@ class NetworkAnalyzer:
     # ========================================================================
 
     def build_coauthor_network(
-        self,
-        author_texts: dict[str, str],
-        similarity_threshold: float = 0.60
+        self, author_texts: dict[str, str], similarity_threshold: float = 0.60
     ) -> list[CoauthorNetwork]:
         """
         Find writing partnerships (similar signal distributions).
-        
+
         Args:
             author_texts: {author_id: text}
             similarity_threshold: Connection threshold
-            
+
         Returns:
             List of CoauthorNetwork relationships
         """
@@ -293,8 +297,7 @@ class NetworkAnalyzer:
                     processed.add((auth1, auth2))
 
                     sim = self.scribe._calculate_signal_similarity(
-                        fingerprints[auth1].signal_vector,
-                        fingerprints[auth2].signal_vector
+                        fingerprints[auth1].signal_vector, fingerprints[auth2].signal_vector
                     )
 
                     if sim > similarity_threshold:
@@ -320,7 +323,7 @@ class NetworkAnalyzer:
                             author_b=auth2,
                             similarity_score=sim,
                             shared_signals=shared,
-                            likely_relationship=rel_type
+                            likely_relationship=rel_type,
                         )
                         relationships.append(relationship)
                         logger.info(f"🤝 {rel_type}: {auth1} ↔ {auth2} ({sim:.0%})")
@@ -329,7 +332,7 @@ class NetworkAnalyzer:
             return relationships
 
         except Exception as e:
-            logger.error(f"❌ Co-author network failed: {e!s}")
+            logger.exception(f"❌ Co-author network failed: {e!s}")
             raise
 
     # ========================================================================
@@ -337,17 +340,15 @@ class NetworkAnalyzer:
     # ========================================================================
 
     def analyze_coordinated_campaign(
-        self,
-        campaign_accounts: list[str],
-        timeline_data: dict[str, list[tuple[str, str]]]
+        self, campaign_accounts: list[str], timeline_data: dict[str, list[tuple[str, str]]]
     ) -> list[AnomalyAlert]:
         """
         Detect coordinated posting patterns (same message, different accounts).
-        
+
         Args:
             campaign_accounts: List of account IDs to analyze
             timeline_data: {account_id: [(timestamp, text), ...]}
-            
+
         Returns:
             List of AnomalyAlert objects
         """
@@ -368,10 +369,9 @@ class NetworkAnalyzer:
                     msg_fp = self.scribe.extract_linguistic_fingerprint(text)
 
                     # Check against existing messages
-                    for existing_id, (existing_fp, posting_accounts) in message_clusters.items():
+                    for existing_fp, posting_accounts in message_clusters.values():
                         sim = self.scribe._calculate_signal_similarity(
-                            msg_fp.signal_vector,
-                            existing_fp.signal_vector
+                            msg_fp.signal_vector, existing_fp.signal_vector
                         )
 
                         if sim > 0.80:  # Very similar message
@@ -382,9 +382,9 @@ class NetworkAnalyzer:
                         message_clusters[len(message_clusters)] = (msg_fp, [(account, timestamp)])
 
             # Find coordinated patterns
-            for cluster_id, (_, postings) in message_clusters.items():
+            for _, postings in message_clusters.values():
                 if len(postings) >= 3:  # 3+ accounts with same message
-                    accounts_involved = list(set([p[0] for p in postings]))
+                    accounts_involved = list({p[0] for p in postings})
 
                     alert = AnomalyAlert(
                         alert_type="Campaign",
@@ -395,18 +395,20 @@ class NetworkAnalyzer:
                             f"Same message posted by {len(accounts_involved)} accounts",
                             "Similar rhetorical patterns across posts",
                             "Coordinated timing",
-                            "Indicates campaign or coordinated effort"
+                            "Indicates campaign or coordinated effort",
                         ],
-                        recommended_action="Flag for platform review; likely coordinated inauthentic behavior"
+                        recommended_action="Flag for platform review; likely coordinated inauthentic behavior",
                     )
                     alerts.append(alert)
-                    logger.info(f"🚨 CAMPAIGN DETECTED: {len(accounts_involved)} accounts coordinated")
+                    logger.info(
+                        f"🚨 CAMPAIGN DETECTED: {len(accounts_involved)} accounts coordinated"
+                    )
 
             logger.info(f"✅ Found {len(alerts)} coordinated campaigns")
             return alerts
 
         except Exception as e:
-            logger.error(f"❌ Campaign analysis failed: {e!s}")
+            logger.exception(f"❌ Campaign analysis failed: {e!s}")
             raise
 
     # ========================================================================
@@ -425,11 +427,15 @@ class NetworkAnalyzer:
         # Sentence length similarity
         length_diff = abs(fp1.avg_sentence_length - fp2.avg_sentence_length)
         if length_diff < 2:
-            evidence.append(f"Nearly identical sentence length (~{fp1.avg_sentence_length:.1f} words)")
+            evidence.append(
+                f"Nearly identical sentence length (~{fp1.avg_sentence_length:.1f} words)"
+            )
 
         # Punctuation similarity
-        punct_diff = sum(abs(fp1.punctuation_profile.get(p, 0) - fp2.punctuation_profile.get(p, 0))
-                        for p in fp1.punctuation_profile)
+        punct_diff = sum(
+            abs(fp1.punctuation_profile.get(p, 0) - fp2.punctuation_profile.get(p, 0))
+            for p in fp1.punctuation_profile
+        )
         if punct_diff < 0.2:
             evidence.append("Nearly identical punctuation habits")
 
@@ -462,7 +468,7 @@ class NetworkAnalyzer:
         self,
         sockpuppets: list[FingerprintCluster],
         bot_farms: list[FingerprintCluster],
-        coauthors: list[CoauthorNetwork]
+        coauthors: list[CoauthorNetwork],
     ) -> dict:
         """Generate comprehensive network analysis report"""
         return {
@@ -470,14 +476,14 @@ class NetworkAnalyzer:
             "timestamp": datetime.utcnow().isoformat(),
             "sockpuppet_clusters": len(sockpuppets),
             "bot_farms_detected": len(bot_farms),
-            "coauthor_relationships": len(coauthors),
+            "coauthor_relationships_count": len(coauthors),
             "overall_threat_level": self._assess_threat_level(sockpuppets, bot_farms),
             "sockpuppets": [
                 {
                     "accounts": c.accounts,
                     "similarity": f"{c.avg_similarity:.0%}",
                     "severity": c.severity,
-                    "evidence": c.evidence
+                    "evidence": c.evidence,
                 }
                 for c in sockpuppets
             ],
@@ -487,7 +493,7 @@ class NetworkAnalyzer:
                     "accounts": c.accounts,
                     "avg_similarity": f"{c.avg_similarity:.0%}",
                     "severity": c.severity,
-                    "evidence": c.evidence
+                    "evidence": c.evidence,
                 }
                 for c in bot_farms
             ],
@@ -496,10 +502,10 @@ class NetworkAnalyzer:
                     "author_a": c.author_a,
                     "author_b": c.author_b,
                     "similarity": f"{c.similarity_score:.0%}",
-                    "relationship": c.likely_relationship
+                    "relationship": c.likely_relationship,
                 }
                 for c in coauthors
-            ]
+            ],
         }
 
     def _assess_threat_level(self, sockpuppets, bot_farms) -> str:
@@ -520,7 +526,10 @@ class NetworkAnalyzer:
 # MCP TOOL FUNCTIONS
 # ============================================================================
 
-def detect_sockpuppets_tool(account_texts: dict[str, str], similarity_threshold: float = 0.85) -> dict:
+
+def detect_sockpuppets_tool(
+    account_texts: dict[str, str], similarity_threshold: float = 0.85
+) -> dict:
     """MCP Tool: Detect sockpuppet accounts"""
     analyzer = NetworkAnalyzer()
     clusters = analyzer.detect_sockpuppet_accounts(account_texts, similarity_threshold)
@@ -534,10 +543,10 @@ def detect_sockpuppets_tool(account_texts: dict[str, str], similarity_threshold:
                 "similarity": f"{c.avg_similarity:.0%}",
                 "confidence": f"{c.confidence:.0f}%",
                 "severity": c.severity,
-                "evidence": c.evidence
+                "evidence": c.evidence,
             }
             for c in clusters
-        ]
+        ],
     }
 
 
@@ -555,10 +564,10 @@ def detect_bot_farms_tool(account_texts: dict[str, str], min_farm_size: int = 3)
                 "accounts": f.accounts,
                 "avg_similarity": f"{f.avg_similarity:.0%}",
                 "severity": f.severity,
-                "evidence": f.evidence
+                "evidence": f.evidence,
             }
             for f in farms
-        ]
+        ],
     }
 
 
@@ -575,18 +584,18 @@ def build_network_tool(author_texts: dict[str, str]) -> dict:
                 "author_a": r.author_a,
                 "author_b": r.author_b,
                 "similarity": f"{r.similarity_score:.0%}",
-                "relationship": r.likely_relationship
+                "relationship": r.likely_relationship,
             }
             for r in relationships
-        ]
+        ],
     }
 
 
 if __name__ == "__main__":
     # Demo
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🕸️ NETWORK ANALYZER DEMO")
-    print("="*80)
+    print("=" * 80)
 
     analyzer = NetworkAnalyzer()
 
@@ -602,4 +611,4 @@ if __name__ == "__main__":
     print(f"Found {len(sockpuppets)} sockpuppet pairs")
 
     print("\n✅ NETWORK ANALYZER READY")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")

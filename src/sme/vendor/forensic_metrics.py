@@ -4,9 +4,9 @@ import numpy as np
 
 def calculate_cosine_delta(v1: np.ndarray, v2: np.ndarray) -> float:
     """
-    Calculates the 'Cosine Delta', a stylometric distance metric that 
+    Calculates the 'Cosine Delta', a stylometric distance metric that
     combines Burrows' Delta logic with Cosine Similarity.
-    
+
     Optimized for Python 3.10+ using NumPy.
     """
     v1 = np.asarray(v1, dtype=float)
@@ -17,10 +17,7 @@ def calculate_cosine_delta(v1: np.ndarray, v2: np.ndarray) -> float:
     norm_v1 = np.linalg.norm(v1)
     norm_v2 = np.linalg.norm(v2)
 
-    if norm_v1 == 0 or norm_v2 == 0:
-        cosine_sim = 0.0
-    else:
-        cosine_sim = dot_product / (norm_v1 * norm_v2)
+    cosine_sim = 0.0 if norm_v1 == 0 or norm_v2 == 0 else dot_product / (norm_v1 * norm_v2)
 
     # Delta component (Manhattan distance on normalized vectors)
     # We use (1 - cosine_sim) as a distance and combine with Manhattan
@@ -31,9 +28,9 @@ def calculate_cosine_delta(v1: np.ndarray, v2: np.ndarray) -> float:
 
 def calculate_symmetrized_kl_divergence(p: np.ndarray, q: np.ndarray) -> float:
     """
-    Calculates the Symmetrized KL Divergence (also known as Jensen-Shannon Divergence 
+    Calculates the Symmetrized KL Divergence (also known as Jensen-Shannon Divergence
     without the square root, or simply a balanced KL).
-    
+
     Measures the informational divergence between two probability distributions.
     """
     p = np.asarray(p, dtype=float)

@@ -13,14 +13,14 @@ Features:
 
 Usage:
     from src.core.resilience import CircuitBreaker, retry_with_backoff
-    
+
     # Circuit breaker
     breaker = CircuitBreaker("database", failure_threshold=0.5)
-    
+
     @breaker
     def call_database():
         return db.query()
-    
+
     # Retry decorator
     @retry_with_backoff(max_attempts=3, base_delay=1)
     def risky_operation():
@@ -34,7 +34,7 @@ import random
 import time
 from collections.abc import Callable
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from functools import wraps
 from threading import Lock
 from typing import Any, TypeVar
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-class CircuitState(str, Enum):
+class CircuitState(StrEnum):
     """Circuit breaker states."""
     CLOSED = "closed"          # Normal operation
     OPEN = "open"              # Failing, reject requests
@@ -59,7 +59,7 @@ class CircuitBreakerError(Exception):
 class CircuitBreaker:
     """
     Circuit breaker for resilient error handling.
-    
+
     Prevents cascade failures by monitoring failure rates and opening
     the circuit when they exceed thresholds.
     """
@@ -68,7 +68,7 @@ class CircuitBreaker:
                  recovery_timeout: int = 60, expected_exception: type = Exception):
         """
         Initialize circuit breaker.
-        
+
         Args:
             name: Circuit name (for logging)
             failure_threshold: Failure rate to open circuit (0.0-1.0)
@@ -89,15 +89,15 @@ class CircuitBreaker:
     def call(self, func: Callable, *args, **kwargs) -> Any:
         """
         Execute function with circuit breaker protection.
-        
+
         Args:
             func: Function to call
             *args: Function arguments
             **kwargs: Function keyword arguments
-        
+
         Returns:
             Function result
-        
+
         Raises:
             CircuitBreakerError: If circuit is open
             Exception: If function raises expected exception
@@ -231,7 +231,7 @@ def retry_with_backoff(
 ) -> Callable:
     """
     Decorator for retrying with exponential backoff.
-    
+
     Args:
         max_attempts: Maximum number of attempts
         base_delay: Initial delay in seconds
@@ -239,7 +239,7 @@ def retry_with_backoff(
         exponential_base: Base for exponential calculation
         jitter: Add random jitter to delay
         on_retry: Callback on retry (attempt_num, exception)
-    
+
     Usage:
         @retry_with_backoff(max_attempts=3, base_delay=1.0)
         def unreliable_operation():
@@ -276,7 +276,7 @@ def retry_with_backoff(
 
                         time.sleep(delay)
                     else:
-                        logger.error(
+                        logger.exception(
                             f"{func.__name__} failed after {max_attempts} attempts: {e}"
                         )
 
@@ -348,7 +348,7 @@ class TimeoutManager:
 class BulkheadIsolation:
     """
     Bulkhead isolation pattern.
-    
+
     Limits concurrent requests to prevent resource exhaustion.
     """
 

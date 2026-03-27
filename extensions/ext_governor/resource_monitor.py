@@ -79,7 +79,7 @@ class VSCodeStatusBarManager:
                 try:
                     callback(status_data, status_text)
                 except Exception as e:
-                    logger.error(f"Error updating status bar: {e}")
+                    logger.exception(f"Error updating status bar: {e}")
 
     def _format_status_text(self, status: ResourceStatus) -> str:
         """Format resource status for display in status bar."""
@@ -162,7 +162,7 @@ class EnhancedResourceMonitor:
                 time.sleep(2.0)  # Monitor every 2 seconds
 
             except Exception as e:
-                logger.error(f"[Governor] Error in enhanced monitoring loop: {e}")
+                logger.exception(f"[Governor] Error in enhanced monitoring loop: {e}")
                 time.sleep(3.0)
 
     def get_current_status(self) -> ResourceStatus:

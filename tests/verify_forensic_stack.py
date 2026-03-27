@@ -39,12 +39,12 @@ def test_gephi_components():
 
         # Test object creation
         rest = GephiREST('http://localhost:8080', workspace='workspace0')
-        s = Streamer(rest)
+        Streamer(rest)
         print("[+] Gephi objects initialized successfully")
 
         # Test graph components
-        node = graph.Node("test_node", label="Test")
-        edge = graph.Edge("test_edge", "node1", "node2")
+        graph.Node("test_node", label="Test")
+        graph.Edge("test_edge", "node1", "node2")
         print("[+] Graph Node and Edge creation successful")
 
         return True

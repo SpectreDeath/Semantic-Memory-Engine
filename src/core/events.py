@@ -52,7 +52,7 @@ class EventType(Enum):
 @dataclass
 class Event:
     """Represents a single event in the system.
-    
+
     Attributes:
         type: The type of event (EventType enum)
         source: Module/component that emitted the event
@@ -78,10 +78,10 @@ class Event:
 
     def matches_filter(self, filter_criteria: dict[str, Any]) -> bool:
         """Check if event matches filter criteria.
-        
+
         Args:
             filter_criteria: Dictionary of criteria to match
-            
+
         Returns:
             True if event matches all criteria, False otherwise
         """
@@ -93,27 +93,25 @@ class Event:
                 if isinstance(value, str):
                     if self.source != value:
                         return False
-                elif isinstance(value, list):
-                    if self.source not in value:
-                        return False
+                elif isinstance(value, list) and self.source not in value:
+                    return False
             elif key in self.data:
                 if self.data[key] != value:
                     return False
-            elif key in self.metadata:
-                if self.metadata[key] != value:
-                    return False
+            elif key in self.metadata and self.metadata[key] != value:
+                return False
         return True
 
 
 class EventHandler:
     """Base class for event handlers.
-    
+
     Handlers can be sync or async functions that process events.
     """
 
     def __init__(self, callback: Callable, name: str = ""):
         """Initialize event handler.
-        
+
         Args:
             callback: Function to call when event is triggered
             name: Optional name for the handler
@@ -124,7 +122,7 @@ class EventHandler:
 
     async def handle(self, event: Event) -> None:
         """Handle an event.
-        
+
         Args:
             event: Event to handle
         """
@@ -144,10 +142,10 @@ class EventHandler:
 
 class EventBus:
     """Central event bus for pub/sub event system.
-    
+
     Manages event publication and subscription with filtering support.
     Supports both sync and async event handlers.
-    
+
     Attributes:
         _subscribers: Dictionary mapping event types to handler lists
         _event_queue: Queue of pending events to process
@@ -176,7 +174,7 @@ class EventBus:
         name: str = ""
     ) -> None:
         """Subscribe to events of a specific type.
-        
+
         Args:
             event_type: Type of event to subscribe to
             handler: Callback function (sync or async)
@@ -197,11 +195,11 @@ class EventBus:
 
     def unsubscribe(self, event_type: EventType, handler: Callable) -> bool:
         """Unsubscribe a handler from an event type.
-        
+
         Args:
             event_type: Type of event to unsubscribe from
             handler: Handler to remove
-            
+
         Returns:
             True if handler was removed, False if not found
         """
@@ -217,7 +215,7 @@ class EventBus:
 
     def publish(self, event: Event) -> None:
         """Publish an event to the bus.
-        
+
         Args:
             event: Event to publish
         """
@@ -235,7 +233,7 @@ class EventBus:
 
     async def _process_events(self) -> None:
         """Process events from the queue (internal).
-        
+
         This runs in the background when the bus is started.
         """
         while self._running:
@@ -295,7 +293,7 @@ class EventBus:
 
     def get_stats(self) -> dict[str, int]:
         """Get event bus statistics.
-        
+
         Returns:
             Dictionary with published, processed, and error counts
         """
@@ -311,10 +309,10 @@ class EventBus:
 
     def get_subscriber_count(self, event_type: EventType | None = None) -> int:
         """Get number of subscribers.
-        
+
         Args:
             event_type: Optional specific event type. If None, returns total.
-            
+
         Returns:
             Number of subscribers
         """
@@ -334,7 +332,7 @@ _event_bus: EventBus | None = None
 
 def get_event_bus() -> EventBus:
     """Get or create the global event bus instance.
-    
+
     Returns:
         The singleton EventBus instance
     """

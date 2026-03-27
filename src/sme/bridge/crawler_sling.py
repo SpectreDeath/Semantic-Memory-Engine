@@ -82,7 +82,7 @@ class CrawlerSling:
             }
 
         except Exception as e:
-            logger.error(f"CrawlerSling failed for {url}: {e}")
+            logger.exception(f"CrawlerSling failed for {url}: {e}")
             return {"error": str(e), "status": "Error"}
         finally:
             # Note: In a real tool, we might keep the client open across calls

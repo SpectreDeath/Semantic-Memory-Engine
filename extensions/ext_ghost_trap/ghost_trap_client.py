@@ -26,7 +26,7 @@ GHOST_TRAP_DIR = os.path.join(DEFAULT_DATA_DIR, "ghost_trap")
 class GhostTrapClient:
     """
     Client for querying Ghost-Trap persistence events.
-    
+
     Ghost-Trap monitors the file system for suspicious changes
     that may indicate persistence mechanisms or unauthorized modifications.
     """
@@ -63,11 +63,11 @@ class GhostTrapClient:
     ) -> list[dict[str, Any]]:
         """
         Get events from the last N hours.
-        
+
         Args:
             hours: Number of hours to look back
             limit: Maximum number of events to return
-        
+
         Returns:
             List of event dictionaries
         """
@@ -97,11 +97,11 @@ class GhostTrapClient:
     ) -> list[dict[str, Any]]:
         """
         Get alerts from Ghost-Trap.
-        
+
         Args:
             hours: Number of hours to look back
             severity: Filter by severity (high, medium, low)
-        
+
         Returns:
             List of alert dictionaries
         """
@@ -131,10 +131,10 @@ class GhostTrapClient:
     def get_persistence_events(self, hours: int = 24) -> list[dict[str, Any]]:
         """
         Get events specifically flagged as persistence mechanisms.
-        
+
         Args:
             hours: Number of hours to look back
-        
+
         Returns:
             List of persistence-related events
         """
@@ -154,10 +154,10 @@ class GhostTrapClient:
     def check_path(self, path: str) -> dict[str, Any]:
         """
         Check if a specific path has been flagged by Ghost-Trap.
-        
+
         Args:
             path: File or directory path to check
-        
+
         Returns:
             Dict with 'flagged' boolean and event details if flagged
         """

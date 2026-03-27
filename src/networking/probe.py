@@ -19,7 +19,7 @@ def check_latency(host: str = "8.8.8.8") -> str:
         return f"Latency Error: {e!s}"
 
 @mcp.tool()
-def verify_connectivity(urls: list[str] = None) -> str:
+def verify_connectivity(urls: list[str] | None = None) -> str:
     """Verifies external service availability via HEAD requests."""
     if urls is None:
         urls = ["https://www.google.com", "https://duckduckgo.com", "https://api.github.com"]

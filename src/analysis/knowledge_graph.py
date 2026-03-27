@@ -46,7 +46,7 @@ class GraphEdge:
 class KnowledgeGraph:
     """
     Engine for building and managing semantic knowledge graphs.
-    
+
     Orchestrates lower-level tools to synthesize entities and relations
     into a cohesive graph structure.
     """
@@ -69,7 +69,7 @@ class KnowledgeGraph:
     def build_from_text(self, text: str, context_id: str = "default"):
         """
         Build or update the graph from a text blob.
-        
+
         Args:
             text: Input text to process
             context_id: Identifier for the source context
@@ -104,7 +104,7 @@ class KnowledgeGraph:
             self._enrich_semantically(result.linked_entities)
 
     def add_edge(self, source: str, target: str, relation: str,
-                 confidence: float = 1.0, metadata: dict[str, Any] = None):
+                 confidence: float = 1.0, metadata: dict[str, Any] | None = None):
         """Add a directed edge to the graph if it doesn't already exist."""
         # Avoid duplicate edges with same relation
         for edge in self.edges:

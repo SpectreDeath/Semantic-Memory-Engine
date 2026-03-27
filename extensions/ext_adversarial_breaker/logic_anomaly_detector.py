@@ -10,7 +10,7 @@ logger = logging.getLogger("LawnmowerMan.APB")
 class LogicAnomalyDetector:
     """
     Adversarial Pattern Breaker (APB) - Logic Anomaly Detector
-    
+
     Detects 'Linguistic Camouflage' - artificial entropy smoothing used to hide synthetic origin.
     Identifies High-Confidence Deception by analyzing unnatural text patterns.
     """
@@ -26,7 +26,7 @@ class LogicAnomalyDetector:
     def detect_linguistic_camouflage(self, text: str) -> dict[str, Any]:
         """
         Main detection method for linguistic camouflage.
-        
+
         Returns comprehensive analysis with deception confidence score.
         """
         if not text or len(text) < 100:  # Minimum text length for analysis

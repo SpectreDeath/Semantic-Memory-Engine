@@ -130,12 +130,12 @@ class CrossModalAuditorPlugin:
                            threshold: float | None = None) -> dict[str, Any]:
             """
             Safe cross-modal audit tool that checks Governor status.
-            
+
             Args:
                 image_path: Path to the image file.
                 prompt: Text prompt describing the image.
                 threshold: Sync score threshold for hallucination detection.
-                
+
             Returns:
                 Dictionary containing audit results.
             """
@@ -158,12 +158,12 @@ class CrossModalAuditorPlugin:
                              threshold: float | None = None) -> dict[str, Any]:
             """
             Direct cross-modal audit tool without Governor status checking.
-            
+
             Args:
                 image_path: Path to the image file.
                 prompt: Text prompt describing the image.
                 threshold: Sync score threshold for hallucination detection.
-                
+
             Returns:
                 Dictionary containing audit results.
             """

@@ -132,7 +132,7 @@ class AnomalyReport:
 class ScribeEngine:
     """
     Forensic authorship analysis engine.
-    
+
     Uses 6,734 rhetoric signals + linguistic features to create unique
     "fingerprints" that are extremely difficult to fake.
     """
@@ -155,17 +155,17 @@ class ScribeEngine:
     def extract_linguistic_fingerprint(self, text: str, author_id: str | None = None) -> LinguisticFingerprint:
         """
         Transform raw text into a numerical fingerprint vector.
-        
+
         This fingerprint captures:
         1. Syntactic patterns (sentence structure, clause complexity)
         2. Lexical patterns (vocabulary richness, repetition)
         3. Punctuation habits ("sparks" that identify the writer)
         4. Rhetorical signal distribution (which signals they favor)
-        
+
         Args:
             text: The text sample to analyze
             author_id: Optional author identifier for profile tracking
-            
+
         Returns:
             LinguisticFingerprint with all feature vectors normalized
         """
@@ -229,7 +229,7 @@ class ScribeEngine:
             return fingerprint
 
         except Exception as e:
-            logger.error(f"❌ Fingerprint extraction failed: {e!s}")
+            logger.exception(f"❌ Fingerprint extraction failed: {e!s}")
             raise
 
     # ========================================================================
@@ -243,14 +243,14 @@ class ScribeEngine:
     ) -> list[AuthorshipMatch]:
         """
         Compare an unknown fingerprint against all known author profiles.
-        
+
         Uses cosine similarity on vectorized signals + linguistic metrics
         to find the most likely author match.
-        
+
         Args:
             unknown_fingerprint: The fingerprint to identify
             min_confidence: Minimum confidence threshold (0-100)
-            
+
         Returns:
             List of AuthorshipMatch results, sorted by confidence descending
         """
@@ -307,17 +307,17 @@ class ScribeEngine:
             return matches
 
         except Exception as e:
-            logger.error(f"❌ Profile comparison failed: {e!s}")
+            logger.exception(f"❌ Profile comparison failed: {e!s}")
             raise
 
     def get_stylo_attribution(self, text: str, corpus_path: str | None = None) -> dict[str, Any]:
         """
         Performs secondary attribution using the R stylo package.
-        
+
         Args:
             text: Text to analyze
             corpus_path: Path to directory of known author samples
-            
+
         Returns:
             Stylo attribution results or error status
         """
@@ -347,7 +347,7 @@ class ScribeEngine:
                 "engine": "R-Stylo (Burrows Delta)"
             }
         except Exception as e:
-            logger.error(f"Stylo attribution failed: {e}")
+            logger.exception(f"Stylo attribution failed: {e}")
             return {"status": "error", "reason": str(e)}
 
     # ========================================================================
@@ -361,17 +361,17 @@ class ScribeEngine:
     ) -> tuple[float, dict]:
         """
         Calculate precise attribution probability for a specific author.
-        
+
         Returns a 0-100 confidence score based on:
         - Signal vector cosine similarity
         - Linguistic metric alignment
         - Punctuation habit matching
         - Lexical diversity consistency
-        
+
         Args:
             unknown_text: The text to attribute
             candidate_author_id: The candidate author to test
-            
+
         Returns:
             (attribution_score: 0-100, detailed_breakdown: Dict)
         """
@@ -446,7 +446,7 @@ class ScribeEngine:
             return final_score, breakdown
 
         except Exception as e:
-            logger.error(f"❌ Attribution score calculation failed: {e!s}")
+            logger.exception(f"❌ Attribution score calculation failed: {e!s}")
             return 0.0, {"error": str(e)}
 
     # ========================================================================
@@ -460,16 +460,16 @@ class ScribeEngine:
     ) -> AnomalyReport | None:
         """
         Detect when a "known" author's style suddenly changes.
-        
+
         Used for detecting:
         - Ghost-writing (author's style becomes AI-like)
         - Account takeover (style drastically shifts)
         - Uncharacteristic behavior (sudden shift in preferred signals)
-        
+
         Args:
             author_id: The known author to check
             new_text: New text allegedly from this author
-            
+
         Returns:
             AnomalyReport if anomalies detected, None if style is consistent
         """
@@ -575,7 +575,7 @@ class ScribeEngine:
             return None
 
         except Exception as e:
-            logger.error(f"❌ Anomaly detection failed: {e!s}")
+            logger.exception(f"❌ Anomaly detection failed: {e!s}")
             raise
 
     # ========================================================================
@@ -642,7 +642,7 @@ class ScribeEngine:
     def _map_to_rhetoric_signals(self, text: str) -> dict[str, float]:
         """
         Map text to the 6,734 rhetoric signals from the lexicon.
-        
+
         This is a lightweight approximation that scores signals based on
         keyword frequency and co-occurrence patterns.
         """
@@ -977,7 +977,7 @@ class ScribeEngine:
                 return None
 
             cols = [desc[0] for desc in cursor.description]
-            profile = dict(zip(cols, row))
+            profile = dict(zip(cols, row, strict=False))
 
             # Deserialize JSON fields
             profile['punctuation_profile'] = json.loads(profile['punctuation_profile'] or '{}')
@@ -1007,7 +1007,7 @@ class ScribeEngine:
             profiles = []
             for row in rows:
                 cols = [desc[0] for desc in cursor.description]
-                profile = dict(zip(cols, row))
+                profile = dict(zip(cols, row, strict=False))
 
                 # Deserialize JSON fields
                 profile['punctuation_profile'] = json.loads(profile['punctuation_profile'] or '{}')
@@ -1122,7 +1122,7 @@ class ScribeEngine:
 def extract_linguistic_fingerprint_tool(text: str, author_id: str | None = None) -> dict:
     """
     MCP Tool: Extract linguistic fingerprint from text.
-    
+
     Returns a unique "behavioral profile" based on style, not content.
     """
     scribe = ScribeEngine()
@@ -1150,7 +1150,7 @@ def extract_linguistic_fingerprint_tool(text: str, author_id: str | None = None)
 def compare_to_profiles_tool(unknown_text: str, min_confidence: float = 50.0) -> dict:
     """
     MCP Tool: Compare unknown text against all known author profiles.
-    
+
     Returns ranked list of potential author matches.
     """
     scribe = ScribeEngine()
@@ -1176,7 +1176,7 @@ def compare_to_profiles_tool(unknown_text: str, min_confidence: float = 50.0) ->
 def calculate_attribution_score_tool(unknown_text: str, candidate_author_id: str) -> dict:
     """
     MCP Tool: Calculate precise attribution probability for a specific author.
-    
+
     Returns 0-100 confidence with detailed breakdown.
     """
     scribe = ScribeEngine()
@@ -1200,7 +1200,7 @@ def calculate_attribution_score_tool(unknown_text: str, candidate_author_id: str
 def identify_stylistic_anomalies_tool(author_id: str, new_text: str) -> dict:
     """
     MCP Tool: Detect stylistic anomalies (ghost-writing, account takeover, AI generation).
-    
+
     Compares new text against author's baseline profile.
     """
     scribe = ScribeEngine()
@@ -1246,16 +1246,16 @@ async def demo_scribe():
     # Sample texts from different authors
     sample_texts = {
         "author_academic": """
-        The examination of contemporary rhetorical patterns reveals a significant 
-        divergence between formal and colloquial discourse structures. It is posited 
-        that such variation stems from sociolinguistic factors inherent to academic 
-        communities. Furthermore, the statistical analysis thereof demonstrates 
+        The examination of contemporary rhetorical patterns reveals a significant
+        divergence between formal and colloquial discourse structures. It is posited
+        that such variation stems from sociolinguistic factors inherent to academic
+        communities. Furthermore, the statistical analysis thereof demonstrates
         considerable consistency across multiple dimensions.
         """,
 
         "author_casual": """
-        So like, I was thinking about how people talk differently, you know? 
-        And it's kinda wild how like, some folks are super formal and others are 
+        So like, I was thinking about how people talk differently, you know?
+        And it's kinda wild how like, some folks are super formal and others are
         just chill. I mean, it makes sense when you think about it, right?
         """,
 
@@ -1279,9 +1279,9 @@ async def demo_scribe():
 
     # Step 2: Test unknown text (matches academic style)
     unknown_academic = """
-    The methodology employed in this investigation encompasses a comprehensive 
-    examination of established paradigms within the discipline. The results obtained 
-    thereby substantiate our initial hypothesis. These findings are moreover consistent 
+    The methodology employed in this investigation encompasses a comprehensive
+    examination of established paradigms within the discipline. The results obtained
+    thereby substantiate our initial hypothesis. These findings are moreover consistent
     with previous scholarly works.
     """
 
@@ -1314,8 +1314,8 @@ async def demo_scribe():
     print("-" * 80)
     # Create "anomalous" text (academic author writing casually)
     anomalous_text = """
-    Yo, so like I was just chillin and thinking about this whole academic thing, 
-    right? And I'm like, why do people talk so formal? It's kinda weird if you 
+    Yo, so like I was just chillin and thinking about this whole academic thing,
+    right? And I'm like, why do people talk so formal? It's kinda weird if you
     ask me. I mean, just say what you mean, you know?
     """
 

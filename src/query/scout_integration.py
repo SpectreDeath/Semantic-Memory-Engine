@@ -79,7 +79,7 @@ class Scout:
     identification of missing related concepts and semantic connections.
     """
 
-    def __init__(self, harvester_path: str = None):
+    def __init__(self, harvester_path: str | None = None):
         from src.core.config import Config
 
         config = Config()
@@ -148,7 +148,7 @@ class Scout:
             conn.close()
             logger.info("✅ Scout database initialized")
         except Exception as e:
-            logger.error(f"❌ Database initialization failed: {e!s}")
+            logger.exception(f"❌ Database initialization failed: {e!s}")
             raise
 
     # ========================================================================
@@ -220,7 +220,7 @@ class Scout:
 
                 # Auto-harvest if complexity is high
                 if auto_harvest and complexity >= 70:
-                    harvest_job = self._trigger_harvest(gap)
+                    self._trigger_harvest(gap)
                     gap.auto_harvest_triggered = True
                     logger.info(f"🚀 Auto-harvest triggered for: {gap.question[:50]}...")
 
@@ -233,7 +233,7 @@ class Scout:
             return gaps
 
         except Exception as e:
-            logger.error(f"❌ Gap detection failed: {e!s}")
+            logger.exception(f"❌ Gap detection failed: {e!s}")
             return []
 
     def detect_semantic_gaps(
@@ -276,7 +276,7 @@ class Scout:
 
                 # Auto-harvest high-priority semantic gaps
                 if annotated_gap["auto_harvest"]:
-                    search_terms = [annotated_gap["gap"]]
+                    [annotated_gap["gap"]]
                     logger.info(
                         f"📚 Semantic gap detected: {annotated_gap['gap']} ({annotated_gap['type']})"
                     )
@@ -286,14 +286,14 @@ class Scout:
             return annotated_gaps
 
         except Exception as e:
-            logger.error(f"❌ Semantic gap detection failed: {e}")
+            logger.exception(f"❌ Semantic gap detection failed: {e}")
             return []
 
     # ========================================================================
     # TOOL 2: KNOWLEDGE COMPLEXITY SCORING
     # ========================================================================
 
-    def score_knowledge_complexity(self, text: str, topic: str = None) -> float:
+    def score_knowledge_complexity(self, text: str, topic: str | None = None) -> float:
         """
         Score complexity of knowledge needed to answer a question.
 
@@ -338,7 +338,7 @@ class Scout:
             return final_score
 
         except Exception as e:
-            logger.error(f"❌ Complexity scoring failed: {e!s}")
+            logger.exception(f"❌ Complexity scoring failed: {e!s}")
             return 0
 
     # ========================================================================
@@ -390,7 +390,7 @@ class Scout:
             return harvest_job
 
         except Exception as e:
-            logger.error(f"❌ Harvest triggering failed: {e!s}")
+            logger.exception(f"❌ Harvest triggering failed: {e!s}")
             return {"error": str(e)}
 
     # ========================================================================
@@ -443,7 +443,7 @@ class Scout:
             return resolution
 
         except Exception as e:
-            logger.error(f"❌ Resolution tracking failed: {e!s}")
+            logger.exception(f"❌ Resolution tracking failed: {e!s}")
             raise
 
     # ========================================================================
@@ -492,7 +492,7 @@ class Scout:
             return patterns
 
         except Exception as e:
-            logger.error(f"❌ Pattern learning failed: {e!s}")
+            logger.exception(f"❌ Pattern learning failed: {e!s}")
             return []
 
     # ========================================================================
@@ -628,7 +628,7 @@ class Scout:
             conn.commit()
             conn.close()
         except Exception as e:
-            logger.error(f"❌ Failed to save gaps: {e!s}")
+            logger.exception(f"❌ Failed to save gaps: {e!s}")
 
     def _save_resolution_to_db(self, resolution: GapResolution):
         """Save gap resolution to database"""
@@ -663,7 +663,7 @@ class Scout:
             conn.commit()
             conn.close()
         except Exception as e:
-            logger.error(f"❌ Failed to save resolution: {e!s}")
+            logger.exception(f"❌ Failed to save resolution: {e!s}")
 
     def _analyze_sentence_complexity(self, text: str) -> float:
         """Analyze sentence structure complexity"""
@@ -689,7 +689,7 @@ class Scout:
             "business": ["market", "revenue", "profit", "company"],
         }
 
-        for domain, keywords in domain_keywords.items():
+        for keywords in domain_keywords.values():
             if any(kw in text.lower() for kw in keywords):
                 domains_found += 1
 
@@ -707,7 +707,7 @@ class Scout:
         dispute_count = sum(1 for kw in dispute_keywords if kw in text.lower())
         return min(100, dispute_count * 20)
 
-    def _analyze_information_availability(self, text: str, topic: str = None) -> float:
+    def _analyze_information_availability(self, text: str, topic: str | None = None) -> float:
         """Analyze how available information is for this topic"""
         # Placeholder - would check web data availability
         return 50
@@ -721,7 +721,7 @@ class Scout:
             variants = self.semantic_graph.find_semantic_variants(term)
             result = []
             # Collect synonyms and related terms, limit to 5
-            for variant_type, words in variants.items():
+            for words in variants.values():
                 result.extend(words[:2])
             return result[:5]
         except Exception as e:

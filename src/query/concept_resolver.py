@@ -99,7 +99,7 @@ class ConceptResolver:
             return core_relations
 
         except Exception as e:
-            logger.error(f"❌ ConceptNet query failed for {term}: {e}")
+            logger.exception(f"❌ ConceptNet query failed for {term}: {e}")
             return []
 
     def expand_concept(self, term: str) -> list[str]:

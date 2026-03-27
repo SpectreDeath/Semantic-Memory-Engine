@@ -131,8 +131,8 @@ with tab1:
     try:
         conn = get_db_connection(DB_PATH)
         feed_df = pd.read_sql_query("""
-            SELECT timestamp, tool_name as Module, event_type as Event, target as Target, confidence as Confidence 
-            FROM forensic_events 
+            SELECT timestamp, tool_name as Module, event_type as Event, target as Target, confidence as Confidence
+            FROM forensic_events
             ORDER BY timestamp DESC LIMIT 20
         """, conn)
         conn.close()
@@ -150,8 +150,8 @@ with tab2:
     try:
         conn = get_db_connection(DB_PATH)
         trend_df = pd.read_sql_query("""
-            SELECT id, confidence as 'Certainty Quotient' 
-            FROM forensic_events 
+            SELECT id, confidence as 'Certainty Quotient'
+            FROM forensic_events
             ORDER BY id ASC LIMIT 50
         """, conn)
         conn.close()

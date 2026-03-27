@@ -52,7 +52,7 @@ class UserModerationProfile:
 class ContentModerator:
     """
     Advanced content moderation system for social media content.
-    
+
     Provides NSFW detection, spam filtering, hate speech detection,
     and content quality assessment for maintaining platform safety
     and content standards.
@@ -167,7 +167,7 @@ class ContentModerator:
     async def moderate_content(self, content: dict[str, Any]) -> ModerationResult:
         """
         Moderate a piece of content.
-        
+
         Args:
             content: Content to moderate with structure:
                     {
@@ -177,7 +177,7 @@ class ContentModerator:
                         "timestamp": datetime,
                         "metadata": Dict
                     }
-        
+
         Returns:
             ModerationResult with moderation decision
         """
@@ -252,7 +252,7 @@ class ContentModerator:
             )
 
         except Exception as e:
-            logger.error(f"Error moderating content {content.get('id', 'unknown')}: {e}")
+            logger.exception(f"Error moderating content {content.get('id', 'unknown')}: {e}")
             return ModerationResult(
                 content_id=content.get("id", ""),
                 content_type=content.get("content_type", "text"),
@@ -267,10 +267,10 @@ class ContentModerator:
     async def moderate_batch(self, content_batch: list[dict[str, Any]]) -> list[ModerationResult]:
         """
         Moderate a batch of content items.
-        
+
         Args:
             content_batch: List of content items to moderate
-            
+
         Returns:
             List of ModerationResults
         """
@@ -284,7 +284,7 @@ class ContentModerator:
             return moderation_results
 
         except Exception as e:
-            logger.error(f"Error moderating batch: {e}")
+            logger.exception(f"Error moderating batch: {e}")
             return []
 
     async def update_user_moderation_profile(self, user_id: str,
@@ -292,12 +292,12 @@ class ContentModerator:
                                            severity: float) -> UserModerationProfile:
         """
         Update user moderation profile based on violation.
-        
+
         Args:
             user_id: User identifier
             violation_type: Type of violation
             severity: Severity of violation (0.0 to 1.0)
-            
+
         Returns:
             Updated UserModerationProfile
         """
@@ -328,7 +328,7 @@ class ContentModerator:
             return profile
 
         except Exception as e:
-            logger.error(f"Error updating user profile for {user_id}: {e}")
+            logger.exception(f"Error updating user profile for {user_id}: {e}")
             return self._get_user_profile(user_id)
 
     def get_user_moderation_profile(self, user_id: str) -> UserModerationProfile | None:
@@ -515,7 +515,7 @@ class ContentModerator:
     async def _update_user_profile(self, user_id: str, moderation_level: str,
                                  detected_issues: list[str]):
         """Update user moderation profile."""
-        profile = self._get_user_profile(user_id)
+        self._get_user_profile(user_id)
 
         # Record moderation action
         if moderation_level != "allow":
@@ -533,11 +533,7 @@ class ContentModerator:
             r"[s3$][3e!][x]",          # sex
         ]
 
-        for pattern in obfuscated_patterns:
-            if re.search(pattern, text, re.IGNORECASE):
-                return True
-
-        return False
+        return any(re.search(pattern, text, re.IGNORECASE) for pattern in obfuscated_patterns)
 
     def _contains_hate_patterns(self, text: str) -> bool:
         """Check for hate speech patterns."""
@@ -547,11 +543,7 @@ class ContentModerator:
             r"(?i)\bdestroy.*\b",  # Destruction
         ]
 
-        for pattern in hate_patterns:
-            if re.search(pattern, text):
-                return True
-
-        return False
+        return any(re.search(pattern, text) for pattern in hate_patterns)
 
     def _calculate_repetition_score(self, text: str) -> float:
         """Calculate score based on content repetition."""
@@ -583,11 +575,7 @@ class ContentModerator:
 
         # Check word repetition
         words = text.lower().split()
-        for i in range(len(words) - 2):
-            if words[i] == words[i+1] == words[i+2]:
-                return True
-
-        return False
+        return any(words[i] == words[i + 1] == words[i + 2] for i in range(len(words) - 2))
 
     def _is_low_quality_language(self, text: str) -> bool:
         """Check if content has low language quality."""

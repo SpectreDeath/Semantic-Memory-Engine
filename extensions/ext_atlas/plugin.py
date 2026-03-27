@@ -84,7 +84,7 @@ class Atlas(BasePlugin):
         try:
             logger.info(f"[{self.plugin_id}] Atlas started successfully")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to start Atlas: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to start Atlas: {e}")
 
     async def on_shutdown(self):
         """
@@ -93,7 +93,7 @@ class Atlas(BasePlugin):
         try:
             logger.info(f"[{self.plugin_id}] Atlas shutdown complete")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
+            logger.exception(f"[{self.plugin_id}] Error during shutdown: {e}")
 
     async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
@@ -113,10 +113,10 @@ class Atlas(BasePlugin):
             self.create_atlas_summary
         ]
 
-    async def generate_forensic_atlas(self, output_path: str = None, include_recurring_only: bool = False) -> str:
+    async def generate_forensic_atlas(self, output_path: str | None = None, include_recurring_only: bool = False) -> str:
         """
         Generate the Forensic Atlas using T-SNE visualization.
-        
+
         Fetches all records from nexus_forensic_ledger, creates a 2D map using T-SNE,
         color-codes points by source_plugin, and highlights recurring samples.
         """
@@ -172,7 +172,7 @@ class Atlas(BasePlugin):
             return json.dumps(result, indent=2)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error generating forensic atlas: {e}")
+            logger.exception(f"[{self.plugin_id}] Error generating forensic atlas: {e}")
             return json.dumps({
                 "error": f"Failed to generate forensic atlas: {e!s}"
             })
@@ -189,7 +189,7 @@ class Atlas(BasePlugin):
             return json.dumps(stats, indent=2)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error getting atlas statistics: {e}")
+            logger.exception(f"[{self.plugin_id}] Error getting atlas statistics: {e}")
             return json.dumps({"error": f"Failed to get atlas statistics: {e!s}"})
 
     async def export_atlas_data(self, format: str = "csv") -> str:
@@ -217,7 +217,7 @@ class Atlas(BasePlugin):
             })
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error exporting atlas data: {e}")
+            logger.exception(f"[{self.plugin_id}] Error exporting atlas data: {e}")
             return json.dumps({"error": f"Failed to export atlas data: {e!s}"})
 
     async def create_atlas_summary(self) -> str:
@@ -232,14 +232,14 @@ class Atlas(BasePlugin):
             return json.dumps(summary, indent=2)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error creating atlas summary: {e}")
+            logger.exception(f"[{self.plugin_id}] Error creating atlas summary: {e}")
             return json.dumps({"error": f"Failed to create atlas summary: {e!s}"})
 
     async def _fetch_forensic_data(self, include_recurring_only: bool = False) -> list[FingerprintRecord]:
         """Fetch data from the forensic ledger."""
         try:
             sql = """
-                SELECT sample_id, model_fingerprint, combined_anomaly_score, 
+                SELECT sample_id, model_fingerprint, combined_anomaly_score,
                        timestamp, source_plugin, metadata, is_recurring, recurring_with
                 FROM nexus_forensic_ledger
             """
@@ -269,7 +269,7 @@ class Atlas(BasePlugin):
             return records
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error fetching forensic data: {e}")
+            logger.exception(f"[{self.plugin_id}] Error fetching forensic data: {e}")
             return []
 
     def _prepare_data_for_tsne(self, records: list[FingerprintRecord]) -> tuple[np.ndarray, list[str], list[float], list[bool], list[str]]:
@@ -303,13 +303,13 @@ class Atlas(BasePlugin):
             return fingerprint_matrix_scaled, labels, anomaly_scores, is_recurring, sample_ids
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error preparing data for T-SNE: {e}")
+            logger.exception(f"[{self.plugin_id}] Error preparing data for T-SNE: {e}")
             raise
 
     def _fingerprint_to_vector(self, fingerprint: str, vector_size: int = 128) -> list[float]:
         """
         Convert a fingerprint string to a numerical vector.
-        
+
         Uses character frequency and positional encoding.
         """
         try:
@@ -340,7 +340,7 @@ class Atlas(BasePlugin):
             return combined_vector
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error converting fingerprint to vector: {e}")
+            logger.exception(f"[{self.plugin_id}] Error converting fingerprint to vector: {e}")
             return [0.0] * vector_size
 
     def _perform_tsne(self, fingerprint_matrix: np.ndarray) -> np.ndarray:
@@ -364,7 +364,7 @@ class Atlas(BasePlugin):
             return tsne_result
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error performing T-SNE: {e}")
+            logger.exception(f"[{self.plugin_id}] Error performing T-SNE: {e}")
             raise
 
     def _create_interactive_visualization(self, tsne_result: np.ndarray, labels: list[str],
@@ -384,7 +384,7 @@ class Atlas(BasePlugin):
 
             # Create hover text
             hover_text = []
-            for i, (sample_id, label, score, recurring) in enumerate(zip(sample_ids, labels, anomaly_scores, is_recurring)):
+            for i, (sample_id, label, score, recurring) in enumerate(zip(sample_ids, labels, anomaly_scores, is_recurring, strict=False)):
                 status = "RECURRING" if recurring else "NORMAL"
                 hover_text.append(
                     f"<b>Sample:</b> {sample_id}<br>"
@@ -402,12 +402,12 @@ class Atlas(BasePlugin):
                 x=x_coords,
                 y=y_coords,
                 mode='markers',
-                marker=dict(
-                    color=colors,
-                    size=sizes,
-                    line=dict(width=1, color='white'),
-                    opacity=0.8
-                ),
+                marker={
+                    "color": colors,
+                    "size": sizes,
+                    "line": {"width": 1, "color": 'white'},
+                    "opacity": 0.8
+                },
                 text=hover_text,
                 hoverinfo='text',
                 name='Fingerprints'
@@ -428,16 +428,16 @@ class Atlas(BasePlugin):
                 showlegend=False,
                 plot_bgcolor='white',
                 paper_bgcolor='white',
-                font=dict(family="Arial, sans-serif", size=12),
+                font={"family": "Arial, sans-serif", "size": 12},
                 annotations=[
-                    dict(
-                        text="Recurring samples are highlighted with larger points",
-                        showarrow=False,
-                        xref="paper", yref="paper",
-                        x=0.02, y=0.98,
-                        xanchor='left', yanchor='top',
-                        font=dict(size=10, color='gray')
-                    )
+                    {
+                        "text": "Recurring samples are highlighted with larger points",
+                        "showarrow": False,
+                        "xref": "paper", "yref": "paper",
+                        "x": 0.02, "y": 0.98,
+                        "xanchor": 'left', "yanchor": 'top',
+                        "font": {"size": 10, "color": 'gray'}
+                    }
                 ]
             )
 
@@ -448,7 +448,7 @@ class Atlas(BasePlugin):
                 fig.add_trace(go.Scatter(
                     x=[None], y=[None],  # Empty trace for legend
                     mode='markers',
-                    marker=dict(color=color, size=10),
+                    marker={"color": color, "size": 10},
                     name=label,
                     showlegend=True
                 ))
@@ -457,7 +457,7 @@ class Atlas(BasePlugin):
             fig.add_trace(go.Scatter(
                 x=[None], y=[None],  # Empty trace for legend
                 mode='markers',
-                marker=dict(color='black', size=20, symbol='circle'),
+                marker={"color": 'black', "size": 20, "symbol": 'circle'},
                 name='Recurring Samples',
                 showlegend=True
             ))
@@ -469,7 +469,7 @@ class Atlas(BasePlugin):
             return html_content
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error creating interactive visualization: {e}")
+            logger.exception(f"[{self.plugin_id}] Error creating interactive visualization: {e}")
             raise
 
     def _generate_atlas_statistics(self, records: list[FingerprintRecord], tsne_result: np.ndarray = None) -> dict[str, Any]:
@@ -478,7 +478,7 @@ class Atlas(BasePlugin):
             # Basic statistics
             total_samples = len(records)
             recurring_samples = sum(1 for r in records if r.is_recurring)
-            unique_plugins = list(set(r.source_plugin for r in records))
+            unique_plugins = list({r.source_plugin for r in records})
 
             # Plugin distribution
             plugin_counts = defaultdict(int)
@@ -513,13 +513,13 @@ class Atlas(BasePlugin):
                 },
                 "time_range": time_range,
                 "plugins": unique_plugins,
-                "visualization_ready": True if tsne_result is not None else False
+                "visualization_ready": tsne_result is not None
             }
 
             return stats
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error generating atlas statistics: {e}")
+            logger.exception(f"[{self.plugin_id}] Error generating atlas statistics: {e}")
             return {"error": str(e)}
 
     def _export_to_csv(self, records: list[FingerprintRecord], output_file: str):
@@ -548,7 +548,7 @@ class Atlas(BasePlugin):
             logger.info(f"[{self.plugin_id}] Data exported to CSV: {output_file}")
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error exporting to CSV: {e}")
+            logger.exception(f"[{self.plugin_id}] Error exporting to CSV: {e}")
             raise
 
     def _export_to_json(self, records: list[FingerprintRecord], output_file: str):
@@ -573,7 +573,7 @@ class Atlas(BasePlugin):
             logger.info(f"[{self.plugin_id}] Data exported to JSON: {output_file}")
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error exporting to JSON: {e}")
+            logger.exception(f"[{self.plugin_id}] Error exporting to JSON: {e}")
             raise
 
     def _create_atlas_summary_report(self, records: list[FingerprintRecord]) -> dict[str, Any]:
@@ -621,7 +621,7 @@ class Atlas(BasePlugin):
             return summary
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error creating atlas summary: {e}")
+            logger.exception(f"[{self.plugin_id}] Error creating atlas summary: {e}")
             return {"error": str(e)}
 
 

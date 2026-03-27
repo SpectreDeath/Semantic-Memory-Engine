@@ -39,7 +39,7 @@ class LogLevel(Enum):
 
 class JSONFormatter(logging.Formatter):
     """Custom formatter that outputs JSON for structured logging.
-    
+
     Converts log records to JSON with context information.
     """
 
@@ -50,10 +50,10 @@ class JSONFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         """Format log record as JSON.
-        
+
         Args:
             record: Log record to format
-            
+
         Returns:
             JSON string representation of log record
         """
@@ -93,14 +93,14 @@ class JSONFormatter(logging.Formatter):
 
 class LogContext:
     """Context manager for propagating logging context.
-    
+
     Temporarily sets context variables like request_id, user_id, etc.
     All logs within the context will include these fields.
     """
 
     def __init__(self, **fields: Any):
         """Initialize context with fields.
-        
+
         Args:
             **fields: Context fields to set (request_id, user_id, etc.)
         """
@@ -122,9 +122,9 @@ class LogContext:
 
 class StructuredLogger:
     """Structured logger with JSON output and context support.
-    
+
     Provides methods for logging at different levels with context propagation.
-    
+
     Attributes:
         logger: Underlying Python logger
         name: Logger name
@@ -132,7 +132,7 @@ class StructuredLogger:
 
     def __init__(self, logger: logging.Logger):
         """Initialize structured logger.
-        
+
         Args:
             logger: Python logger instance
         """
@@ -141,7 +141,7 @@ class StructuredLogger:
 
     def debug(self, message: str, **kwargs: Any) -> None:
         """Log debug message.
-        
+
         Args:
             message: Log message
             **kwargs: Extra fields to include
@@ -150,7 +150,7 @@ class StructuredLogger:
 
     def info(self, message: str, **kwargs: Any) -> None:
         """Log info message.
-        
+
         Args:
             message: Log message
             **kwargs: Extra fields to include
@@ -159,7 +159,7 @@ class StructuredLogger:
 
     def warning(self, message: str, **kwargs: Any) -> None:
         """Log warning message.
-        
+
         Args:
             message: Log message
             **kwargs: Extra fields to include
@@ -168,7 +168,7 @@ class StructuredLogger:
 
     def error(self, message: str, exc_info: bool = False, **kwargs: Any) -> None:
         """Log error message.
-        
+
         Args:
             message: Log message
             exc_info: Include exception info
@@ -178,7 +178,7 @@ class StructuredLogger:
 
     def critical(self, message: str, exc_info: bool = False, **kwargs: Any) -> None:
         """Log critical message.
-        
+
         Args:
             message: Log message
             exc_info: Include exception info
@@ -188,7 +188,7 @@ class StructuredLogger:
 
     def _log(self, level: int, message: str, exc_info: bool = False, **kwargs: Any) -> None:
         """Internal method to log with extra fields.
-        
+
         Args:
             level: Log level
             message: Log message
@@ -212,10 +212,10 @@ class StructuredLogger:
 
     def with_context(self, **fields: Any) -> LogContext:
         """Create context manager for context propagation.
-        
+
         Args:
             **fields: Context fields to set
-            
+
         Returns:
             LogContext context manager
         """
@@ -228,7 +228,7 @@ class StructuredLogger:
 
 class LogManager:
     """Central manager for structured logging configuration.
-    
+
     Singleton that configures all loggers with JSON formatting
     and context support.
     """
@@ -250,7 +250,7 @@ class LogManager:
     @classmethod
     def setup(cls, config: dict[str, Any] | None = None) -> None:
         """Set up logging system with configuration.
-        
+
         Args:
             config: Configuration dictionary with:
                 - level: Log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
@@ -304,10 +304,10 @@ class LogManager:
 
     def get_logger(self, name: str) -> StructuredLogger:
         """Get or create a structured logger.
-        
+
         Args:
             name: Logger name
-            
+
         Returns:
             StructuredLogger instance
         """
@@ -329,10 +329,10 @@ _log_manager: LogManager | None = None
 
 def get_logger(name: str) -> StructuredLogger:
     """Get or create a structured logger.
-    
+
     Args:
         name: Logger name (usually __name__)
-        
+
     Returns:
         StructuredLogger instance
     """
@@ -348,7 +348,7 @@ def get_logger(name: str) -> StructuredLogger:
 
 def setup_logging(config: dict[str, Any] | None = None) -> None:
     """Setup logging system with configuration.
-    
+
     Args:
         config: Configuration dictionary
     """
@@ -357,10 +357,10 @@ def setup_logging(config: dict[str, Any] | None = None) -> None:
 
 def get_log_context(**fields: Any) -> LogContext:
     """Create a log context for context propagation.
-    
+
     Args:
         **fields: Context fields to set
-        
+
     Returns:
         LogContext context manager
     """

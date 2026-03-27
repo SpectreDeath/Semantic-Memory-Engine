@@ -16,6 +16,7 @@ Key Features:
 - Geographic correlation analysis
 """
 
+import contextlib
 import logging
 from collections import defaultdict
 from dataclasses import dataclass
@@ -159,17 +160,16 @@ class CampaignDetector:
                                           keywords: list[str]) -> dict:
         """
         Analyze coordination patterns across platforms.
-        
+
         Args:
             campaign_data: Data from multiple platforms
             keywords: Keywords being coordinated
-            
+
         Returns:
             Dict containing coordination analysis results
         """
         try:
             coordination_results = []
-            risk_factors = []
 
             # Analyze each platform
             for platform, data in campaign_data.items():
@@ -198,7 +198,7 @@ class CampaignDetector:
             }
 
         except Exception as e:
-            logger.error(f"Error analyzing coordination patterns: {e}")
+            logger.exception(f"Error analyzing coordination patterns: {e}")
             return {
                 "error": str(e),
                 "coordination_results": [],
@@ -210,10 +210,10 @@ class CampaignDetector:
     async def analyze_bot_patterns(self, platform_data: dict) -> dict:
         """
         Analyze bot activity patterns in platform data.
-        
+
         Args:
             platform_data: Data from a specific platform
-            
+
         Returns:
             Dict containing bot analysis results
         """
@@ -254,7 +254,7 @@ class CampaignDetector:
             }
 
         except Exception as e:
-            logger.error(f"Error analyzing bot patterns: {e}")
+            logger.exception(f"Error analyzing bot patterns: {e}")
             return {
                 "error": str(e),
                 "bot_score": 0.0,
@@ -265,10 +265,10 @@ class CampaignDetector:
     async def analyze_amplification_network(self, platform_data: dict) -> dict:
         """
         Analyze amplification networks in platform data.
-        
+
         Args:
             platform_data: Data from a specific platform
-            
+
         Returns:
             Dict containing amplification network analysis
         """
@@ -307,7 +307,7 @@ class CampaignDetector:
             }
 
         except Exception as e:
-            logger.error(f"Error analyzing amplification network: {e}")
+            logger.exception(f"Error analyzing amplification network: {e}")
             return {
                 "error": str(e),
                 "amplification_networks": [],
@@ -319,11 +319,11 @@ class CampaignDetector:
     async def analyze_influence_metrics(self, handle: str, platform_data: dict) -> dict:
         """
         Analyze influence metrics for a specific account.
-        
+
         Args:
             handle: Account handle
             platform_data: Data from a specific platform
-            
+
         Returns:
             Dict containing influence analysis
         """
@@ -332,7 +332,7 @@ class CampaignDetector:
             users = platform_data.get("users", {})
 
             # Get account data
-            account_data = users.get(handle, {})
+            users.get(handle, {})
 
             # Analyze posting metrics
             posting_metrics = self._analyze_posting_metrics(posts, handle)
@@ -358,7 +358,7 @@ class CampaignDetector:
             }
 
         except Exception as e:
-            logger.error(f"Error analyzing influence metrics for {handle}: {e}")
+            logger.exception(f"Error analyzing influence metrics for {handle}: {e}")
             return {
                 "error": str(e),
                 "handle": handle,
@@ -373,11 +373,11 @@ class CampaignDetector:
                                              platform_data: dict) -> dict:
         """
         Analyze cross-platform influence patterns.
-        
+
         Args:
             handle: Account handle
             platform_data: Data across multiple platforms
-            
+
         Returns:
             Dict containing cross-platform influence analysis
         """
@@ -414,7 +414,7 @@ class CampaignDetector:
             }
 
         except Exception as e:
-            logger.error(f"Error analyzing cross-platform influence for {handle}: {e}")
+            logger.exception(f"Error analyzing cross-platform influence for {handle}: {e}")
             return {
                 "error": str(e),
                 "handle": handle,
@@ -428,12 +428,12 @@ class CampaignDetector:
                                         topic: str) -> dict:
         """
         Analyze geographic patterns in geotagged content.
-        
+
         Args:
             platform: Platform name
             geo_content: Geotagged content
             topic: Topic being analyzed
-            
+
         Returns:
             Dict containing geographic pattern analysis
         """
@@ -465,7 +465,7 @@ class CampaignDetector:
             }
 
         except Exception as e:
-            logger.error(f"Error analyzing geographic patterns for {platform}: {e}")
+            logger.exception(f"Error analyzing geographic patterns for {platform}: {e}")
             return {
                 "error": str(e),
                 "platform": platform,
@@ -478,10 +478,10 @@ class CampaignDetector:
     async def generate_geographic_heatmap(self, geolocation_data: dict) -> dict:
         """
         Generate geographic heatmap data.
-        
+
         Args:
             geolocation_data: Geographic data from platforms
-            
+
         Returns:
             Dict containing heatmap data
         """
@@ -500,7 +500,7 @@ class CampaignDetector:
             }
 
         except Exception as e:
-            logger.error(f"Error generating geographic heatmap: {e}")
+            logger.exception(f"Error generating geographic heatmap: {e}")
             return {
                 "error": str(e),
                 "heatmap_data": {},
@@ -713,10 +713,8 @@ class CampaignDetector:
                 created_at = user_data.get("created_at")
                 account_age = 0
                 if created_at:
-                    try:
+                    with contextlib.suppress(BaseException):
                         account_age = (datetime.now() - created_at).days
-                    except:
-                        pass
 
                 account_analysis[user_id] = {
                     "engagement_ratio": engagement_ratio,
@@ -734,17 +732,17 @@ class CampaignDetector:
         bot_indicators = []
 
         # Check posting frequency
-        for user_id, analysis in posting_analysis.items():
+        for analysis in posting_analysis.values():
             if analysis["posting_frequency"] > self.bot_detection_rules["posting_frequency"]["threshold"]:
                 bot_indicators.append(0.8)
 
         # Check content similarity
-        for post_id, analysis in content_analysis.items():
+        for analysis in content_analysis.values():
             if analysis["max_similarity"] > self.bot_detection_rules["content_similarity"]["threshold"]:
                 bot_indicators.append(0.7)
 
         # Check account behavior
-        for user_id, analysis in account_analysis.items():
+        for analysis in account_analysis.values():
             if analysis["engagement_ratio"] < self.bot_detection_rules["engagement_ratio"]["likes_to_posts"]:
                 bot_indicators.append(0.6)
 
@@ -905,22 +903,11 @@ class CampaignDetector:
         ]
 
         if risk_level == "CRITICAL":
-            return base_recommendations + [
-                "Escalate to senior management immediately",
-                "Coordinate with platform moderators",
-                "Prepare emergency response protocols"
-            ]
+            return [*base_recommendations, "Escalate to senior management immediately", "Coordinate with platform moderators", "Prepare emergency response protocols"]
         elif risk_level == "HIGH":
-            return base_recommendations + [
-                "Increase monitoring frequency",
-                "Engage with community to counter misinformation",
-                "Prepare public communication strategy"
-            ]
+            return [*base_recommendations, "Increase monitoring frequency", "Engage with community to counter misinformation", "Prepare public communication strategy"]
         elif risk_level == "MEDIUM":
-            return base_recommendations + [
-                "Continue monitoring for escalation",
-                "Document patterns for future reference"
-            ]
+            return [*base_recommendations, "Continue monitoring for escalation", "Document patterns for future reference"]
         else:
             return base_recommendations
 
@@ -986,7 +973,7 @@ class CampaignDetector:
         """Generate global heatmap combining all platforms."""
         global_data = defaultdict(int)
 
-        for platform, data in heatmap_data.items():
+        for data in heatmap_data.values():
             for location, count in data.get("data", {}).items():
                 global_data[location] += count
 
@@ -1107,7 +1094,7 @@ class CampaignDetector:
             return 0.0
 
         # Calculate correlation based on co-occurrence
-        total_posts = len(posts)
+        len(posts)
         correlations = []
 
         keyword_list = list(keyword_usage.keys())
@@ -1221,7 +1208,7 @@ class CampaignDetector:
             "mention_count": mentions,
             "retweet_count": retweets,
             "influence_network_size": mentions + retweets,
-            "network_diversity": len(set(post.get("author_id") for post in posts if f"@{handle}" in post.get("text", "")))
+            "network_diversity": len({post.get("author_id") for post in posts if f"@{handle}" in post.get("text", "")})
         }
 
     def _calculate_influence_score(self, posting_metrics: dict,

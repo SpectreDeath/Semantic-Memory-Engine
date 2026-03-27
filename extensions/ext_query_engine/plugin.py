@@ -61,7 +61,7 @@ class QueryEngineExtension(BasePlugin):
             self.query_aifdb,
         ]
 
-    async def execute_query(self, query: str, filters: dict = None) -> str:
+    async def execute_query(self, query: str, filters: dict | None = None) -> str:
         """Execute semantic query."""
         if not self.engine:
             return json.dumps({"error": "QueryEngine not available"})
@@ -91,7 +91,7 @@ class QueryEngineExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def resolve_concept(self, ambiguous_term: str, context: str = None) -> str:
+    async def resolve_concept(self, ambiguous_term: str, context: str | None = None) -> str:
         """Resolve ambiguous concept to specific meaning."""
         if not self.concept:
             return json.dumps({"error": "ConceptResolver not available"})

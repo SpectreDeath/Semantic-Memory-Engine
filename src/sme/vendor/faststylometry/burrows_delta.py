@@ -101,7 +101,7 @@ def get_token_counts(corpus: Corpus):
 
     corpus.token_counts = token_counts
     corpus.total_token_counts = total_token_counts
-    corpus.author_book_combinations = [a + " - " + b for a, b in zip(corpus.authors, corpus.books)]
+    corpus.author_book_combinations = [a + " - " + b for a, b in zip(corpus.authors, corpus.books, strict=False)]
 
     ## OLD LOGIC
     # corpus.df_token_counts = pd.DataFrame(token_counts, columns=corpus.top_tokens)
@@ -121,7 +121,7 @@ def get_token_counts_by_author(corpus: Corpus):
     :param corpus:  The corpus to run the operation on and store the result in.
     """
     corpus.all_unique_authors = sorted(set(corpus.authors))
-    corpus.author_to_author_id = dict([(author, idx) for idx, author in enumerate(corpus.all_unique_authors)])
+    corpus.author_to_author_id = {author: idx for idx, author in enumerate(corpus.all_unique_authors)}
     corpus.author_ids = [corpus.author_to_author_id[author_name] for author_name in corpus.authors]
 
     corpus.token_counts_by_author = np.stack(
@@ -139,7 +139,7 @@ def get_token_counts_by_author_and_book(corpus: Corpus):
     :param corpus:  The corpus to run the operation on and store the result in.
     """
     corpus.all_unique_authors = sorted(set(corpus.author_book_combinations))
-    corpus.author_to_author_id = dict([(author, idx) for idx, author in enumerate(corpus.all_unique_authors)])
+    corpus.author_to_author_id = {author: idx for idx, author in enumerate(corpus.all_unique_authors)}
     corpus.author_ids = [corpus.author_to_author_id[author_name] for author_name in corpus.author_book_combinations]
 
     corpus.token_counts_by_author = np.stack(
@@ -194,7 +194,7 @@ def calculate_difference_from_train_corpus(test_corpus, train_corpus=None):
     test_corpus.difference_matrix = np.stack(test_corpus.difference_matrices)
 
 
-def calculate_burrows_delta(train_corpus: Corpus, test_corpus: Corpus, vocab_size: int = 50, words_to_exclude: set = {},
+def calculate_burrows_delta(train_corpus: Corpus, test_corpus: Corpus, vocab_size: int = 50, words_to_exclude: set | None = None,
                             tok_match_pattern: str = r'^[a-z][a-z]+$') -> pd.DataFrame:
     """
     Calculate the Burrows' Delta statistic for the test corpus vs every author's subcorpus in the training corpus.
@@ -203,6 +203,8 @@ def calculate_burrows_delta(train_corpus: Corpus, test_corpus: Corpus, vocab_siz
     :param vocab_size: We will take the top n tokens from the training corpus and use as the vocabulary for the model. Normally 50-100 make sensible values.
     :return: A DataFrame of Burrows' Delta values for each author in the training corpus.
     """
+    if words_to_exclude is None:
+        words_to_exclude = {}
     get_top_tokens(train_corpus, vocab_size, words_to_exclude, tok_match_pattern)
     get_token_counts(train_corpus)
     get_token_counts_by_author(train_corpus)

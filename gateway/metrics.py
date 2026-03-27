@@ -51,7 +51,7 @@ class MetricsManager:
                 start_http_server(self.port)
                 logger.info(f"Prometheus metrics exporter started on port {self.port}")
             except Exception as e:
-                logger.error(f"Failed to start Prometheus server: {e}")
+                logger.exception(f"Failed to start Prometheus server: {e}")
         else:
             logger.info("Prometheus metrics disabled via environment")
 

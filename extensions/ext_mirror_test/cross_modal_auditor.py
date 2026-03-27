@@ -79,7 +79,7 @@ class CrossModalAuditor:
     def __init__(self, model_name: str = "openai/clip-vit-base-patch32"):
         """
         Initialize the Cross-Modal Auditor.
-        
+
         Args:
             model_name: CLIP model to use for image-text matching.
         """
@@ -120,16 +120,16 @@ class CrossModalAuditor:
 
         except Exception as e:
             print(f"❌ Failed to load CLIP model: {e}")
-            logger.error(f"Model initialization failed: {e}")
+            logger.exception(f"Model initialization failed: {e}")
             return False
 
     def _extract_keywords(self, prompt: str) -> dict[str, list[str]]:
         """
         Extract key nouns and adjectives from prompt using NLP.
-        
+
         Args:
             prompt: Text prompt to analyze.
-            
+
         Returns:
             Dictionary with 'nouns' and 'adjectives' keys.
         """
@@ -167,10 +167,10 @@ class CrossModalAuditor:
     def _preprocess_image(self, image_path: str) -> torch.Tensor | None:
         """
         Preprocess image for CLIP model.
-        
+
         Args:
             image_path: Path to image file.
-            
+
         Returns:
             Preprocessed image tensor or None if failed.
         """
@@ -184,18 +184,18 @@ class CrossModalAuditor:
 
         except Exception as e:
             print(f"❌ Failed to process image {image_path}: {e}")
-            logger.error(f"Image preprocessing failed: {e}")
+            logger.exception(f"Image preprocessing failed: {e}")
             return None
 
     def _calculate_similarity(self, image_features: torch.Tensor,
                             text_features: torch.Tensor) -> float:
         """
         Calculate cosine similarity between image and text features.
-        
+
         Args:
             image_features: Image feature tensor.
             text_features: Text feature tensor.
-            
+
         Returns:
             Similarity score between 0 and 100.
         """
@@ -212,10 +212,10 @@ class CrossModalAuditor:
     def _generate_test_prompts(self, keywords: dict[str, list[str]]) -> list[str]:
         """
         Generate test prompts from extracted keywords.
-        
+
         Args:
             keywords: Dictionary with 'nouns' and 'adjectives'.
-            
+
         Returns:
             List of test prompts.
         """
@@ -245,26 +245,25 @@ class CrossModalAuditor:
                             threshold: float = 65.0) -> AuditResult:
         """
         Audit image-text synchronization using CLIP model.
-        
+
         Args:
             image_path: Path to the image file.
             prompt: Text prompt describing the image.
             threshold: Sync score threshold for hallucination detection.
-            
+
         Returns:
             AuditResult containing sync score and hallucination status.
         """
         # Initialize model if not already done
-        if not self._initialized:
-            if not self._initialize_model():
-                return AuditResult(
-                    sync_score=0.0,
-                    hallucination_detected=True,
-                    severity="HIGH",
-                    detected_keywords=[],
-                    missing_keywords=[],
-                    timestamp=datetime.now()
-                )
+        if not self._initialized and not self._initialize_model():
+            return AuditResult(
+                sync_score=0.0,
+                hallucination_detected=True,
+                severity="HIGH",
+                detected_keywords=[],
+                missing_keywords=[],
+                timestamp=datetime.now()
+            )
 
         print(f"🔍 Starting multimodal audit for: {image_path}")
         print(f"📝 Prompt: {prompt}")
@@ -357,12 +356,12 @@ class CrossModalAuditor:
 def audit_multimodal_sync(image_path: str, prompt: str, threshold: float = 65.0) -> dict[str, Any]:
     """
     Main function to audit image-text synchronization.
-    
+
     Args:
         image_path: Path to the image file.
         prompt: Text prompt describing the image.
         threshold: Sync score threshold for hallucination detection (default: 65%).
-        
+
     Returns:
         Dictionary containing audit results.
     """

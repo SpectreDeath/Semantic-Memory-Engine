@@ -98,7 +98,7 @@ def get_concept_with_cache(term: str, limit: int = 5):
                            (term, json.dumps(results), now, now))
             conn.commit()
         except Exception as e:
-            logger.error(f"Failed to cache {term}: {e}")
+            logger.exception(f"Failed to cache {term}: {e}")
         finally:
             conn.close()
 
@@ -141,7 +141,7 @@ def lookup_concept_api(term: str, limit: int = 5):
         return results
 
     except Exception as e:
-        logger.error(f"ConceptNet API lookup failed for {term}: {e}")
+        logger.exception(f"ConceptNet API lookup failed for {term}: {e}")
         # Fallback for stability (weights included)
         fallbacks = {
             "cbrn": {

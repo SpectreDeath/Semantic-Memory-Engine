@@ -98,10 +98,10 @@ class RhetoricalBehaviorAuditor:
     def analyze_sentiment_volatility(self, text: str) -> float:
         """
         Analyze sentiment volatility in the text.
-        
+
         Args:
             text: Text to analyze.
-            
+
         Returns:
             Sentiment volatility score (0-1, higher = more volatile).
         """
@@ -134,10 +134,10 @@ class RhetoricalBehaviorAuditor:
     def calculate_type_token_ratio(self, text: str) -> float:
         """
         Calculate Type-Token Ratio (TTR) for lexical diversity analysis.
-        
+
         Args:
             text: Text to analyze.
-            
+
         Returns:
             Type-Token Ratio (0-1, higher = more diverse).
         """
@@ -157,10 +157,10 @@ class RhetoricalBehaviorAuditor:
     def analyze_synthetic_repetitiveness(self, text: str) -> float:
         """
         Analyze synthetic repetitiveness using various repetition metrics.
-        
+
         Args:
             text: Text to analyze.
-            
+
         Returns:
             Synthetic repetitiveness score (0-1, higher = more repetitive).
         """
@@ -189,10 +189,10 @@ class RhetoricalBehaviorAuditor:
     def detect_emphatic_qualifiers(self, text: str) -> list[str]:
         """
         Detect emphatic qualifiers in the text.
-        
+
         Args:
             text: Text to analyze.
-            
+
         Returns:
             List of detected emphatic qualifiers.
         """
@@ -208,10 +208,10 @@ class RhetoricalBehaviorAuditor:
     def detect_non_contracted_denials(self, text: str) -> list[str]:
         """
         Detect non-contracted denials in the text.
-        
+
         Args:
             text: Text to analyze.
-            
+
         Returns:
             List of detected non-contracted denials.
         """
@@ -227,10 +227,10 @@ class RhetoricalBehaviorAuditor:
     def calculate_lexical_diversity_score(self, ttr: float) -> float:
         """
         Calculate lexical diversity score based on TTR.
-        
+
         Args:
             ttr: Type-Token Ratio.
-            
+
         Returns:
             Lexical diversity score (0-1, higher = more diverse).
         """
@@ -255,10 +255,10 @@ class RhetoricalBehaviorAuditor:
     def audit_rhetorical_behavior(self, text: str) -> RhetoricalAnalysis:
         """
         Main function to audit rhetorical behavior in text.
-        
+
         Args:
             text: Text to analyze for rhetorical anomalies.
-            
+
         Returns:
             RhetoricalAnalysis containing all analysis results.
         """
@@ -323,7 +323,7 @@ class RhetoricalBehaviorAuditor:
                                  synthetic_repetitiveness: float) -> bool:
         """
         Detect rhetorical anomaly based on analysis criteria.
-        
+
         Criteria: Low Lexical Diversity + High Emphatic Qualifiers
         """
         low_lexical_diversity = lexical_diversity < 0.5
@@ -376,10 +376,10 @@ class RhetoricalBehaviorAuditor:
 def audit_rhetorical_behavior(text: str) -> dict[str, Any]:
     """
     Main function to audit rhetorical behavior in text.
-    
+
     Args:
         text: Text to analyze for rhetorical anomalies.
-        
+
     Returns:
         Dictionary containing analysis results.
     """

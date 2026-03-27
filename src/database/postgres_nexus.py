@@ -36,7 +36,7 @@ POSTGRES_CONNECTION_STRING = os.environ.get(
 class PostgresNexus:
     """
     PostgreSQL-backed forensic database layer.
-    
+
     Provides the same interface as ForensicNexus but with PostgreSQL
     for production multi-container deployments.
     """
@@ -80,7 +80,7 @@ class PostgresNexus:
                 metadata JSONB,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
             );
-            
+
             -- Source provenance table
             CREATE TABLE IF NOT EXISTS prov.source_provenance (
                 id SERIAL PRIMARY KEY,
@@ -90,17 +90,17 @@ class PostgresNexus:
                 first_seen TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
                 last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
             );
-            
+
             -- Create indexes for performance
-            CREATE INDEX IF NOT EXISTS idx_forensic_events_timestamp 
+            CREATE INDEX IF NOT EXISTS idx_forensic_events_timestamp
                 ON lab.forensic_events(timestamp DESC);
-            CREATE INDEX IF NOT EXISTS idx_forensic_events_tool 
+            CREATE INDEX IF NOT EXISTS idx_forensic_events_tool
                 ON lab.forensic_events(tool_name);
-            CREATE INDEX IF NOT EXISTS idx_source_provenance_id 
+            CREATE INDEX IF NOT EXISTS idx_source_provenance_id
                 ON prov.source_provenance(source_id);
-            
+
             -- Enable JSONB indexing
-            CREATE INDEX IF NOT EXISTS idx_forensic_events_metadata 
+            CREATE INDEX IF NOT EXISTS idx_forensic_events_metadata
                 ON lab.forensic_events USING GIN(metadata);
         """
 
@@ -111,7 +111,7 @@ class PostgresNexus:
                 conn.commit()
             logger.info("PostgreSQL Nexus: Schema initialized")
         except Exception as e:
-            logger.error(f"PostgreSQL Nexus: Schema init failed: {e}")
+            logger.exception(f"PostgreSQL Nexus: Schema init failed: {e}")
             raise
 
     @contextmanager
@@ -132,7 +132,7 @@ class PostgresNexus:
                     rows = cur.fetchall()
                     return [dict(row) for row in rows]
         except Exception as e:
-            logger.error(f"PostgreSQL Query Error: {e}\nSQL: {sql}")
+            logger.exception(f"PostgreSQL Query Error: {e}\nSQL: {sql}")
             return []
 
     def execute(self, sql: str, params: tuple = ()):
@@ -143,7 +143,7 @@ class PostgresNexus:
                     cur.execute(sql, params)
                 conn.commit()
         except Exception as e:
-            logger.error(f"PostgreSQL Execution Error: {e}\nSQL: {sql}")
+            logger.exception(f"PostgreSQL Execution Error: {e}\nSQL: {sql}")
             raise
 
     def get_unified_forensic_feed(self, limit: int = 10) -> list[dict[str, Any]]:
@@ -174,7 +174,7 @@ class PostgresNexus:
                 version = cur.fetchone()
 
                 cur.execute("""
-                        SELECT 
+                        SELECT
                             schemaname,
                             tablename,
                             n_live_tup as row_count
@@ -207,12 +207,12 @@ def get_postgres_nexus(
 ) -> PostgresNexus:
     """
     Get the PostgreSQL Nexus singleton.
-    
+
     Args:
         connection_string: PostgreSQL connection string
         min_connections: Minimum pool connections
         max_connections: Maximum pool connections
-    
+
     Returns:
         PostgresNexus instance
     """
@@ -238,10 +238,10 @@ def is_postgres_enabled() -> bool:
 def get_nexus(use_postgres: bool | None = None) -> Any:
     """
     Factory function to get the appropriate Nexus instance.
-    
+
     Args:
         use_postgres: Override automatic detection
-    
+
     Returns:
         ForensicNexus (SQLite) or PostgresNexus (PostgreSQL)
     """

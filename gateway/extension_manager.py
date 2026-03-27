@@ -112,7 +112,7 @@ class ExtensionManager:
                     logger.warning(f"Plugin {plugin_id}: Entry point {entry_point} not found.")
 
             except Exception as e:
-                logger.error(f"Failed to load plugin from {plugin_path}: {e}")
+                logger.exception(f"Failed to load plugin from {plugin_path}: {e}")
 
     async def _load_module(self, plugin_id: str, path: str, manifest: dict[str, Any]):
         """
@@ -154,7 +154,7 @@ class ExtensionManager:
                     f"Plugin {plugin_id}: register_extension() not found in {module_name}"
                 )
         except Exception as e:
-            logger.error(f"Failed to load package-based plugin {plugin_id}: {e}")
+            logger.exception(f"Failed to load package-based plugin {plugin_id}: {e}")
 
     def get_extension_tools(self) -> list[dict[str, Any]]:
         """
@@ -203,7 +203,7 @@ class ExtensionManager:
                     else:
                         instance.on_ingestion(raw_data, metadata)
                 except Exception as e:
-                    logger.error(f"Error in on_ingestion hook for plugin: {e}")
+                    logger.exception(f"Error in on_ingestion hook for plugin: {e}")
 
     async def fire_event(self, event_id: str, payload: dict[str, Any]):
         """
@@ -219,7 +219,7 @@ class ExtensionManager:
                     else:
                         instance.on_event(event_id, payload)
                 except Exception as e:
-                    logger.error(f"Error firing event {event_id} to {plugin_id}: {e}")
+                    logger.exception(f"Error firing event {event_id} to {plugin_id}: {e}")
 
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)

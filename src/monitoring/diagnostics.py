@@ -121,9 +121,7 @@ class DatabaseHealthChecker:
         """Validate table name to prevent SQL injection."""
         if not table_name or not isinstance(table_name, str):
             return False
-        if not table_name.replace("_", "").replace("-", "").isalnum():
-            return False
-        return True
+        return table_name.replace("_", "").replace("-", "").isalnum()
 
     @staticmethod
     def check_database() -> dict[str, Any]:
@@ -216,7 +214,7 @@ class CacheEfficiencyAnalyzer:
 
             # Get sentiment log statistics
             cursor.execute("""
-                SELECT 
+                SELECT
                     COUNT(*) as total_records,
                     COUNT(DISTINCT source_file) as unique_files,
                     AVG(compound) as avg_sentiment,

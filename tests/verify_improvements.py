@@ -41,7 +41,7 @@ def test_web_search():
 
     # Minimal test to see if it runs (might fail without internet, but logic should be sound)
     try:
-        result = search_duckduckgo("test query")
+        search_duckduckgo("test query")
         print("✅ Search logic executed.")
         # print(result[:100] + "...")
     except Exception as e:

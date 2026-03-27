@@ -175,7 +175,7 @@ class PriorityCache:
 class VectorSyncer:
     """
     Hybrid vector store with local Polars IPC and Supabase pgvector.
-    
+
     Features:
     - Local-first with automatic Supabase sync
     - Priority-based caching (HOT/WARM/COLD/FROZEN)
@@ -303,7 +303,7 @@ class VectorSyncer:
     ) -> str:
         """
         Add a vector to the store.
-        
+
         Returns the vector ID.
         """
         metadata = metadata or {}
@@ -408,7 +408,7 @@ class VectorSyncer:
     ) -> list[tuple[VectorEntry, float]]:
         """
         Search for similar vectors.
-        
+
         Returns list of (entry, similarity_score) tuples.
         """
         results: list[tuple[VectorEntry, float]] = []
@@ -497,7 +497,7 @@ class VectorSyncer:
     def sync_to_supabase(self, batch_size: int = 100) -> dict[str, Any]:
         """
         Sync pending vectors to Supabase.
-        
+
         Returns sync statistics.
         """
         if not supabase:
@@ -572,7 +572,7 @@ class VectorSyncer:
     def pull_from_supabase(self, since: datetime | None = None) -> int:
         """
         Pull new vectors from Supabase.
-        
+
         Returns number of vectors pulled.
         """
         if not supabase:

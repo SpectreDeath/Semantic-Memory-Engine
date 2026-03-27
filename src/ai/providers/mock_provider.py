@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from src.ai.provider import SME_AI_Provider
+from src.ai.provider import SMEAIProvider
 
 
-class MockProvider(SME_AI_Provider):
+class MockProvider(SMEAIProvider):
     """
     Mock AI Provider for development and CI verification.
     """

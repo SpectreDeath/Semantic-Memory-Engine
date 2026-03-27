@@ -8,10 +8,10 @@ Integrates with DataManager and SemanticGraph for unified linguistic analysis.
 
 Usage:
     from src.core.nlp_pipeline import NLPPipeline
-    
+
     nlp = NLPPipeline()
     analysis = nlp.analyze(text)
-    
+
     print(analysis.pos_tags)        # Part-of-speech tags
     print(analysis.entities)         # Named entities
     print(analysis.lemmas)          # Lemmatized forms
@@ -116,7 +116,7 @@ class NLPAnalysis:
 class NLPPipeline:
     """
     Advanced NLP analysis pipeline.
-    
+
     Provides complete linguistic analysis including tokenization, POS tagging,
     NER, chunking, lemmatization, and semantic analysis.
     """
@@ -159,10 +159,10 @@ class NLPPipeline:
     def analyze(self, text: str) -> NLPAnalysis | None:
         """
         Perform complete NLP analysis on text.
-        
+
         Args:
             text: Text to analyze
-        
+
         Returns:
             NLPAnalysis with all linguistic features
         """
@@ -215,7 +215,7 @@ class NLPPipeline:
             # Build results
             lemmas = {token.text: token.lemma for token in tokens}
             stems = {token.text: token.stem for token in tokens}
-            vocabulary = set(token.text for token in tokens)
+            vocabulary = {token.text for token in tokens}
 
             analysis = NLPAnalysis(
                 text=text,
@@ -236,17 +236,17 @@ class NLPPipeline:
             return analysis
 
         except Exception as e:
-            logger.error(f"Analysis failed: {e}")
+            logger.exception(f"Analysis failed: {e}")
             return None
 
     def extract_key_terms(self, text: str, min_freq: int = 1) -> list[tuple[str, int]]:
         """
         Extract key terms from text by frequency.
-        
+
         Args:
             text: Text to analyze
             min_freq: Minimum frequency to include
-        
+
         Returns:
             List of (term, frequency) tuples, sorted by frequency
         """
@@ -270,10 +270,10 @@ class NLPPipeline:
     def extract_entities_by_type(self, text: str) -> dict[str, list[str]]:
         """
         Extract named entities organized by type.
-        
+
         Args:
             text: Text to analyze
-        
+
         Returns:
             Dictionary mapping entity types to entity lists
         """
@@ -286,10 +286,10 @@ class NLPPipeline:
     def lemmatize_text(self, text: str) -> str:
         """
         Return lemmatized version of text.
-        
+
         Args:
             text: Text to lemmatize
-        
+
         Returns:
             Lemmatized text
         """
@@ -303,10 +303,10 @@ class NLPPipeline:
     def get_linguistic_complexity(self, text: str) -> dict[str, float]:
         """
         Calculate linguistic complexity metrics.
-        
+
         Args:
             text: Text to analyze
-        
+
         Returns:
             Dictionary with complexity metrics
         """

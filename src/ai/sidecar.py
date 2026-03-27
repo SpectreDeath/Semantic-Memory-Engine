@@ -27,7 +27,7 @@ try:
     provider = get_provider()
     logger.info(f"AI Provider initialized: {provider.__class__.__name__}")
 except Exception as e:
-    logger.error(f"Failed to initialize AI Provider: {e}")
+    logger.exception(f"Failed to initialize AI Provider: {e}")
     provider = None
 
 class AIRequest(BaseModel):

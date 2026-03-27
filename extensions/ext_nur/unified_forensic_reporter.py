@@ -7,7 +7,6 @@ with AI-powered conclusions using rnj-1 for analysis.
 
 from __future__ import annotations
 
-import datetime
 import logging
 import re
 from dataclasses import dataclass
@@ -16,15 +15,15 @@ from pathlib import Path
 from typing import Any
 
 # Configure logging for the forensic reporter
-logger = logging.getLogger('nur.unified_forensic_reporter')
+logger = logging.getLogger("nur.unified_forensic_reporter")
 logger.setLevel(logging.INFO)
 
 # Create file handler for forensic reporting events
-forensic_handler = logging.FileHandler('forensic_reporting_events.log')
+forensic_handler = logging.FileHandler("forensic_reporting_events.log")
 forensic_handler.setLevel(logging.INFO)
 
 # Create formatter and add it to handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 forensic_handler.setFormatter(formatter)
 
 # Add handler to logger
@@ -34,6 +33,7 @@ logger.addHandler(forensic_handler)
 @dataclass
 class ExtensionLogEntry:
     """Represents a log entry from an extension."""
+
     timestamp: datetime
     level: str
     message: str
@@ -44,6 +44,7 @@ class ExtensionLogEntry:
 @dataclass
 class ForensicSummary:
     """Represents a forensic summary of system health."""
+
     overall_health_score: float
     detected_issues: list[str]
     resolved_issues: list[str]
@@ -61,30 +62,33 @@ class UnifiedForensicReporter:
 
         # Log file patterns for each extension
         self.log_patterns = {
-            'ghost_trap': {
-                'files': ['ghost_trap_events.log', 'ghost_detection_events.log'],
-                'event_types': ['POTENTIAL SELF-REPLICATION EVENT', 'SUSPICIOUS FILE DETECTED'],
-                'extension_name': 'Ghost Trap'
+            "ghost_trap": {
+                "files": ["ghost_trap_events.log", "ghost_detection_events.log"],
+                "event_types": ["POTENTIAL SELF-REPLICATION EVENT", "SUSPICIOUS FILE DETECTED"],
+                "extension_name": "Ghost Trap",
             },
-            'cross_modal': {
-                'files': ['cross_modal_audit_events.log'],
-                'event_types': ['MULTIMODAL HALLUCINATION DETECTED', 'MULTIMODAL SYNC VERIFIED'],
-                'extension_name': 'Cross-Modal Auditor'
+            "cross_modal": {
+                "files": ["cross_modal_audit_events.log"],
+                "event_types": ["MULTIMODAL HALLUCINATION DETECTED", "MULTIMODAL SYNC VERIFIED"],
+                "extension_name": "Cross-Modal Auditor",
             },
-            'stetho_scan': {
-                'files': ['watermark_detection_events.log', 'stetho_governor_integration_events.log'],
-                'event_types': ['PROVENANCE IDENTIFIED', 'DETECTION BLOCKED'],
-                'extension_name': 'Statistical Watermark Decoder'
-            }
+            "stetho_scan": {
+                "files": [
+                    "watermark_detection_events.log",
+                    "stetho_governor_integration_events.log",
+                ],
+                "event_types": ["PROVENANCE IDENTIFIED", "DETECTION BLOCKED"],
+                "extension_name": "Statistical Watermark Decoder",
+            },
         }
 
     def read_extension_logs(self, hours_back: int = 24) -> list[ExtensionLogEntry]:
         """
         Read and parse logs from all extensions.
-        
+
         Args:
             hours_back: Number of hours to look back in logs.
-            
+
         Returns:
             List of parsed log entries.
         """
@@ -93,8 +97,8 @@ class UnifiedForensicReporter:
 
         print(f"🔍 Reading extension logs from the last {hours_back} hours...")
 
-        for ext_key, ext_config in self.log_patterns.items():
-            for log_file in ext_config['files']:
+        for ext_config in self.log_patterns.values():
+            for log_file in ext_config["files"]:
                 log_path = Path(log_file)
 
                 if not log_path.exists():
@@ -102,7 +106,7 @@ class UnifiedForensicReporter:
                     continue
 
                 try:
-                    with open(log_path, encoding='utf-8') as f:
+                    with open(log_path, encoding="utf-8") as f:
                         for line in f:
                             entry = self._parse_log_line(line.strip(), ext_config, cutoff_time)
                             if entry:
@@ -110,7 +114,7 @@ class UnifiedForensicReporter:
 
                 except Exception as e:
                     print(f"❌ Failed to read log file {log_path}: {e}")
-                    logger.error(f"Failed to read log file {log_path}: {e}")
+                    logger.exception(f"Failed to read log file {log_path}: {e}")
 
         # Sort entries by timestamp
         log_entries.sort(key=lambda x: x.timestamp)
@@ -118,44 +122,46 @@ class UnifiedForensicReporter:
         print(f"✅ Parsed {len(log_entries)} log entries from all extensions")
         return log_entries
 
-    def _parse_log_line(self, line: str, ext_config: dict, cutoff_time: datetime) -> ExtensionLogEntry | None:
+    def _parse_log_line(
+        self, line: str, ext_config: dict, cutoff_time: datetime
+    ) -> ExtensionLogEntry | None:
         """
         Parse a single log line into a structured entry.
-        
+
         Args:
             line: Raw log line.
             ext_config: Extension configuration.
             cutoff_time: Minimum timestamp to include.
-            
+
         Returns:
             Parsed log entry or None if parsing failed or timestamp too old.
         """
         # Expected log format: YYYY-MM-DD HH:MM:SS,mmm - name - level - message
-        log_pattern = r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) - ([^ ]+) - ([A-Z]+) - (.+)'
+        log_pattern = r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}) - ([^ ]+) - ([A-Z]+) - (.+)"
         match = re.match(log_pattern, line)
 
         if not match:
             return None
 
-        timestamp_str, logger_name, level, message = match.groups()
+        timestamp_str, _logger_name, level, message = match.groups()
 
         try:
             # Parse timestamp
-            timestamp = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S,%f')
+            timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S,%f")
 
             # Check if within time range
             if timestamp < cutoff_time:
                 return None
 
             # Determine event type
-            event_type = self._classify_event(message, ext_config['event_types'])
+            event_type = self._classify_event(message, ext_config["event_types"])
 
             return ExtensionLogEntry(
                 timestamp=timestamp,
                 level=level,
                 message=message,
-                extension=ext_config['extension_name'],
-                event_type=event_type
+                extension=ext_config["extension_name"],
+                event_type=event_type,
             )
 
         except ValueError:
@@ -171,10 +177,10 @@ class UnifiedForensicReporter:
     def analyze_system_health(self, log_entries: list[ExtensionLogEntry]) -> ForensicSummary:
         """
         Analyze system health based on log entries.
-        
+
         Args:
             log_entries: List of parsed log entries.
-            
+
         Returns:
             Forensic summary with health analysis.
         """
@@ -218,7 +224,9 @@ class UnifiedForensicReporter:
             system_status = "POOR"
 
         # Get last scan time
-        last_scan_time = max([entry.timestamp for entry in log_entries]) if log_entries else datetime.now()
+        last_scan_time = (
+            max([entry.timestamp for entry in log_entries]) if log_entries else datetime.now()
+        )
 
         summary = ForensicSummary(
             overall_health_score=health_score,
@@ -226,7 +234,7 @@ class UnifiedForensicReporter:
             resolved_issues=resolved_issues,
             system_status=system_status,
             last_scan_time=last_scan_time,
-            extension_activity=extension_activity
+            extension_activity=extension_activity,
         )
 
         print(f"✅ System health analysis complete. Score: {health_score}% ({system_status})")
@@ -235,11 +243,11 @@ class UnifiedForensicReporter:
     def _calculate_health_score(self, event_counts: dict[str, int], total_entries: int) -> float:
         """
         Calculate overall system health score.
-        
+
         Args:
             event_counts: Dictionary of event counts by type.
             total_entries: Total number of log entries.
-            
+
         Returns:
             Health score between 0 and 100.
         """
@@ -256,9 +264,9 @@ class UnifiedForensicReporter:
             elif "MULTIMODAL HALLUCINATION DETECTED" in event_key:
                 score -= count * 10  # Medium severity
             elif "PROVENANCE IDENTIFIED" in event_key:
-                score -= count * 5   # Lower severity
+                score -= count * 5  # Lower severity
             elif "DETECTION BLOCKED" in event_key:
-                score -= count * 2   # Resource constraint
+                score -= count * 2  # Resource constraint
 
         # Bonus for positive events
         for event_key, count in event_counts.items():
@@ -270,14 +278,16 @@ class UnifiedForensicReporter:
 
         return round(score, 1)
 
-    def generate_forensic_conclusion(self, summary: ForensicSummary, log_entries: list[ExtensionLogEntry]) -> str:
+    def generate_forensic_conclusion(
+        self, summary: ForensicSummary, log_entries: list[ExtensionLogEntry]
+    ) -> str:
         """
         Generate AI-powered forensic conclusion using rnj-1 logic.
-        
+
         Args:
             summary: System health summary.
             log_entries: All parsed log entries.
-            
+
         Returns:
             Forensic conclusion text.
         """
@@ -290,29 +300,43 @@ class UnifiedForensicReporter:
         resolved_count = len(summary.resolved_issues)
 
         # Find specific events for detailed analysis
-        hallucination_events = [e for e in log_entries if "MULTIMODAL HALLUCINATION DETECTED" in e.event_type]
-        replication_events = [e for e in log_entries if "POTENTIAL SELF-REPLICATION EVENT" in e.event_type]
+        hallucination_events = [
+            e for e in log_entries if "MULTIMODAL HALLUCINATION DETECTED" in e.event_type
+        ]
+        replication_events = [
+            e for e in log_entries if "POTENTIAL SELF-REPLICATION EVENT" in e.event_type
+        ]
         watermark_events = [e for e in log_entries if "PROVENANCE IDENTIFIED" in e.event_type]
 
         # Generate conclusion using rnj-1 style analysis
         conclusion = self._rnj1_forensic_analysis(
-            health_score, system_status, detected_count, resolved_count,
-            hallucination_events, replication_events, watermark_events,
-            summary.extension_activity
+            health_score,
+            system_status,
+            detected_count,
+            resolved_count,
+            hallucination_events,
+            replication_events,
+            watermark_events,
+            summary.extension_activity,
         )
 
         print("✅ Forensic conclusion generated")
         return conclusion
 
-    def _rnj1_forensic_analysis(self, health_score: float, system_status: str,
-                              detected_count: int, resolved_count: int,
-                              hallucination_events: list[ExtensionLogEntry],
-                              replication_events: list[ExtensionLogEntry],
-                              watermark_events: list[ExtensionLogEntry],
-                              extension_activity: dict[str, int]) -> str:
+    def _rnj1_forensic_analysis(
+        self,
+        health_score: float,
+        system_status: str,
+        detected_count: int,
+        resolved_count: int,
+        hallucination_events: list[ExtensionLogEntry],
+        replication_events: list[ExtensionLogEntry],
+        watermark_events: list[ExtensionLogEntry],
+        extension_activity: dict[str, int],
+    ) -> str:
         """
         Generate forensic conclusion using rnj-1 style analysis.
-        
+
         Args:
             health_score: Overall system health score.
             system_status: System status category.
@@ -322,7 +346,7 @@ class UnifiedForensicReporter:
             replication_events: List of replication detection events.
             watermark_events: List of watermark detection events.
             extension_activity: Activity counts by extension.
-            
+
         Returns:
             Detailed forensic conclusion.
         """
@@ -334,12 +358,12 @@ class UnifiedForensicReporter:
 Based on comprehensive analysis of all extension logs and system activity patterns, the following conclusions are drawn:
 
 ### System Status Assessment
-The system demonstrates **{system_status.lower()}** operational integrity with a health score of {health_score}%. This indicates {'optimal' if health_score >= 90 else 'good' if health_score >= 80 else 'acceptable' if health_score >= 60 else 'concerning'} performance levels and effective security monitoring.
+The system demonstrates **{system_status.lower()}** operational integrity with a health score of {health_score}%. This indicates {"optimal" if health_score >= 90 else "good" if health_score >= 80 else "acceptable" if health_score >= 60 else "concerning"} performance levels and effective security monitoring.
 
 ### Security Posture Analysis
 - **Threat Detection**: {detected_count} potential security events identified and monitored
 - **Issue Resolution**: {resolved_count} security concerns successfully resolved
-- **System Response**: {'Excellent' if resolved_count > detected_count else 'Good' if resolved_count > 0 else 'Needs Attention'} incident response capability
+- **System Response**: {"Excellent" if resolved_count > detected_count else "Good" if resolved_count > 0 else "Needs Attention"} incident response capability
 
 ### Extension Performance Evaluation
 """
@@ -370,14 +394,14 @@ The system demonstrates **{system_status.lower()}** operational integrity with a
 
         conclusion += f"""
 ### Risk Assessment
-**Current Risk Level**: {'LOW' if health_score >= 85 else 'MEDIUM' if health_score >= 70 else 'ELEVATED'}
+**Current Risk Level**: {"LOW" if health_score >= 85 else "MEDIUM" if health_score >= 70 else "ELEVATED"}
 
-The system maintains {'strong' if health_score >= 85 else 'adequate' if health_score >= 70 else 'reduced'} defensive capabilities against potential threats. All detected anomalies have been {'successfully contained' if resolved_count > 0 else 'logged for further analysis'}.
+The system maintains {"strong" if health_score >= 85 else "adequate" if health_score >= 70 else "reduced"} defensive capabilities against potential threats. All detected anomalies have been {"successfully contained" if resolved_count > 0 else "logged for further analysis"}.
 
 ### Recommendations
-{'No immediate action required. System performance is optimal.' if health_score >= 90 else 'Monitor system performance and consider reviewing security configurations.' if health_score >= 70 else 'Immediate attention recommended. Review security protocols and system configurations.'}
+{"No immediate action required. System performance is optimal." if health_score >= 90 else "Monitor system performance and consider reviewing security configurations." if health_score >= 70 else "Immediate attention recommended. Review security protocols and system configurations."}
 
-**Report Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+**Report Generated**: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Analysis Method**: rnj-1 Forensic Intelligence Algorithm
 """
 
@@ -386,7 +410,7 @@ The system maintains {'strong' if health_score >= 85 else 'adequate' if health_s
     def generate_nexus_summary(self) -> str:
         """
         Generate the unified nexus intelligence report.
-        
+
         Returns:
             Path to the generated report file.
         """
@@ -408,7 +432,7 @@ The system maintains {'strong' if health_score >= 85 else 'adequate' if health_s
         report_path = self.report_dir / "nexus_intelligence_v1.md"
 
         try:
-            with open(report_path, 'w', encoding='utf-8') as f:
+            with open(report_path, "w", encoding="utf-8") as f:
                 f.write(report_content)
 
             print(f"✅ Report generated successfully: {report_path}")
@@ -418,23 +442,27 @@ The system maintains {'strong' if health_score >= 85 else 'adequate' if health_s
 
         except Exception as e:
             print(f"❌ Failed to write report: {e}")
-            logger.error(f"Failed to write report: {e}")
+            logger.exception(f"Failed to write report: {e}")
             return ""
 
-    def _create_report_content(self, summary: ForensicSummary, log_entries: list[ExtensionLogEntry],
-                             forensic_conclusion: str) -> str:
+    def _create_report_content(
+        self,
+        summary: ForensicSummary,
+        log_entries: list[ExtensionLogEntry],
+        forensic_conclusion: str,
+    ) -> str:
         """
         Create the complete report content in Markdown format.
-        
+
         Args:
             summary: System health summary.
             log_entries: All parsed log entries.
             forensic_conclusion: AI-generated conclusion.
-            
+
         Returns:
             Complete report content as Markdown string.
         """
-        report_date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        report_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         content = f"""# Unified Nexus Intelligence Report
 
@@ -447,7 +475,7 @@ The system maintains {'strong' if health_score >= 85 else 'adequate' if health_s
 
 **Overall System Health Score**: {summary.overall_health_score}%
 **System Status**: {summary.system_status}
-**Last Scan**: {summary.last_scan_time.strftime('%Y-%m-%d %H:%M:%S')}
+**Last Scan**: {summary.last_scan_time.strftime("%Y-%m-%d %H:%M:%S")}
 
 ### Key Findings
 
@@ -518,7 +546,7 @@ The system maintains {'strong' if health_score >= 85 else 'adequate' if health_s
 def generate_nexus_summary() -> dict[str, Any]:
     """
     Main function to generate the unified nexus intelligence report.
-    
+
     Returns:
         Dictionary containing report generation results.
     """
@@ -526,12 +554,14 @@ def generate_nexus_summary() -> dict[str, Any]:
     report_path = reporter.generate_nexus_summary()
 
     return {
-        'report_path': report_path,
-        'status': 'SUCCESS' if report_path else 'FAILED',
-        'timestamp': datetime.now().isoformat(),
-        'message': f'Nexus intelligence report generated at {report_path}' if report_path else 'Failed to generate report'
+        "report_path": report_path,
+        "status": "SUCCESS" if report_path else "FAILED",
+        "timestamp": datetime.now().isoformat(),
+        "message": f"Nexus intelligence report generated at {report_path}"
+        if report_path
+        else "Failed to generate report",
     }
 
 
 # Export the main function for use as a tool
-__all__ = ['ForensicSummary', 'UnifiedForensicReporter', 'generate_nexus_summary']
+__all__ = ["ForensicSummary", "UnifiedForensicReporter", "generate_nexus_summary"]

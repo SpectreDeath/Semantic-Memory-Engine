@@ -17,7 +17,7 @@ def _get_ngrams(text: str, n: int = 3) -> set:
     words = re.findall(r'\b\w+\b', text.lower())
     if len(words) < n:
         return set()
-    return set(zip(*[words[i:] for i in range(n)]))
+    return set(zip(*[words[i:] for i in range(n)], strict=False))
 
 def load_vault() -> list[set]:
     """Load vault signatures (cached). Returns list of n-gram sets."""
@@ -170,7 +170,7 @@ class TrustScorer:
             if not vector_b or len(vector_b) != len(vector_a):
                 continue
 
-            dot_product = sum(a * b for a, b in zip(vector_a, vector_b))
+            dot_product = sum(a * b for a, b in zip(vector_a, vector_b, strict=False))
             norm_b = math.sqrt(sum(x*x for x in vector_b))
 
             if norm_b > 0:

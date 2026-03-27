@@ -43,14 +43,14 @@ class WaybackScout:
 
             # First row is headers
             keys = data[0]
-            snapshots = [dict(zip(keys, row)) for row in data[1:]]
+            snapshots = [dict(zip(keys, row, strict=False)) for row in data[1:]]
 
             # Sort by timestamp ascending
             snapshots.sort(key=lambda x: x['timestamp'])
             return snapshots
 
         except Exception as e:
-            logger.error(f"Failed to retrieve CDX history for {url}: {e}")
+            logger.exception(f"Failed to retrieve CDX history for {url}: {e}")
             return []
 
     def find_divergent_snapshots(self, url: str) -> tuple[dict | None, dict | None]:
@@ -107,7 +107,7 @@ class WaybackScout:
 
             return content
         except Exception as e:
-            logger.error(f"Failed to fetch snapshot content from {wb_url}: {e}")
+            logger.exception(f"Failed to fetch snapshot content from {wb_url}: {e}")
             return None
 
     def _is_soft_404(self, content: str) -> bool:
@@ -125,10 +125,7 @@ class WaybackScout:
         ]
 
         lower_content = content.lower()
-        for indicator in soft_404_indicators:
-            if indicator.lower() in lower_content:
-                return True
-        return False
+        return any(indicator.lower() in lower_content for indicator in soft_404_indicators)
 
     def build_wayback_url(self, timestamp: str, original_url: str) -> str:
         return f"https://web.archive.org/web/{timestamp}/{original_url}"

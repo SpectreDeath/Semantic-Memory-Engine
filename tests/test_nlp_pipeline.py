@@ -52,7 +52,7 @@ class TestNLPPipelineBasics(unittest.TestCase):
         analysis = self.nlp.analyze(text)
 
         # Extract POS tags
-        pos_dict = {word: pos for word, pos in analysis.pos_tags}
+        pos_dict = dict(analysis.pos_tags)
 
         # Check for expected tags
         self.assertIn('I', pos_dict)
@@ -181,7 +181,7 @@ class TestNLPKeyTermExtraction(unittest.TestCase):
         key_terms = self.nlp.extract_key_terms(text, min_freq=2)
 
         # All returned terms should have at least min_freq
-        for term, freq in key_terms:
+        for _term, freq in key_terms:
             self.assertGreaterEqual(freq, 2)
 
 
@@ -290,7 +290,7 @@ class TestNLPIntegration(unittest.TestCase):
         self.assertEqual(len(analysis.tokens), len(analysis.pos_tags))
 
         # Vocabulary should be subset of all tokens
-        unique_tokens = set(t.text for t in analysis.tokens)
+        unique_tokens = {t.text for t in analysis.tokens}
         self.assertEqual(len(analysis.vocabulary), len(unique_tokens))
 
     def test_analysis_reproducibility(self):

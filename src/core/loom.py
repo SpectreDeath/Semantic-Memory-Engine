@@ -255,10 +255,7 @@ def compress_semantic_data(facts_json: str) -> str:
     Estimates 30x token reduction through deduplication and clustering.
     """
     try:
-        if isinstance(facts_json, str):
-            facts = json.loads(facts_json)
-        else:
-            facts = facts_json
+        facts = json.loads(facts_json) if isinstance(facts_json, str) else facts_json
 
         if not isinstance(facts, list):
             facts = [facts]

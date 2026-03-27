@@ -114,10 +114,7 @@ class GhostDetector:
             return False
 
         # Skip if too small
-        if self._get_file_size_mb(file_path) < (self.size_threshold_bytes / (1024 * 1024)):
-            return False
-
-        return True
+        return not self._get_file_size_mb(file_path) < self.size_threshold_bytes / (1024 * 1024)
 
     def scan_directory(
         self, directory: str | None = None, recursive: bool = True
@@ -175,10 +172,10 @@ class GhostDetector:
                     print(f"👻 {message}")
 
         except PermissionError as e:
-            logger.error(f"Permission denied scanning {scan_dir}: {e}")
+            logger.exception(f"Permission denied scanning {scan_dir}: {e}")
             print(f"⚠️  Permission denied scanning {scan_dir}: {e}")
         except Exception as e:
-            logger.error(f"Error during ghost scan: {e}")
+            logger.exception(f"Error during ghost scan: {e}")
             print(f"❌ Error during ghost scan: {e}")
 
         logger.info(f"Ghost scan completed. Found {len(ghost_files)} suspicious files.")

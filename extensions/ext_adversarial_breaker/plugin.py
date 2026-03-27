@@ -51,7 +51,7 @@ class AdversarialPatternBreaker(BasePlugin):
             self.dal.create_table("nexus_adversarial_patterns", schema)
             logger.info(f"[{self.plugin_id}] 'nexus_adversarial_patterns' table initialized.")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to init DB table: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to init DB table: {e}")
 
     async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
@@ -220,7 +220,7 @@ class AdversarialPatternBreaker(BasePlugin):
             logger.info(f"[{self.plugin_id}] Stored adversarial pattern: {text_hash[:8]}... (Confidence: {analysis_result.get('deception_confidence', 0):.2%})")
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to store adversarial pattern: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to store adversarial pattern: {e}")
 
     def _calculate_pattern_similarity(self, analysis_a: dict[str, Any], analysis_b: dict[str, Any]) -> float:
         """

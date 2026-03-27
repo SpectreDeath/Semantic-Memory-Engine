@@ -149,7 +149,7 @@ def register(
             stats["health"] = "healthy"
 
         except Exception as e:
-            logger.error(f"get_memory_stats error: {e}")
+            logger.exception(f"get_memory_stats error: {e}")
             stats["error"] = str(e)
             stats["health"] = "error"
 

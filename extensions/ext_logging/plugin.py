@@ -53,7 +53,7 @@ class LoggingExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def get_logs(self, level: str = None, component: str = None, limit: int = 100) -> str:
+    async def get_logs(self, level: str | None = None, component: str | None = None, limit: int = 100) -> str:
         """Retrieve logs with optional filtering."""
         if not self.logging_system:
             return json.dumps({"error": "LoggingSystem not available"})
@@ -63,7 +63,7 @@ class LoggingExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def configure_logger(self, component: str, level: str, format: str = None) -> str:
+    async def configure_logger(self, component: str, level: str, format: str | None = None) -> str:
         """Configure logger for a specific component."""
         if not self.logging_system:
             return json.dumps({"error": "LoggingSystem not available"})

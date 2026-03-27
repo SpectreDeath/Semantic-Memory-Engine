@@ -62,8 +62,7 @@ class LexiconImporter:
         """Read CSV file line-by-line to keep memory usage low."""
         with open(file_path, encoding='utf-8') as f:
             reader = csv.DictReader(f)
-            for row in reader:
-                yield row
+            yield from reader
 
     def _stream_json(self, file_path: str) -> Generator[dict[str, Any], None, None]:
         """Read JSON file (assumes list of objects) iteratively."""
@@ -72,8 +71,7 @@ class LexiconImporter:
         with open(file_path, encoding='utf-8') as f:
             data = json.load(f)
             if isinstance(data, list):
-                for item in data:
-                    yield item
+                yield from data
             else:
                 yield data
 
@@ -86,11 +84,11 @@ class LexiconImporter:
     ) -> dict[str, Any]:
         """
         Import signals from a file into CentrifugeDB using batch loading.
-        
+
         Args:
             file_path: Path to CSV or JSON file.
             source_type: Label for the lexicon (e.g. 'emotion', 'sentiment').
-            mapping_func: Function that takes a row dict and returns a list of 
+            mapping_func: Function that takes a row dict and returns a list of
                          (word, signal_type, weight) tuples.
             batch_size: Number of records to insert per transaction.
         """
@@ -139,7 +137,7 @@ class LexiconImporter:
 
         except Exception as e:
             conn.rollback()
-            logger.error(f"❌ Failed to import lexicon: {e}")
+            logger.exception(f"❌ Failed to import lexicon: {e}")
             return {"status": "error", "message": str(e)}
         finally:
             conn.close()
@@ -155,7 +153,7 @@ class LexiconImporter:
             """, (word, signal_type, weight, source_type))
             conn.commit()
         except Exception as e:
-            logger.error(f"Error inserting internal lexicon entry: {e}")
+            logger.exception(f"Error inserting internal lexicon entry: {e}")
         finally:
             conn.close()
 
@@ -166,13 +164,13 @@ class LexiconImporter:
 
         try:
             cursor.execute("""
-                SELECT source_type, COUNT(*) 
-                FROM rhetorical_signals 
+                SELECT source_type, COUNT(*)
+                FROM rhetorical_signals
                 GROUP BY source_type
             """)
             return dict(cursor.fetchall())
         except Exception as e:
-            logger.error(f"Error fetching summary: {e}")
+            logger.exception(f"Error fetching summary: {e}")
             return {}
         finally:
             conn.close()
@@ -213,7 +211,7 @@ class LexiconImporter:
             return pd.DataFrame(data).sort_values(by='count', ascending=False)
 
         except Exception as e:
-            logger.error(f"Error fetching author summary: {e}")
+            logger.exception(f"Error fetching author summary: {e}")
             return pd.DataFrame()
         finally:
             conn.close()

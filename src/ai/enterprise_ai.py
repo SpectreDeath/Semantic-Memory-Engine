@@ -115,11 +115,11 @@ class EnterpriseAIManager:
                 time.sleep(300)
 
             except Exception as e:
-                logger.error(f"Error in AI background loop: {e}")
+                logger.exception(f"Error in AI background loop: {e}")
                 time.sleep(60)  # Wait 1 minute before retrying
 
     def collect_performance_metrics(self, extension_id: str, metrics: dict[str, float],
-                                  context: dict[str, Any] = None):
+                                  context: dict[str, Any] | None = None):
         """Collect performance metrics for AI analysis."""
         context = context or {}
 
@@ -174,14 +174,14 @@ class EnterpriseAIManager:
                 predictions = self.anomaly_detector.predict(scaled_features)
 
                 # Process anomalies
-                for i, (score, is_anomaly) in enumerate(zip(anomaly_scores, predictions)):
+                for i, (score, is_anomaly) in enumerate(zip(anomaly_scores, predictions, strict=False)):
                     if is_anomaly == -1:  # Anomaly detected
                         extension_id = extensions[i]
                         anomaly_result = self._analyze_anomaly(extension_id, score, features[i])
                         self._handle_anomaly(anomaly_result)
 
         except Exception as e:
-            logger.error(f"Error in anomaly detection: {e}")
+            logger.exception(f"Error in anomaly detection: {e}")
 
     def _analyze_anomaly(self, extension_id: str, score: float, features: list[float]) -> AnomalyDetectionResult:
         """Analyze detected anomaly and determine type and action."""
@@ -280,7 +280,7 @@ class EnterpriseAIManager:
             logger.debug(f"Updated {len(recommendations)} recommendations")
 
         except Exception as e:
-            logger.error(f"Error updating recommendations: {e}")
+            logger.exception(f"Error updating recommendations: {e}")
 
     def _generate_recommendations(self) -> list[ExtensionRecommendation]:
         """Generate AI-powered extension recommendations."""
@@ -353,7 +353,7 @@ class EnterpriseAIManager:
                 ext_data['throughput'] += metric.value
 
         # Calculate averages
-        for ext_id, data in performance_data.items():
+        for data in performance_data.values():
             if data['count'] > 0:
                 data['avg_response_time'] /= data['count']
                 data['error_rate'] /= data['count']
@@ -383,7 +383,7 @@ class EnterpriseAIManager:
             ext_data['peak_usage'] = max(ext_data['peak_usage'], metric.value)
 
         # Calculate averages
-        for ext_id, data in usage_data.items():
+        for data in usage_data.values():
             if data['count'] > 0:
                 data['utilization'] /= data['count']
                 data['avg_usage'] = data['utilization']
@@ -403,7 +403,7 @@ class EnterpriseAIManager:
                     self._apply_optimization(rec)
 
         except Exception as e:
-            logger.error(f"Error in performance optimization: {e}")
+            logger.exception(f"Error in performance optimization: {e}")
 
     def _apply_optimization(self, recommendation: ExtensionRecommendation):
         """Apply a specific optimization recommendation."""
@@ -433,7 +433,7 @@ class EnterpriseAIManager:
                     self._apply_security_fix(rec)
 
         except Exception as e:
-            logger.error(f"Error in security compliance check: {e}")
+            logger.exception(f"Error in security compliance check: {e}")
 
     def _analyze_security_patterns(self) -> list[dict[str, Any]]:
         """Analyze security patterns and detect potential issues."""

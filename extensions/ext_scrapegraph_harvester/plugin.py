@@ -44,7 +44,8 @@ class ScrapeRequest(pydantic.BaseModel):
     )
     model: str = pydantic.Field(default="ollama/llama3.2", description="LLM model to use")
 
-    @pydantic.validator("url")
+    @pydantic.field_validator("url")
+    @classmethod
     def validate_url(cls, v):
         """Validate that the URL is well-formed and safe"""
         try:
@@ -72,7 +73,8 @@ class ResearchRequest(pydantic.BaseModel):
     )
     model: str = pydantic.Field(default="ollama/llama3.2", description="LLM model to use")
 
-    @pydantic.validator("query")
+    @pydantic.field_validator("query")
+    @classmethod
     def validate_query(cls, v):
         """Validate search query"""
         if not v.strip():
@@ -84,7 +86,8 @@ class MarkdownifyRequest(pydantic.BaseModel):
     url: str = pydantic.Field(..., min_length=1, description="URL to convert to Markdown")
     model: str = pydantic.Field(default="ollama/llama3.2", description="LLM model to use")
 
-    @pydantic.validator("url")
+    @pydantic.field_validator("url")
+    @classmethod
     def validate_url(cls, v):
         """Validate that the URL is well-formed and safe"""
         try:
@@ -187,7 +190,7 @@ class ScrapeGraphHarvester:
                     "model": request.model,
                     "nodes_created": len(memory_nodes),
                     "entities_extracted": len(
-                        set(e for node in memory_nodes for e in node.entities)
+                        {e for node in memory_nodes for e in node.entities}
                     ),
                     "trust_score": round(
                         sum(n.trust_score for n in memory_nodes) / len(memory_nodes), 2
@@ -196,7 +199,7 @@ class ScrapeGraphHarvester:
             )
 
         except Exception as e:
-            logger.error(f"Scrape error: {e}")
+            logger.exception(f"Scrape error: {e}")
             return json.dumps({"error": str(e), "status": "error"})
 
     async def deep_research(self, request: ResearchRequest) -> str:
@@ -231,7 +234,7 @@ class ScrapeGraphHarvester:
                     "results_count": len(result.results),
                     "nodes_created": len(memory_nodes),
                     "entities_extracted": len(
-                        set(e for node in memory_nodes for e in node.entities)
+                        {e for node in memory_nodes for e in node.entities}
                     ),
                     "trust_score": round(
                         sum(n.trust_score for n in memory_nodes) / len(memory_nodes), 2
@@ -240,7 +243,7 @@ class ScrapeGraphHarvester:
             )
 
         except Exception as e:
-            logger.error(f"Research error: {e}")
+            logger.exception(f"Research error: {e}")
             return json.dumps({"error": str(e), "status": "error"})
 
     async def markdownify(self, request: MarkdownifyRequest) -> str:
@@ -275,7 +278,7 @@ class ScrapeGraphHarvester:
                     "markdown_length": len(result.markdown),
                     "nodes_created": len(memory_nodes),
                     "entities_extracted": len(
-                        set(e for node in memory_nodes for e in node.entities)
+                        {e for node in memory_nodes for e in node.entities}
                     ),
                     "trust_score": round(
                         sum(n.trust_score for n in memory_nodes) / len(memory_nodes), 2
@@ -284,7 +287,7 @@ class ScrapeGraphHarvester:
             )
 
         except Exception as e:
-            logger.error(f"Markdownify error: {e}")
+            logger.exception(f"Markdownify error: {e}")
             return json.dumps({"error": str(e), "status": "error"})
 
     # Helper methods for processing and storing results
@@ -542,7 +545,7 @@ class ScrapeGraphHarvester:
                     try:
                         self.nexus.execute(
                             """
-                            INSERT INTO nexus.memory_nodes 
+                            INSERT INTO nexus.memory_nodes
                             (node_id, content, source_url, timestamp, trust_score, entities, relationships)
                             VALUES (?, ?, ?, ?, ?, ?, ?)
                             ON CONFLICT(node_id) DO UPDATE SET
@@ -561,7 +564,7 @@ class ScrapeGraphHarvester:
                         try:
                             self.nexus.execute(
                                 """
-                                INSERT INTO nexus.memory_nodes 
+                                INSERT INTO nexus.memory_nodes
                                 (node_id, content, source_url, timestamp, trust_score, entities, relationships)
                                 VALUES (?, ?, ?, ?, ?, ?, ?)
                             """,

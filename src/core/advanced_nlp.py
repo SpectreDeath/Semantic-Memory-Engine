@@ -11,19 +11,19 @@ Builds on NLPPipeline for comprehensive semantic understanding.
 
 Usage:
     from src.core.advanced_nlp import AdvancedNLPEngine
-    
+
     advanced = AdvancedNLPEngine()
     text = "John gave Mary a book. She read it yesterday."
-    
+
     # Dependency parsing
     deps = advanced.extract_dependencies(text)
-    
+
     # Coreference resolution
     resolved = advanced.resolve_coreferences(text)
-    
+
     # Semantic role labeling
     srl = advanced.extract_semantic_roles(text)
-    
+
     # Full analysis
     analysis = advanced.analyze_advanced(text)
 """
@@ -158,7 +158,7 @@ class AdvancedNLPEngine:
     def __init__(self, use_spacy: bool = True):
         """
         Initialize advanced NLP engine.
-        
+
         Args:
             use_spacy: Try to use spaCy if available (better parsing)
         """
@@ -191,10 +191,10 @@ class AdvancedNLPEngine:
     def analyze_advanced(self, text: str) -> AdvancedAnalysis | None:
         """
         Perform complete advanced NLP analysis.
-        
+
         Args:
             text: Text to analyze
-        
+
         Returns:
             AdvancedAnalysis with all linguistic features
         """
@@ -219,7 +219,7 @@ class AdvancedNLPEngine:
 
             # Semantic role labeling
             semantic_roles = self._extract_semantic_roles(text, sentences)
-            predicates = list(set(sr.predicate for sr in semantic_roles))
+            predicates = list({sr.predicate for sr in semantic_roles})
 
             # Event extraction
             events = self._extract_events(text, semantic_roles, coref_chains)
@@ -230,7 +230,7 @@ class AdvancedNLPEngine:
                 if chain.entity_type in ('PERSON', 'ORG', 'GPE'):
                     key_participants.add(chain.representative)
 
-            key_events = set(e.event_trigger for e in events)
+            key_events = {e.event_trigger for e in events}
             temporal_markers = self._extract_temporal_markers(text)
             spatial_markers = self._extract_spatial_markers(text)
 
@@ -259,16 +259,16 @@ class AdvancedNLPEngine:
             return analysis
 
         except Exception as e:
-            logger.error(f"Advanced analysis failed: {e}")
+            logger.exception(f"Advanced analysis failed: {e}")
             return None
 
     def extract_dependencies(self, text: str) -> list[DependencyRelation]:
         """
         Extract syntactic dependency relations.
-        
+
         Args:
             text: Text to parse
-        
+
         Returns:
             List of dependency relations
         """
@@ -280,10 +280,10 @@ class AdvancedNLPEngine:
     def resolve_coreferences(self, text: str) -> list[CoreferenceChain]:
         """
         Resolve pronoun and entity coreferences.
-        
+
         Args:
             text: Text to process
-        
+
         Returns:
             List of coreference chains
         """
@@ -293,10 +293,10 @@ class AdvancedNLPEngine:
     def extract_semantic_roles(self, text: str) -> list[SemanticRoleLabel]:
         """
         Extract semantic role labels.
-        
+
         Args:
             text: Text to analyze
-        
+
         Returns:
             List of semantic role labels
         """
@@ -547,7 +547,7 @@ class AdvancedNLPAnalyzer:
     def analyze_story(self, text: str) -> dict:
         """
         Analyze narrative text to extract story structure.
-        
+
         Returns:
             Dictionary with story elements
         """
@@ -581,7 +581,7 @@ class AdvancedNLPAnalyzer:
     def analyze_relationships(self, text: str) -> dict:
         """
         Extract relationships and dependencies.
-        
+
         Returns:
             Relationship graph
         """

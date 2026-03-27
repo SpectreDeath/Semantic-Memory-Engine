@@ -18,7 +18,8 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.
 try:
     from src.database.supabase_client import sync_osint_results_to_supabase
 except Exception:
-    sync_osint_results_to_supabase = lambda x: None
+    def sync_osint_results_to_supabase(x):
+        return None
 
 try:
     from fake_useragent import UserAgent

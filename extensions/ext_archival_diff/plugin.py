@@ -43,10 +43,10 @@ class ArchivalDiffExtension(BasePlugin):
     async def scan_for_scrubbing(self, target_url: str) -> str:
         """
         Scans a URL for semantic deletions compared to its previous Wayback snapshot.
-        
+
         Args:
             target_url: The URL of the government page to check.
-            
+
         Returns:
             JSON string containing the diff analysis result.
         """
@@ -109,7 +109,7 @@ class ArchivalDiffExtension(BasePlugin):
             return json.dumps(report, indent=2)
 
         except Exception as e:
-            logger.error(f"Error during scrub scan: {e}")
+            logger.exception(f"Error during scrub scan: {e}")
             return json.dumps({"status": "error", "error": str(e)})
 
     async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):

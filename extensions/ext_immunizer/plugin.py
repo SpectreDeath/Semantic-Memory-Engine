@@ -97,7 +97,7 @@ class Immunizer(BasePlugin):
         try:
             logger.info(f"[{self.plugin_id}] Immunizer started successfully")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to start Immunizer: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to start Immunizer: {e}")
 
     async def on_shutdown(self):
         """
@@ -106,7 +106,7 @@ class Immunizer(BasePlugin):
         try:
             logger.info(f"[{self.plugin_id}] Immunizer shutdown complete")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
+            logger.exception(f"[{self.plugin_id}] Error during shutdown: {e}")
 
     async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
@@ -126,10 +126,10 @@ class Immunizer(BasePlugin):
             self.generate_hardening_report
         ]
 
-    async def run_signature_patch(self, report_path: str = None) -> str:
+    async def run_signature_patch(self, report_path: str | None = None) -> str:
         """
         Run the signature patch process.
-        
+
         Reads the evasion test report, identifies high-impact vulnerabilities,
         generates hardened detection rules using rnj-1 techniques, performs
         safety checks against human baseline, and appends to hardened_signatures.json.
@@ -193,7 +193,7 @@ class Immunizer(BasePlugin):
             return json.dumps(summary, indent=2)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error running signature patch: {e}")
+            logger.exception(f"[{self.plugin_id}] Error running signature patch: {e}")
             return json.dumps({
                 "error": f"Failed to run signature patch: {e!s}"
             })
@@ -223,10 +223,10 @@ class Immunizer(BasePlugin):
             return json.dumps(stats, indent=2)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error getting hardening statistics: {e}")
+            logger.exception(f"[{self.plugin_id}] Error getting hardening statistics: {e}")
             return json.dumps({"error": f"Failed to get hardening statistics: {e!s}"})
 
-    async def test_rule_safety(self, rule_id: str = None) -> str:
+    async def test_rule_safety(self, rule_id: str | None = None) -> str:
         """Test the safety of specific rules against the human baseline."""
         try:
             hardened_file = os.path.join(self.data_dir, "hardened_signatures.json")
@@ -274,7 +274,7 @@ class Immunizer(BasePlugin):
                 }, indent=2)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error testing rule safety: {e}")
+            logger.exception(f"[{self.plugin_id}] Error testing rule safety: {e}")
             return json.dumps({"error": f"Failed to test rule safety: {e!s}"})
 
     async def generate_hardening_report(self) -> str:
@@ -299,7 +299,7 @@ class Immunizer(BasePlugin):
                     "total_rules": len(rules),
                     "rule_types": Counter(rule.get("rule_type", "unknown") for rule in rules),
                     "average_confidence": sum(rule.get("confidence", 0) for rule in rules) / len(rules) if rules else 0,
-                    "vulnerability_coverage": len(set(rule.get("vulnerability_source", "") for rule in rules))
+                    "vulnerability_coverage": len({rule.get("vulnerability_source", "") for rule in rules})
                 },
                 "safety_analysis": {
                     "baseline_compatibility": {
@@ -330,7 +330,7 @@ class Immunizer(BasePlugin):
             return json.dumps(report, indent=2)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error generating hardening report: {e}")
+            logger.exception(f"[{self.plugin_id}] Error generating hardening report: {e}")
             return json.dumps({"error": f"Failed to generate hardening report: {e!s}"})
 
     def load_human_baseline(self):
@@ -346,7 +346,7 @@ class Immunizer(BasePlugin):
                 # Create default baseline if file doesn't exist
                 self._create_default_baseline()
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error loading human baseline: {e}")
+            logger.exception(f"[{self.plugin_id}] Error loading human baseline: {e}")
             self._create_default_baseline()
 
     def _create_default_baseline(self):
@@ -425,7 +425,7 @@ class Immunizer(BasePlugin):
         rules = []
 
         # Analyze character substitutions in the vulnerability
-        changes = vulnerability.modification_details.get("changes", [])
+        vulnerability.modification_details.get("changes", [])
 
         # Generate regex patterns for common homoglyph attacks
         homoglyph_patterns = [
@@ -643,7 +643,7 @@ class Immunizer(BasePlugin):
             )
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error testing rule safety: {e}")
+            logger.exception(f"[{self.plugin_id}] Error testing rule safety: {e}")
             return BaselineTestResult(
                 rule_id=rule.rule_id,
                 false_positive_rate=1.0,
@@ -665,7 +665,7 @@ class Immunizer(BasePlugin):
             else:
                 return False
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error matching rule: {e}")
+            logger.exception(f"[{self.plugin_id}] Error matching rule: {e}")
             return False
 
     async def _save_hardened_rules(self, rules: list[HardenedRule], output_file: str):
@@ -702,7 +702,7 @@ class Immunizer(BasePlugin):
             logger.info(f"[{self.plugin_id}] Saved {len(rules)} hardened rules to {output_file}")
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error saving hardened rules: {e}")
+            logger.exception(f"[{self.plugin_id}] Error saving hardened rules: {e}")
             raise
 
     def _get_vulnerability_type_summary(self, vulnerabilities: list[VulnerabilityRecord]) -> dict[str, int]:

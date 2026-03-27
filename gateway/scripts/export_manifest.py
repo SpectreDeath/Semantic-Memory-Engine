@@ -29,7 +29,7 @@ def generate_markdown_manifest(output_file="d:/SME/gateway/User_Guide.md"):
         if isinstance(tool_item, ToolDefinition):
             # It's a static definition (not yet instantiated)
             doc = tool_item.description
-            params = ", ".join(f"`{p}`" for p in tool_item.parameters.keys())
+            params = ", ".join(f"`{p}`" for p in tool_item.parameters)
         else:
             # It's a live instance or function (manually injected)
             # Try to find the primary method

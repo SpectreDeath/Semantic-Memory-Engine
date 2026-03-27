@@ -1,9 +1,9 @@
 import os
 
-from src.ai.provider import SME_AI_Provider
+from src.ai.provider import SMEAIProvider
 
 
-def get_provider() -> SME_AI_Provider:
+def get_provider() -> SMEAIProvider:
     """
     Provider Factory: returns the configured AI provider.
     Defaults to Langflow if not specified.

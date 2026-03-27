@@ -66,7 +66,7 @@ class BatchProcessor:
                 result = await job.processor(item)
                 job.results.append(result)
             except Exception as e:
-                logger.error(f"Error processing item in job {job_id}: {e}")
+                logger.exception(f"Error processing item in job {job_id}: {e}")
                 job.errors.append({"item_index": i, "error": str(e)})
 
             job.progress = (i + 1) / total

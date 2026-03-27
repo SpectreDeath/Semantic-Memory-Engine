@@ -19,7 +19,7 @@ class ImpostorsChecker:
     using iterative bootstrapping with Most Frequent Words (MFWs).
     """
 
-    def __init__(self, db_path: str = None):
+    def __init__(self, db_path: str | None = None):
         config = Config()
         base_dir = config.get_path('storage.base_dir')
         self.db_path = db_path or str(base_dir / "storage" / "scribe_profiles.sqlite")
@@ -39,11 +39,11 @@ class ImpostorsChecker:
     def _load_impostor_pool(self, exclude_author: str, pool_size: int = 20) -> list[str]:
         """
         Loads a lazy reference group from existing profiles.
-        
+
         Args:
             exclude_author: Author ID to exclude from pool
             pool_size: Number of random impostors to load
-            
+
         Returns:
             List of author IDs
         """
@@ -51,8 +51,8 @@ class ImpostorsChecker:
         cursor = conn.cursor()
 
         cursor.execute("""
-            SELECT DISTINCT author_id FROM author_profiles 
-            WHERE author_id != ? 
+            SELECT DISTINCT author_id FROM author_profiles
+            WHERE author_id != ?
             LIMIT ?
         """, (exclude_author, pool_size))
 
@@ -94,14 +94,14 @@ class ImpostorsChecker:
     ) -> dict[str, Any]:
         """
         Performs authorship verification using the Impostors Method.
-        
+
         Args:
             target_text: The text to verify
             suspect_author_id: The claimed author
             iterations: Number of bootstrap iterations
             mfw_size: Number of Most Frequent Words to sample per iteration
             impostor_count: Number of random impostors to use
-            
+
         Returns:
             Dict with verification results including confidence score
         """
@@ -138,7 +138,7 @@ class ImpostorsChecker:
         # 4. Iterative bootstrapping
         suspect_wins = 0
 
-        for iteration in range(iterations):
+        for _iteration in range(iterations):
             # Randomly sample MFWs
             selected_mfws = random.sample(all_words, mfw_size)
 

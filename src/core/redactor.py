@@ -59,8 +59,8 @@ _TECHNICAL_PRESERVE = [
 class Redactor:
     """
     Centralized PII and Entity Redaction engine for federation safety.
-    
-    Hardens data anonymity for SME v3.0.0 by stripping identifying 
+
+    Hardens data anonymity for SME v3.0.0 by stripping identifying
     metadata via regex heuristics.
     """
 
@@ -68,12 +68,12 @@ class Redactor:
     def redact(cls, text: str, strict: bool = False) -> str:
         """
         Sanitize text by replacing PII with [REDACTED].
-        
+
         Args:
             text: The raw source material.
-            strict: If True, applies more aggressive scrubbing for 
+            strict: If True, applies more aggressive scrubbing for
                     federated vector storage.
-        
+
         Returns:
             Sanitized text.
         """

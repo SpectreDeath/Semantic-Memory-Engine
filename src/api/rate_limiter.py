@@ -11,13 +11,13 @@ Features:
 Usage:
     from src.api.rate_limiter import RateLimiter
     from fastapi import FastAPI
-    
+
     app = FastAPI()
     limiter = RateLimiter()
-    
+
     # Add middleware
     app.add_middleware(limiter.middleware_factory)
-    
+
     # Or use decorator
     @app.get("/api/endpoint")
     @limiter.limit("10/minute")
@@ -43,7 +43,7 @@ class TokenBucket:
     def __init__(self, capacity: int, refill_rate: float):
         """
         Initialize token bucket.
-        
+
         Args:
             capacity: Maximum tokens (capacity)
             refill_rate: Tokens per second
@@ -56,10 +56,10 @@ class TokenBucket:
     def consume(self, tokens: int = 1) -> bool:
         """
         Try to consume tokens.
-        
+
         Args:
             tokens: Number of tokens to consume
-        
+
         Returns:
             True if tokens available, False otherwise
         """
@@ -88,7 +88,7 @@ class RateLimiter:
                  cleanup_interval: int = 300):
         """
         Initialize rate limiter.
-        
+
         Args:
             default_limit: Default rate limit (e.g., "100/minute")
             cleanup_interval: Seconds between cleanup of expired buckets
@@ -102,10 +102,10 @@ class RateLimiter:
     def _parse_limit(self, limit_str: str) -> tuple[int, float]:
         """
         Parse limit string like '100/minute'.
-        
+
         Args:
             limit_str: Limit string
-        
+
         Returns:
             (capacity, refill_rate) tuple
         """
@@ -159,11 +159,11 @@ class RateLimiter:
     def is_allowed(self, key: str, limit: str | None = None) -> bool:
         """
         Check if request is allowed.
-        
+
         Args:
             key: Rate limit key (e.g., IP address, user ID)
             limit: Rate limit string (e.g., "100/minute")
-        
+
         Returns:
             True if allowed, False if rate limit exceeded
         """
@@ -188,11 +188,11 @@ class RateLimiter:
     async def middleware_factory(self, request: Request, call_next):
         """
         FastAPI middleware factory.
-        
+
         Args:
             request: Incoming request
             call_next: Next middleware/handler
-        
+
         Returns:
             Response
         """
@@ -227,7 +227,7 @@ class RateLimiter:
     def limit(self, limit_str: str = "100/minute"):
         """
         Decorator for limiting endpoint.
-        
+
         Usage:
             @app.get("/endpoint")
             @limiter.limit("10/minute")

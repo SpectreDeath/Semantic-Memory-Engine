@@ -34,11 +34,11 @@ class SemanticAuditor:
     async def audit_semantic_stability(self, model_family: str) -> str:
         """
         MCP Tool: audit_semantic_stability(model_family)
-        
+
         Pulls the last 50 samples of the specified model from nexus_db,
-        compares their semantic centroid against the "Master Signature" 
+        compares their semantic centroid against the "Master Signature"
         in data/signatures.json, and returns a Drift Score.
-        
+
         If score > 0.15, triggers a [LOGIC SHIFT DETECTED] warning.
         """
         try:
@@ -87,7 +87,7 @@ class SemanticAuditor:
             return json.dumps(result, indent=2)
 
         except Exception as e:
-            logger.error(f"Error in semantic stability audit: {e}")
+            logger.exception(f"Error in semantic stability audit: {e}")
             return json.dumps({
                 "error": str(e),
                 "status": "failed"
@@ -115,7 +115,7 @@ class SemanticAuditor:
             }
 
         except Exception as e:
-            logger.error(f"Failed to load master signature: {e}")
+            logger.exception(f"Failed to load master signature: {e}")
             return None
 
     def _get_recent_samples(self, model_family: str, limit: int = 50) -> list[dict[str, Any]]:
@@ -137,10 +137,10 @@ class SemanticAuditor:
 
             # Query for recent samples of the specified model family
             sql = f"""
-                SELECT text_sample, metadata 
-                FROM {model_table} 
-                WHERE model_family = ? 
-                ORDER BY timestamp DESC 
+                SELECT text_sample, metadata
+                FROM {model_table}
+                WHERE model_family = ?
+                ORDER BY timestamp DESC
                 LIMIT ?
             """
 
@@ -160,7 +160,7 @@ class SemanticAuditor:
             return samples
 
         except Exception as e:
-            logger.error(f"Failed to get recent samples: {e}")
+            logger.exception(f"Failed to get recent samples: {e}")
             return []
 
     def _get_available_tables(self) -> list[str]:
@@ -170,7 +170,7 @@ class SemanticAuditor:
             results = self.nexus.nexus.query(sql)
             return [row["name"] for row in results]
         except Exception as e:
-            logger.error(f"Failed to get available tables: {e}")
+            logger.exception(f"Failed to get available tables: {e}")
             return []
 
     def _find_model_table(self, tables: list[str]) -> str | None:
@@ -292,7 +292,7 @@ class SemanticAuditor:
             return 1.0  # Maximum distance for zero vectors
 
         # Calculate dot product
-        dot_product = sum(a * b for a, b in zip(vector_a, vector_b))
+        dot_product = sum(a * b for a, b in zip(vector_a, vector_b, strict=False))
 
         # Calculate cosine similarity
         cosine_similarity = dot_product / (norm_a * norm_b)

@@ -8,7 +8,7 @@ import h5py
 
 
 class AuditEngine:
-    def __init__(self, h5_path: str = None):
+    def __init__(self, h5_path: str | None = None):
         if h5_path is None:
             self.h5_path = os.getenv("KNOWLEDGE_CORE_PATH", "data/knowledge_core.h5")
         else:

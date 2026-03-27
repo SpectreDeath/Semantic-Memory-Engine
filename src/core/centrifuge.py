@@ -91,7 +91,7 @@ def get_sentiment_trends(days: int = 7) -> str:
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute('''
-            SELECT timestamp, compound FROM sentiment_logs 
+            SELECT timestamp, compound FROM sentiment_logs
             WHERE timestamp >= datetime('now', ?)
             ORDER BY timestamp ASC
         ''', (f'-{days} days',))

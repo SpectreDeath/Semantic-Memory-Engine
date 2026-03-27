@@ -14,7 +14,7 @@ from src.ai.providers.factory import get_provider
 def main():
     """
     Subprocess worker that runs in the Python 3.13 environment.
-    Uses the SME_AI_Provider abstraction for silicon agnosticism.
+    Uses the SMEAIProvider abstraction for silicon agnosticism.
     """
     if len(sys.argv) < 3:
         print("Usage: brain_worker.py <flow_name> <input_json>")

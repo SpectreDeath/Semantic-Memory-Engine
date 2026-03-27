@@ -107,10 +107,10 @@ class StatisticalWatermarkDecoder:
     def detect_invisible_markers(self, text: str) -> list[str]:
         """
         Detect invisible unicode markers in text.
-        
+
         Args:
             text: Text to analyze for invisible markers.
-            
+
         Returns:
             List of detected invisible markers.
         """
@@ -126,10 +126,10 @@ class StatisticalWatermarkDecoder:
     def tokenize_text(self, text: str) -> list[str]:
         """
         Tokenize text into words, filtering out punctuation and normalizing.
-        
+
         Args:
             text: Text to tokenize.
-            
+
         Returns:
             List of tokens.
         """
@@ -144,10 +144,10 @@ class StatisticalWatermarkDecoder:
     def calculate_z_scores(self, tokens: list[str]) -> dict[str, float]:
         """
         Calculate Z-Scores for token frequencies.
-        
+
         Args:
             tokens: List of tokens from the text.
-            
+
         Returns:
             Dictionary mapping tokens to their Z-Scores.
         """
@@ -185,10 +185,10 @@ class StatisticalWatermarkDecoder:
     def analyze_provider_signature(self, z_scores: dict[str, float]) -> str | None:
         """
         Analyze Z-Scores to identify potential provider signatures.
-        
+
         Args:
             z_scores: Dictionary of token Z-Scores.
-            
+
         Returns:
             Provider name if signature detected, None otherwise.
         """
@@ -200,7 +200,7 @@ class StatisticalWatermarkDecoder:
             match_score = 0
             common_tokens = signature['common_tokens']
 
-            for i, token in enumerate(common_tokens):
+            for _i, token in enumerate(common_tokens):
                 if token in z_scores:
                     expected_z = signature['z_score_threshold']
                     actual_z = abs(z_scores[token])
@@ -222,10 +222,10 @@ class StatisticalWatermarkDecoder:
     def analyze_character_frequency(self, text: str) -> dict[str, float]:
         """
         Analyze character frequency for additional watermark detection.
-        
+
         Args:
             text: Text to analyze.
-            
+
         Returns:
             Dictionary of character frequency deviations.
         """
@@ -254,10 +254,10 @@ class StatisticalWatermarkDecoder:
     def detect_watermark_pulse(self, text: str) -> WatermarkDetection:
         """
         Main function to detect statistical watermarks in text.
-        
+
         Args:
             text: Text to analyze for watermarks.
-            
+
         Returns:
             WatermarkDetection result containing analysis results.
         """
@@ -309,13 +309,13 @@ class StatisticalWatermarkDecoder:
                                   provider: str | None, char_deviations: dict[str, float]) -> float:
         """
         Calculate overall confidence score for watermark detection.
-        
+
         Args:
             has_markers: Whether invisible markers were detected.
             z_scores: Z-Score analysis results.
             provider: Detected provider signature.
             char_deviations: Character frequency deviations.
-            
+
         Returns:
             Confidence score between 0 and 1.
         """
@@ -343,10 +343,10 @@ class StatisticalWatermarkDecoder:
 def detect_watermark_pulse(text: str) -> dict[str, Any]:
     """
     Main function to detect watermarks in text.
-    
+
     Args:
         text: Text to analyze for watermarks.
-        
+
     Returns:
         Dictionary containing detection results.
     """

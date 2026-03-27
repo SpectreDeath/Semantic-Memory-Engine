@@ -2,12 +2,12 @@ import logging
 import os
 from typing import Any
 
-from src.ai.provider import SME_AI_Provider
+from src.ai.provider import SMEAIProvider
 from src.core.config import get_config
 
 logger = logging.getLogger("SentinelProvider")
 
-class SentinelProvider(SME_AI_Provider):
+class SentinelProvider(SMEAIProvider):
     """
     Hardware-Aware AI Provider for the GTX 1660 Ti.
     Uses llama-cpp-python to manage GGUF models and LoRA adapters.
@@ -40,7 +40,7 @@ class SentinelProvider(SME_AI_Provider):
             )
             logger.info(f"Sentinel (GGUF) initialized with {model_path.name}")
         except Exception as e:
-            logger.error(f"Failed to load llama-cpp: {e}")
+            logger.exception(f"Failed to load llama-cpp: {e}")
 
     def run(self, flow_name: str, input_data: Any) -> str:
         """Execute a forensic tool call using the loaded model."""
@@ -88,7 +88,7 @@ class SentinelProvider(SME_AI_Provider):
             self.current_lora = lens_name
             logger.info(f"Sentinel shifted lens to: {lens_name} (scale={scale})")
         except Exception as e:
-            logger.error(f"LoRA shift failed: {e}")
+            logger.exception(f"LoRA shift failed: {e}")
 
     def offload_to_ram(self):
         """
@@ -120,7 +120,7 @@ class SentinelProvider(SME_AI_Provider):
             if self.current_lora:
                 self.switch_lens(self.current_lora)
         except Exception as e:
-            logger.error(f"Offload re-init failed: {e}")
+            logger.exception(f"Offload re-init failed: {e}")
 
     def get_metadata(self) -> dict[str, Any]:
         return {

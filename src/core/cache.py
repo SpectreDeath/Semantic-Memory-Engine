@@ -160,7 +160,7 @@ class LRUCache(CacheBackend):
             if key not in self.cache:
                 return False
 
-            value, expiry = self.cache[key]
+            _value, expiry = self.cache[key]
             if expiry is not None and time.time() > expiry:
                 del self.cache[key]
                 return False
@@ -222,7 +222,7 @@ class RedisCache(CacheBackend):
         try:
             return pickle.dumps(value)
         except Exception as e:
-            logger.error(f"Serialization error: {e}")
+            logger.exception(f"Serialization error: {e}")
             return b""
 
     def _deserialize(self, data: bytes) -> Any | None:
@@ -230,7 +230,7 @@ class RedisCache(CacheBackend):
         try:
             return pickle.loads(data)
         except Exception as e:
-            logger.error(f"Deserialization error: {e}")
+            logger.exception(f"Deserialization error: {e}")
             return None
 
     def get(self, key: str) -> Any | None:
@@ -248,7 +248,7 @@ class RedisCache(CacheBackend):
             self.hits += 1
             return self._deserialize(data)
         except Exception as e:
-            logger.error(f"Redis get error: {e}")
+            logger.exception(f"Redis get error: {e}")
             self.misses += 1
             return None
 
@@ -265,7 +265,7 @@ class RedisCache(CacheBackend):
                 self.redis_client.set(key, serialized)
             return True
         except Exception as e:
-            logger.error(f"Redis set error: {e}")
+            logger.exception(f"Redis set error: {e}")
             return False
 
     def delete(self, key: str) -> bool:
@@ -277,7 +277,7 @@ class RedisCache(CacheBackend):
             self.redis_client.delete(key)
             return True
         except Exception as e:
-            logger.error(f"Redis delete error: {e}")
+            logger.exception(f"Redis delete error: {e}")
             return False
 
     def clear(self) -> bool:
@@ -289,7 +289,7 @@ class RedisCache(CacheBackend):
             self.redis_client.flushdb()
             return True
         except Exception as e:
-            logger.error(f"Redis clear error: {e}")
+            logger.exception(f"Redis clear error: {e}")
             return False
 
     def exists(self, key: str) -> bool:
@@ -300,7 +300,7 @@ class RedisCache(CacheBackend):
         try:
             return self.redis_client.exists(key) > 0
         except Exception as e:
-            logger.error(f"Redis exists error: {e}")
+            logger.exception(f"Redis exists error: {e}")
             return False
 
     def get_stats(self) -> dict[str, Any]:
@@ -342,14 +342,6 @@ class CacheManager:
     _instance = None
     _lock = Lock()
 
-    def __new__(cls, backend: CacheBackend | None = None):
-        """Singleton pattern with optional backend injection."""
-        if cls._instance is None:
-            with cls._lock:
-                if cls._instance is None:
-                    cls._instance = super().__new__(cls)
-        return cls._instance
-
     def __new__(cls, backend: CacheBackend | None = None, max_size: int = 1000):
         """Support optional max_size parameter for test compatibility."""
         instance = super().__new__(cls)
@@ -385,7 +377,7 @@ class CacheManager:
         """Invalidate cache entries matching pattern."""
         backend = self.backend
         if hasattr(backend, "cache"):
-            keys_to_delete = [k for k in backend.cache.keys() if k.startswith(pattern)]
+            keys_to_delete = [k for k in backend.cache if k.startswith(pattern)]
             for key in keys_to_delete:
                 backend.delete(key)
             return len(keys_to_delete)
@@ -393,7 +385,7 @@ class CacheManager:
 
     def stats(self) -> dict[str, Any]:
         """Get cache statistics."""
-        stats = self.get_stats()
+        self.get_stats()
         hits = self.hits
         misses = self.misses
         total = hits + misses

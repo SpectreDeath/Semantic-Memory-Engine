@@ -62,7 +62,7 @@ def _get_vram():
         pynvml.nvmlShutdown()
         return used
     except Exception as e:
-        logger.error(f"NVML Error: {e}")
+        logger.exception(f"NVML Error: {e}")
         return -1
 
 def _signal_offload():
@@ -72,7 +72,7 @@ def _signal_offload():
         with httpx.Client(timeout=5.0) as client:
             client.post(f"{SIDECAR_URL}/sentinel/offload", json={"vram_pressure": "high"})
     except Exception as e:
-        logger.error(f"Failed to signal sidecar: {e}")
+        logger.exception(f"Failed to signal sidecar: {e}")
 
 def _kill_sidecar():
     logger.critical("CRITICAL VRAM. Terminating sidecar.")
@@ -85,7 +85,7 @@ def _kill_sidecar():
                 pid = int(line.strip())
                 os.kill(pid, signal.SIGTERM)
     except Exception as e:
-        logger.error(f"Kill failed: {e}")
+        logger.exception(f"Kill failed: {e}")
 
 def main():
     logger.info("Sentinel Monitor v2.2.0 active.")

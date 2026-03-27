@@ -13,10 +13,10 @@ Features:
 
 Usage:
     from src.core.validation import SearchQuery, validate_input, ValidationError
-    
+
     # Define schema
     query = SearchQuery(text="hello", limit=10)
-    
+
     # Or use validation function
     try:
         validate_input(data, schema_class=SearchQuery)
@@ -192,7 +192,7 @@ if PYDANTIC_AVAILABLE:
             }
         )
 
-    def validate_input(
+    def validate_input[T: BaseModel](
         data: Any, schema_class: type[T], strict: bool = False
     ) -> T | None:
         """Validate input against Pydantic schema."""
@@ -218,7 +218,7 @@ if PYDANTIC_AVAILABLE:
 else:
     # Fallback validation without Pydantic
 
-    def validate_input(data: Any, schema_class: type = None, strict: bool = False) -> dict | None:
+    def validate_input(data: Any, schema_class: type | None = None, strict: bool = False) -> dict | None:
         """Fallback validation without Pydantic."""
         logger.warning("Pydantic not available, using basic validation")
         return data

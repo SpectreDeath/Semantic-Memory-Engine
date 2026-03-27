@@ -33,7 +33,7 @@ class SmeExporter:
     Also handles Prometheus metric updates.
     """
 
-    def __init__(self, db_url: str = None):
+    def __init__(self, db_url: str | None = None):
         self.db_url = db_url or os.environ.get("DATABASE_URL", "postgresql://sme_user:sme_password@localhost:5432/sme_nexus")
         self.pool = None
         self._initialize_pool()
@@ -44,7 +44,7 @@ class SmeExporter:
             self.pool = pool.SimpleConnectionPool(1, 10, dsn=self.db_url)
             logger.info("PostgreSQL connection pool initialized.")
         except Exception as e:
-            logger.error(f"Failed to initialize PostgreSQL pool: {e}")
+            logger.exception(f"Failed to initialize PostgreSQL pool: {e}")
 
     def _initialize_schema(self):
         """
@@ -91,7 +91,7 @@ class SmeExporter:
                 conn.commit()
                 logger.info("SME Archival Schema initialized successfully.")
         except Exception as e:
-            logger.error(f"Failed to initialize schema: {e}")
+            logger.exception(f"Failed to initialize schema: {e}")
             conn.rollback()
         finally:
             self._put_connection(conn)
@@ -102,7 +102,7 @@ class SmeExporter:
         try:
             return self.pool.getconn()
         except Exception as e:
-            logger.error(f"Error getting connection from pool: {e}")
+            logger.exception(f"Error getting connection from pool: {e}")
             return None
 
     def _put_connection(self, conn):
@@ -174,7 +174,7 @@ class SmeExporter:
                 logger.info(f"Committed {len(deleted_content)} scrubbed nodes for {target_url}")
 
         except Exception as e:
-            logger.error(f"Error exporting scrubbing data: {e}")
+            logger.exception(f"Error exporting scrubbing data: {e}")
             conn.rollback()
         finally:
             self._put_connection(conn)

@@ -172,7 +172,7 @@ class GateStats:
 class EpistemicGate:
     """
     Self-Correcting Epistemic Gate with SLM-based trust validation.
-    
+
     Features:
     - Lightweight classifier for 4GB VRAM constraint
     - Continuous learning from failures and feedback
@@ -352,7 +352,7 @@ class EpistemicGate:
     ) -> dict[str, Any]:
         """
         Evaluate text through the epistemic gate.
-        
+
         Returns decision, confidence, and details.
         """
         with self._lock:
@@ -447,7 +447,7 @@ class EpistemicGate:
     ) -> dict[str, Any]:
         """
         Recursively validate decision using both gatekeeper and model.
-        
+
         Creates a feedback loop where model learnings inform the final decision.
         """
         reasons = []
@@ -546,7 +546,7 @@ class EpistemicGate:
     ) -> str:
         """
         Report feedback on a gate decision.
-        
+
         Used to train the model on false positives/negatives.
         """
         with self._lock:
@@ -609,7 +609,7 @@ class EpistemicGate:
     def train(self) -> dict[str, Any]:
         """
         Train the classifier on recorded failures.
-        
+
         Uses lightweight SGD classifier for 4GB VRAM constraint.
         """
         with self._lock:

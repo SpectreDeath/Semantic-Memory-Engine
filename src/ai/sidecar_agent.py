@@ -131,7 +131,7 @@ class RetryStrategy:
                     )
                     await asyncio.sleep(delay)
                 else:
-                    logger.error(
+                    logger.exception(
                         f"All {self.max_retries} attempts exhausted. "
                         f"Last error: {e}"
                     )

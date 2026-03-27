@@ -13,7 +13,7 @@ This module bridges ChromaDB with WordNet to enable:
 
 Usage:
     from src.core.semantic_graph import SemanticGraph
-    
+
     sg = SemanticGraph()
     meaning = sg.explore_meaning("intelligence")
     related = sg.find_related_concepts("machine learning")
@@ -59,7 +59,7 @@ class ConceptMeaning:
 class SemanticGraph:
     """
     Semantic relationship analyzer using WordNet.
-    
+
     Provides methods to explore semantic connections between words,
     understand concept hierarchies, and find related terms for
     knowledge gap detection and memory consolidation.
@@ -81,11 +81,11 @@ class SemanticGraph:
     def explore_meaning(self, word: str, max_relations: int = 10) -> ConceptMeaning | None:
         """
         Comprehensive semantic analysis of a word.
-        
+
         Args:
             word: The word to analyze
             max_relations: Maximum number of relations to return
-        
+
         Returns:
             ConceptMeaning with all semantic relationships or None if word not found
         """
@@ -128,16 +128,16 @@ class SemanticGraph:
             return result
 
         except Exception as e:
-            logger.error(f"Error exploring meaning of '{word}': {e}")
+            logger.exception(f"Error exploring meaning of '{word}': {e}")
             return None
 
     def find_semantic_variants(self, word: str) -> dict[str, list[str]]:
         """
         Find all semantic variants (synonyms, related forms).
-        
+
         Args:
             word: The word to find variants for
-        
+
         Returns:
             Dictionary mapping relation types to lists of words
         """
@@ -158,13 +158,13 @@ class SemanticGraph:
     def calculate_semantic_similarity(self, word1: str, word2: str) -> float:
         """
         Calculate semantic similarity between two words (0-1).
-        
+
         Uses WordNet path distance to estimate similarity.
-        
+
         Args:
             word1: First word
             word2: Second word
-        
+
         Returns:
             Similarity score (0=no relation, 1=identical meaning)
         """
@@ -189,17 +189,17 @@ class SemanticGraph:
             return max(0.0, min(1.0, max_similarity))
 
         except Exception as e:
-            logger.error(f"Error calculating similarity: {e}")
+            logger.exception(f"Error calculating similarity: {e}")
             return 0.0
 
     def find_related_concepts(self, word: str, depth: int = 2) -> dict[str, set[str]]:
         """
         Find all related concepts within specified depth.
-        
+
         Args:
             word: Starting word
             depth: How many steps away to search (1-3 recommended)
-        
+
         Returns:
             Dictionary mapping concept to related concepts at each depth
         """
@@ -234,11 +234,11 @@ class SemanticGraph:
     def detect_semantic_gaps(self, concept: str, existing_concepts: set[str]) -> list[dict]:
         """
         Detect knowledge gaps by finding related concepts not yet covered.
-        
+
         Args:
             concept: The main concept
             existing_concepts: Set of concepts already covered
-        
+
         Returns:
             List of suggested gap fillers
         """
@@ -286,11 +286,11 @@ class SemanticGraph:
     def get_concept_hierarchy(self, word: str, direction: str = 'both') -> dict:
         """
         Get the concept hierarchy (taxonomy) for a word.
-        
+
         Args:
             word: The word to get hierarchy for
             direction: 'up' (hypernyms), 'down' (hyponyms), 'both'
-        
+
         Returns:
             Hierarchical structure of concepts
         """
@@ -323,7 +323,7 @@ class SemanticGraph:
         for synset in synsets:
             for lemma in synset.lemmas():
                 lemmas.add(lemma.name().replace('_', ' '))
-        return sorted(list(lemmas))
+        return sorted(lemmas)
 
     @staticmethod
     def _extract_antonyms(synsets) -> list[str]:
@@ -333,7 +333,7 @@ class SemanticGraph:
             for lemma in synset.lemmas():
                 for antonym in lemma.antonyms():
                     antonyms.add(antonym.name().replace('_', ' '))
-        return sorted(list(antonyms))
+        return sorted(antonyms)
 
     @staticmethod
     def _extract_hypernyms(synsets, max_count: int = 10) -> list[str]:
@@ -343,7 +343,7 @@ class SemanticGraph:
             for hyp in synset.hypernyms()[:max_count]:
                 for lemma in hyp.lemmas():
                     hypernyms.add(lemma.name().replace('_', ' '))
-        return sorted(list(hypernyms))[:max_count]
+        return sorted(hypernyms)[:max_count]
 
     @staticmethod
     def _extract_hyponyms(synsets, max_count: int = 10) -> list[str]:
@@ -353,7 +353,7 @@ class SemanticGraph:
             for hyp in synset.hyponyms()[:max_count]:
                 for lemma in hyp.lemmas():
                     hyponyms.add(lemma.name().replace('_', ' '))
-        return sorted(list(hyponyms))[:max_count]
+        return sorted(hyponyms)[:max_count]
 
     @staticmethod
     def _build_semantic_relations(

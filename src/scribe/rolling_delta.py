@@ -19,19 +19,19 @@ class RollingDelta:
         try:
             self.pystyl = ToolFactory.create_pystyl_wrapper()
         except Exception as e:
-            logger.error(f"RollingDelta failed to load PyStyl: {e}")
+            logger.exception(f"RollingDelta failed to load PyStyl: {e}")
             self.pystyl = None
 
     def generate_windows(self, text: str, window_size: int = 5000, step: int = 500) -> Generator[tuple[int, str], None, None]:
         """
         Yields text segments based on token count windowing.
         Generator implementation keeps memory footprint low.
-        
+
         Args:
             text: Full text to analyze.
             window_size: Number of tokens per window.
             step: Advancement step in tokens.
-            
+
         Yields:
             Tuple of (start_token_index, window_text)
         """
@@ -56,13 +56,13 @@ class RollingDelta:
     def analyze_rolling_delta(self, target_text: str, candidates: dict[str, str], window_size: int = 5000, step: int = 500) -> dict[str, Any]:
         """
         Analyzes the target text in windows against candidate profiles.
-        
+
         Args:
             target_text: The document to analyze.
             candidates: Dictionary of {AuthorName: ReferenceText}.
             window_size: Tokens per window.
             step: Tokens to advance.
-            
+
         Returns:
             JSON-compatible dict with 'series', 'volatility', and 'windows'.
         """
@@ -85,7 +85,7 @@ class RollingDelta:
         logger.info(f"🔄 Starting Rolling Delta (Window: {window_size}, Step: {step})")
 
         for start_idx, window_text in self.generate_windows(target_text, window_size, step):
-            label = f"{start_idx}-{start_idx + window_size}"
+            f"{start_idx}-{start_idx + window_size}"
             results["windows"].append(start_idx) # Use integer index for x-axis charting
 
             for author, ref_text in candidates.items():

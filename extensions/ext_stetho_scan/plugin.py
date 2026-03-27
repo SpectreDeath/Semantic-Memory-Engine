@@ -141,10 +141,10 @@ class StatisticalWatermarkDecoderPlugin:
         def safe_detection_tool(text: str) -> dict[str, Any]:
             """
             Safe watermark detection tool that checks Governor status and CPU usage.
-            
+
             Args:
                 text: Text to analyze for watermarks.
-                
+
             Returns:
                 Dictionary containing detection results.
             """
@@ -161,10 +161,10 @@ class StatisticalWatermarkDecoderPlugin:
         def direct_detection_tool(text: str) -> dict[str, Any]:
             """
             Direct watermark detection tool without Governor status checking.
-            
+
             Args:
                 text: Text to analyze for watermarks.
-                
+
             Returns:
                 Dictionary containing detection results.
             """

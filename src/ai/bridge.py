@@ -29,10 +29,7 @@ def _cold_start(flow_name, input_data):
     if not os.path.exists(worker_script):
         return "Error: Worker script not found."
 
-    if not isinstance(input_data, str):
-        input_json = json.dumps(input_data)
-    else:
-        input_json = input_data
+    input_json = json.dumps(input_data) if not isinstance(input_data, str) else input_data
 
     env = os.environ.copy()
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

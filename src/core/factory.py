@@ -9,7 +9,7 @@ This factory pattern provides:
 
 Usage:
     from src.core.factory import ToolFactory
-    
+
     scribe = ToolFactory.create_scribe()
     scout = ToolFactory.create_scout()
     semantic_search = ToolFactory.create_search_engine()
@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 class ToolFactory:
     """
     Factory for creating and managing SimpleMem tools.
-    
+
     Provides lazy-loading and singleton-like caching for tools
     that are expensive to initialize.
     """
@@ -40,7 +40,7 @@ class ToolFactory:
         from src.monitoring.diagnostics import PerformanceProfiler
 
         config = Config()
-        vram_limit = config.get('hardware', {}).get('vram_limit_mb', 6144)
+        config.get('hardware', {}).get('vram_limit_mb', 6144)
 
         try:
             profiler = PerformanceProfiler()
@@ -65,10 +65,10 @@ class ToolFactory:
     def create_scribe(cls, reset: bool = False) -> ScribeEngine:
         """
         Create or retrieve the ScribeEngine instance.
-        
+
         Args:
             reset: Force creation of new instance, ignoring cache
-        
+
         Returns:
             ScribeEngine instance
         """
@@ -78,7 +78,7 @@ class ToolFactory:
                 cls._instances['scribe'] = ScribeEngine()
                 logger.info("Created ScribeEngine instance")
             except Exception as e:
-                logger.error(f"Failed to create ScribeEngine: {e}")
+                logger.exception(f"Failed to create ScribeEngine: {e}")
                 raise
         return cls._instances['scribe']
 
@@ -86,10 +86,10 @@ class ToolFactory:
     def create_lexicon_importer(cls, reset: bool = False) -> LexiconImporter:
         """
         Create or retrieve the LexiconImporter instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             LexiconImporter instance
         """
@@ -99,7 +99,7 @@ class ToolFactory:
                 cls._instances['lexicon_importer'] = LexiconImporter()
                 logger.info("Created LexiconImporter instance")
             except Exception as e:
-                logger.error(f"Failed to create LexiconImporter: {e}")
+                logger.exception(f"Failed to create LexiconImporter: {e}")
                 raise
         return cls._instances['lexicon_importer']
 
@@ -107,10 +107,10 @@ class ToolFactory:
     def create_aifdb_connector(cls, reset: bool = False) -> AIFdbConnector:
         """
         Create or retrieve the AIFdbConnector instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             AIFdbConnector instance
         """
@@ -120,7 +120,7 @@ class ToolFactory:
                 cls._instances['aifdb'] = AIFdbConnector()
                 logger.info("Created AIFdbConnector instance")
             except Exception as e:
-                logger.error(f"Failed to create AIFdbConnector: {e}")
+                logger.exception(f"Failed to create AIFdbConnector: {e}")
                 raise
         return cls._instances['aifdb']
 
@@ -128,10 +128,10 @@ class ToolFactory:
     def create_concept_resolver(cls, reset: bool = False) -> ConceptResolver:
         """
         Create or retrieve the ConceptResolver instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             ConceptResolver instance
         """
@@ -141,7 +141,7 @@ class ToolFactory:
                 cls._instances['concept_resolver'] = ConceptResolver()
                 logger.info("Created ConceptResolver instance")
             except Exception as e:
-                logger.error(f"Failed to create ConceptResolver: {e}")
+                logger.exception(f"Failed to create ConceptResolver: {e}")
                 raise
         return cls._instances['concept_resolver']
 
@@ -149,10 +149,10 @@ class ToolFactory:
     def create_stylo_wrapper(cls, reset: bool = False) -> StyloWrapper:
         """
         Create or retrieve the StyloWrapper instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             StyloWrapper instance
         """
@@ -162,7 +162,7 @@ class ToolFactory:
                 cls._instances['stylo_wrapper'] = StyloWrapper()
                 logger.info("Created StyloWrapper instance")
             except Exception as e:
-                logger.error(f"Failed to create StyloWrapper: {e}")
+                logger.exception(f"Failed to create StyloWrapper: {e}")
                 raise
         return cls._instances['stylo_wrapper']
 
@@ -170,10 +170,10 @@ class ToolFactory:
     def create_pystyl_wrapper(cls, reset: bool = False) -> PyStylWrapper:
         """
         Create or retrieve the PyStylWrapper instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             PyStylWrapper instance
         """
@@ -183,7 +183,7 @@ class ToolFactory:
                 cls._instances['pystyl'] = PyStylWrapper()
                 logger.info("Created PyStylWrapper instance")
             except Exception as e:
-                logger.error(f"Failed to create PyStylWrapper: {e}")
+                logger.exception(f"Failed to create PyStylWrapper: {e}")
                 raise
         return cls._instances['pystyl']
 
@@ -191,10 +191,10 @@ class ToolFactory:
     def create_rolling_delta(cls, reset: bool = False) -> RollingDelta:
         """
         Create or retrieve the RollingDelta instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             RollingDelta instance
         """
@@ -204,7 +204,7 @@ class ToolFactory:
                 cls._instances['rolling_delta'] = RollingDelta()
                 logger.info("Created RollingDelta instance")
             except Exception as e:
-                logger.error(f"Failed to create RollingDelta: {e}")
+                logger.exception(f"Failed to create RollingDelta: {e}")
                 raise
         return cls._instances['rolling_delta']
 
@@ -212,10 +212,10 @@ class ToolFactory:
     def create_adaptive_learner(cls, reset: bool = False) -> AdaptiveLearner:
         """
         Create or retrieve the AdaptiveLearner instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             AdaptiveLearner instance
         """
@@ -225,7 +225,7 @@ class ToolFactory:
                 cls._instances['adaptive_learner'] = AdaptiveLearner()
                 logger.info("Created AdaptiveLearner instance")
             except Exception as e:
-                logger.error(f"Failed to create AdaptiveLearner: {e}")
+                logger.exception(f"Failed to create AdaptiveLearner: {e}")
                 raise
         return cls._instances['adaptive_learner']
 
@@ -233,10 +233,10 @@ class ToolFactory:
     def create_forensic_scout(cls, reset: bool = False) -> ForensicScout:
         """
         Create or retrieve the ForensicScout instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             ForensicScout instance
         """
@@ -246,7 +246,7 @@ class ToolFactory:
                 cls._instances['forensic_scout'] = ForensicScout()
                 logger.info("Created ForensicScout instance")
             except Exception as e:
-                logger.error(f"Failed to create ForensicScout: {e}")
+                logger.exception(f"Failed to create ForensicScout: {e}")
                 raise
         return cls._instances['forensic_scout']
 
@@ -254,10 +254,10 @@ class ToolFactory:
     def create_contrastive_analyzer(cls, reset: bool = False) -> ContrastiveAnalyzer:
         """
         Create or retrieve the ContrastiveAnalyzer instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             ContrastiveAnalyzer instance
         """
@@ -267,7 +267,7 @@ class ToolFactory:
                 cls._instances['contrastive_analyzer'] = ContrastiveAnalyzer()
                 logger.info("Created ContrastiveAnalyzer instance")
             except Exception as e:
-                logger.error(f"Failed to create ContrastiveAnalyzer: {e}")
+                logger.exception(f"Failed to create ContrastiveAnalyzer: {e}")
                 raise
         return cls._instances['contrastive_analyzer']
 
@@ -275,10 +275,10 @@ class ToolFactory:
     def create_impostors_checker(cls, reset: bool = False) -> ImpostorsChecker:
         """
         Create or retrieve the ImpostorsChecker instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             ImpostorsChecker instance
         """
@@ -288,7 +288,7 @@ class ToolFactory:
                 cls._instances['impostors_checker'] = ImpostorsChecker()
                 logger.info("Created ImpostorsChecker instance")
             except Exception as e:
-                logger.error(f"Failed to create ImpostorsChecker: {e}")
+                logger.exception(f"Failed to create ImpostorsChecker: {e}")
                 raise
         return cls._instances['impostors_checker']
 
@@ -296,10 +296,10 @@ class ToolFactory:
     def create_network_generator(cls, reset: bool = False) -> NetworkGenerator:
         """
         Create or retrieve the NetworkGenerator instance.
-        
+
         Args:
             reset: Force creation of new instance
-            
+
         Returns:
             NetworkGenerator instance
         """
@@ -309,7 +309,7 @@ class ToolFactory:
                 cls._instances['network_generator'] = NetworkGenerator()
                 logger.info("Created NetworkGenerator instance")
             except Exception as e:
-                logger.error(f"Failed to create NetworkGenerator: {e}")
+                logger.exception(f"Failed to create NetworkGenerator: {e}")
                 raise
         return cls._instances['network_generator']
 
@@ -317,10 +317,10 @@ class ToolFactory:
     def create_scout(cls, reset: bool = False) -> Scout:
         """
         Create or retrieve the Scout instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             Scout instance
         """
@@ -330,7 +330,7 @@ class ToolFactory:
                 cls._instances['scout'] = Scout()
                 logger.info("Created Scout instance")
             except Exception as e:
-                logger.error(f"Failed to create Scout: {e}")
+                logger.exception(f"Failed to create Scout: {e}")
                 raise
         return cls._instances['scout']
 
@@ -338,10 +338,10 @@ class ToolFactory:
     def create_search_engine(cls, reset: bool = False) -> SemanticSearchEngine:
         """
         Create or retrieve the SemanticSearchEngine instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             SemanticSearchEngine instance
         """
@@ -351,7 +351,7 @@ class ToolFactory:
                 cls._instances['search'] = SemanticSearchEngine()
                 logger.info("Created SemanticSearchEngine instance")
             except Exception as e:
-                logger.error(f"Failed to create SemanticSearchEngine: {e}")
+                logger.exception(f"Failed to create SemanticSearchEngine: {e}")
                 raise
         return cls._instances['search']
 
@@ -359,10 +359,10 @@ class ToolFactory:
     def create_synapse(cls, reset: bool = False) -> MemoryConsolidator:
         """
         Create or retrieve the MemoryConsolidator instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             MemoryConsolidator instance
         """
@@ -372,7 +372,7 @@ class ToolFactory:
                 cls._instances['synapse'] = MemoryConsolidator()
                 logger.info("Created MemoryConsolidator instance")
             except Exception as e:
-                logger.error(f"Failed to create MemoryConsolidator: {e}")
+                logger.exception(f"Failed to create MemoryConsolidator: {e}")
                 raise
         return cls._instances['synapse']
 
@@ -380,10 +380,10 @@ class ToolFactory:
     def create_centrifuge(cls, reset: bool = False) -> Centrifuge:
         """
         Create or retrieve the Centrifuge database instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             Centrifuge instance
         """
@@ -393,7 +393,7 @@ class ToolFactory:
                 cls._instances['centrifuge'] = Centrifuge()
                 logger.info("Created Centrifuge instance")
             except Exception as e:
-                logger.error(f"Failed to create Centrifuge: {e}")
+                logger.exception(f"Failed to create Centrifuge: {e}")
                 raise
         return cls._instances['centrifuge']
 
@@ -401,10 +401,10 @@ class ToolFactory:
     def create_event_bus(cls, reset: bool = False) -> EventBus:
         """
         Create or retrieve the EventBus instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             EventBus instance
         """
@@ -414,7 +414,7 @@ class ToolFactory:
                 cls._instances['event_bus'] = EventBus()
                 logger.info("Created EventBus instance")
             except Exception as e:
-                logger.error(f"Failed to create EventBus: {e}")
+                logger.exception(f"Failed to create EventBus: {e}")
                 raise
         return cls._instances['event_bus']
 
@@ -422,10 +422,10 @@ class ToolFactory:
     def create_log_manager(cls, reset: bool = False) -> LogManager:
         """
         Create or retrieve the LogManager instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             LogManager instance
         """
@@ -436,7 +436,7 @@ class ToolFactory:
                 cls._instances['log_manager'] = LogManager()
                 logger.info("Created LogManager instance")
             except Exception as e:
-                logger.error(f"Failed to create LogManager: {e}")
+                logger.exception(f"Failed to create LogManager: {e}")
                 raise
         return cls._instances['log_manager']
 
@@ -444,10 +444,10 @@ class ToolFactory:
     def create_semantic_db(cls, reset: bool = False) -> SemanticMemory:
         """
         Create or retrieve the SemanticMemory (ChromaDB) instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             SemanticMemory instance
         """
@@ -457,7 +457,7 @@ class ToolFactory:
                 cls._instances['semantic_db'] = SemanticMemory()
                 logger.info("Created SemanticMemory instance")
             except Exception as e:
-                logger.error(f"Failed to create SemanticMemory: {e}")
+                logger.exception(f"Failed to create SemanticMemory: {e}")
                 raise
         return cls._instances['semantic_db']
 
@@ -476,7 +476,7 @@ class ToolFactory:
                 cls._instances['semantic_graph'] = SemanticGraph()
                 logger.info("Created SemanticGraph instance")
             except Exception as e:
-                logger.error(f"Failed to create SemanticGraph: {e}")
+                logger.exception(f"Failed to create SemanticGraph: {e}")
                 raise
         return cls._instances['semantic_graph']
 
@@ -484,10 +484,10 @@ class ToolFactory:
     def create_data_manager(cls, reset: bool = False) -> DataManager:
         """
         Create or retrieve the DataManager instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             DataManager instance
         """
@@ -497,7 +497,7 @@ class ToolFactory:
                 cls._instances['data_manager'] = DataManager()
                 logger.info("Created DataManager instance")
             except Exception as e:
-                logger.error(f"Failed to create DataManager: {e}")
+                logger.exception(f"Failed to create DataManager: {e}")
                 raise
         return cls._instances['data_manager']
 
@@ -505,10 +505,10 @@ class ToolFactory:
     def create_nlp_pipeline(cls, reset: bool = False) -> NLPPipeline:
         """
         Create or retrieve the NLPPipeline instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             NLPPipeline instance
         """
@@ -518,7 +518,7 @@ class ToolFactory:
                 cls._instances['nlp_pipeline'] = NLPPipeline()
                 logger.info("Created NLPPipeline instance")
             except Exception as e:
-                logger.error(f"Failed to create NLPPipeline: {e}")
+                logger.exception(f"Failed to create NLPPipeline: {e}")
                 raise
         return cls._instances['nlp_pipeline']
 
@@ -537,7 +537,7 @@ class ToolFactory:
                 cls._instances['advanced_nlp'] = AdvancedNLPEngine()
                 logger.info("Created AdvancedNLPEngine instance")
             except Exception as e:
-                logger.error(f"Failed to create AdvancedNLPEngine: {e}")
+                logger.exception(f"Failed to create AdvancedNLPEngine: {e}")
                 raise
         return cls._instances['advanced_nlp']
 
@@ -545,10 +545,10 @@ class ToolFactory:
     def create_monitor(cls, reset: bool = False) -> SystemMonitor:
         """
         Create or retrieve the SystemMonitor instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             SystemMonitor instance
         """
@@ -558,7 +558,7 @@ class ToolFactory:
                 cls._instances['monitor'] = SystemMonitor()
                 logger.info("Created SystemMonitor instance")
             except Exception as e:
-                logger.error(f"Failed to create SystemMonitor: {e}")
+                logger.exception(f"Failed to create SystemMonitor: {e}")
                 raise
         return cls._instances['monitor']
 
@@ -566,10 +566,10 @@ class ToolFactory:
     def create_orchestrator(cls, reset: bool = False) -> PipelineCoordinator:
         """
         Create or retrieve the PipelineCoordinator instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             PipelineCoordinator instance
         """
@@ -579,7 +579,7 @@ class ToolFactory:
                 cls._instances['orchestrator'] = PipelineCoordinator()
                 logger.info("Created PipelineCoordinator instance")
             except Exception as e:
-                logger.error(f"Failed to create PipelineCoordinator: {e}")
+                logger.exception(f"Failed to create PipelineCoordinator: {e}")
                 raise
         return cls._instances['orchestrator']
 
@@ -587,10 +587,10 @@ class ToolFactory:
     def create_sentiment_analyzer(cls, reset: bool = False) -> SentimentAnalyzer:
         """
         Create or retrieve the SentimentAnalyzer instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             SentimentAnalyzer instance
         """
@@ -600,7 +600,7 @@ class ToolFactory:
                 cls._instances['sentiment'] = SentimentAnalyzer()
                 logger.info("Created SentimentAnalyzer instance")
             except Exception as e:
-                logger.error(f"Failed to create SentimentAnalyzer: {e}")
+                logger.exception(f"Failed to create SentimentAnalyzer: {e}")
                 raise
         return cls._instances['sentiment']
 
@@ -608,10 +608,10 @@ class ToolFactory:
     def create_text_summarizer(cls, reset: bool = False) -> TextSummarizer:
         """
         Create or retrieve the TextSummarizer instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             TextSummarizer instance
         """
@@ -621,7 +621,7 @@ class ToolFactory:
                 cls._instances['summarizer'] = TextSummarizer()
                 logger.info("Created TextSummarizer instance")
             except Exception as e:
-                logger.error(f"Failed to create TextSummarizer: {e}")
+                logger.exception(f"Failed to create TextSummarizer: {e}")
                 raise
         return cls._instances['summarizer']
 
@@ -629,10 +629,10 @@ class ToolFactory:
     def create_entity_linker(cls, reset: bool = False) -> EntityLinker:
         """
         Create or retrieve the EntityLinker instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             EntityLinker instance
         """
@@ -642,7 +642,7 @@ class ToolFactory:
                 cls._instances['entity_linker'] = EntityLinker()
                 logger.info("Created EntityLinker instance")
             except Exception as e:
-                logger.error(f"Failed to create EntityLinker: {e}")
+                logger.exception(f"Failed to create EntityLinker: {e}")
                 raise
         return cls._instances['entity_linker']
 
@@ -650,10 +650,10 @@ class ToolFactory:
     def create_document_clusterer(cls, reset: bool = False) -> DocumentClusterer:
         """
         Create or retrieve the DocumentClusterer instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             DocumentClusterer instance
         """
@@ -663,7 +663,7 @@ class ToolFactory:
                 cls._instances['clusterer'] = DocumentClusterer()
                 logger.info("Created DocumentClusterer instance")
             except Exception as e:
-                logger.error(f"Failed to create DocumentClusterer: {e}")
+                logger.exception(f"Failed to create DocumentClusterer: {e}")
                 raise
         return cls._instances['clusterer']
 
@@ -671,10 +671,10 @@ class ToolFactory:
     def create_knowledge_graph(cls, reset: bool = False) -> KnowledgeGraph:
         """
         Create or retrieve the KnowledgeGraph instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             KnowledgeGraph instance
         """
@@ -684,7 +684,7 @@ class ToolFactory:
                 cls._instances['knowledge_graph'] = KnowledgeGraph()
                 logger.info("Created KnowledgeGraph instance")
             except Exception as e:
-                logger.error(f"Failed to create KnowledgeGraph: {e}")
+                logger.exception(f"Failed to create KnowledgeGraph: {e}")
                 raise
         return cls._instances['knowledge_graph']
 
@@ -692,10 +692,10 @@ class ToolFactory:
     def create_intelligence_reports(cls, reset: bool = False) -> IntelligenceReports:
         """
         Create or retrieve the IntelligenceReports instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             IntelligenceReports instance
         """
@@ -705,7 +705,7 @@ class ToolFactory:
                 cls._instances['intelligence_reports'] = IntelligenceReports()
                 logger.info("Created IntelligenceReports instance")
             except Exception as e:
-                logger.error(f"Failed to create IntelligenceReports: {e}")
+                logger.exception(f"Failed to create IntelligenceReports: {e}")
                 raise
         return cls._instances['intelligence_reports']
 
@@ -713,10 +713,10 @@ class ToolFactory:
     def create_overlap_discovery(cls, reset: bool = False) -> OverlapDiscovery:
         """
         Create or retrieve the OverlapDiscovery instance.
-        
+
         Args:
             reset: Force creation of new instance
-        
+
         Returns:
             OverlapDiscovery instance
         """
@@ -726,7 +726,7 @@ class ToolFactory:
                 cls._instances['overlap_discovery'] = OverlapDiscovery()
                 logger.info("Created OverlapDiscovery instance")
             except Exception as e:
-                logger.error(f"Failed to create OverlapDiscovery: {e}")
+                logger.exception(f"Failed to create OverlapDiscovery: {e}")
                 raise
         return cls._instances['overlap_discovery']
 
@@ -734,10 +734,10 @@ class ToolFactory:
     def get_instance(cls, tool_name: str) -> Any | None:
         """
         Get a cached tool instance by name.
-        
+
         Args:
             tool_name: Name of the tool (e.g., 'scribe', 'scout')
-        
+
         Returns:
             Tool instance or None if not found
         """
@@ -747,7 +747,7 @@ class ToolFactory:
     def list_instances(cls) -> dict[str, str]:
         """
         List all cached tool instances.
-        
+
         Returns:
             Dictionary mapping tool names to their types
         """
@@ -760,7 +760,7 @@ class ToolFactory:
     def health_check(cls) -> dict[str, bool]:
         """
         Check health status of all cached instances.
-        
+
         Returns:
             Dictionary mapping tool names to their health status
         """

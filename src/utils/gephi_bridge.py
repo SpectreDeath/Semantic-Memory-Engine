@@ -390,7 +390,7 @@ def stream_synthetic_mode(workspace="workspace0"):
             confidence_score = float(row['confidence_score'])
             # Handle both string and boolean values for vaulted field
             vaulted_str = str(row['vaulted']).lower()
-            vaulted = vaulted_str == 'true' or vaulted_str == '1'
+            vaulted = vaulted_str in {'true', '1'}
 
             # Create node with appropriate color
             node = graph.Node(

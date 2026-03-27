@@ -232,7 +232,7 @@ class MerkleTree:
 class SignatureLibrary:
     """
     Collaborative Forensic Profile system with secure hashed signature sharing.
-    
+
     Features:
     - Cryptographic signature verification
     - Merkle tree-based profile integrity
@@ -363,7 +363,7 @@ class SignatureLibrary:
         words = re.findall(r'\b\w+\b', text.lower())
         if len(words) < n:
             return set()
-        return set('_'.join(words[i:i+n]) for i in range(len(words) - n + 1))
+        return {'_'.join(words[i:i+n]) for i in range(len(words) - n + 1)}
 
     def _generate_signature_features(self, text: str) -> dict[str, Any]:
         """Extract rhetorical signature features from text."""
@@ -394,7 +394,7 @@ class SignatureLibrary:
     ) -> SignatureNode | None:
         """
         Create a new rhetorical signature from text.
-        
+
         Returns the created SignatureNode or None if already exists.
         """
         # Check for duplicate
@@ -411,7 +411,7 @@ class SignatureLibrary:
         # Generate signature hash
         sig_data = json.dumps({
             "features": features,
-            "ngrams": sorted(list(ngrams)),
+            "ngrams": sorted(ngrams),
             "type": signature_type
         }, sort_keys=True)
         signature_hash = hashlib.sha256(sig_data.encode()).hexdigest()
@@ -493,7 +493,7 @@ class SignatureLibrary:
     ) -> tuple[bool, str]:
         """
         Verify a signature's integrity.
-        
+
         Returns (is_valid, message).
         """
         sig = self._signatures.get(signature_id)
@@ -576,7 +576,7 @@ class SignatureLibrary:
     ) -> dict[str, Any]:
         """
         Export a profile for sharing.
-        
+
         Optionally includes private signatures (for trusted sharing).
         """
         profile = self._profiles.get(profile_id)
@@ -608,7 +608,7 @@ class SignatureLibrary:
     ) -> tuple[bool, str]:
         """
         Import a profile from another node.
-        
+
         Returns (success, message).
         """
         try:

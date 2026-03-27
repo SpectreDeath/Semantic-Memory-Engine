@@ -40,25 +40,25 @@ def migrate_add_raw_content_table():
 
     # Create indices for fast queries
     cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_raw_content_domain 
+        CREATE INDEX IF NOT EXISTS idx_raw_content_domain
         ON raw_content(domain)
     """)
     print("✅ Created index on domain")
 
     cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_raw_content_loom 
+        CREATE INDEX IF NOT EXISTS idx_raw_content_loom
         ON raw_content(processed_by_loom)
     """)
     print("✅ Created index on processed_by_loom")
 
     cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_raw_content_quality 
+        CREATE INDEX IF NOT EXISTS idx_raw_content_quality
         ON raw_content(source_quality)
     """)
     print("✅ Created index on source_quality")
 
     cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_raw_content_timestamp 
+        CREATE INDEX IF NOT EXISTS idx_raw_content_timestamp
         ON raw_content(timestamp)
     """)
     print("✅ Created index on timestamp")
@@ -84,7 +84,7 @@ def verify_schema():
     print("\n📊 raw_content Table Schema:")
     print("─" * 60)
     for col in columns:
-        col_id, name, col_type, notnull, default, pk = col
+        _col_id, name, col_type, notnull, _default, _pk = col
         print(f"  {name:25} {col_type:15} {'NOT NULL' if notnull else 'NULL':10}")
 
     # Get indices
@@ -138,8 +138,8 @@ def cleanup_old_entries(days: int = 30):
     cursor = conn.cursor()
 
     cursor.execute("""
-        DELETE FROM raw_content 
-        WHERE processed_by_loom = 0 
+        DELETE FROM raw_content
+        WHERE processed_by_loom = 0
         AND timestamp < datetime('now', '-' || ? || ' days')
     """, (days,))
 
@@ -191,7 +191,7 @@ def add_harvest_batch_table():
     """)
 
     cursor.execute("""
-        CREATE INDEX IF NOT EXISTS idx_harvest_batches_status 
+        CREATE INDEX IF NOT EXISTS idx_harvest_batches_status
         ON harvest_batches(status)
     """)
 
@@ -212,8 +212,8 @@ def report_database_status():
 
         # Get total tables
         cursor.execute("""
-            SELECT COUNT(*) 
-            FROM sqlite_master 
+            SELECT COUNT(*)
+            FROM sqlite_master
             WHERE type='table'
         """)
         table_count = cursor.fetchone()[0]

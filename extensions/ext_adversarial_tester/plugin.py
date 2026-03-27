@@ -89,7 +89,7 @@ class AdversarialTester(BasePlugin):
         try:
             logger.info(f"[{self.plugin_id}] Adversarial Tester started successfully")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to start Adversarial Tester: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to start Adversarial Tester: {e}")
 
     async def on_shutdown(self):
         """
@@ -98,7 +98,7 @@ class AdversarialTester(BasePlugin):
         try:
             logger.info(f"[{self.plugin_id}] Adversarial Tester shutdown complete")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
+            logger.exception(f"[{self.plugin_id}] Error during shutdown: {e}")
 
     async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
@@ -118,10 +118,10 @@ class AdversarialTester(BasePlugin):
             self.suggest_signature_improvements
         ]
 
-    async def run_evasion_test(self, sample_id: str = None) -> str:
+    async def run_evasion_test(self, sample_id: str | None = None) -> str:
         """
         Run evasion test on a high-confidence sample.
-        
+
         Fetches a high-confidence sample from the Forensic Vault, generates 3 evasion variants
         using rnj-1, and tests them through SDA and APB. Flags vulnerabilities if detection
         drops below 50%.
@@ -175,7 +175,7 @@ class AdversarialTester(BasePlugin):
             return json.dumps(report, indent=2, default=str)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error running evasion test: {e}")
+            logger.exception(f"[{self.plugin_id}] Error running evasion test: {e}")
             return json.dumps({
                 "error": f"Failed to run evasion test: {e!s}"
             })
@@ -188,7 +188,7 @@ class AdversarialTester(BasePlugin):
             return json.dumps(stats, indent=2)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error getting evasion statistics: {e}")
+            logger.exception(f"[{self.plugin_id}] Error getting evasion statistics: {e}")
             return json.dumps({"error": f"Failed to get evasion statistics: {e!s}"})
 
     async def generate_evasion_report(self, format: str = "json") -> str:
@@ -210,7 +210,7 @@ class AdversarialTester(BasePlugin):
                 return json.dumps(report, indent=2, default=str)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error generating evasion report: {e}")
+            logger.exception(f"[{self.plugin_id}] Error generating evasion report: {e}")
             return json.dumps({"error": f"Failed to generate evasion report: {e!s}"})
 
     async def suggest_signature_improvements(self) -> str:
@@ -220,7 +220,7 @@ class AdversarialTester(BasePlugin):
             return json.dumps(suggestions, indent=2)
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error suggesting signature improvements: {e}")
+            logger.exception(f"[{self.plugin_id}] Error suggesting signature improvements: {e}")
             return json.dumps({"error": f"Failed to suggest signature improvements: {e!s}"})
 
     def register_plugins(self, sda_plugin=None, apb_plugin=None):
@@ -233,7 +233,7 @@ class AdversarialTester(BasePlugin):
         """Fetch a high-confidence sample from the forensic ledger."""
         try:
             sql = """
-                SELECT sample_id, model_fingerprint, combined_anomaly_score, 
+                SELECT sample_id, model_fingerprint, combined_anomaly_score,
                        timestamp, source_plugin, metadata, is_recurring, recurring_with
                 FROM nexus_forensic_ledger
                 WHERE combined_anomaly_score >= ?
@@ -260,14 +260,14 @@ class AdversarialTester(BasePlugin):
             return None
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error fetching high-confidence sample: {e}")
+            logger.exception(f"[{self.plugin_id}] Error fetching high-confidence sample: {e}")
             return None
 
     async def _fetch_sample_by_id(self, sample_id: str) -> Any | None:
         """Fetch a specific sample by ID from the forensic ledger."""
         try:
             sql = """
-                SELECT sample_id, model_fingerprint, combined_anomaly_score, 
+                SELECT sample_id, model_fingerprint, combined_anomaly_score,
                        timestamp, source_plugin, metadata, is_recurring, recurring_with
                 FROM nexus_forensic_ledger
                 WHERE sample_id = ?
@@ -292,7 +292,7 @@ class AdversarialTester(BasePlugin):
             return None
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error fetching sample by ID: {e}")
+            logger.exception(f"[{self.plugin_id}] Error fetching sample by ID: {e}")
             return None
 
     def _generate_evasion_variants(self, original_text: str, sample_id: str) -> list[EvasionVariant]:
@@ -520,7 +520,7 @@ class AdversarialTester(BasePlugin):
             )
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error testing sample detection: {e}")
+            logger.exception(f"[{self.plugin_id}] Error testing sample detection: {e}")
             return DetectionResult(
                 sample_id=sample_id,
                 sda_result={"status": "error", "score": 0.0, "error": str(e)},
@@ -536,7 +536,7 @@ class AdversarialTester(BasePlugin):
             variant_score = variant.combined_score
 
             # Calculate vulnerability score
-            vulnerability_score = original_score - variant_score
+            original_score - variant_score
 
             # Check if detection dropped below 50%
             if variant_score < self.detection_threshold:
@@ -547,7 +547,7 @@ class AdversarialTester(BasePlugin):
             return False
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error checking vulnerability: {e}")
+            logger.exception(f"[{self.plugin_id}] Error checking vulnerability: {e}")
             return False
 
     def _analyze_vulnerability(self, sample_id: str, variant: EvasionVariant,
@@ -644,7 +644,7 @@ class AdversarialTester(BasePlugin):
         }
 
         # Add variant analysis
-        for variant, result in zip(variants, variant_results):
+        for variant, result in zip(variants, variant_results, strict=False):
             variant_analysis = {
                 "variant_id": variant.variant_id,
                 "variant_type": variant.variant_type,
@@ -685,7 +685,7 @@ class AdversarialTester(BasePlugin):
         """Get most effective evasion techniques."""
         technique_drops = defaultdict(list)
 
-        for variant, result in zip(variants, results):
+        for variant, result in zip(variants, results, strict=False):
             drop = result.combined_score  # Lower is better for evasion
             technique_drops[variant.variant_type].append(drop)
 
@@ -720,8 +720,8 @@ class AdversarialTester(BasePlugin):
             # Insert vulnerabilities
             for vuln in vulnerabilities:
                 sql = """
-                    INSERT INTO nexus_evasion_vulnerabilities 
-                    (sample_id, variant_id, original_detection, variant_detection, vulnerability_score, 
+                    INSERT INTO nexus_evasion_vulnerabilities
+                    (sample_id, variant_id, original_detection, variant_detection, vulnerability_score,
                      suggested_features, variant_details)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 """
@@ -738,7 +738,7 @@ class AdversarialTester(BasePlugin):
             logger.info(f"[{self.plugin_id}] Saved {len(vulnerabilities)} vulnerabilities to database")
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error saving vulnerability data: {e}")
+            logger.exception(f"[{self.plugin_id}] Error saving vulnerability data: {e}")
 
     async def _get_vulnerability_statistics(self) -> dict[str, Any]:
         """Get statistics about evasion vulnerabilities."""
@@ -753,7 +753,7 @@ class AdversarialTester(BasePlugin):
 
             # Get most common vulnerability types
             # Note: This is simplified for SQLite compatibility
-            type_data = self.nexus.nexus.execute(
+            self.nexus.nexus.execute(
                 "SELECT variant_details, COUNT(*) FROM nexus_evasion_vulnerabilities GROUP BY variant_details"
             ).fetchall()
 
@@ -768,7 +768,7 @@ class AdversarialTester(BasePlugin):
             return stats
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error getting vulnerability statistics: {e}")
+            logger.exception(f"[{self.plugin_id}] Error getting vulnerability statistics: {e}")
             return {"error": str(e)}
 
     async def _generate_comprehensive_report(self) -> dict[str, Any]:
@@ -779,7 +779,7 @@ class AdversarialTester(BasePlugin):
 
             # Get recent vulnerabilities
             recent_sql = """
-                SELECT sample_id, variant_id, original_detection, variant_detection, 
+                SELECT sample_id, variant_id, original_detection, variant_detection,
                        vulnerability_score, suggested_features, detected_at
                 FROM nexus_evasion_vulnerabilities
                 ORDER BY detected_at DESC
@@ -817,7 +817,7 @@ class AdversarialTester(BasePlugin):
             return report
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error generating comprehensive report: {e}")
+            logger.exception(f"[{self.plugin_id}] Error generating comprehensive report: {e}")
             return {"error": str(e)}
 
     async def _analyze_signature_improvements(self) -> dict[str, Any]:
@@ -874,7 +874,7 @@ class AdversarialTester(BasePlugin):
             return improvements
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error analyzing signature improvements: {e}")
+            logger.exception(f"[{self.plugin_id}] Error analyzing signature improvements: {e}")
             return {"error": str(e)}
 
 

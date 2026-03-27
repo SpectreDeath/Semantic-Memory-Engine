@@ -40,7 +40,7 @@ class GraphCentrality:
             v = v_next
 
         # Pair with labels and sort
-        centrality_scores = {label: float(score) for label, score in zip(node_labels, v)}
+        centrality_scores = {label: float(score) for label, score in zip(node_labels, v, strict=False)}
         sorted_hubs = sorted(centrality_scores.items(), key=lambda x: x[1], reverse=True)
 
         return {

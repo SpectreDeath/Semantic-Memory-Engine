@@ -77,8 +77,8 @@ class MemoryConsolidator:
             cursor = conn.cursor()
 
             cursor.execute('''
-                SELECT source_file FROM sentiment_logs 
-                GROUP BY source_file 
+                SELECT source_file FROM sentiment_logs
+                GROUP BY source_file
                 ORDER BY timestamp DESC LIMIT 100
             ''')
             files = [row[0] for row in cursor.fetchall()]
@@ -121,7 +121,7 @@ class MemoryConsolidator:
             cursor = conn.cursor()
 
             cursor.execute('''
-                INSERT OR IGNORE INTO memory_concepts 
+                INSERT OR IGNORE INTO memory_concepts
                 (concept_name, abstract_level, member_count, definition)
                 VALUES (?, ?, ?, ?)
             ''', (concept_name, 1, len(members), definition))
@@ -197,7 +197,7 @@ class BehavioralProfiler:
 
             # Aggregate sentiment data
             cursor.execute('''
-                SELECT 
+                SELECT
                     AVG(neg) as avg_neg,
                     AVG(neu) as avg_neu,
                     AVG(pos) as avg_pos,

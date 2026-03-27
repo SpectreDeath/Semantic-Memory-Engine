@@ -52,7 +52,7 @@ def register(
     Returns the instantiated EpistemicValidator so the intelligence router
     can reference it for cross-domain epistemic auditing.
     """
-    safe_tool_call = make_safe_tool_call(registry, metrics_manager)
+    make_safe_tool_call(registry, metrics_manager)
 
     # --- Instantiate tool objects ---
     scribe_tool = ScribeAuthorshipTool(sme_core)
@@ -212,7 +212,7 @@ def register(
     @mcp.tool()
     def analyze_authorship(
         text: str,
-        suspect_vector_id: str = None,
+        suspect_vector_id: str | None = None,
         session_id: str | None = None,
     ) -> str:
         """

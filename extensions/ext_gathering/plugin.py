@@ -71,7 +71,7 @@ class GatheringExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def osint_scan(self, target: str, scan_types: list[str] = None) -> str:
+    async def osint_scan(self, target: str, scan_types: list[str] | None = None) -> str:
         """Perform OSINT scan on target."""
         if not self.osint:
             return json.dumps({"error": "OSINTToolkit not available"})
@@ -103,7 +103,7 @@ class GatheringExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def fetch_cloud(self, source: str, path: str, options: dict = None) -> str:
+    async def fetch_cloud(self, source: str, path: str, options: dict | None = None) -> str:
         """Fetch data from cloud storage."""
         if not self.cloud:
             return json.dumps({"error": "CloudFetcher not available"})

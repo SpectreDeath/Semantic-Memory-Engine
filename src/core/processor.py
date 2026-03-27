@@ -72,7 +72,7 @@ class LexiconProcessor:
         except Exception as e:
             return {'error': str(e)}
 
-    def build_index(self, filenames: list[str] = None) -> dict[str, Any]:
+    def build_index(self, filenames: list[str] | None = None) -> dict[str, Any]:
         """Builds a master index of all lexicons."""
         try:
             if filenames is None:
@@ -212,7 +212,7 @@ class BatchCompressor:
 
                         # Simple compression: key extraction
                         if isinstance(data, dict):
-                            compressed = {k: v for k, v in list(data.items())[:10]}
+                            compressed = dict(list(data.items())[:10])
                         else:
                             compressed = data[:10] if isinstance(data, list) else data
 

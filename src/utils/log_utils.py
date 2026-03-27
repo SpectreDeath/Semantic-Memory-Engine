@@ -78,7 +78,7 @@ except ImportError:
             self._logger.warning(msg, extra=kwargs)
 
         def error(self, msg: str, **kwargs: Any) -> None:
-            self._logger.error(msg, extra=kwargs)
+            self._logger.exception(msg, extra=kwargs)
 
         def debug(self, msg: str, **kwargs: Any) -> None:
             self._logger.debug(msg, extra=kwargs)

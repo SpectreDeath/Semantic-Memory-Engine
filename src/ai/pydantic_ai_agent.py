@@ -85,12 +85,12 @@ forensic_agent = None
 def analyze_forensic_text(text: str) -> dict[str, Any]:
     """
     Analyze text using Pydantic-AI agent.
-    
+
     This is a synchronous wrapper for the async agent.
-    
+
     Args:
         text: The forensic text to analyze
-        
+
     Returns:
         Dictionary with structured analysis results
     """
@@ -150,18 +150,18 @@ async def analyze_forensic_text_async(text: str) -> dict[str, Any]:
 def verify_claim(claim: str, evidence: list[str]) -> dict[str, Any]:
     """
     Verify a forensic claim against evidence sources.
-    
+
     Args:
         claim: The claim to verify
         evidence: List of evidence text snippets
-        
+
     Returns:
         Verification result with confidence score
     """
     verification_agent = pydantic_ai.Agent(
         model='openai:gpt-4o-mini',
         result_type=ClaimVerification,
-        system_prompt="""You are an epistemic verifier. 
+        system_prompt="""You are an epistemic verifier.
         Evaluate claims against provided evidence sources.
         Be strict - only verify claims that have clear support.""",
     )
@@ -185,7 +185,7 @@ def verify_claim(claim: str, evidence: list[str]) -> dict[str, Any]:
 def register_with_sme_registry(registry):
     """
     Register Pydantic-AI tools with SME's tool registry.
-    
+
     Args:
         registry: SME ToolRegistry instance
     """

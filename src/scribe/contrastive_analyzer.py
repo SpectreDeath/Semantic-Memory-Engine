@@ -15,7 +15,7 @@ class ContrastiveAnalyzer:
     Uses Zeta-score to identify preferred/avoided words.
     """
 
-    def __init__(self, db_path: str = None):
+    def __init__(self, db_path: str | None = None):
         config = Config()
         base_dir = config.get_path('storage.base_dir')
         self.db_path = db_path or str(base_dir / "storage" / "scribe_profiles.sqlite")
@@ -23,10 +23,10 @@ class ContrastiveAnalyzer:
     def _get_author_texts(self, author_id: str) -> list[str]:
         """
         Retrieves all text samples for an author from profile snapshots.
-        
+
         Args:
             author_id: The author identifier
-            
+
         Returns:
             List of text samples (concatenated from signal weights or stored text)
         """
@@ -54,14 +54,14 @@ class ContrastiveAnalyzer:
     ) -> dict[str, float]:
         """
         Calculates Zeta scores for word discrimination.
-        
+
         Zeta = proportion of A texts containing word - proportion of B texts containing word
-        
+
         Args:
             texts_a: Text samples from author A
             texts_b: Text samples from author B
             min_freq: Minimum frequency threshold
-            
+
         Returns:
             Dict mapping words to Zeta scores (positive = preferred by A, negative = preferred by B)
         """
@@ -114,12 +114,12 @@ class ContrastiveAnalyzer:
     ) -> dict[str, Any]:
         """
         Identifies distinctive lexical markers between two authors.
-        
+
         Args:
             author_a_id: First author identifier
             author_b_id: Second author identifier
             top_n: Number of top markers to return for each side
-            
+
         Returns:
             Dict formatted for bar chart visualization with 'preferred_a', 'preferred_b', 'labels', 'scores'
         """

@@ -49,10 +49,10 @@ class SemanticMemory:
     ):
         """
         Add a fact and automatically include its semantic variants.
-        
+
         This enriches the memory by adding synonyms and related concepts,
         making future searches more effective through semantic connections.
-        
+
         Args:
             fact_id: Unique identifier for the fact
             fact_text: The fact content
@@ -120,15 +120,15 @@ class SemanticMemory:
     ) -> dict:
         """
         Perform semantic search with automatic query expansion.
-        
+
         Automatically finds synonyms and related terms for the query,
         improving recall by searching for semantic variants.
-        
+
         Args:
             query: The search query
             n_results: Number of results to return
             include_variants: Whether to expand query with variants
-        
+
         Returns:
             Search results with enhanced relevance
         """
@@ -180,7 +180,7 @@ class SemanticMemory:
     def find_clusters(self, threshold: float = 0.1) -> dict:
         """
         Finds potential clusters (basic implementation via distance).
-        
+
         Note: High-level abstraction for the 'Synapse' layer to use.
         In a real implementation, we'd use collection.get() and perform clustering.
         """
@@ -194,14 +194,14 @@ class SemanticMemory:
     ) -> list[dict]:
         """
         Detect knowledge gaps in memory by analyzing semantic relationships.
-        
+
         Uses the semantic graph to find related concepts that haven't been
         stored yet, helping the system identify what information is missing.
-        
+
         Args:
             central_concept: The main concept to analyze
             existing_facts: Set of fact IDs already in memory
-        
+
         Returns:
             List of suggested gap fillers with priorities
         """
@@ -227,11 +227,11 @@ class SemanticMemory:
     ) -> dict[str, list[str]]:
         """
         Get all semantically related concepts for a given term.
-        
+
         Args:
             concept: The concept to find neighbors for
             relation_type: Filter by type ('synonym', 'hypernym', 'hyponym', 'antonym')
-        
+
         Returns:
             Dictionary of related concepts organized by relation type
         """

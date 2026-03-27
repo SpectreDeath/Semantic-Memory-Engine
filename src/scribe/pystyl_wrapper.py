@@ -29,10 +29,10 @@ class PyStylWrapper:
         """
         Implements Mendenhall's Breadth.
         Returns a normalized dictionary of word lengths (1-20+ letters).
-        
+
         Args:
             text: Input text string
-            
+
         Returns:
             Dict mapping length (int) to frequency (float 0.0-1.0)
         """
@@ -54,12 +54,12 @@ class PyStylWrapper:
         """
         Implements Kilgariff's Chi-squared Distance.
         Uses the top N most frequent words from the combined corpus.
-        
+
         Args:
             text_a: Reference text
             text_b: Unknown text
             top_n: Number of most frequent features to compare
-            
+
         Returns:
             Chi-squared distance score (lower is closer match)
         """

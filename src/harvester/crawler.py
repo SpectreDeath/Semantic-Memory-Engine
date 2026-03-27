@@ -145,13 +145,13 @@ class HarvesterCrawler:
 
             # Create index on domain for crawl queries
             cursor.execute("""
-                CREATE INDEX IF NOT EXISTS idx_raw_content_domain 
+                CREATE INDEX IF NOT EXISTS idx_raw_content_domain
                 ON raw_content(domain)
             """)
 
             # Create index on processed status for Loom pipeline
             cursor.execute("""
-                CREATE INDEX IF NOT EXISTS idx_raw_content_loom 
+                CREATE INDEX IF NOT EXISTS idx_raw_content_loom
                 ON raw_content(processed_by_loom)
             """)
 
@@ -159,7 +159,7 @@ class HarvesterCrawler:
             conn.close()
             logger.info("✅ raw_content table initialized")
         except Exception as e:
-            logger.error(f"❌ Database initialization error: {e}")
+            logger.exception(f"❌ Database initialization error: {e}")
 
     # ============================================================================
     # TOOL 1: fetch_semantic_markdown()
@@ -244,7 +244,7 @@ class HarvesterCrawler:
             return result
 
         except Exception as e:
-            logger.error(f"❌ Error fetching {url}: {e}")
+            logger.exception(f"❌ Error fetching {url}: {e}")
             result["status"] = "error"
             result["error"] = str(e)
             return result
@@ -362,7 +362,7 @@ class HarvesterCrawler:
             return result
 
         except Exception as e:
-            logger.error(f"Playwright failed: {e}")
+            logger.exception(f"Playwright failed: {e}")
             raise
 
     def _fetch_with_beautifulsoup(self, url: str, result: dict) -> dict:
@@ -394,7 +394,7 @@ class HarvesterCrawler:
             return result
 
         except Exception as e:
-            logger.error(f"BeautifulSoup failed: {e}")
+            logger.exception(f"BeautifulSoup failed: {e}")
             raise
 
     # ============================================================================
@@ -511,7 +511,7 @@ class HarvesterCrawler:
             return result
 
         except Exception as e:
-            logger.error(f"❌ Crawl error: {e}")
+            logger.exception(f"❌ Crawl error: {e}")
             result["error"] = str(e)
             result["processing_time_s"] = time.time() - start_time
             return result
@@ -591,7 +591,7 @@ class HarvesterCrawler:
                 "table_count": len(result["tables"]),
                 "form_count": len(result["forms"]),
                 "json_ld_count": len(result["json_ld"]),
-                "microdata_types": list(set([m.get("@type") for m in microdata.values()])),
+                "microdata_types": list({m.get("@type") for m in microdata.values()}),
             }
 
             result["status"] = "success"
@@ -599,7 +599,7 @@ class HarvesterCrawler:
             return result
 
         except Exception as e:
-            logger.error(f"❌ Structure extraction error: {e}")
+            logger.exception(f"❌ Structure extraction error: {e}")
             result["status"] = "error"
             result["error"] = str(e)
             return result
@@ -714,7 +714,7 @@ class HarvesterCrawler:
             return result
 
         except Exception as e:
-            logger.error(f"❌ SPA rendering error: {e}")
+            logger.exception(f"❌ SPA rendering error: {e}")
             result["status"] = "error"
             result["error"] = str(e)
             return result
@@ -785,8 +785,8 @@ class HarvesterCrawler:
 
             cursor.execute(
                 """
-                INSERT OR REPLACE INTO raw_content 
-                (url, domain, raw_html, markdown_content, extracted_schema, 
+                INSERT OR REPLACE INTO raw_content
+                (url, domain, raw_html, markdown_content, extracted_schema,
                  content_type, js_required, processed_by_loom, source_quality, fetch_method)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
@@ -820,7 +820,7 @@ class HarvesterCrawler:
             return result
 
         except Exception as e:
-            logger.error(f"❌ Archive error: {e}")
+            logger.exception(f"❌ Archive error: {e}")
             result["status"] = "error"
             result["error"] = str(e)
             return result
@@ -853,8 +853,8 @@ class HarvesterCrawler:
 
             cursor.execute(
                 """
-                INSERT OR REPLACE INTO raw_content 
-                (url, domain, raw_html, markdown_content, extracted_schema, 
+                INSERT OR REPLACE INTO raw_content
+                (url, domain, raw_html, markdown_content, extracted_schema,
                  content_type, js_required, source_quality, fetch_method)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,

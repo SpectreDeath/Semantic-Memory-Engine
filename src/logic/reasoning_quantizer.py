@@ -14,7 +14,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 class ReasoningQuantizer:
-    def __init__(self, h5_path: str = None):
+    def __init__(self, h5_path: str | None = None):
         if h5_path is None:
             self.h5_path = os.getenv("KNOWLEDGE_CORE_PATH", "data/knowledge_core.h5")
         else:
@@ -23,11 +23,11 @@ class ReasoningQuantizer:
     def distill_assertions(self, csv_path: str, format_type: str = "conceptnet") -> dict[str, Any]:
         """
         Processes raw CSV into high-performance HDF5 format.
-        
+
         Args:
             csv_path: Path to the CSV file containing assertions
             format_type: Type of CSV format ("conceptnet", "custom", "auto")
-            
+
         Returns:
             Dict with statistics about the distillation process
         """
@@ -84,8 +84,6 @@ class ReasoningQuantizer:
         """Parse CSV file and extract entities and relationships."""
         entities = {}
         relationships = []
-        entity_counter = 0
-        rel_counter = 0
 
         logger.info(f"Parsing CSV in {format_type} format...")
 
@@ -149,7 +147,7 @@ class ReasoningQuantizer:
                         logger.info(f"Processed {rel_counter:,} relationships...")
 
         except Exception as e:
-            logger.error(f"Error parsing ConceptNet CSV: {e}")
+            logger.exception(f"Error parsing ConceptNet CSV: {e}")
             raise
 
         return entities, relationships
@@ -185,7 +183,7 @@ class ReasoningQuantizer:
                 raise ValueError("CSV must contain subject, predicate, and object columns")
 
             # Process rows
-            for idx, row in df.iterrows():
+            for _idx, row in df.iterrows():
                 subject = str(row[subject_col]).strip()
                 predicate = str(row[predicate_col]).strip()
                 obj = str(row[object_col]).strip()
@@ -221,7 +219,7 @@ class ReasoningQuantizer:
                     logger.info(f"Processed {rel_counter:,} relationships...")
 
         except Exception as e:
-            logger.error(f"Error parsing custom CSV: {e}")
+            logger.exception(f"Error parsing custom CSV: {e}")
             raise
 
         return entities, relationships

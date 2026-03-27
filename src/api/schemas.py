@@ -6,9 +6,9 @@ Provides type-safe request/response models and auto-generated API documentation.
 Usage:
     from fastapi import FastAPI
     from src.api.schemas import AnalysisRequest, AnalysisResponse
-    
+
     app = FastAPI()
-    
+
     @app.post("/api/v1/analyze")
     async def analyze(request: AnalysisRequest) -> AnalysisResponse:
         result = analyzer.analyze(request.text)

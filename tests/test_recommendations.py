@@ -346,7 +346,7 @@ class TestIntegration:
 
     def test_caching_improves_performance(self):
         """Test that caching improves performance."""
-        cache = CacheManager()
+        CacheManager()
         call_count = 0
 
         @cache_decorator(ttl_seconds=10)

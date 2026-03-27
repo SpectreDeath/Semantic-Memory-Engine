@@ -13,9 +13,9 @@ def test_apb_logic():
 
     # 1. Human-like text (Variable sentence length, diverse vocabulary)
     human_text = """
-    The quick brown fox jumps over the lazy dog and then runs away into the forest to find some food. 
-    It was a bright, cold day in April, and the clocks were striking thirteen as Winston Smith walked home quickly. 
-    To be or not to be, that is the question that haunts every soul in the silence of the night. 
+    The quick brown fox jumps over the lazy dog and then runs away into the forest to find some food.
+    It was a bright, cold day in April, and the clocks were striking thirteen as Winston Smith walked home quickly.
+    To be or not to be, that is the question that haunts every soul in the silence of the night.
     In the beginning God created the heaven and the earth, and the earth was without form, and void.
     The sun set behind the mountains, casting long shadows across the valley while birds sang their final songs.
     Suddenly, a loud noise echoed through the trees! What could it be?

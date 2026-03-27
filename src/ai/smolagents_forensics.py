@@ -21,10 +21,10 @@ from smolagents import tools as tools_mod
 def analyze_stylometry(text: str) -> str:
     """
     Analyze text for stylometric fingerprinting.
-    
+
     Args:
         text: The text to analyze
-        
+
     Returns:
         JSON string with stylometric analysis
     """
@@ -44,10 +44,10 @@ def analyze_stylometry(text: str) -> str:
 def check_source_trust(url: str) -> str:
     """
     Check the trust score of a web source.
-    
+
     Args:
         url: The URL to check
-        
+
     Returns:
         JSON string with trust analysis
     """
@@ -68,10 +68,10 @@ def check_source_trust(url: str) -> str:
 def extract_entities(text: str) -> str:
     """
     Extract named entities from text.
-    
+
     Args:
         text: Text to extract entities from
-        
+
     Returns:
         JSON string with extracted entities
     """
@@ -88,10 +88,10 @@ def extract_entities(text: str) -> str:
 def calculate_risk_score(indicators: list[str]) -> str:
     """
     Calculate risk score from behavioral indicators.
-    
+
     Args:
         indicators: List of risk indicators
-        
+
     Returns:
         JSON string with risk analysis
     """
@@ -161,10 +161,10 @@ code_agent = smolagents.CodeAgent(
 def run_forensic_investigation(query: str) -> str:
     """
     Run a forensic investigation using the Smolagent.
-    
+
     Args:
         query: The investigation query
-        
+
     Returns:
         Agent's response
     """
@@ -175,10 +175,10 @@ def run_forensic_investigation(query: str) -> str:
 def run_code_analysis(code: str) -> str:
     """
     Run code-based forensic analysis.
-    
+
     Args:
         code: Python code to execute
-        
+
     Returns:
         Analysis result
     """

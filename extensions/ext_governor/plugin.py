@@ -89,7 +89,7 @@ class ResourceMonitor:
                 time.sleep(1.0)  # Monitor every second
 
             except Exception as e:
-                logger.error(f"[Governor] Error in monitoring loop: {e}")
+                logger.exception(f"[Governor] Error in monitoring loop: {e}")
                 time.sleep(2.0)
 
     def get_vram_usage_gb(self) -> float:
@@ -214,7 +214,7 @@ class Governor(BasePlugin):
             logger.info(f"[{self.plugin_id}] Governor started successfully")
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to start Governor: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to start Governor: {e}")
 
     async def on_shutdown(self):
         """
@@ -231,7 +231,7 @@ class Governor(BasePlugin):
             logger.info(f"[{self.plugin_id}] Governor shutdown complete")
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
+            logger.exception(f"[{self.plugin_id}] Error during shutdown: {e}")
 
     async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """
@@ -271,7 +271,7 @@ class Governor(BasePlugin):
                 "queue_size": self.ingestion_queue.qsize()
             }
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error queuing task {task_id}: {e}")
+            logger.exception(f"[{self.plugin_id}] Error queuing task {task_id}: {e}")
             return {
                 "status": "error",
                 "reason": str(e)
@@ -385,7 +385,7 @@ class Governor(BasePlugin):
                 await self._process_task(task)
 
             except Exception as e:
-                logger.error(f"[{self.plugin_id}] Error in processing loop: {e}")
+                logger.exception(f"[{self.plugin_id}] Error in processing loop: {e}")
                 await asyncio.sleep(1.0)
 
     async def _process_task(self, task: IngestionTask):
@@ -416,7 +416,7 @@ class Governor(BasePlugin):
             logger.info(f"[{self.plugin_id}] Task {task.task_id} completed in {processing_time:.2f}s")
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to process task {task.task_id}: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to process task {task.task_id}: {e}")
             task.status = "failed"
             self.stats["failed_tasks"] += 1
 
@@ -452,7 +452,7 @@ class Governor(BasePlugin):
                 logger.debug(f"[{self.plugin_id}] LogicAuditor completed: {logic_result.get('status', 'unknown')}")
 
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Pipeline execution failed: {e}")
+            logger.exception(f"[{self.plugin_id}] Pipeline execution failed: {e}")
             pipeline_results["pipeline_status"] = "failed"
             pipeline_results["error"] = str(e)
 
@@ -462,7 +462,7 @@ class Governor(BasePlugin):
         """Store task start information in database."""
         try:
             sql = """
-                INSERT INTO nexus_governor_stats 
+                INSERT INTO nexus_governor_stats
                 (timestamp, vram_usage_gb, vram_state, queue_size, total_tasks, completed_tasks, delayed_tasks, failed_tasks)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """
@@ -480,14 +480,14 @@ class Governor(BasePlugin):
                 self.stats["failed_tasks"]
             ))
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to store task start: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to store task start: {e}")
 
     async def _store_task_completion(self, task: IngestionTask, results: dict[str, Any], processing_time: float):
         """Store task completion information in database."""
         try:
             # Update the existing record with completion info
             sql = """
-                UPDATE nexus_governor_stats 
+                UPDATE nexus_governor_stats
                 SET processing_time = ?, pipeline_results = ?
                 WHERE timestamp = ?
             """
@@ -498,13 +498,13 @@ class Governor(BasePlugin):
                 task.timestamp.isoformat()
             ))
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to store task completion: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to store task completion: {e}")
 
     async def _store_task_failure(self, task: IngestionTask, error: str):
         """Store task failure information in database."""
         try:
             sql = """
-                UPDATE nexus_governor_stats 
+                UPDATE nexus_governor_stats
                 SET error_message = ?
                 WHERE timestamp = ?
             """
@@ -514,7 +514,7 @@ class Governor(BasePlugin):
                 task.timestamp.isoformat()
             ))
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to store task failure: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to store task failure: {e}")
 
     def _update_avg_processing_time(self, new_time: float):
         """Update the average processing time."""

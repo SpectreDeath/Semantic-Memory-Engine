@@ -2,12 +2,12 @@ import json
 import os
 from typing import Any
 
-from src.ai.provider import SME_AI_Provider
+from src.ai.provider import SMEAIProvider
 
 
-class LangflowProvider(SME_AI_Provider):
+class LangflowProvider(SMEAIProvider):
     """
-    Concrete implementation of SME_AI_Provider using Langflow JSON flows.
+    Concrete implementation of SMEAIProvider using Langflow JSON flows.
     """
 
     def __init__(self, flows_dir: str = "src/ai/flows"):
@@ -33,10 +33,7 @@ class LangflowProvider(SME_AI_Provider):
         flow = load_flow_from_json(flow_path)
 
         # input_data might need to be stringified for some Langflow versions
-        if not isinstance(input_data, str):
-            input_val = json.dumps(input_data)
-        else:
-            input_val = input_data
+        input_val = json.dumps(input_data) if not isinstance(input_data, str) else input_data
 
         result = flow.run(input_val)
         return str(result)

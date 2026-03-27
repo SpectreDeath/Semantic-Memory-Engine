@@ -142,7 +142,7 @@ class EntityLinker:
     def link_entities(self, text: str, kb_type: KnowledgeBase = KnowledgeBase.WIKIPEDIA) -> EntityLinkingResult:
         """
         Recognize and link entities in text.
-        
+
         Args:
             text: Input text
             kb_type: Target knowledge base
@@ -181,7 +181,7 @@ class EntityLinker:
     def disambiguate_entity(self, entity_text: str, context: str = "") -> list[LinkedEntity]:
         """
         Disambiguate entity by resolving to multiple possible candidates.
-        
+
         Args:
             entity_text: Entity to disambiguate
             context: Context for disambiguation
@@ -474,11 +474,7 @@ class EntityLinker:
         """Check if entities occur in same sentence."""
         sentences = text.split('.')
 
-        for sentence in sentences:
-            if entity1.text in sentence and entity2.text in sentence:
-                return True
-
-        return False
+        return any(entity1.text in sentence and entity2.text in sentence for sentence in sentences)
 
     def _infer_relationship(self, entity1: LinkedEntity, entity2: LinkedEntity) -> str:
         """Infer relationship type between entities."""
@@ -497,7 +493,7 @@ class EntityLinker:
         best_match = None
         best_score = 0.0
 
-        for known_entity in self.WIKI_URLS.keys():
+        for known_entity in self.WIKI_URLS:
             score = self._string_similarity(entity_text.lower(), known_entity.lower())
             if score > best_score:
                 best_score = score

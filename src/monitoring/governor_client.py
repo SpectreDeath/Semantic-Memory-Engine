@@ -59,7 +59,7 @@ class SystemSnapshot:
 class Governor:
     """
     System resource governor providing real-time monitoring.
-    
+
     Singleton pattern ensures consistent monitoring across all extensions.
     """
 
@@ -199,7 +199,7 @@ class Governor:
     ) -> dict[str, bool]:
         """
         Check if any resource exceeds threshold.
-        
+
         Returns dict with 'cpu', 'ram', 'gpu' boolean flags.
         """
         snap = self.get_snapshot()

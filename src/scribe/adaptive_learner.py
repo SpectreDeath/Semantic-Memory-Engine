@@ -47,7 +47,7 @@ class AdaptiveLearner:
     def save_profile_snapshot(self, author_id: str, current_weights: dict[str, float]):
         """
         Stores the state of an author's profile before update.
-        
+
         Args:
             author_id: The unique author identifier.
             current_weights: Dictionary of signal weights.
@@ -62,18 +62,18 @@ class AdaptiveLearner:
             conn.commit()
             logger.info(f"📸 Saved profile snapshot for {author_id}")
         except Exception as e:
-            logger.error(f"Failed to save snapshot for {author_id}: {e}")
+            logger.exception(f"Failed to save snapshot for {author_id}: {e}")
         finally:
             conn.close()
 
     def calculate_weighted_profile(self, author_id: str, decay_factor: float = 0.9) -> dict[str, float]:
         """
         Retrieves historical snapshots and applies exponential decay.
-        
+
         Args:
             author_id: The author to calculate for.
             decay_factor: Rate of decay (0.0 < x < 1.0). Closer to 1 keeps history longer.
-            
+
         Returns:
             Weighted average of signal weights.
         """
@@ -82,8 +82,8 @@ class AdaptiveLearner:
 
         # Get snapshots ordered by most recent first
         cursor.execute("""
-            SELECT signal_weights FROM profile_snapshots 
-            WHERE author_id = ? 
+            SELECT signal_weights FROM profile_snapshots
+            WHERE author_id = ?
             ORDER BY timestamp DESC
         """, (author_id,))
 
@@ -123,12 +123,12 @@ class AdaptiveLearner:
     def detect_style_drift(self, new_data: dict[str, float], author_id: str, threshold: float = 0.15) -> dict[str, Any]:
         """
         Flags if new content is a statistical outlier compared to weighted history.
-        
+
         Args:
             new_data: Signal weights of the new text.
             author_id: Author to check against.
             threshold: Cosine distance threshold for alerting drift.
-            
+
         Returns:
             Dict containing 'drift_detected' (bool), 'distance' (float), 'is_outlier' (bool).
         """
@@ -139,7 +139,7 @@ class AdaptiveLearner:
 
         # Align vectors for cosine distance
         all_keys = set(historical_profile.keys()) | set(new_data.keys())
-        sorted_keys = sorted(list(all_keys))
+        sorted_keys = sorted(all_keys)
 
         vec_hist = np.array([historical_profile.get(k, 0.0) for k in sorted_keys], dtype=float)
         vec_new = np.array([new_data.get(k, 0.0) for k in sorted_keys], dtype=float)
@@ -198,16 +198,16 @@ class AdaptiveLearner:
             return result
 
         except Exception as e:
-            logger.error(f"Error fetching history for {author_id}: {e}")
+            logger.exception(f"Error fetching history for {author_id}: {e}")
             return pd.DataFrame()
         finally:
             conn.close()
 
     def analyze_recent_drift(self, author_id: str, threshold: float = 0.15) -> tuple[bool, float]:
         """
-        Checks if the *latest* snapshot deviates from the *historical weighted average* 
+        Checks if the *latest* snapshot deviates from the *historical weighted average*
         of all prior snapshots.
-        
+
         Returns:
             (is_drifting, drift_score)
         """
@@ -221,8 +221,8 @@ class AdaptiveLearner:
 
             # 1. Get latest snapshot ID and data
             cursor.execute("""
-                SELECT id, signal_weights FROM profile_snapshots 
-                WHERE author_id = ? 
+                SELECT id, signal_weights FROM profile_snapshots
+                WHERE author_id = ?
                 ORDER BY timestamp DESC LIMIT 1
             """, (author_id,))
             row = cursor.fetchone()
@@ -242,7 +242,7 @@ class AdaptiveLearner:
 
             # Let's fetch all others.
             cursor.execute("""
-                SELECT signal_weights FROM profile_snapshots 
+                SELECT signal_weights FROM profile_snapshots
                 WHERE author_id = ? AND id != ?
                 ORDER BY timestamp DESC
             """, (author_id, latest_id))
@@ -277,7 +277,7 @@ class AdaptiveLearner:
             # We'll just do the math here to be safe and dependency-free
 
             all_keys = set(history_profile.keys()) | set(latest_data.keys())
-            sorted_keys = sorted(list(all_keys))
+            sorted_keys = sorted(all_keys)
 
             vec_hist = np.array([history_profile.get(k, 0.0) for k in sorted_keys], dtype=float)
             vec_new = np.array([latest_data.get(k, 0.0) for k in sorted_keys], dtype=float)
@@ -298,7 +298,7 @@ class AdaptiveLearner:
             return dist > threshold, float(dist)
 
         except Exception as e:
-            logger.error(f"Error checking recent drift: {e}")
+            logger.exception(f"Error checking recent drift: {e}")
             return False, 0.0
         finally:
             conn.close()

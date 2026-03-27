@@ -26,10 +26,7 @@ class ObfuscationAnalyzer:
         """
         Detects obfuscated scripts using Hamming Weight and Compression-based Complexity.
         """
-        if isinstance(content, str):
-            data = content.encode('utf-8')
-        else:
-            data = bytes(content)
+        data = content.encode('utf-8') if isinstance(content, str) else bytes(content)
 
         if not data:
             return {"obfuscation_score": 0.0, "status": "Empty Content"}

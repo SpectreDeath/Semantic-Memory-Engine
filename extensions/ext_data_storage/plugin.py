@@ -50,17 +50,17 @@ class DataStorageExtension(BasePlugin):
             self.backup_data,
         ]
 
-    async def store_semantic(self, key: str, value: Any, metadata: dict = None) -> str:
+    async def store_semantic(self, key: str, value: Any, metadata: dict | None = None) -> str:
         """Store data in semantic database."""
         if not self.semantic_db:
             return json.dumps({"error": "SemanticDatabase not available"})
         try:
-            result = self.semantic_db.store(key, value, metadata)
+            self.semantic_db.store(key, value, metadata)
             return json.dumps({"status": "stored", "key": key})
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def query_semantic(self, query: str, filters: dict = None, limit: int = 10) -> str:
+    async def query_semantic(self, query: str, filters: dict | None = None, limit: int = 10) -> str:
         """Query semantic database."""
         if not self.semantic_db:
             return json.dumps({"error": "SemanticDatabase not available"})
@@ -75,7 +75,7 @@ class DataStorageExtension(BasePlugin):
         if not self.centrifuge:
             return json.dumps({"error": "CentrifugeStorage not available"})
         try:
-            result = self.centrifuge.store(data, tier)
+            self.centrifuge.store(data, tier)
             return json.dumps({"status": "stored", "tier": tier})
         except Exception as e:
             return json.dumps({"error": str(e)})
@@ -100,12 +100,12 @@ class DataStorageExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def backup_data(self, target_path: str, collections: list[str] = None) -> str:
+    async def backup_data(self, target_path: str, collections: list[str] | None = None) -> str:
         """Backup data collections to specified path."""
         if not self.data_manager:
             return json.dumps({"error": "DataManager not available"})
         try:
-            result = self.data_manager.backup(target_path, collections)
+            self.data_manager.backup(target_path, collections)
             return json.dumps({"status": "backed_up", "target": target_path})
         except Exception as e:
             return json.dumps({"error": str(e)})

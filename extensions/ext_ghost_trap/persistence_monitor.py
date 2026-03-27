@@ -82,11 +82,7 @@ class GhostTrapMonitor:
 
         # Also check for dot-prefixed directories
         path_parts = Path(path).parts
-        for part in path_parts:
-            if part.startswith('.') and len(part) > 1:  # Exclude '.' and '..'
-                return True
-
-        return False
+        return any(part.startswith('.') and len(part) > 1 for part in path_parts)
 
     def _log_ghost_event(self, function_name: str, args: tuple, kwargs: dict,
                         target_path: str | None = None):
@@ -118,7 +114,7 @@ class GhostTrapMonitor:
             if self._is_monitoring:
                 # Check if command might create files in hidden directories
                 if any(hidden_dir in command.lower() for hidden_dir in self._hidden_directories):
-                    self._log_ghost_event('os.system', (command,) + args, kwargs, command)
+                    self._log_ghost_event('os.system', (command, *args), kwargs, command)
 
             return original_func(command, *args, **kwargs)
         return wrapper
@@ -127,9 +123,8 @@ class GhostTrapMonitor:
         """Wrap shutil.copy to monitor file copying operations."""
         @functools.wraps(original_func)
         def wrapper(src: str, dst: str, *args, **kwargs):
-            if self._is_monitoring:
-                if self._is_hidden_directory(dst):
-                    self._log_ghost_event('shutil.copy', (src, dst) + args, kwargs, dst)
+            if self._is_monitoring and self._is_hidden_directory(dst):
+                self._log_ghost_event('shutil.copy', (src, dst, *args), kwargs, dst)
 
             return original_func(src, dst, *args, **kwargs)
         return wrapper
@@ -147,7 +142,7 @@ class GhostTrapMonitor:
                     target_path = file
 
                 if target_path and self._is_hidden_directory(target_path):
-                    self._log_ghost_event('pickle.dump', (obj, file) + args, kwargs, target_path)
+                    self._log_ghost_event('pickle.dump', (obj, file, *args), kwargs, target_path)
 
             return original_func(obj, file, *args, **kwargs)
         return wrapper
@@ -159,7 +154,7 @@ class GhostTrapMonitor:
             if self._is_monitoring:
                 # Check if this might be part of a larger operation
                 # We can't easily detect the target path for dumps, but we can log the call
-                self._log_ghost_event('pickle.dumps', (obj,) + args, kwargs)
+                self._log_ghost_event('pickle.dumps', (obj, *args), kwargs)
 
             return original_func(obj, *args, **kwargs)
         return wrapper
@@ -236,7 +231,7 @@ ghost_monitor = GhostTrapMonitor()
 def hook_governor_task_execution(task_func: Callable, *args, **kwargs):
     """
     Hook function to be called by Governor before task execution.
-    
+
     This function wraps the task execution with ghost trap monitoring.
     """
     with ghost_monitor.monitor_context():

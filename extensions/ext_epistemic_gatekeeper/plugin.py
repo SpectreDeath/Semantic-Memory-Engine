@@ -45,7 +45,7 @@ class EpistemicGatekeeper(BasePlugin):
         try:
             logger.info(f"[{self.plugin_id}] Gatekeeper Online. Trust algorithms active.")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Failed to start Gatekeeper: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to start Gatekeeper: {e}")
 
     async def on_shutdown(self):
         """
@@ -54,7 +54,7 @@ class EpistemicGatekeeper(BasePlugin):
         try:
             logger.info(f"[{self.plugin_id}] Gatekeeper shutdown complete")
         except Exception as e:
-            logger.error(f"[{self.plugin_id}] Error during shutdown: {e}")
+            logger.exception(f"[{self.plugin_id}] Error during shutdown: {e}")
 
     async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
         """

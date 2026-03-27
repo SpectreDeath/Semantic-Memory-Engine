@@ -6,7 +6,6 @@ Handles cross-call state, temporary knowledge retention, and result history.
 
 from __future__ import annotations
 
-
 import json
 import os
 import sqlite3

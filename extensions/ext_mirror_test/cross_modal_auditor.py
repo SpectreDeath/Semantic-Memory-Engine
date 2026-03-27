@@ -7,7 +7,6 @@ Provides the audit_multimodal_sync() tool for multimodal hallucination detection
 
 from __future__ import annotations
 
-
 import logging
 import warnings
 from dataclasses import dataclass

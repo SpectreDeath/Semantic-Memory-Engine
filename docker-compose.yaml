@@ -1,6 +1,28 @@
 services:
 
   # ---------------------------------------------------------------------------
+  # Gateway - MCP Server for LLM agent integration
+  # ---------------------------------------------------------------------------
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: sme_gateway
+    restart: unless-stopped
+    ports:
+      - "8765:8765"
+    environment:
+      - SME_GATEWAY_SECRET=${SME_GATEWAY_SECRET}
+      - SME_ADMIN_PASSWORD=${SME_ADMIN_PASSWORD}
+      - SME_SIDECAR_URL=http://sme-sidecar:8089
+    depends_on:
+      - sme-operator
+    volumes:
+      - ./data:/app/data
+    networks:
+      - backend-net
+
+  # ---------------------------------------------------------------------------
   # autoheal: Monitors HEALTHCHECK status and restarts unhealthy containers.
   # Docker's own restart policy only fires on container exit/crash, NOT when a
   # container transitions to "unhealthy".  autoheal bridges that gap.

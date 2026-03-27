@@ -4,7 +4,6 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any
 
-
 ALLOWED_TABLES = {"skills", "sessions", "events", "metrics", "forensic_events", "source_provenance"}
 
 

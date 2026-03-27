@@ -5,12 +5,12 @@ import logging
 import pathlib
 import sys
 import time
-from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any
+from datetime import UTC, datetime
+from typing import Any
 from urllib import parse
 
-
 import pydantic
+
 from gateway import hardware_security, nexus_db, session_manager
 
 # Ensure SME is importable
@@ -293,7 +293,7 @@ class ScrapeGraphHarvester:
         Process SmartScraperGraph results into structured memory nodes.
         """
         nodes = []
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.now(UTC).isoformat()
 
         # Extract entities and relationships from the result
         entities = self._extract_entities(result)
@@ -325,7 +325,7 @@ class ScrapeGraphHarvester:
         Process SearchGraph results into structured memory nodes.
         """
         nodes = []
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.now(UTC).isoformat()
 
         # Extract entities and relationships from the result
         entities = self._extract_entities(result)
@@ -359,7 +359,7 @@ class ScrapeGraphHarvester:
         Process MarkdownifyGraph results into structured memory nodes.
         """
         nodes = []
-        timestamp = datetime.now(timezone.utc).isoformat()
+        timestamp = datetime.now(UTC).isoformat()
 
         # Extract entities and relationships from the result
         entities = self._extract_entities(result)

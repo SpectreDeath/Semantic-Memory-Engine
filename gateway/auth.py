@@ -45,7 +45,7 @@ class AuthManager:
     def login(self, username: str, password: str) -> str | None:
         """Verify credentials and return a JWT token."""
         if secrets.compare_digest(password, self.admin_password):
-            now = datetime.datetime.now(datetime.timezone.utc)
+            now = datetime.datetime.now(datetime.UTC)
             payload = {
                 "sub": username,
                 "role": "admin" if username == "admin" else "user",

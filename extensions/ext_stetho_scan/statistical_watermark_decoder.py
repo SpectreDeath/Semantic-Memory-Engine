@@ -7,7 +7,6 @@ to identify statistical watermarks in text content.
 
 from __future__ import annotations
 
-
 import logging
 import re
 import statistics

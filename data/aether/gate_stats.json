@@ -1,9 +1,9 @@
 {
-  "total_decisions": 22,
+  "total_decisions": 23,
   "decisions_by_type": {
-    "review": 22
+    "review": 23
   },
-  "corrections_received": 22,
+  "corrections_received": 23,
   "false_positives": 0,
   "false_negatives": 0,
   "true_positives": 0,
@@ -11,5 +11,5 @@
   "average_confidence": 0.0,
   "model_accuracy": 0.0,
   "last_training": null,
-  "last_updated": "2026-03-25T16:54:54.436539"
+  "last_updated": "2026-03-26T20:13:50.264903"
 }

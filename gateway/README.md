@@ -20,9 +20,9 @@ python -m gateway.mcp_server
 ### Option 2: Docker
 
 ```bash
-# Build and run the gateway container
-cd d:\SME\gateway
-docker-compose up -d
+# Build and run the gateway container (from SME root)
+cd d:\SME
+docker-compose up gateway -d
 ```
 
 ### Option 3: LM Studio Integration

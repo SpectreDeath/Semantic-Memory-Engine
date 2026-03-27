@@ -2,6 +2,7 @@
 API Router - Maps Laboratory Tools to REST Endpoints
 """
 
+import os
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -22,17 +23,21 @@ router = APIRouter()
 
 # --- Models ---
 
+
 class TextRequest(BaseModel):
     text: str
     context_id: str = "default"
+
 
 class ConnectionRequest(BaseModel):
     context_id: str
     limit: int = 5
 
+
 class BatchRequest(BaseModel):
     items: list[str]
-    operation: str = "sentiment" # or "summarize", etc.
+    operation: str = "sentiment"  # or "summarize", etc.
+
 
 class IngestRequest(BaseModel):
     url: str
@@ -40,10 +45,13 @@ class IngestRequest(BaseModel):
     deep_crawl: bool = False
     max_pages: int = 5
 
+
 class ProviderUpdateRequest(BaseModel):
-    provider_type: str # 'langflow', 'mock', etc.
+    provider_type: str  # 'langflow', 'mock', etc.
+
 
 # --- Analysis Endpoints ---
+
 
 @router.post("/analysis/graph")
 @cached(ttl=600)  # Cache for 10 minutes
@@ -57,17 +65,14 @@ async def build_knowledge_graph(request: TextRequest):
         kg = analysis_breaker.call(ToolFactory.create_knowledge_graph)
         kg.build_from_text(request.text, request.context_id)
 
-        return {
-            "summary": kg.get_summary(),
-            "mermaid": kg.to_mermaid(),
-            "json_graph": kg.to_json()
-        }
+        return {"summary": kg.get_summary(), "mermaid": kg.to_mermaid(), "json_graph": kg.to_json()}
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except CircuitBreakerError as e:
         raise HTTPException(status_code=503, detail=f"Service temporarily unavailable: {e!s}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/analysis/report")
 @cached(ttl=900)  # Cache for 15 minutes
@@ -81,16 +86,14 @@ async def generate_intelligence_report(request: TextRequest):
         ir = analysis_breaker.call(ToolFactory.create_intelligence_reports)
         report = ir.generate_briefing(request.text, title=f"API Briefing - {request.context_id}")
 
-        return {
-            "report_data": report,
-            "markdown": ir.to_markdown(report)
-        }
+        return {"report_data": report, "markdown": ir.to_markdown(report)}
     except ValidationError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except CircuitBreakerError as e:
         raise HTTPException(status_code=503, detail=f"Service temporarily unavailable: {e!s}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/analysis/connections")
 async def find_connections(context_id: str = Query(...), limit: int = 5):
@@ -111,7 +114,9 @@ async def find_connections(context_id: str = Query(...), limit: int = 5):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # --- Tool Management ---
+
 
 @router.get("/tools/status")
 async def get_tools_status():
@@ -121,12 +126,15 @@ async def get_tools_status():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get("/tools/list")
 async def list_active_instances():
     """List all currently instantiated tool objects."""
     return ToolFactory.list_instances()
 
+
 # --- Search ---
+
 
 @router.get("/search")
 async def semantic_search(query: str = Query(...), limit: int = 5):
@@ -147,7 +155,9 @@ async def semantic_search(query: str = Query(...), limit: int = 5):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # --- Batch Processing ---
+
 
 @router.post("/batch/process")
 async def submit_batch_job(request: BatchRequest, user: User = Depends(get_current_user)):
@@ -156,6 +166,7 @@ async def submit_batch_job(request: BatchRequest, user: User = Depends(get_curre
 
     # Define task based on operation
     if request.operation == "sentiment":
+
         async def process_item(text: str):
             analyzer = ToolFactory.create_sentiment_analyzer()
             return analyzer.analyze_sentiment(text)
@@ -164,6 +175,7 @@ async def submit_batch_job(request: BatchRequest, user: User = Depends(get_curre
 
     job_id = await processor.create_job(request.items, process_item)
     return {"job_id": job_id, "status": "accepted"}
+
 
 @router.get("/batch/status/{job_id}")
 async def get_batch_status(job_id: str, user: User = Depends(get_current_user)):
@@ -174,6 +186,7 @@ async def get_batch_status(job_id: str, user: User = Depends(get_current_user)):
         raise HTTPException(status_code=404, detail="Job not found")
     return status
 
+
 @router.get("/batch/results/{job_id}")
 async def get_batch_results(job_id: str, user: User = Depends(get_current_user)):
     """Retrieve results of a completed batch job."""
@@ -183,7 +196,9 @@ async def get_batch_results(job_id: str, user: User = Depends(get_current_user))
         raise HTTPException(status_code=404, detail="Results not ready or job not found")
     return results
 
+
 # --- Connection Management ---
+
 
 @router.get("/connections/status")
 async def get_all_connections_status():
@@ -197,7 +212,7 @@ async def get_all_connections_status():
             "api": "online",
             "sidecar": "offline",
             "database": "offline",
-            "tools": ToolFactory.health_check()
+            "tools": ToolFactory.health_check(),
         }
 
         # Check Sidecar
@@ -212,7 +227,7 @@ async def get_all_connections_status():
         # Check Database (Check if we can query the factory's DB instance)
         try:
             db = ToolFactory.create_semantic_db()
-            if db: # placeholder for actual health check
+            if db:  # placeholder for actual health check
                 status["database"] = "online"
         except:
             pass
@@ -220,6 +235,7 @@ async def get_all_connections_status():
         return status
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/connections/ai-provider")
 async def update_ai_provider(request: ProviderUpdateRequest):
@@ -229,11 +245,14 @@ async def update_ai_provider(request: ProviderUpdateRequest):
     os.environ["SME_AI_PROVIDER"] = request.provider_type
     return {"status": "success", "active_provider": request.provider_type}
 
+
 # --- Drift Analysis (AuditEngine) ---
+
 
 class DriftAnalysisRequest(BaseModel):
     claims: list[dict[str, str]]
     format_type: str = "auto"  # "conceptnet", "custom", "auto"
+
 
 @router.post("/drift/analyze")
 async def analyze_drift(request: DriftAnalysisRequest):
@@ -255,18 +274,21 @@ async def analyze_drift(request: DriftAnalysisRequest):
             "anomaly_count": len(result["anomalies"]),
             "verified_claims": result["verified"],
             "anomalous_claims": result["anomalies"],
-            "analysis_timestamp": result.get("analysis_timestamp", "N/A")
+            "analysis_timestamp": result.get("analysis_timestamp", "N/A"),
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Drift analysis failed: {e!s}")
 
+
 # --- Ingestion (Harvester) ---
+
 
 @router.post("/ingestion/crawl")
 async def ingest_from_url(request: IngestRequest):
     """Ingest content from a URL using the Harvester engine."""
     try:
         from src.harvester.crawler import HarvesterCrawler
+
         crawler = HarvesterCrawler()
 
         if request.deep_crawl:
@@ -277,7 +299,7 @@ async def ingest_from_url(request: IngestRequest):
             result = crawler.fetch_semantic_markdown(request.url, js_render=request.js_render)
 
         if result.get("status") == "error":
-             raise HTTPException(status_code=422, detail=result.get("error"))
+            raise HTTPException(status_code=422, detail=result.get("error"))
 
         return result
     except Exception as e:

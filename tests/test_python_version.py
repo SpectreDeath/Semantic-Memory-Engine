@@ -176,8 +176,6 @@ class TestAuthModule:
     @pytest.fixture
     def auth_manager(self):
         """Create auth manager with test credentials."""
-        import sys
-        from unittest.mock import patch
 
         env_vars = {
             "SME_GATEWAY_SECRET": "test_secret_key_for_testing_12345",
@@ -185,9 +183,10 @@ class TestAuthModule:
         }
 
         with patch.dict(os.environ, env_vars, clear=False):
-            from gateway.auth import AuthManager
             import importlib
+
             import gateway.auth as auth_module
+            from gateway.auth import AuthManager
 
             importlib.reload(auth_module)
             return AuthManager(admin_password="test_admin_password")
@@ -404,9 +403,9 @@ class TestCrossVersionCompatibility:
     @pytest.mark.integration
     def test_type_annotations_compatible(self):
         """Test that type annotations are compatible."""
-        from typing import Any, Optional
+        from typing import Any
 
-        test: Optional[str] = None
+        test: str | None = None
         assert test is None
 
         test = "value"

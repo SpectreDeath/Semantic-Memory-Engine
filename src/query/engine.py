@@ -5,7 +5,6 @@ Semantic search interface, fact verification checker, context window optimizer.
 
 from __future__ import annotations
 
-
 import json
 import os
 import re

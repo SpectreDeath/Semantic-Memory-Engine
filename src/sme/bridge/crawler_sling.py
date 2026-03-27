@@ -1,12 +1,9 @@
 import logging
 import os
-import sys
 from typing import Any
 
 import httpx
 import trafilatura
-
-
 
 from src.sme.vendor import faststylometry, forensic_files, forensic_math
 

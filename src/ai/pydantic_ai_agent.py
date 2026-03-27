@@ -9,9 +9,7 @@ v2.1.0: Added Pydantic-AI integration for agentic forensic workflows.
 
 from __future__ import annotations
 
-
 # cSpell:ignore agentic ollama Ollama exfiltration
-
 import json
 from typing import Any
 

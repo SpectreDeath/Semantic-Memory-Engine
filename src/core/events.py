@@ -10,7 +10,6 @@ Status: Production Ready
 
 from __future__ import annotations
 
-
 import asyncio
 import logging
 from collections.abc import Callable
@@ -271,7 +270,7 @@ class EventBus:
                         self._stats["errors"] += 1
                         logger.error(f"Error processing event: {e}", exc_info=True)
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 continue
             except Exception as e:
                 self._stats["errors"] += 1

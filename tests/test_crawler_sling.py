@@ -1,15 +1,15 @@
 import asyncio
 import sys
-from pathlib import Path
 
 # Standard bootstrap
 import src.bootstrap
+
 src.bootstrap.initialize()
+
+import pytest
 
 from src.sme.bridge import crawler_sling
 
-
-import pytest
 
 @pytest.mark.asyncio
 async def test_crawler_sling():

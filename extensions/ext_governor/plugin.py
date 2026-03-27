@@ -378,7 +378,7 @@ class Governor(BasePlugin):
                         self.ingestion_queue.get(),
                         timeout=1.0
                     )
-                except asyncio.TimeoutError:
+                except TimeoutError:
                     continue  # No tasks available, continue loop
 
                 # Process the task

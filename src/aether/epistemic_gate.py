@@ -15,7 +15,6 @@ Technical Targets:
 
 from __future__ import annotations
 
-
 import hashlib
 import json
 import os
@@ -93,7 +92,7 @@ class GateFailure:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "GateFailure":
+    def from_dict(cls, data: dict[str, Any]) -> GateFailure:
         return cls(
             id=data["id"],
             text=data["text"],
@@ -154,7 +153,7 @@ class GateStats:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "GateStats":
+    def from_dict(cls, data: dict[str, Any]) -> GateStats:
         return cls(
             total_decisions=data.get("total_decisions", 0),
             decisions_by_type=data.get("decisions_by_type", {}),

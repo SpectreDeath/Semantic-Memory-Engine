@@ -13,7 +13,6 @@ Usage:
 
 from __future__ import annotations
 
-
 import logging
 import os
 import sys
@@ -40,7 +39,6 @@ from src.sme.vendor.faststylometry import Corpus
 from src.sme.vendor.faststylometry.en import tokenise_remove_pronouns_en
 from src.sme.vendor.faststylometry.probability import calibrate, predict_proba
 from src.sme.vendor.forensic_math import dict_to_vectors
-from src.sme.epistemic_validator import EpistemicValidator
 
 # Ensure SME src is importable
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

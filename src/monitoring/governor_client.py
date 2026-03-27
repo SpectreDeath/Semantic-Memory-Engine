@@ -13,12 +13,11 @@ This replaces placeholder implementations in extensions.
 
 from __future__ import annotations
 
-
 import logging
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("lawnmower.governor")
 
@@ -64,7 +63,7 @@ class Governor:
     Singleton pattern ensures consistent monitoring across all extensions.
     """
 
-    _instance: Optional['Governor'] = None
+    _instance: Governor | None = None
     _lock = threading.Lock()
 
     def __new__(cls):

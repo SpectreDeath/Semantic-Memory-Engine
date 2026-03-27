@@ -7,7 +7,6 @@ with AI-powered conclusions using rnj-1 for analysis.
 
 from __future__ import annotations
 
-
 import datetime
 import logging
 import re

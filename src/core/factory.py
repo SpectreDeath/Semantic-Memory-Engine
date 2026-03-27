@@ -17,7 +17,6 @@ Usage:
 
 from __future__ import annotations
 
-
 import logging
 from typing import Any
 
@@ -39,14 +38,14 @@ class ToolFactory:
         """Check if enough VRAM is available for a heavy tool (GTX 1660 Ti optimization)."""
         from src.core.config import Config
         from src.monitoring.diagnostics import PerformanceProfiler
-        
+
         config = Config()
         vram_limit = config.get('hardware', {}).get('vram_limit_mb', 6144)
-        
+
         try:
             profiler = PerformanceProfiler()
             gpu_info = profiler.profile_gpu_fallback()
-            
+
             if gpu_info.get('gpus'):
                 free_vram = gpu_info['gpus'][0].get('memory_free_mb', 0)
                 if free_vram < required_mb:
@@ -63,7 +62,7 @@ class ToolFactory:
         cls._instances.clear()
 
     @classmethod
-    def create_scribe(cls, reset: bool = False) -> 'ScribeEngine':
+    def create_scribe(cls, reset: bool = False) -> ScribeEngine:
         """
         Create or retrieve the ScribeEngine instance.
         
@@ -84,7 +83,7 @@ class ToolFactory:
         return cls._instances['scribe']
 
     @classmethod
-    def create_lexicon_importer(cls, reset: bool = False) -> 'LexiconImporter':
+    def create_lexicon_importer(cls, reset: bool = False) -> LexiconImporter:
         """
         Create or retrieve the LexiconImporter instance.
         
@@ -105,7 +104,7 @@ class ToolFactory:
         return cls._instances['lexicon_importer']
 
     @classmethod
-    def create_aifdb_connector(cls, reset: bool = False) -> 'AIFdbConnector':
+    def create_aifdb_connector(cls, reset: bool = False) -> AIFdbConnector:
         """
         Create or retrieve the AIFdbConnector instance.
         
@@ -126,7 +125,7 @@ class ToolFactory:
         return cls._instances['aifdb']
 
     @classmethod
-    def create_concept_resolver(cls, reset: bool = False) -> 'ConceptResolver':
+    def create_concept_resolver(cls, reset: bool = False) -> ConceptResolver:
         """
         Create or retrieve the ConceptResolver instance.
         
@@ -147,7 +146,7 @@ class ToolFactory:
         return cls._instances['concept_resolver']
 
     @classmethod
-    def create_stylo_wrapper(cls, reset: bool = False) -> 'StyloWrapper':
+    def create_stylo_wrapper(cls, reset: bool = False) -> StyloWrapper:
         """
         Create or retrieve the StyloWrapper instance.
         
@@ -168,7 +167,7 @@ class ToolFactory:
         return cls._instances['stylo_wrapper']
 
     @classmethod
-    def create_pystyl_wrapper(cls, reset: bool = False) -> 'PyStylWrapper':
+    def create_pystyl_wrapper(cls, reset: bool = False) -> PyStylWrapper:
         """
         Create or retrieve the PyStylWrapper instance.
         
@@ -189,7 +188,7 @@ class ToolFactory:
         return cls._instances['pystyl']
 
     @classmethod
-    def create_rolling_delta(cls, reset: bool = False) -> 'RollingDelta':
+    def create_rolling_delta(cls, reset: bool = False) -> RollingDelta:
         """
         Create or retrieve the RollingDelta instance.
         
@@ -210,7 +209,7 @@ class ToolFactory:
         return cls._instances['rolling_delta']
 
     @classmethod
-    def create_adaptive_learner(cls, reset: bool = False) -> 'AdaptiveLearner':
+    def create_adaptive_learner(cls, reset: bool = False) -> AdaptiveLearner:
         """
         Create or retrieve the AdaptiveLearner instance.
         
@@ -231,7 +230,7 @@ class ToolFactory:
         return cls._instances['adaptive_learner']
 
     @classmethod
-    def create_forensic_scout(cls, reset: bool = False) -> 'ForensicScout':
+    def create_forensic_scout(cls, reset: bool = False) -> ForensicScout:
         """
         Create or retrieve the ForensicScout instance.
         
@@ -252,7 +251,7 @@ class ToolFactory:
         return cls._instances['forensic_scout']
 
     @classmethod
-    def create_contrastive_analyzer(cls, reset: bool = False) -> 'ContrastiveAnalyzer':
+    def create_contrastive_analyzer(cls, reset: bool = False) -> ContrastiveAnalyzer:
         """
         Create or retrieve the ContrastiveAnalyzer instance.
         
@@ -273,7 +272,7 @@ class ToolFactory:
         return cls._instances['contrastive_analyzer']
 
     @classmethod
-    def create_impostors_checker(cls, reset: bool = False) -> 'ImpostorsChecker':
+    def create_impostors_checker(cls, reset: bool = False) -> ImpostorsChecker:
         """
         Create or retrieve the ImpostorsChecker instance.
         
@@ -294,7 +293,7 @@ class ToolFactory:
         return cls._instances['impostors_checker']
 
     @classmethod
-    def create_network_generator(cls, reset: bool = False) -> 'NetworkGenerator':
+    def create_network_generator(cls, reset: bool = False) -> NetworkGenerator:
         """
         Create or retrieve the NetworkGenerator instance.
         
@@ -315,7 +314,7 @@ class ToolFactory:
         return cls._instances['network_generator']
 
     @classmethod
-    def create_scout(cls, reset: bool = False) -> 'Scout':
+    def create_scout(cls, reset: bool = False) -> Scout:
         """
         Create or retrieve the Scout instance.
         
@@ -336,7 +335,7 @@ class ToolFactory:
         return cls._instances['scout']
 
     @classmethod
-    def create_search_engine(cls, reset: bool = False) -> 'SemanticSearchEngine':
+    def create_search_engine(cls, reset: bool = False) -> SemanticSearchEngine:
         """
         Create or retrieve the SemanticSearchEngine instance.
         
@@ -357,7 +356,7 @@ class ToolFactory:
         return cls._instances['search']
 
     @classmethod
-    def create_synapse(cls, reset: bool = False) -> 'MemoryConsolidator':
+    def create_synapse(cls, reset: bool = False) -> MemoryConsolidator:
         """
         Create or retrieve the MemoryConsolidator instance.
         
@@ -378,7 +377,7 @@ class ToolFactory:
         return cls._instances['synapse']
 
     @classmethod
-    def create_centrifuge(cls, reset: bool = False) -> 'Centrifuge':
+    def create_centrifuge(cls, reset: bool = False) -> Centrifuge:
         """
         Create or retrieve the Centrifuge database instance.
         
@@ -399,7 +398,7 @@ class ToolFactory:
         return cls._instances['centrifuge']
 
     @classmethod
-    def create_event_bus(cls, reset: bool = False) -> 'EventBus':
+    def create_event_bus(cls, reset: bool = False) -> EventBus:
         """
         Create or retrieve the EventBus instance.
         
@@ -420,7 +419,7 @@ class ToolFactory:
         return cls._instances['event_bus']
 
     @classmethod
-    def create_log_manager(cls, reset: bool = False) -> 'LogManager':
+    def create_log_manager(cls, reset: bool = False) -> LogManager:
         """
         Create or retrieve the LogManager instance.
         
@@ -442,7 +441,7 @@ class ToolFactory:
         return cls._instances['log_manager']
 
     @classmethod
-    def create_semantic_db(cls, reset: bool = False) -> 'SemanticMemory':
+    def create_semantic_db(cls, reset: bool = False) -> SemanticMemory:
         """
         Create or retrieve the SemanticMemory (ChromaDB) instance.
         
@@ -463,7 +462,7 @@ class ToolFactory:
         return cls._instances['semantic_db']
 
     @classmethod
-    def create_semantic_graph(cls, reset: bool = False) -> 'SemanticGraph':
+    def create_semantic_graph(cls, reset: bool = False) -> SemanticGraph:
         """
         Create or retrieve the SemanticGraph (WordNet) instance.
         """
@@ -482,7 +481,7 @@ class ToolFactory:
         return cls._instances['semantic_graph']
 
     @classmethod
-    def create_data_manager(cls, reset: bool = False) -> 'DataManager':
+    def create_data_manager(cls, reset: bool = False) -> DataManager:
         """
         Create or retrieve the DataManager instance.
         
@@ -503,7 +502,7 @@ class ToolFactory:
         return cls._instances['data_manager']
 
     @classmethod
-    def create_nlp_pipeline(cls, reset: bool = False) -> 'NLPPipeline':
+    def create_nlp_pipeline(cls, reset: bool = False) -> NLPPipeline:
         """
         Create or retrieve the NLPPipeline instance.
         
@@ -524,7 +523,7 @@ class ToolFactory:
         return cls._instances['nlp_pipeline']
 
     @classmethod
-    def create_advanced_nlp(cls, reset: bool = False) -> 'AdvancedNLPEngine':
+    def create_advanced_nlp(cls, reset: bool = False) -> AdvancedNLPEngine:
         """
         Create or retrieve the AdvancedNLPEngine instance.
         """
@@ -543,7 +542,7 @@ class ToolFactory:
         return cls._instances['advanced_nlp']
 
     @classmethod
-    def create_monitor(cls, reset: bool = False) -> 'SystemMonitor':
+    def create_monitor(cls, reset: bool = False) -> SystemMonitor:
         """
         Create or retrieve the SystemMonitor instance.
         
@@ -564,7 +563,7 @@ class ToolFactory:
         return cls._instances['monitor']
 
     @classmethod
-    def create_orchestrator(cls, reset: bool = False) -> 'PipelineCoordinator':
+    def create_orchestrator(cls, reset: bool = False) -> PipelineCoordinator:
         """
         Create or retrieve the PipelineCoordinator instance.
         
@@ -585,7 +584,7 @@ class ToolFactory:
         return cls._instances['orchestrator']
 
     @classmethod
-    def create_sentiment_analyzer(cls, reset: bool = False) -> 'SentimentAnalyzer':
+    def create_sentiment_analyzer(cls, reset: bool = False) -> SentimentAnalyzer:
         """
         Create or retrieve the SentimentAnalyzer instance.
         
@@ -606,7 +605,7 @@ class ToolFactory:
         return cls._instances['sentiment']
 
     @classmethod
-    def create_text_summarizer(cls, reset: bool = False) -> 'TextSummarizer':
+    def create_text_summarizer(cls, reset: bool = False) -> TextSummarizer:
         """
         Create or retrieve the TextSummarizer instance.
         
@@ -627,7 +626,7 @@ class ToolFactory:
         return cls._instances['summarizer']
 
     @classmethod
-    def create_entity_linker(cls, reset: bool = False) -> 'EntityLinker':
+    def create_entity_linker(cls, reset: bool = False) -> EntityLinker:
         """
         Create or retrieve the EntityLinker instance.
         
@@ -648,7 +647,7 @@ class ToolFactory:
         return cls._instances['entity_linker']
 
     @classmethod
-    def create_document_clusterer(cls, reset: bool = False) -> 'DocumentClusterer':
+    def create_document_clusterer(cls, reset: bool = False) -> DocumentClusterer:
         """
         Create or retrieve the DocumentClusterer instance.
         
@@ -669,7 +668,7 @@ class ToolFactory:
         return cls._instances['clusterer']
 
     @classmethod
-    def create_knowledge_graph(cls, reset: bool = False) -> 'KnowledgeGraph':
+    def create_knowledge_graph(cls, reset: bool = False) -> KnowledgeGraph:
         """
         Create or retrieve the KnowledgeGraph instance.
         
@@ -690,7 +689,7 @@ class ToolFactory:
         return cls._instances['knowledge_graph']
 
     @classmethod
-    def create_intelligence_reports(cls, reset: bool = False) -> 'IntelligenceReports':
+    def create_intelligence_reports(cls, reset: bool = False) -> IntelligenceReports:
         """
         Create or retrieve the IntelligenceReports instance.
         
@@ -711,7 +710,7 @@ class ToolFactory:
         return cls._instances['intelligence_reports']
 
     @classmethod
-    def create_overlap_discovery(cls, reset: bool = False) -> 'OverlapDiscovery':
+    def create_overlap_discovery(cls, reset: bool = False) -> OverlapDiscovery:
         """
         Create or retrieve the OverlapDiscovery instance.
         

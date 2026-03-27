@@ -10,13 +10,12 @@ Features:
 
 from __future__ import annotations
 
-
 import asyncio
 import logging
 import uuid
 from collections.abc import Callable
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 

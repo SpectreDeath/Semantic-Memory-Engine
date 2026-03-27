@@ -4,12 +4,12 @@ Circuit Breaker pattern implementation for resilient service communication.
 
 from __future__ import annotations
 
-
 import logging
 import threading
 import time
+from collections.abc import Callable
 from enum import Enum
-from typing import Any, Callable, TypeVar
+from typing import TypeVar
 
 T = TypeVar("T")
 

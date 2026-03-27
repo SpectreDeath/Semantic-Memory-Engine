@@ -3,7 +3,6 @@ SME Bootstrap - Centralized path management and environment initialization.
 """
 
 import logging
-import os
 import sys
 from pathlib import Path
 

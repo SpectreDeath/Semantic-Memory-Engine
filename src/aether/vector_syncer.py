@@ -15,7 +15,6 @@ Technical Targets:
 
 from __future__ import annotations
 
-
 import hashlib
 import json
 import os
@@ -81,7 +80,7 @@ class VectorEntry:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "VectorEntry":
+    def from_dict(cls, data: dict[str, Any]) -> VectorEntry:
         return cls(
             id=data["id"],
             embedding=data["embedding"],

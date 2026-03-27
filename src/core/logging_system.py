@@ -14,7 +14,6 @@ Status: Production Ready
 
 from __future__ import annotations
 
-
 import json
 import logging
 import logging.handlers
@@ -23,7 +22,7 @@ from contextvars import ContextVar
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Context variables for propagating request/user info
 _context: ContextVar[dict[str, Any]] = ContextVar("logging_context", default={})
@@ -108,7 +107,7 @@ class LogContext:
         self.fields = fields
         self.token = None
 
-    def __enter__(self) -> "LogContext":
+    def __enter__(self) -> LogContext:
         """Enter context."""
         current_context = _context.get().copy()
         current_context.update(self.fields)
@@ -234,10 +233,10 @@ class LogManager:
     and context support.
     """
 
-    _instance: "LogManager" | None = None
+    _instance: LogManager | None = None
     _configured: bool = False
 
-    def __new__(cls) -> "LogManager":
+    def __new__(cls) -> LogManager:
         """Singleton pattern."""
         if cls._instance is None:
             cls._instance = super().__new__(cls)

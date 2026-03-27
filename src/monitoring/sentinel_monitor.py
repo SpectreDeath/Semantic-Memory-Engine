@@ -18,7 +18,7 @@ import os
 import signal
 import subprocess
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
@@ -45,7 +45,7 @@ logger = logging.getLogger("Sentinel")
 def _emit(level: str, used: int, action: str | None = None):
     """Output JSON for telemetry consumption."""
     record = {
-        "ts": datetime.now(timezone.utc).isoformat(),
+        "ts": datetime.now(UTC).isoformat(),
         "level": level,
         "vram_used_mb": used,
         "action": action

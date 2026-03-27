@@ -11,7 +11,6 @@ Supports fetching content from various cloud storage providers:
 
 from __future__ import annotations
 
-
 import hashlib
 import logging
 import os

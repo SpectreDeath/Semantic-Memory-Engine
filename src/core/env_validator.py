@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import os
 import logging
-from typing import Any, Callable, Optional
+import os
+from collections.abc import Callable
+from typing import Any
 from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
@@ -136,13 +137,12 @@ class EnvValidator:
                 values[var_name] = validated
             elif required:
                 errors.append(f"Required env var '{var_name}' is missing or invalid: {description}")
+            elif raw_value is None:
+                warnings.append(f"Optional env var '{var_name}' is not set: {description}")
             else:
-                if raw_value is None:
-                    warnings.append(f"Optional env var '{var_name}' is not set: {description}")
-                else:
-                    warnings.append(
-                        f"Optional env var '{var_name}' has invalid value: {description}"
-                    )
+                warnings.append(
+                    f"Optional env var '{var_name}' has invalid value: {description}"
+                )
 
         postgres_error = validate_docker_postgres_enforcement(values)
         if postgres_error:

@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -36,7 +36,7 @@ class Config:
     to settings with sensible defaults.
     """
 
-    _instance: "Config" | None = None
+    _instance: Config | None = None
     _config: dict[str, Any] = {}
 
     def __new__(cls):

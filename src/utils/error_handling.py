@@ -7,7 +7,6 @@ across all SME extensions for consistency and maintainability.
 
 from __future__ import annotations
 
-
 import functools
 import json
 import logging

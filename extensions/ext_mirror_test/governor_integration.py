@@ -7,7 +7,6 @@ when Governor status is NORMAL (Green) to avoid OOM conditions.
 
 from __future__ import annotations
 
-
 import json
 import logging
 from collections.abc import Callable

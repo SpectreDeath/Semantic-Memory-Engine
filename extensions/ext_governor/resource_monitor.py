@@ -9,16 +9,24 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
+try:
+    import psutil
+except ImportError:
+    psutil = None
+
 logger = logging.getLogger("LawnmowerMan.Governor.ResourceMonitor")
+
 
 class VRAMState(Enum):
     NORMAL = "normal"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 @dataclass
 class ResourceStatus:
     """Resource status information."""
+
     vram_usage_gb: float
     vram_threshold_gb: float
     vram_state: VRAMState
@@ -26,6 +34,7 @@ class ResourceStatus:
     timestamp: datetime
     cpu_usage_percent: float = 0.0
     memory_usage_gb: float = 0.0
+
 
 class VSCodeStatusBarManager:
     """
@@ -58,7 +67,7 @@ class VSCodeStatusBarManager:
             "should_delay": status.should_delay,
             "cpu_usage_percent": round(status.cpu_usage_percent, 1),
             "memory_usage_gb": round(status.memory_usage_gb, 2),
-            "timestamp": status.timestamp.isoformat()
+            "timestamp": status.timestamp.isoformat(),
         }
 
         # Format status bar text
@@ -74,17 +83,28 @@ class VSCodeStatusBarManager:
 
     def _format_status_text(self, status: ResourceStatus) -> str:
         """Format resource status for display in status bar."""
-        vram_icon = "🟢" if status.vram_state == VRAMState.NORMAL else "🟡" if status.vram_state == VRAMState.HIGH else "🔴"
+        vram_icon = (
+            "🟢"
+            if status.vram_state == VRAMState.NORMAL
+            else "🟡"
+            if status.vram_state == VRAMState.HIGH
+            else "🔴"
+        )
         delay_icon = "⏸️" if status.should_delay else "▶️"
 
         return f"{vram_icon} VRAM: {status.vram_usage_gb:.1f}GB | {delay_icon} {status.vram_state.value.upper()}"
+
 
 class EnhancedResourceMonitor:
     """
     Enhanced resource monitor with VS Code status bar integration.
     """
 
-    def __init__(self, vram_threshold_gb: float = 5.8, status_bar_manager: VSCodeStatusBarManager | None = None):
+    def __init__(
+        self,
+        vram_threshold_gb: float = 5.8,
+        status_bar_manager: VSCodeStatusBarManager | None = None,
+    ):
         self.vram_threshold_gb = vram_threshold_gb
         self.status_bar_manager = status_bar_manager or VSCodeStatusBarManager()
         self.monitoring = False
@@ -102,7 +122,9 @@ class EnhancedResourceMonitor:
             self.monitoring = True
             self.monitor_thread = threading.Thread(target=self._monitor_loop, daemon=True)
             self.monitor_thread.start()
-            logger.info(f"[Governor] Enhanced resource monitoring started (VRAM threshold: {self.vram_threshold_gb}GB)")
+            logger.info(
+                f"[Governor] Enhanced resource monitoring started (VRAM threshold: {self.vram_threshold_gb}GB)"
+            )
 
     def stop_monitoring(self):
         """Stop background resource monitoring."""
@@ -131,7 +153,9 @@ class EnhancedResourceMonitor:
 
                 # Log critical resource usage
                 if status.vram_state == VRAMState.CRITICAL:
-                    logger.warning(f"[Governor] VRAM usage critical: {status.vram_usage_gb:.2f}GB > {self.vram_threshold_gb}GB")
+                    logger.warning(
+                        f"[Governor] VRAM usage critical: {status.vram_usage_gb:.2f}GB > {self.vram_threshold_gb}GB"
+                    )
                 elif status.vram_state == VRAMState.HIGH:
                     logger.info(f"[Governor] VRAM usage high: {status.vram_usage_gb:.2f}GB")
 
@@ -147,6 +171,7 @@ class EnhancedResourceMonitor:
             # Try to use GPU if available
             try:
                 import GPUtil
+
                 gpus = GPUtil.getGPUs()
                 if gpus:
                     gpu = gpus[0]  # Use first GPU
@@ -184,7 +209,7 @@ class EnhancedResourceMonitor:
             should_delay=should_delay,
             timestamp=datetime.now(),
             cpu_usage_percent=cpu_usage,
-            memory_usage_gb=memory_usage_gb
+            memory_usage_gb=memory_usage_gb,
         )
 
     def get_vram_state(self) -> VRAMState:
@@ -215,7 +240,7 @@ class EnhancedResourceMonitor:
                     "should_delay": status.should_delay,
                     "cpu_usage_percent": round(status.cpu_usage_percent, 1),
                     "memory_usage_gb": round(status.memory_usage_gb, 2),
-                    "timestamp": status.timestamp.isoformat()
+                    "timestamp": status.timestamp.isoformat(),
                 }
             else:
                 return {
@@ -225,7 +250,7 @@ class EnhancedResourceMonitor:
                     "should_delay": False,
                     "cpu_usage_percent": 0.0,
                     "memory_usage_gb": 0.0,
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
 
     def get_resource_trends(self) -> dict[str, Any]:
@@ -245,30 +270,33 @@ class EnhancedResourceMonitor:
                     "min": min(vram_values),
                     "max": max(vram_values),
                     "avg": sum(vram_values) / len(vram_values),
-                    "history_count": len(vram_values)
+                    "history_count": len(vram_values),
                 },
                 "cpu_trend": {
                     "current": cpu_values[-1],
                     "min": min(cpu_values),
                     "max": max(cpu_values),
                     "avg": sum(cpu_values) / len(cpu_values),
-                    "history_count": len(cpu_values)
+                    "history_count": len(cpu_values),
                 },
                 "memory_trend": {
                     "current": memory_values[-1],
                     "min": min(memory_values),
                     "max": max(memory_values),
                     "avg": sum(memory_values) / len(memory_values),
-                    "history_count": len(memory_values)
-                }
+                    "history_count": len(memory_values),
+                },
             }
+
 
 # Global status bar manager instance
 global_status_bar_manager = VSCodeStatusBarManager()
 
+
 def get_status_bar_manager() -> VSCodeStatusBarManager:
     """Get the global status bar manager instance."""
     return global_status_bar_manager
+
 
 def create_enhanced_monitor(vram_threshold_gb: float = 5.8) -> EnhancedResourceMonitor:
     """Create an enhanced resource monitor with status bar integration."""

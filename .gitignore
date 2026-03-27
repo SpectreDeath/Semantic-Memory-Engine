@@ -15,6 +15,7 @@ bin/grafana/
 __pycache__/
 *.py[cod]
 *$py.class
+.cpython-314.pyc
 
 # --- AI & Data ---
 *.log
@@ -22,11 +23,14 @@ data/raw/
 data/processed/
 models/*.bin
 models/*.pt
+bandit_results.json
 
 # --- Build Artifacts & IDE ---
 *.egg-info/
 .cocoindex_code/
 .cursor/
+legacy/
+node_modules/
 
 # --- SME Specific Data ---
 data/forensic_nexus.db
@@ -34,6 +38,7 @@ data/provenance.db
 data/storage/
 data/scribe_profiles.sqlite
 data/signatures.json
+data/chroma_db/
 
 # --- Uppercase SME (duplicate or temp) ---
 SME/

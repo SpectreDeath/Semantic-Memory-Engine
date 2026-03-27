@@ -7,7 +7,6 @@ patterns to improve extension performance and resource usage.
 
 from __future__ import annotations
 
-
 import asyncio
 import collections
 import functools
@@ -105,7 +104,7 @@ class PerformanceMonitor:
         self.operation_times: dict[str, list] = {}
         self.lock = threading.RLock()
 
-    def time_operation(self, operation_name: str) -> 'OperationTimer':
+    def time_operation(self, operation_name: str) -> OperationTimer:
         """Time a specific operation."""
         return OperationTimer(self, operation_name)
 

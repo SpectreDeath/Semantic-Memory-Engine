@@ -7,7 +7,6 @@ that might contain hidden model weights or other suspicious data.
 
 from __future__ import annotations
 
-
 import json
 import logging
 import os

@@ -15,7 +15,6 @@ Or configure in docker-compose.yaml environment section.
 
 from __future__ import annotations
 
-
 import logging
 import os
 import threading

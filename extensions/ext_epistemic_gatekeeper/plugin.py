@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+from datetime import datetime
 from typing import Any
 
 # Import shared trust logic
@@ -22,16 +23,20 @@ from src.utils.performance import LRUCache, get_performance_monitor
 
 logger = logging.getLogger("LawnmowerMan.Gatekeeper")
 
+
 class EpistemicGatekeeper(BasePlugin):
     """
     Epistemic Gatekeeper Extension (v1.2.0).
     Provides volume-based trust auditing (Heat Maps) and governance.
     """
+
     def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
         self.error_handler = ErrorHandler(self.plugin_id)
         self.monitor = get_performance_monitor(self.plugin_id)
-        self.file_cache = LRUCache(max_size=1000, ttl_seconds=600)  # Cache file contents for 10 minutes
+        self.file_cache = LRUCache(
+            max_size=1000, ttl_seconds=600
+        )  # Cache file contents for 10 minutes
 
     async def on_startup(self):
         """
@@ -58,7 +63,7 @@ class EpistemicGatekeeper(BasePlugin):
         """
         return {
             "status": "skipped",
-            "reason": "Epistemic Gatekeeper provides auditing tools, not direct ingestion processing"
+            "reason": "Epistemic Gatekeeper provides auditing tools, not direct ingestion processing",
         }
 
     def get_tools(self) -> list:
@@ -66,7 +71,7 @@ class EpistemicGatekeeper(BasePlugin):
             self.audit_folder_veracity,
             self.semantic_nexus_check,
             self.get_gatekeeper_stats,
-            self.clear_file_cache
+            self.clear_file_cache,
         ]
 
     async def audit_folder_veracity(self, folder_path: str) -> str:
@@ -84,10 +89,10 @@ class EpistemicGatekeeper(BasePlugin):
 
         for root, _, files in os.walk(folder_path):
             for file in files:
-                if file.lower().endswith(('.txt', '.md', '.log', '.json')):
+                if file.lower().endswith((".txt", ".md", ".log", ".json")):
                     file_path = os.path.join(root, file)
                     try:
-                        with open(file_path, encoding='utf-8', errors='ignore') as f:
+                        with open(file_path, encoding="utf-8", errors="ignore") as f:
                             content = f.read()
 
                         if len(content) < 50:
@@ -123,7 +128,7 @@ class EpistemicGatekeeper(BasePlugin):
                             nts=nts,
                             verdict=verdict,
                             attribution=str(attribution),
-                            sda_warning=attr_msg
+                            sda_warning=attr_msg,
                         )
                         file_stats.append(node)
                         total_files += 1
@@ -144,23 +149,25 @@ class EpistemicGatekeeper(BasePlugin):
                 "metrics": {
                     "high_confidence_percentage": round(high_confidence_pct, 1),
                     "synthetic_risk_percentage": round(synthetic_risk_pct, 1),
-                    "uncertain_percentage": round(uncertain_pct, 1)
+                    "uncertain_percentage": round(uncertain_pct, 1),
                 },
                 "counts": {
                     "human_grounded": human_count,
                     "synthetic_hazard": synthetic_count,
-                    "uncertain": total_files - (human_count + synthetic_count)
+                    "uncertain": total_files - (human_count + synthetic_count),
                 },
-                "global_trust_ratio": round(human_count / total_files, 2) if total_files > 0 else 0
+                "global_trust_ratio": round(human_count / total_files, 2) if total_files > 0 else 0,
             },
-            "detailed_map": [n.to_dict() for n in sorted(file_stats, key=lambda x: x.nts)]
+            "detailed_map": [n.to_dict() for n in sorted(file_stats, key=lambda x: x.nts)],
         }
 
         return json.dumps(report, indent=2)
 
-    async def semantic_nexus_check(self, new_entities: list[str], nexus_entities: set[str]) -> float:
+    async def semantic_nexus_check(
+        self, new_entities: list[str], nexus_entities: set[str]
+    ) -> float:
         """
-        Calculates a trust signal based on how well new data aligns 
+        Calculates a trust signal based on how well new data aligns
         with the established 'Nexus' memory.
         """
         logger.info("Executing Weighted Entity Overlap and Entropy Divergence Check")
@@ -194,7 +201,7 @@ class EpistemicGatekeeper(BasePlugin):
                 "plugin_id": self.plugin_id,
                 "cache_stats": cache_stats,
                 "performance_stats": performance_stats,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
             return json.dumps(stats, indent=2)
         except Exception as e:
@@ -204,10 +211,9 @@ class EpistemicGatekeeper(BasePlugin):
         """Clear the file content cache."""
         try:
             self.file_cache.clear()
-            return json.dumps({
-                "status": "success",
-                "message": "File cache cleared successfully"
-            }, indent=2)
+            return json.dumps(
+                {"status": "success", "message": "File cache cleared successfully"}, indent=2
+            )
         except Exception as e:
             return self.error_handler.handle_tool_error(e, "clear_file_cache")
 

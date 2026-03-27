@@ -16,7 +16,6 @@ Features:
 
 from __future__ import annotations
 
-
 import logging
 from collections import Counter
 from dataclasses import dataclass

@@ -31,7 +31,6 @@ Usage:
 
 from __future__ import annotations
 
-
 import hashlib
 import json
 import logging
@@ -92,7 +91,7 @@ class LRUCache(CacheBackend):
     def __init__(self, max_size: int = 1000):
         """Initialize LRU cache."""
         self.max_size = max_size
-        self.cache: Ordereddict[str, tuple[Any, float | None]] = OrderedDict()
+        self.cache: OrderedDict[str, tuple[Any, float | None]] = OrderedDict()
         self.lock = Lock()
         self.hits = 0
         self.misses = 0

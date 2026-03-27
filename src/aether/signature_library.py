@@ -15,7 +15,6 @@ Technical Targets:
 
 from __future__ import annotations
 
-
 import hashlib
 import hmac
 import json
@@ -99,7 +98,7 @@ class SignatureNode:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "SignatureNode":
+    def from_dict(cls, data: dict[str, Any]) -> SignatureNode:
         return cls(
             id=data["id"],
             signature_hash=data["signature_hash"],
@@ -169,7 +168,7 @@ class ForensicProfile:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ForensicProfile":
+    def from_dict(cls, data: dict[str, Any]) -> ForensicProfile:
         return cls(
             id=data["id"],
             name=data["name"],

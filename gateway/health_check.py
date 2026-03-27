@@ -148,8 +148,8 @@ def _check_disk_space() -> dict[str, str]:
 
 def _check_extensions() -> dict[str, str]:
     try:
-        from gateway.nexus_db import get_nexus
         from gateway.extension_manager import ExtensionManager
+        from gateway.nexus_db import get_nexus
 
         nexus = get_nexus()
         manager = ExtensionManager(nexus_api=nexus)

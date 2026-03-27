@@ -15,7 +15,6 @@ Features:
 
 from __future__ import annotations
 
-
 import logging
 import re
 from dataclasses import dataclass

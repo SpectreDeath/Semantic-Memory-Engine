@@ -30,15 +30,10 @@ Usage:
 
 from __future__ import annotations
 
-
-import logging
-import typing
-
-
-
 # Standard library imports
 import dataclasses
 import enum
+import logging
 
 import spacy
 

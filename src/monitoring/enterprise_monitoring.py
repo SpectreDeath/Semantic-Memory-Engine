@@ -7,7 +7,6 @@ for the SME extension ecosystem.
 
 from __future__ import annotations
 
-
 import logging
 import smtplib
 import threading

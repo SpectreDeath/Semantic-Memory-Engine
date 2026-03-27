@@ -3,7 +3,7 @@
 # Builds the MCP gateway container for Project Lawnmower Man.
 # This container exposes SME's forensic toolkit to LLM agents.
 
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 LABEL maintainer="Project Lawnmower Man"
 LABEL description="MCP Gateway to SME Forensic Toolkit"

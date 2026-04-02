@@ -485,28 +485,6 @@
     "implementation_status": "verified"
   },
   {
-    "name": "context-identification",
-    "domain": "SME_INTEGRATION",
-    "version": "1.0.0",
-    "complexity": "Intermediate",
-    "type": "Tool",
-    "category": "Utilities",
-    "source_file": "src/utils/context_sniffer.py",
-    "source_exists": true,
-    "spec_path": "skills\\context-identification.md",
-    "purpose": "Identifies project context and manages persona assignments based on file extension detection and keyword scanning.",
-    "description": "The Context Sniffer analyzes file content and metadata to determine project context. It uses file extension patterns, keyword scanning, and persona mapping to identify the appropriate context for anal",
-    "workflow": [
-      "File Analysis",
-      "Extension Detection",
-      "Keyword Scanning",
-      "Persona Mapping",
-      "Context Output"
-    ],
-    "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
-  },
-  {
     "name": "context-sniffer",
     "domain": "SME_INTEGRATION",
     "version": "1.0.0",
@@ -1644,28 +1622,6 @@
     "implementation_status": "verified"
   },
   {
-    "name": "semantic-overlap-detection",
-    "domain": "SME_INTEGRATION",
-    "version": "1.0.0",
-    "complexity": "Intermediate",
-    "type": "Tool",
-    "category": "Analysis",
-    "source_file": "src/analysis/overlap_discovery.py",
-    "source_exists": true,
-    "spec_path": "skills\\semantic-overlap-detection.md",
-    "purpose": "Detects semantic overlap between texts using embedding-based similarity to identify related content at the meaning level.",
-    "description": "The Semantic Overlap Detection module uses vector embeddings to identify semantically similar content. Unlike exact matching, it captures meaning-level similarity, finding related concepts even with d",
-    "workflow": [
-      "Embedding Creation",
-      "Similarity Calculation",
-      "Threshold Application",
-      "Clustering",
-      "Reporting"
-    ],
-    "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
-  },
-  {
     "name": "sentiment-analysis",
     "domain": "SME_INTEGRATION",
     "version": "1.0.0",
@@ -1774,26 +1730,6 @@
       "Sentiment Analysis",
       "Trend Extraction",
       "Report Generation"
-    ],
-    "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
-  },
-  {
-    "name": "stylo-integration",
-    "domain": "SME_INTEGRATION",
-    "version": "1.0.0",
-    "complexity": "Advanced",
-    "type": "Tool",
-    "category": "Analysis",
-    "source_file": "src/scribe/stylo_wrapper.py",
-    "source_exists": true,
-    "spec_path": "skills\\stylo-integration.md",
-    "purpose": "Provides integration with Stylo (stylo package) for comprehensive stylometric analysis.",
-    "description": "The Stylo Integration module wraps the Stylo R package for advanced stylometric analysis. It provides access to Stylo's clustering, classification, and visualization capabilities.",
-    "workflow": [
-      "Stylo Execution",
-      "Result Parsing",
-      "Visualization"
     ],
     "source": "Semantic Memory Engine (SME)",
     "implementation_status": "verified"

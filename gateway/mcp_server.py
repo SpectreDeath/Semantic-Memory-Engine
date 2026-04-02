@@ -22,6 +22,14 @@ import logging
 import sys
 from typing import Any
 
+from src.core.constants import (
+    DEFAULT_LOG_LEVEL,
+    LOG_FORMAT,
+    LOG_DATE_FORMAT,
+    SME_VERSION,
+    SME_NAME,
+)
+
 # Standard bootstrap
 import src.bootstrap
 
@@ -47,9 +55,9 @@ from gateway.tool_registry import get_registry
 # Logging — structured JSON format for log aggregators
 # =============================================================================
 logging.basicConfig(
-    level=logging.INFO,
-    format='{"time": "%(asctime)s", "level": "%(levelname)s", "module": "%(name)s", "message": "%(message)s"}',
-    datefmt="%Y-%m-%dT%H:%M:%S",
+    level=getattr(logging, DEFAULT_LOG_LEVEL),
+    format=LOG_FORMAT,
+    datefmt=LOG_DATE_FORMAT,
 )
 logger = logging.getLogger("lawnmower.mcp")
 
@@ -269,7 +277,7 @@ register_all_routers(
 # =============================================================================
 
 if __name__ == "__main__":
-    logger.info("Starting Lawnmower Man MCP Gateway v3.0.0 (Crucible Bridge)...")
+    logger.info(f"Starting {SME_NAME} v{SME_VERSION}...")
     logger.info(f"Available tools: {len(registry.TOOL_DEFINITIONS)}")
     logger.info(f"Categories: {registry.get_categories()}")
     metrics_manager.start()

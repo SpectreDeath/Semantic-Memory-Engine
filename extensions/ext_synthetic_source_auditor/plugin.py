@@ -1,10 +1,13 @@
+from __future__ import annotations
+
 import hashlib
 import json
 import logging
 from datetime import datetime
 from typing import Any
 
-# NexusAPI: use self.nexus.get_hsm() — no gateway imports
+from collections.abc import Callable
+
 # Import shared logic
 from gateway.gatekeeper_logic import calculate_burstiness, calculate_entropy
 
@@ -19,45 +22,56 @@ except ImportError:
         sys.path.insert(0, str(_dir))
     from sda_engine import SourceDeAnonymizationEngine
 
+# BasePlugin import for extension contract compliance
+from src.core.plugin_base import BasePlugin
+
 logger = logging.getLogger("LawnmowerMan.SSA")
 
-class AnalyticAuditor:
+
+class AnalyticAuditor(BasePlugin):
     """
     Synthetic Source Auditor (SSA) v1.0.
     Detects low-entropy synthetic text and vaults it for counter-intelligence.
     Now includes Source De-Anonymization (SDA) capabilities.
+    
+    Extends BasePlugin to comply with the SME extension contract.
     """
+    
     def __init__(self, manifest: dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
         # Initialize SDA engine
         self.sda_engine = SourceDeAnonymizationEngine()
 
-    async def on_startup(self):
+    async def on_startup(self) -> None:
         """
         Initialize the 'nexus_synthetic_baselines' table in the core DB.
         """
-        sql = """
-            CREATE TABLE IF NOT EXISTS nexus_synthetic_baselines (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                source_id TEXT NOT NULL,
-                text_sample TEXT NOT NULL,
-                entropy_score REAL NOT NULL,
-                timestamp TEXT,
-                integrity_hash TEXT
-            )
-        """
         try:
-            # We access the underlying sqlite connection via nexus_api.nexus.conn
-            # or execute directly if exposed. SmeCoreBridge exposes .nexus (NexusDB).
-            # NexusDB has execute(sql, params).
+            sql = """
+                CREATE TABLE IF NOT EXISTS nexus_synthetic_baselines (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    source_id TEXT NOT NULL,
+                    text_sample TEXT NOT NULL,
+                    entropy_score REAL NOT NULL,
+                    timestamp TEXT,
+                    integrity_hash TEXT
+                )
+            """
             self.nexus.nexus.execute(sql)
             logger.info(f"[{self.plugin_id}] 'nexus_synthetic_baselines' table initialized.")
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Failed to init DB table: {e}")
 
-    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]):
+    async def on_shutdown(self) -> None:
+        """
+        Clean shutdown hook for the Synthetic Source Auditor.
+        """
+        try:
+            logger.info(f"[{self.plugin_id}] Synthetic Source Auditor shutdown complete")
+        except Exception as e:
+            logger.exception(f"[{self.plugin_id}] Error during shutdown: {e}")
+
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]) -> dict[str, Any]:
         """
         Automatically audits ingestion stream for synthetic patterns.
         Now includes SDA analysis for model attribution.
@@ -70,7 +84,7 @@ class AnalyticAuditor:
         burstiness = calculate_burstiness(raw_data)
 
         # SDA Analysis for model attribution
-        sda_result = self.sda_engine.analyze_text(raw_data)
+        sda_result = self.sda_engine.analyze_text(raw_data) if hasattr(self, 'sda_engine') else None
 
         # Threshold Check for Vaulting
         # Vault if clearly synthetic (Low Entropy OR Low Burstiness)
@@ -92,7 +106,7 @@ class AnalyticAuditor:
             "sda_analysis": sda_result
         }
 
-    def get_tools(self) -> list:
+    def get_tools(self) -> list[Callable[..., Any]]:
         return [
             self.audit_text_integrity,
             self.vault_synthetic_pattern,

@@ -1,5 +1,5 @@
 """
-SimpleMem Laboratory CLI Entry Point
+SME (Semantic Memory Engine) CLI Entry Point
 
 Provides a command-line interface to discover and run available tools.
 Usage:
@@ -95,9 +95,9 @@ TOOLS: dict[str, dict[str, any]] = {
 }
 
 
-def list_tools():
+def list_tools() -> None:
     """Display all available tools and their descriptions."""
-    print("\n🧪 SimpleMem Laboratory - Available Tools\n")
+    print("\n🧪 SME Laboratory - Available Tools\n")
     print("-" * 70)
     for tool_key, tool_info in TOOLS.items():
         print(f"  {tool_key:15} | {tool_info['name']}")
@@ -105,10 +105,10 @@ def list_tools():
         print()
 
 
-def show_help():
+def show_help() -> None:
     """Display help message."""
     print("""
-🧪 SimpleMem Laboratory CLI
+🧪 SME (Semantic Memory Engine) CLI
 ============================
 
 Usage: python -m src [command] [options]
@@ -133,22 +133,22 @@ For tool-specific options, try:
   python -m src info [tool-name]
 
 Documentation:
-  - README.md          : Main documentation
-  - docs/START_HERE.md : Getting started guide
-  - config/config.yaml : Configuration settings
+  - README.md                 : Main documentation
+  - docs/CONTROL_ROOM_OPERATOR.md : Getting started guide
+  - config/config.yaml        : Configuration settings
 """)
 
 
-def show_version():
+def show_version() -> None:
     """Display version information."""
-    print("""
-SimpleMem Laboratory v2.0
-Refactored Architecture with Semantic Memory
-Powered by ChromaDB, Centrifuge, and MCP Framework
+    from src.core.constants import SME_VERSION, SME_NAME
+    print(f"""
+{SME_NAME} v{SME_VERSION}
+Powered by FastMCP, PostgreSQL Nexus, and Modular Extensions
 """)
 
 
-def show_tool_info(tool_name: str):
+def show_tool_info(tool_name: str) -> None:
     """Show detailed information about a specific tool."""
     if tool_name not in TOOLS:
         print(f"❌ Tool '{tool_name}' not found.")
@@ -171,7 +171,7 @@ def show_tool_info(tool_name: str):
     print()
 
 
-def run_tool(tool_name: str, args: list = None):
+def run_tool(tool_name: str, args: list | None = None) -> None:
     """Run a tool (experimental - depends on tool's main interface)."""
     if tool_name not in TOOLS:
         print(f"❌ Tool '{tool_name}' not found.")

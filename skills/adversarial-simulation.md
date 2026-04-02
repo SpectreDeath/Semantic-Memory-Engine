@@ -1,57 +1,32 @@
 ---
-Domain: SME_INTEGRATION
+Domain: Security
 Version: 1.0.0
-Complexity: Advanced
-Type: Tool
-Category: Testing
-name: adversarial-simulation
-Source: Semantic Memory Engine (SME)
+Complexity: advanced
+Type: analysis
+Category: counter-intelligence
+name: Adversarial Simulation (DEPRECATED)
+Source: SME v3.0.0
 Source_File: extensions/ext_adversarial_tester/
 ---
 
-## Purpose
+# ⚠️ DEPRECATED: Adversarial Simulation
 
-Simulates adversarial attacks and tests system robustness by generating varied attack scenarios to probe SME defenses.
+## This skill has been merged into `adversarial-pattern-detection.md`
 
-## Description
+The adversarial simulation capabilities have been consolidated with adversarial pattern detection
+to provide a unified counter-intelligence skill.
 
-The Adversarial Tester creates and executes simulated attack scenarios against the SME system. It tests detection capabilities, response procedures, and system resilience against various threat vectors including injection attacks, evasion techniques, and data poisoning.
+## Migration
 
-## Workflow
+**OLD**: `skills/adversarial-simulation.md`
+**NEW**: `skills/adversarial-pattern-detection.md`
 
-1. **Scenario Selection**: Choose attack type or template
-2. **Payload Generation**: Create adversarial inputs
-3. **Attack Execution**: Run simulation against SME components
-4. **Detection Verification**: Check if attacks are detected
-5. **Response Testing**: Verify defensive measures activate
-6. **Vulnerability Assessment**: Identify weaknesses
-7. **Report Generation**: Detailed simulation results
-
-## Examples
-
-### Example 1: Detection Robustness Testing
-**Input**: Attack scenario type
-**Output**: Detection success/failure results
-**Use Case**: Validating detection systems
-
-### Example 2: Evasion Technique Testing
-**Input**: Bypass attempt patterns
-**Output**: Whether evasion was successful
-**Use Case**: Security hardening
-
-### Example 3: Poisoning Resistance
-**Input**: Data poisoning attempts
-**Output**: System resilience assessment
-**Use Case**: Data integrity verification
-
-## Implementation Notes
-
-- **Status**: Beta (🟡)
-- **Test Types**: Injection, evasion, poisoning, bypass
-- **Extension**: Adversarial Tester
-- **Location**: `D:/SME/extensions/ext_adversarial_tester/`
+The new consolidated skill includes:
+- Pattern detection (prompt injection, data poisoning, obfuscation)
+- Adversarial simulation (attack generation, vulnerability testing)
+- Combined analysis with trust scoring
 
 ## See Also
-
-- [Adversarial Pattern Detection](SKILL.adversarial-pattern-detection/)
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- `adversarial-pattern-detection.md` - The consolidated skill
+- `trust-score-analysis.md` - Confidence scoring
+- `synthetic-source-detection.md` - AI content detection

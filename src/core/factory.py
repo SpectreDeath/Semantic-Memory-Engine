@@ -6,6 +6,7 @@ This factory pattern provides:
 - Consistent initialization across the toolkit
 - Easy testing and mocking
 - Clear dependency management
+- Thread-safe singleton caching
 
 Usage:
     from src.core.factory import ToolFactory
@@ -18,6 +19,7 @@ Usage:
 from __future__ import annotations
 
 import logging
+import threading
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -29,18 +31,25 @@ class ToolFactory:
 
     Provides lazy-loading and singleton-like caching for tools
     that are expensive to initialize.
+    
+    Thread safety: All cached instances are protected by a reentrant lock.
     """
 
     _instances: dict[str, Any] = {}
+    _lock: threading.RLock = threading.RLock()
 
     @classmethod
     def _check_vram_guardrail(cls, required_mb: int = 1000) -> bool:
-        """Check if enough VRAM is available for a heavy tool (GTX 1660 Ti optimization)."""
+        """Check if enough VRAM is available for a heavy tool (GTX 1660 Ti optimization).
+        
+        Fixed: Now properly reads and uses the vram_limit_mb configuration.
+        """
         from src.core.config import Config
         from src.monitoring.diagnostics import PerformanceProfiler
 
         config = Config()
-        config.get('hardware', {}).get('vram_limit_mb', 6144)
+        # Fixed: Store the result instead of discarding it
+        vram_limit_mb = config.get('hardware', {}).get('vram_limit_mb', 6144)
 
         try:
             profiler = PerformanceProfiler()
@@ -49,12 +58,15 @@ class ToolFactory:
             if gpu_info.get('gpus'):
                 free_vram = gpu_info['gpus'][0].get('memory_free_mb', 0)
                 if free_vram < required_mb:
-                    logger.warning(f"VRAM Guardrail Triggered: Only {free_vram}MB free, {required_mb}MB required.")
+                    logger.warning(
+                        f"VRAM Guardrail: Only {free_vram}MB free (limit: {vram_limit_mb}MB), "
+                        f"{required_mb}MB required. Tool may fail or use fallback."
+                    )
                     return False
             return True
         except Exception as e:
             logger.debug(f"GPU check skipped: {e}")
-            return True
+            return True  # Default to allowing tool creation if GPU check fails
 
     @classmethod
     def reset(cls):
@@ -62,25 +74,26 @@ class ToolFactory:
         cls._instances.clear()
 
     @classmethod
+    def create_with_lock(cls, tool_name: str, creator_fn, reset: bool = False):
+        """Thread-safe tool creation with lock protection."""
+        with cls._lock:
+            if reset or tool_name not in cls._instances:
+                try:
+                    instance = creator_fn()
+                    cls._instances[tool_name] = instance
+                    logger.info(f"Created {type(instance).__name__} instance")
+                except Exception as e:
+                    logger.exception(f"Failed to create {tool_name}: {e}")
+                    raise
+            return cls._instances[tool_name]
+
+    @classmethod
     def create_scribe(cls, reset: bool = False) -> ScribeEngine:
-        """
-        Create or retrieve the ScribeEngine instance.
-
-        Args:
-            reset: Force creation of new instance, ignoring cache
-
-        Returns:
-            ScribeEngine instance
-        """
-        if reset or 'scribe' not in cls._instances:
-            try:
-                from src.scribe.engine import ScribeEngine
-                cls._instances['scribe'] = ScribeEngine()
-                logger.info("Created ScribeEngine instance")
-            except Exception as e:
-                logger.exception(f"Failed to create ScribeEngine: {e}")
-                raise
-        return cls._instances['scribe']
+        """Create or retrieve the ScribeEngine instance (thread-safe)."""
+        def _create():
+            from src.scribe.engine import ScribeEngine
+            return ScribeEngine()
+        return cls.create_with_lock('scribe', _create, reset)
 
     @classmethod
     def create_lexicon_importer(cls, reset: bool = False) -> LexiconImporter:

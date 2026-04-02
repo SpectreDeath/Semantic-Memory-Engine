@@ -8,13 +8,18 @@ with the SME system.
 from __future__ import annotations
 
 import json
+import logging
 import sys
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from src.core.plugin_base import BasePlugin
+
+logger = logging.getLogger("LawnmowerMan.CrossModalAuditor")
+
 try:
-    from .cross_modal_auditor import AuditResult, CrossModalAuditor, audit_multimodal_sync
+    from .cross_modal_auditor import CrossModalAuditor, audit_multimodal_sync
     from .governor_integration import (
         GovernorIntegration,
         GovernorStatus,
@@ -34,20 +39,24 @@ except ImportError:
     )
 
 
-class CrossModalAuditorPlugin:
-    """Main plugin class for the Cross-Modal Auditor extension."""
+class CrossModalAuditorPlugin(BasePlugin):
+    """
+    Cross-Modal Auditor Extension Plugin.
+    Validates image-text alignment using CLIP model and NLP parsing.
+    
+    Extends BasePlugin to comply with the SME extension contract.
+    """
 
-    def __init__(self):
-        self.name = "Cross-Modal Auditor Extension"
-        self.version = "1.0.0"
+    def __init__(self, manifest: dict[str, Any], nexus_api: Any):
+        super().__init__(manifest, nexus_api)
         self.description = "Validates image-text alignment using CLIP model and NLP parsing"
 
         # Plugin configuration
         self.config = {
-            'sync_threshold': 65.0,  # Sync score threshold for hallucination detection
+            'sync_threshold': 65.0,
             'model_name': "openai/clip-vit-base-patch32",
-            'governor_integration': True,  # Enable Governor status checking
-            'safe_mode': True,  # Use safe wrapper that checks Governor status
+            'governor_integration': True,
+            'safe_mode': True,
             'log_detailed_results': True
         }
 
@@ -55,72 +64,69 @@ class CrossModalAuditorPlugin:
         self.is_active = False
         self.governor_integration = GovernorIntegration()
 
-    def activate(self) -> bool:
-        """Activate the Cross-Modal Auditor plugin."""
+    async def on_startup(self) -> None:
+        """
+        Initialize the Cross-Modal Auditor plugin.
+        """
         try:
-            print(f"🔍 Activating {self.name} v{self.version}")
-            print(f"Description: {self.description}")
-
-            # Initialize Governor integration
+            logger.info(f"[{self.plugin_id}] Cross-Modal Auditor initializing")
             if self.config.get('governor_integration', True):
-                print("✅ Governor integration enabled")
-
+                logger.info(f"[{self.plugin_id}] Governor integration enabled")
             self.is_active = True
-            print(f"✅ {self.name} activated successfully")
-            return True
-
+            logger.info(f"[{self.plugin_id}] Cross-Modal Auditor activated successfully")
         except Exception as e:
-            print(f"❌ Failed to activate {self.name}: {e}")
-            return False
+            logger.exception(f"[{self.plugin_id}] Failed to activate: {e}")
 
-    def deactivate(self) -> bool:
-        """Deactivate the Cross-Modal Auditor plugin."""
+    async def on_shutdown(self) -> None:
+        """
+        Clean shutdown of the Cross-Modal Auditor plugin.
+        """
         try:
-            print(f"🔍 Deactivating {self.name}")
-
             self.is_active = False
-            print(f"✅ {self.name} deactivated successfully")
-            return True
-
+            logger.info(f"[{self.plugin_id}] Cross-Modal Auditor deactivated successfully")
         except Exception as e:
-            print(f"❌ Failed to deactivate {self.name}: {e}")
-            return False
+            logger.exception(f"[{self.plugin_id}] Failed to deactivate: {e}")
+
+    async def on_ingestion(self, raw_data: str, metadata: dict[str, Any]) -> dict[str, Any]:
+        """
+        Cross-Modal Auditor does not process on_ingestion directly.
+        It provides tools for multimodal auditing.
+        """
+        return {
+            "status": "skipped",
+            "reason": "Cross-Modal Auditor provides auditing tools, not direct ingestion processing"
+        }
 
     def get_status(self) -> dict[str, Any]:
         """Get current plugin status."""
         return {
-            'name': self.name,
-            'version': self.version,
+            'name': self.plugin_id,
+            'version': self.manifest.get('version', '1.0.0'),
             'is_active': self.is_active,
             'config': self.config,
             'governor_status': self.governor_integration.get_status_info()
         }
 
-    def configure(self, **kwargs) -> bool:
+    def configure(self, **kwargs: Any) -> bool:
         """Configure the plugin."""
         try:
-            # Update configuration
             for key, value in kwargs.items():
                 if key in self.config:
                     self.config[key] = value
-
-            print(f"✅ {self.name} configuration updated")
+            logger.info(f"[{self.plugin_id}] configuration updated")
             return True
-
         except Exception as e:
-            print(f"❌ Failed to configure {self.name}: {e}")
+            logger.exception(f"[{self.plugin_id}] Failed to configure: {e}")
             return False
 
-    def get_tools(self) -> dict[str, Callable]:
+    def get_tools(self) -> list[Callable[..., Any]]:
         """Get available tools provided by this plugin."""
-        tools = {}
+        tools: list[Callable[..., Any]] = []
 
         if self.config.get('safe_mode', True):
-            # Use safe wrapper that checks Governor status
-            tools['audit_multimodal_sync'] = self._create_safe_audit_tool()
+            tools.append(self._create_safe_audit_tool())
         else:
-            # Use direct audit function
-            tools['audit_multimodal_sync'] = self._create_direct_audit_tool()
+            tools.append(self._create_direct_audit_tool())
 
         return tools
 
@@ -179,74 +185,47 @@ class CrossModalAuditorPlugin:
 
         return direct_audit_tool
 
-    def get_hooks(self) -> dict[str, Callable]:
-        """Get available hooks provided by this plugin."""
-        return {
-            'governor_status_check': create_governor_aware_hook()
-        }
-
-    def get_events(self) -> list[str]:
-        """Get list of events this plugin can handle."""
-        return [
-            'governor_status_changed',
-            'audit_started',
-            'audit_completed',
-            'hallucination_detected'
-        ]
-
-    def handle_event(self, event_name: str, **kwargs) -> Any:
-        """Handle plugin-specific events."""
-        if event_name == 'governor_status_changed':
-            new_status = kwargs.get('status', 'UNKNOWN')
-            print(f"📊 Governor status changed to: {new_status}")
-
-            # Update our Governor integration
-            if new_status == "NORMAL":
-                self.governor_integration._governor_status = GovernorStatus.NORMAL
-            elif new_status == "WARNING":
-                self.governor_integration._governor_status = GovernorStatus.WARNING
-            elif new_status == "CRITICAL":
-                self.governor_integration._governor_status = GovernorStatus.CRITICAL
-            else:
-                self.governor_integration._governor_status = GovernorStatus.UNKNOWN
-
-            self.governor_integration._last_status_check = kwargs.get('timestamp')
-
-            return {'status_updated': True, 'new_status': new_status}
-
-        elif event_name == 'audit_started':
-            print("🔍 Cross-modal audit started")
-            return {'audit_started': True}
-
-        elif event_name == 'audit_completed':
-            result = kwargs.get('result', {})
-            print(f"✅ Cross-modal audit completed. Status: {result.get('status', 'unknown')}")
-            return {'audit_completed': True}
-
-        elif event_name == 'hallucination_detected':
-            hallucination_info = kwargs.get('hallucination_info', {})
-            print(f"🚨 Multimodal hallucination detected: {hallucination_info}")
-            return {'hallucination_handled': True}
-
-        return {'event_handled': False}
+    async def on_event(self, event_id: str, payload: dict[str, Any]) -> None:
+        """
+        V3.0 Event Bus Hook: Responds to system-wide events.
+        """
+        try:
+            if event_id == 'governor_status_changed':
+                new_status = payload.get('status', 'UNKNOWN')
+                logger.info(f"[{self.plugin_id}] Governor status changed to: {new_status}")
+                if new_status == "NORMAL":
+                    self.governor_integration._governor_status = GovernorStatus.NORMAL
+                elif new_status == "WARNING":
+                    self.governor_integration._governor_status = GovernorStatus.WARNING
+                elif new_status == "CRITICAL":
+                    self.governor_integration._governor_status = GovernorStatus.CRITICAL
+                else:
+                    self.governor_integration._governor_status = GovernorStatus.UNKNOWN
+                self.governor_integration._last_status_check = payload.get('timestamp')
+            elif event_id == 'audit_started':
+                logger.info(f"[{self.plugin_id}] Cross-modal audit started")
+            elif event_id == 'audit_completed':
+                result = payload.get('result', {})
+                logger.info(f"[{self.plugin_id}] Audit completed. Status: {result.get('status', 'unknown')}")
+            elif event_id == 'hallucination_detected':
+                hallucination_info = payload.get('hallucination_info', {})
+                logger.warning(f"[{self.plugin_id}] Multimodal hallucination detected: {hallucination_info}")
+        except Exception as e:
+            logger.exception(f"[{self.plugin_id}] Error handling event {event_id}: {e}")
 
     def get_auditor_instance(self) -> CrossModalAuditor:
         """Get an instance of the CrossModalAuditor for advanced usage."""
         return CrossModalAuditor(model_name=self.config['model_name'])
 
 
-# Create global plugin instance
-cross_modal_auditor_plugin = CrossModalAuditorPlugin()
+def create_plugin(manifest: dict[str, Any], nexus_api: Any) -> CrossModalAuditorPlugin:
+    """Factory function to create and return a CrossModalAuditorPlugin instance."""
+    return CrossModalAuditorPlugin(manifest, nexus_api)
 
 
-def get_plugin() -> CrossModalAuditorPlugin:
-    """Get the global Cross-Modal Auditor plugin instance."""
-    return cross_modal_auditor_plugin
-
-
-def register_extension(manifest: dict, nexus_api: Any) -> CrossModalAuditorPlugin:
-    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
-    return cross_modal_auditor_plugin
+def register_extension(manifest: dict[str, Any], nexus_api: Any) -> CrossModalAuditorPlugin:
+    """Standard Lawnmower Man v3.0 extension hook; required by ExtensionManager."""
+    return create_plugin(manifest, nexus_api)
 
 
 # Export for use by the extension system

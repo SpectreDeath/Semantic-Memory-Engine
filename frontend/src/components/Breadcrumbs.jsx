@@ -69,24 +69,4 @@ const Breadcrumbs = ({ items = [], onNavigate }) => {
   );
 };
 
-// Helper to generate breadcrumbs from current route
-export const generateBreadcrumbs = (pathname) => {
-  const paths = pathname.split('/').filter(Boolean);
-  
-  const breadcrumbs = [
-    { label: 'Home', path: '/' },
-  ];
-
-  let currentPath = '';
-  paths.forEach((segment) => {
-    currentPath += `/${segment}`;
-    breadcrumbs.push({
-      label: segment.charAt(0).toUpperCase() + segment.slice(1),
-      path: currentPath,
-    });
-  });
-
-  return breadcrumbs;
-};
-
 export default Breadcrumbs;

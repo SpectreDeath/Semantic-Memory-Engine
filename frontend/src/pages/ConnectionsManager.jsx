@@ -37,7 +37,10 @@ const ConnectionsManager = () => {
   };
 
   useEffect(() => {
-    fetchStatus();
+    // Use requestAnimationFrame to avoid calling setState synchronously
+    requestAnimationFrame(() => {
+      fetchStatus();
+    });
   }, []);
 
   return (

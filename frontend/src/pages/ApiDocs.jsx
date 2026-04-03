@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { BookOpen, Search, ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
 import { api } from '../api';
 import ErrorBoundary from '../components/ErrorBoundary';
@@ -10,8 +9,6 @@ import { SkeletonCard, SkeletonList } from '../components/Skeleton';
  * Displays all available MCP tools with descriptions and parameters
  */
 const ApiDocs = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const [tools, setTools] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

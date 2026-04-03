@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
@@ -23,7 +23,8 @@ import {
 } from 'lucide-react';
 
 import { ws } from './api';
-import { ThemeProvider, useTheme } from './contexts/ThemeContext';
+import { ThemeProvider } from './contexts/ThemeContextProvider';
+import { useTheme } from './hooks/useTheme';
 import ErrorBoundary from './components/ErrorBoundary';
 import GlobalSearch from './components/GlobalSearch';
 import Breadcrumbs, { generateBreadcrumbs } from './components/Breadcrumbs';
@@ -50,7 +51,7 @@ const Layout = () => {
   const [searchOpen, setSearchOpen] = useState(false);
 
   // Tab to route mapping
-  const tabs = [
+  const tabs = useMemo(() => [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
     { id: 'brain', label: 'The Brain', icon: Network, path: '/brain' },
     { id: 'reports', label: 'Intelligences', icon: FileText, path: '/reports' },
@@ -58,14 +59,19 @@ const Layout = () => {
     { id: 'harvester', label: 'Harvester', icon: Globe, path: '/harvester' },
     { id: 'connections', label: 'Connections', icon: Unplug, path: '/connections' },
     { id: 'api-docs', label: 'API Docs', icon: BookOpen, path: '/api-docs' },
-  ];
+  ], []);
 
   // Sync tab with URL
   useEffect(() => {
     const path = location.pathname;
     const tab = tabs.find(t => t.path === path);
-    if (tab) setActiveTab(tab.id);
-  }, [location.pathname]);
+    if (tab) {
+      // Use requestAnimationFrame to avoid calling setState synchronously
+      requestAnimationFrame(() => {
+        setActiveTab(tab.id);
+      });
+    }
+  }, [location.pathname, tabs]);
 
   // WebSocket connection
   useEffect(() => {

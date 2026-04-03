@@ -4,7 +4,18 @@ import ForceGraph2D from 'react-force-graph-2d';
 const KnowledgeBrain = () => {
   const [graphData, setGraphData] = useState({ nodes: [], links: [] });
   const [loading, setLoading] = useState(true);
+  const [width, setWidth] = useState(800);
   const containerRef = useRef();
+
+  useEffect(() => {
+    // Update width based on container size
+    if (containerRef.current) {
+      // Use requestAnimationFrame to avoid calling setState synchronously
+      requestAnimationFrame(() => {
+        setWidth(containerRef.current.clientWidth || 800);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     // Fetch initial graph data or provide dummy data for preview
@@ -53,7 +64,7 @@ const KnowledgeBrain = () => {
           linkDirectionalArrowLength={3.5}
           linkDirectionalArrowRelPos={1}
           linkCurvature={0.25}
-          width={containerRef.current?.clientWidth || 800}
+          width={width}
           height={500}
           backgroundColor="rgba(0,0,0,0)"
           nodeCanvasObject={(node, ctx, globalScale) => {

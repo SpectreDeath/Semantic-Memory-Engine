@@ -6,15 +6,10 @@ import { SkeletonCard } from '../components/Skeleton';
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [feedItems, setFeedItems] = useState([]);
-  const [metrics, setMetrics] = useState({ cpu: 0, memory: 0, latency: '0ms' });
 
   useEffect(() => {
     // Connect to WebSocket for real-time diagnostics
     ws.connect('/ws/diagnostics');
-
-    const unsubMessage = ws.on('diagnostics', (data) => {
-      setMetrics(data);
-    });
 
     // Try to fetch real data
     const fetchData = async () => {
@@ -28,7 +23,7 @@ const Dashboard = () => {
             { type: 'KNOWLEDGE', msg: 'Connected to Nexus database', time: 'now' },
           ]);
         }
-      } catch (e) {
+      } catch {
         // Use fallback data if API unavailable
         setFeedItems([
           { type: 'ENTITY', msg: 'API server not connected - using demo mode', time: 'now' },
@@ -40,10 +35,6 @@ const Dashboard = () => {
     };
 
     fetchData();
-
-    return () => {
-      unsubMessage?.();
-    };
   }, []);
 
   if (loading) {

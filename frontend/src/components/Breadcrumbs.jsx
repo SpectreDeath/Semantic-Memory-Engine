@@ -1,7 +1,8 @@
 import React from 'react';
 import { ChevronRight, Home } from 'lucide-react';
+import { generateBreadcrumbs } from '../utils/breadcrumbs';
 
-export { generateBreadcrumbs } from '../utils/breadcrumbs';
+export { generateBreadcrumbs };
 
 /**
  * Breadcrumbs Component

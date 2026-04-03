@@ -138,9 +138,7 @@ class EnvValidator:
             elif raw_value is None:
                 warnings.append(f"Optional env var '{var_name}' is not set: {description}")
             else:
-                warnings.append(
-                    f"Optional env var '{var_name}' has invalid value: {description}"
-                )
+                warnings.append(f"Optional env var '{var_name}' has invalid value: {description}")
 
         postgres_error = validate_docker_postgres_enforcement(values)
         if postgres_error:

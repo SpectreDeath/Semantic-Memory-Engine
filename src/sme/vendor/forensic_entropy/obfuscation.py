@@ -11,6 +11,7 @@ class ObfuscationAnalyzer:
     Detects obfuscated or packed code using statistical complexity measures.
     Optimized with __slots__.
     """
+
     __slots__ = ()
 
     def calculate_hamming_weight(self, data: np.ndarray) -> float:
@@ -26,7 +27,7 @@ class ObfuscationAnalyzer:
         """
         Detects obfuscated scripts using Hamming Weight and Compression-based Complexity.
         """
-        data = content.encode('utf-8') if isinstance(content, str) else bytes(content)
+        data = content.encode("utf-8") if isinstance(content, str) else bytes(content)
 
         if not data:
             return {"obfuscation_score": 0.0, "status": "Empty Content"}
@@ -56,8 +57,9 @@ class ObfuscationAnalyzer:
             "hamming_weight": round(h_weight, 4),
             "compression_ratio": round(comp_ratio, 4),
             "is_likely_obfuscated": bool(obfuscation_prob > 0.7 or h_weight > 5.0),
-            "status": "Success"
+            "status": "Success",
         }
+
 
 def analyze_obfuscation_score(content: str | bytes) -> dict[str, Any]:
     """Standalone wrapper for obfuscation analysis."""

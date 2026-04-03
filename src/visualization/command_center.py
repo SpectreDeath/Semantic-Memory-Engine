@@ -17,7 +17,8 @@ st.set_page_config(
 )
 
 # Custom CSS for Dark Mode/Premium Look
-st.markdown("""
+st.markdown(
+    """
 <style>
     .main {
         background-color: #0e1117;
@@ -39,18 +40,22 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
+
 
 # Helper: Load Data
 def load_json(filepath):
     if not Path(filepath).exists():
         return []
     try:
-        with open(filepath, encoding='utf-8') as f:
+        with open(filepath, encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
         st.error(f"Error loading {filepath}: {e}")
         return []
+
 
 # Sidebar: Controls
 st.sidebar.title("🕵️ SME Ops")
@@ -90,13 +95,10 @@ if osint_data:
     # Process for Heatmap
     platforms_found = []
     for scan in osint_data:
-        username = scan.get('username', 'Unknown')
-        for plat in scan.get('platforms', []):
-            if plat.get('status') == 'found':
-                platforms_found.append({
-                    "Username": username,
-                    "Platform": plat.get('name')
-                })
+        username = scan.get("username", "Unknown")
+        for plat in scan.get("platforms", []):
+            if plat.get("status") == "found":
+                platforms_found.append({"Username": username, "Platform": plat.get("name")})
 
     if platforms_found:
         df = pd.DataFrame(platforms_found)
@@ -106,7 +108,7 @@ if osint_data:
             y="Username",
             title="Entity Detection Heatmap",
             color_continuous_scale="Viridis",
-            labels={'Username': 'Potential Actor', 'Platform': 'Platform Found'}
+            labels={"Username": "Potential Actor", "Platform": "Platform Found"},
         )
         st.plotly_chart(fig, use_container_width=True)
     else:
@@ -120,7 +122,7 @@ tab1, tab2 = st.tabs(["Academic TLDRs", "Forensic News"])
 
 with tab1:
     if research_data:
-        for paper in sorted(research_data, key=lambda x: x.get('ingested_at', ''), reverse=True):
+        for paper in sorted(research_data, key=lambda x: x.get("ingested_at", ""), reverse=True):
             with st.expander(f"📄 {paper.get('title')[:80]}..."):
                 col_a, col_b = st.columns([2, 1])
                 with col_a:
@@ -129,20 +131,20 @@ with tab1:
                     st.write(f"**TLDR:** {paper.get('tldr') or 'No summary available.'}")
                 with col_b:
                     st.write("**Authors (Targets):**")
-                    for author in paper.get('authors', []):
+                    for author in paper.get("authors", []):
                         st.code(author)
-                    st.link_button("View Paper", paper.get('url', '#'))
+                    st.link_button("View Paper", paper.get("url", "#"))
     else:
         st.write("No research data found.")
 
 with tab2:
     if news_data:
-        for news in sorted(news_data, key=lambda x: x.get('published_iso', ''), reverse=True):
+        for news in sorted(news_data, key=lambda x: x.get("published_iso", ""), reverse=True):
             with st.expander(f"📰 {news.get('title')}"):
                 st.write(f"**Feed:** {news.get('source_feed')}")
                 st.write(f"**Published:** {news.get('published')}")
-                st.write(news.get('summary', 'No summary provided.'))
-                st.link_button("Read Full Article", news.get('link', '#'))
+                st.write(news.get("summary", "No summary provided."))
+                st.link_button("Read Full Article", news.get("link", "#"))
     else:
         st.write("No news data found.")
 

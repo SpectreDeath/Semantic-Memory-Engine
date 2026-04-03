@@ -5,15 +5,16 @@ from textblob import TextBlob
 # Your custom dictionary (Risk Signals)
 custom_lexicon = {
     "dehumanizing": ["vermin", "parasite", "infestation", "toxic"],
-    "distancing": ["collateral", "entities", "processing_units"]
+    "distancing": ["collateral", "entities", "processing_units"],
 }
+
 
 def analyze_rhetoric(text):
     blob = TextBlob(text)
     results = {
-        "polarity": blob.sentiment.polarity,      # -1 (neg) to 1 (pos)
-        "subjectivity": blob.sentiment.subjectivity, # 0 (fact) to 1 (opinion)
-        "custom_flags": []
+        "polarity": blob.sentiment.polarity,  # -1 (neg) to 1 (pos)
+        "subjectivity": blob.sentiment.subjectivity,  # 0 (fact) to 1 (opinion)
+        "custom_flags": [],
     }
 
     # Check for your specific character tells
@@ -25,6 +26,7 @@ def analyze_rhetoric(text):
 
     return results
 
+
 # Example crawl-ready text
 sample_text = "The entities were cleared as part of the toxic infestation removal."
 print(analyze_rhetoric(sample_text))
@@ -32,7 +34,8 @@ import nltk
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 
 # Ensure you have the lexicon downloaded (only needed once)
-nltk.download('vader_lexicon')
+nltk.download("vader_lexicon")
+
 
 class RhetoricAnalyzer:
     def __init__(self):
@@ -42,7 +45,7 @@ class RhetoricAnalyzer:
         # YOUR CUSTOM LEXICON (Add your dehumanizing terms here)
         self.custom_signals = {
             "dehumanizing": ["vermin", "parasite", "infestation", "toxic"],
-            "distancing": ["entities", "units", "case-load"]
+            "distancing": ["entities", "units", "case-load"],
         }
 
     def analyze(self, text):
@@ -59,8 +62,9 @@ class RhetoricAnalyzer:
         return {
             "sentiment": vader_scores,
             "risk_signals": signal_counts,
-            "is_high_risk": vader_scores['neg'] > 0.5 or sum(signal_counts.values()) > 0
+            "is_high_risk": vader_scores["neg"] > 0.5 or sum(signal_counts.values()) > 0,
         }
+
 
 # --- TEST IT ---
 engine = RhetoricAnalyzer()

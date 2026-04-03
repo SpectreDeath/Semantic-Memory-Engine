@@ -18,8 +18,12 @@ from typing import Any
 class SMEError(Exception):
     """Base exception class for SME extension errors."""
 
-    def __init__(self, message: str, error_code: str = "UNKNOWN_ERROR",
-                 original_exception: Exception | None = None):
+    def __init__(
+        self,
+        message: str,
+        error_code: str = "UNKNOWN_ERROR",
+        original_exception: Exception | None = None,
+    ):
         self.message = message
         self.error_code = error_code
         self.original_exception = original_exception
@@ -30,8 +34,7 @@ class SMEError(Exception):
 class ErrorContext:
     """Context information for error handling."""
 
-    def __init__(self, plugin_id: str, operation: str,
-                 user_data: dict[str, Any] | None = None):
+    def __init__(self, plugin_id: str, operation: str, user_data: dict[str, Any] | None = None):
         self.plugin_id = plugin_id
         self.operation = operation
         self.user_data = user_data or {}
@@ -45,9 +48,13 @@ class ErrorHandler:
         self.plugin_id = plugin_id
         self.logger = logging.getLogger(f"SME.{plugin_id}")
 
-    def handle_extension_error(self, error: Exception, operation: str,
-                              user_data: dict[str, Any] | None = None,
-                              log_level: str = "ERROR") -> dict[str, Any]:
+    def handle_extension_error(
+        self,
+        error: Exception,
+        operation: str,
+        user_data: dict[str, Any] | None = None,
+        log_level: str = "ERROR",
+    ) -> dict[str, Any]:
         """
         Handle extension errors with standardized logging and response format.
 
@@ -69,16 +76,12 @@ class ErrorHandler:
         # Log the error with appropriate level
         log_method = getattr(self.logger, log_level.lower())
         log_method(
-            f"[{self.plugin_id}] {operation} failed: {error_message} "
-            f"(Error Code: {error_code})"
+            f"[{self.plugin_id}] {operation} failed: {error_message} (Error Code: {error_code})"
         )
 
         # Log full traceback for debugging
-        if log_level.upper() in ['ERROR', 'CRITICAL']:
-            self.logger.error(
-                f"[{self.plugin_id}] Full traceback for {operation}:",
-                exc_info=True
-            )
+        if log_level.upper() in ["ERROR", "CRITICAL"]:
+            self.logger.error(f"[{self.plugin_id}] Full traceback for {operation}:", exc_info=True)
 
         # Return standardized error response
         return {
@@ -88,11 +91,12 @@ class ErrorHandler:
             "operation": operation,
             "plugin_id": self.plugin_id,
             "timestamp": context.timestamp,
-            "context": context.user_data
+            "context": context.user_data,
         }
 
-    def handle_tool_error(self, error: Exception, tool_name: str,
-                         user_data: dict[str, Any] | None = None) -> str:
+    def handle_tool_error(
+        self, error: Exception, tool_name: str, user_data: dict[str, Any] | None = None
+    ) -> str:
         """
         Handle tool execution errors and return JSON response.
 
@@ -109,8 +113,7 @@ class ErrorHandler:
         )
         return json.dumps(error_response, indent=2)
 
-    def safe_execute(self, func: Callable, operation: str,
-                    *args, **kwargs) -> Any:
+    def safe_execute(self, func: Callable, operation: str, *args, **kwargs) -> Any:
         """
         Safely execute a function with error handling.
 
@@ -127,8 +130,7 @@ class ErrorHandler:
         except Exception as e:
             return self.handle_extension_error(e, operation)
 
-    async def safe_async_execute(self, coro, operation: str,
-                          *args, **kwargs) -> Any:
+    async def safe_async_execute(self, coro, operation: str, *args, **kwargs) -> Any:
         """
         Safely execute an async function with error handling.
 
@@ -154,31 +156,31 @@ class ErrorHandler:
             "OperationalError": "DB_OPERATIONAL_ERROR",
             "IntegrityError": "DB_INTEGRITY_ERROR",
             "DatabaseError": "DB_ERROR",
-
             # Network errors
             "ConnectionError": "NETWORK_CONNECTION_ERROR",
             "TimeoutError": "NETWORK_TIMEOUT_ERROR",
             "RequestException": "NETWORK_REQUEST_ERROR",
-
             # File system errors
             "FileNotFoundError": "FILE_NOT_FOUND",
             "PermissionError": "FILE_PERMISSION_ERROR",
             "IsADirectoryError": "FILE_IS_DIRECTORY",
-
             # Configuration errors
             "KeyError": "CONFIGURATION_ERROR",
             "ValueError": "INVALID_VALUE",
             "TypeError": "TYPE_ERROR",
-
             # Plugin-specific errors
-            "SMEError": error.error_code if hasattr(error, 'error_code') else "PLUGIN_ERROR",
+            "SMEError": error.error_code if hasattr(error, "error_code") else "PLUGIN_ERROR",
         }
 
         return error_codes.get(error_type, "UNKNOWN_ERROR")
 
 
-def create_error_response(message: str, error_code: str = "UNKNOWN_ERROR",
-                         plugin_id: str = "UNKNOWN", operation: str = "UNKNOWN") -> str:
+def create_error_response(
+    message: str,
+    error_code: str = "UNKNOWN_ERROR",
+    plugin_id: str = "UNKNOWN",
+    operation: str = "UNKNOWN",
+) -> str:
     """
     Create a standardized JSON error response.
 
@@ -197,13 +199,14 @@ def create_error_response(message: str, error_code: str = "UNKNOWN_ERROR",
         "message": message,
         "operation": operation,
         "plugin_id": plugin_id,
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
     return json.dumps(error_response, indent=2)
 
 
-def log_operation_start(logger: logging.Logger, plugin_id: str, operation: str,
-                       user_data: dict[str, Any] | None = None):
+def log_operation_start(
+    logger: logging.Logger, plugin_id: str, operation: str, user_data: dict[str, Any] | None = None
+):
     """Log the start of an operation."""
     context = ""
     if user_data:
@@ -212,15 +215,15 @@ def log_operation_start(logger: logging.Logger, plugin_id: str, operation: str,
     logger.info(f"[{plugin_id}] Starting {operation}{context}")
 
 
-def log_operation_success(logger: logging.Logger, plugin_id: str, operation: str,
-                         result_summary: str | None = None):
+def log_operation_success(
+    logger: logging.Logger, plugin_id: str, operation: str, result_summary: str | None = None
+):
     """Log successful completion of an operation."""
     summary = f" | Result: {result_summary}" if result_summary else ""
     logger.info(f"[{plugin_id}] {operation} completed successfully{summary}")
 
 
-def log_operation_warning(logger: logging.Logger, plugin_id: str, operation: str,
-                         warning: str):
+def log_operation_warning(logger: logging.Logger, plugin_id: str, operation: str, warning: str):
     """Log a warning during operation."""
     logger.warning(f"[{plugin_id}] {operation} warning: {warning}")
 
@@ -229,8 +232,13 @@ def log_operation_warning(logger: logging.Logger, plugin_id: str, operation: str
 class OperationContext:
     """Context manager for operations with automatic error handling."""
 
-    def __init__(self, logger: logging.Logger, plugin_id: str, operation: str,
-                 user_data: dict[str, Any] | None = None):
+    def __init__(
+        self,
+        logger: logging.Logger,
+        plugin_id: str,
+        operation: str,
+        user_data: dict[str, Any] | None = None,
+    ):
         self.logger = logger
         self.plugin_id = plugin_id
         self.operation = operation
@@ -252,8 +260,7 @@ class OperationContext:
         # Operation completed successfully
         duration = (datetime.now() - self.start_time).total_seconds()
         log_operation_success(
-            self.logger, self.plugin_id, self.operation,
-            f"Duration: {duration:.2f}s"
+            self.logger, self.plugin_id, self.operation, f"Duration: {duration:.2f}s"
         )
         return True
 
@@ -267,6 +274,7 @@ def handle_errors(plugin_id: str, operation_name: str | None = None):
         plugin_id: Plugin identifier for logging.
         operation_name: Optional operation name (defaults to function name).
     """
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -277,7 +285,9 @@ def handle_errors(plugin_id: str, operation_name: str | None = None):
                 return func(*args, **kwargs)
             except Exception as e:
                 return error_handler.handle_extension_error(e, op_name)
+
         return wrapper
+
     return decorator
 
 
@@ -290,6 +300,7 @@ def handle_async_errors(plugin_id: str, operation_name: str | None = None):
         plugin_id: Plugin identifier for logging.
         operation_name: Optional operation name (defaults to function name).
     """
+
     def decorator(func):
         @functools.wraps(func)
         async def wrapper(*args, **kwargs):
@@ -300,5 +311,7 @@ def handle_async_errors(plugin_id: str, operation_name: str | None = None):
                 return await func(*args, **kwargs)
             except Exception as e:
                 return error_handler.handle_extension_error(e, op_name)
+
         return wrapper
+
     return decorator

@@ -11,6 +11,7 @@ mcp = FastMCP("BioFeedback")
 DB_PATH = os.path.normpath("D:/mcp_servers/storage/laboratory.db")
 CHARTS_DIR = os.path.normpath("D:/mcp_servers/storage/charts")
 
+
 @mcp.tool()
 def plot_sentiment_history(days: int = 7) -> str:
     """Generates a sentiment trend chart for the specified period."""
@@ -20,11 +21,14 @@ def plot_sentiment_history(days: int = 7) -> str:
         # 1. Fetch data from Centrifuge
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT timestamp, compound FROM sentiment_logs
             WHERE timestamp >= datetime('now', ?)
             ORDER BY timestamp ASC
-        ''', (f'-{days} days',))
+        """,
+            (f"-{days} days",),
+        )
         data = cursor.fetchall()
         conn.close()
 
@@ -32,13 +36,13 @@ def plot_sentiment_history(days: int = 7) -> str:
             return f"No data found to plot for the last {days} days."
 
         # 2. Process data
-        timestamps = [datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S') for row in data]
+        timestamps = [datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S") for row in data]
         compounds = [row[1] for row in data]
 
         # 3. Create Plot
         plt.figure(figsize=(10, 6))
-        plt.plot(timestamps, compounds, marker='o', linestyle='-', color='b')
-        plt.axhline(0, color='black', linestyle='--', linewidth=0.8)
+        plt.plot(timestamps, compounds, marker="o", linestyle="-", color="b")
+        plt.axhline(0, color="black", linestyle="--", linewidth=0.8)
         plt.title(f"Laboratory Sentiment Trends (Last {days} Days)")
         plt.xlabel("Time")
         plt.ylabel("Compound Score (-1 to 1)")
@@ -57,6 +61,7 @@ def plot_sentiment_history(days: int = 7) -> str:
 
     except Exception as e:
         return f"Visualization Error: {e!s}"
+
 
 if __name__ == "__main__":
     mcp.run()

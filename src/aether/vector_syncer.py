@@ -40,6 +40,7 @@ LOCAL_DB_PATH = "data/aether/vector_store.db"
 
 class VectorStoreType(Enum):
     """Vector store backend types."""
+
     LOCAL = "local"
     SUPABASE = "supabase"
     HYBRID = "hybrid"
@@ -47,15 +48,17 @@ class VectorStoreType(Enum):
 
 class Priority(Enum):
     """Cache priority levels."""
-    HOT = 3      # Frequently accessed, keep in memory
-    WARM = 2     # Occasionally accessed
-    COLD = 1     # Rarely accessed, candidate for eviction
-    FROZEN = 0   # Archived, only load on demand
+
+    HOT = 3  # Frequently accessed, keep in memory
+    WARM = 2  # Occasionally accessed
+    COLD = 1  # Rarely accessed, candidate for eviction
+    FROZEN = 0  # Archived, only load on demand
 
 
 @dataclass
 class VectorEntry:
     """A single vector entry with metadata."""
+
     id: str
     embedding: list[float]
     text: str
@@ -76,7 +79,7 @@ class VectorEntry:
             "priority": self.priority,
             "last_accessed": self.last_accessed.isoformat(),
             "created_at": self.created_at.isoformat(),
-            "sync_status": self.sync_status
+            "sync_status": self.sync_status,
         }
 
     @classmethod
@@ -90,7 +93,7 @@ class VectorEntry:
             priority=data.get("priority", Priority.WARM.value),
             last_accessed=datetime.fromisoformat(data["last_accessed"]),
             created_at=datetime.fromisoformat(data["created_at"]),
-            sync_status=data.get("sync_status", "local")
+            sync_status=data.get("sync_status", "local"),
         )
 
 
@@ -111,10 +114,10 @@ class PriorityCache:
         """Estimate memory size of an entry in bytes."""
         # embedding (float64) + text + metadata
         return (
-            len(entry.embedding) * 8 +
-            len(entry.text.encode('utf-8')) +
-            len(json.dumps(entry.metadata).encode('utf-8')) +
-            500  # overhead
+            len(entry.embedding) * 8
+            + len(entry.text.encode("utf-8"))
+            + len(json.dumps(entry.metadata).encode("utf-8"))
+            + 500  # overhead
         )
 
     def get(self, key: str) -> VectorEntry | None:
@@ -135,8 +138,10 @@ class PriorityCache:
             entry_size = self._estimate_size(entry)
 
             # Evict until we have space
-            while (len(self._cache) >= self.max_size or
-                   self._current_memory + entry_size > self.max_memory_bytes) and self._cache:
+            while (
+                len(self._cache) >= self.max_size
+                or self._current_memory + entry_size > self.max_memory_bytes
+            ) and self._cache:
                 # Evict least recently used
                 _, old_entry = self._cache.popitem(last=False)
                 self._current_memory -= self._estimate_size(old_entry)
@@ -161,8 +166,7 @@ class PriorityCache:
         """Get hot entries sorted by access frequency."""
         with self._lock:
             return [
-                e for _, e in list(self._cache.items())[:limit]
-                if e.priority >= Priority.HOT.value
+                e for _, e in list(self._cache.items())[:limit] if e.priority >= Priority.HOT.value
             ]
 
     def clear(self):
@@ -188,7 +192,7 @@ class VectorSyncer:
         store_type: VectorStoreType = VectorStoreType.HYBRID,
         local_path: str = LOCAL_DB_PATH,
         ipc_path: str = IPC_FILE,
-        cache_size_mb: float = CACHE_SIZE_MB
+        cache_size_mb: float = CACHE_SIZE_MB,
     ):
         self.store_type = store_type
         self.local_path = local_path
@@ -216,7 +220,7 @@ class VectorSyncer:
             "cache_hits": 0,
             "cache_misses": 0,
             "sync_operations": 0,
-            "supabase_queries": 0
+            "supabase_queries": 0,
         }
 
         print(f"[Aether.VectorSyncer] Initialized {store_type.value} mode")
@@ -239,23 +243,25 @@ class VectorSyncer:
                         "priority": pl.Int8,
                         "last_accessed": pl.Utf8,
                         "created_at": pl.Utf8,
-                        "sync_status": pl.Utf8
-                    }
+                        "sync_status": pl.Utf8,
+                    },
                 )
                 print(f"[Aether.VectorSyncer] Loaded {len(self._local_df)} vectors from IPC")
             else:
                 # Create empty DataFrame - store embeddings as JSON strings
-                self._local_df = pl.DataFrame(schema={
-                    "id": pl.Utf8,
-                    "embedding": pl.Utf8,  # Store as JSON string
-                    "text": pl.Utf8,
-                    "signature_hash": pl.Utf8,
-                    "metadata": pl.Utf8,  # JSON string
-                    "priority": pl.Int8,
-                    "last_accessed": pl.Utf8,
-                    "created_at": pl.Utf8,
-                    "sync_status": pl.Utf8
-                })
+                self._local_df = pl.DataFrame(
+                    schema={
+                        "id": pl.Utf8,
+                        "embedding": pl.Utf8,  # Store as JSON string
+                        "text": pl.Utf8,
+                        "signature_hash": pl.Utf8,
+                        "metadata": pl.Utf8,  # JSON string
+                        "priority": pl.Int8,
+                        "last_accessed": pl.Utf8,
+                        "created_at": pl.Utf8,
+                        "sync_status": pl.Utf8,
+                    }
+                )
                 print("[Aether.VectorSyncer] Created new local vector index")
         except Exception as e:
             print(f"[Aether.VectorSyncer] Error loading index: {e}")
@@ -299,7 +305,7 @@ class VectorSyncer:
         embedding: list[float],
         metadata: dict[str, Any] | None = None,
         priority: int = Priority.WARM.value,
-        auto_sync: bool = True
+        auto_sync: bool = True,
     ) -> str:
         """
         Add a vector to the store.
@@ -317,7 +323,7 @@ class VectorSyncer:
             signature_hash=sig_hash,
             metadata=metadata,
             priority=priority,
-            sync_status="pending" if auto_sync else "local"
+            sync_status="pending" if auto_sync else "local",
         )
 
         # Add to cache (primary storage)
@@ -328,27 +334,32 @@ class VectorSyncer:
             self._load_local_index()
 
         # Simply append - duplicates handled by cache
-        new_row = pl.DataFrame([{
-            "id": entry.id,
-            "embedding": json.dumps(entry.embedding),
-            "text": entry.text,
-            "signature_hash": entry.signature_hash,
-            "metadata": json.dumps(entry.metadata),
-            "priority": entry.priority,
-            "last_accessed": entry.last_accessed.isoformat(),
-            "created_at": entry.created_at.isoformat(),
-            "sync_status": entry.sync_status
-        }], schema={
-            "id": pl.Utf8,
-            "embedding": pl.Utf8,
-            "text": pl.Utf8,
-            "signature_hash": pl.Utf8,
-            "metadata": pl.Utf8,
-            "priority": pl.Int8,
-            "last_accessed": pl.Utf8,
-            "created_at": pl.Utf8,
-            "sync_status": pl.Utf8
-        })
+        new_row = pl.DataFrame(
+            [
+                {
+                    "id": entry.id,
+                    "embedding": json.dumps(entry.embedding),
+                    "text": entry.text,
+                    "signature_hash": entry.signature_hash,
+                    "metadata": json.dumps(entry.metadata),
+                    "priority": entry.priority,
+                    "last_accessed": entry.last_accessed.isoformat(),
+                    "created_at": entry.created_at.isoformat(),
+                    "sync_status": entry.sync_status,
+                }
+            ],
+            schema={
+                "id": pl.Utf8,
+                "embedding": pl.Utf8,
+                "text": pl.Utf8,
+                "signature_hash": pl.Utf8,
+                "metadata": pl.Utf8,
+                "priority": pl.Int8,
+                "last_accessed": pl.Utf8,
+                "created_at": pl.Utf8,
+                "sync_status": pl.Utf8,
+            },
+        )
 
         if len(self._local_df) == 0:
             self._local_df = new_row
@@ -391,7 +402,7 @@ class VectorSyncer:
                     priority=row_data["priority"],
                     last_accessed=datetime.fromisoformat(row_data["last_accessed"]),
                     created_at=datetime.fromisoformat(row_data["created_at"]),
-                    sync_status=row_data["sync_status"]
+                    sync_status=row_data["sync_status"],
                 )
                 # Add to cache
                 self.cache.put(vector_id, entry)
@@ -404,7 +415,7 @@ class VectorSyncer:
         query_embedding: list[float],
         top_k: int = 10,
         min_similarity: float = 0.0,
-        filter_metadata: dict[str, Any] | None = None
+        filter_metadata: dict[str, Any] | None = None,
     ) -> list[tuple[VectorEntry, float]]:
         """
         Search for similar vectors.
@@ -438,7 +449,7 @@ class VectorSyncer:
                         priority=row["priority"],
                         last_accessed=datetime.fromisoformat(row["last_accessed"]),
                         created_at=datetime.fromisoformat(row["created_at"]),
-                        sync_status=row["sync_status"]
+                        sync_status=row["sync_status"],
                     )
                     results.append((entry, similarity))
 
@@ -455,9 +466,7 @@ class VectorSyncer:
         return results[:top_k]
 
     def _search_supabase(
-        self,
-        query_embedding: list[float],
-        top_k: int = 10
+        self, query_embedding: list[float], top_k: int = 10
     ) -> list[tuple[VectorEntry, float]]:
         """Search Supabase vector store."""
         if not supabase:
@@ -469,11 +478,7 @@ class VectorSyncer:
             # Query Supabase - assumes table has embedding column
             response = supabase.rpc(
                 "match_vectors",
-                {
-                    "query_embedding": query_embedding,
-                    "match_threshold": 0.0,
-                    "match_count": top_k
-                }
+                {"query_embedding": query_embedding, "match_threshold": 0.0, "match_count": top_k},
             ).execute()
 
             results = []
@@ -484,7 +489,7 @@ class VectorSyncer:
                     text=row["text"],
                     signature_hash=row.get("signature_hash", ""),
                     metadata=row.get("metadata", {}),
-                    sync_status="synced"
+                    sync_status="synced",
                 )
                 results.append((entry, row.get("similarity", 0.0)))
 
@@ -514,28 +519,29 @@ class VectorSyncer:
             pending_list = list(self._pending_sync)
 
             for i in range(0, len(pending_list), batch_size):
-                batch_ids = pending_list[i:i + batch_size]
+                batch_ids = pending_list[i : i + batch_size]
                 batch_entries = []
 
                 for vec_id in batch_ids:
                     entry = self.get_vector(vec_id)
                     if entry:
-                        batch_entries.append({
-                            "id": entry.id,
-                            "embedding": entry.embedding,
-                            "text": entry.text,
-                            "signature_hash": entry.signature_hash,
-                            "metadata": entry.metadata,
-                            "priority": entry.priority,
-                            "last_accessed": entry.last_accessed.isoformat(),
-                            "created_at": entry.created_at.isoformat()
-                        })
+                        batch_entries.append(
+                            {
+                                "id": entry.id,
+                                "embedding": entry.embedding,
+                                "text": entry.text,
+                                "signature_hash": entry.signature_hash,
+                                "metadata": entry.metadata,
+                                "priority": entry.priority,
+                                "last_accessed": entry.last_accessed.isoformat(),
+                                "created_at": entry.created_at.isoformat(),
+                            }
+                        )
 
                 if batch_entries:
                     try:
                         supabase.table("aether_vectors").upsert(
-                            batch_entries,
-                            on_conflict="id"
+                            batch_entries, on_conflict="id"
                         ).execute()
 
                         synced.extend([e["id"] for e in batch_entries])
@@ -566,7 +572,7 @@ class VectorSyncer:
                 "status": "completed",
                 "synced": len(synced),
                 "failed": len(failed),
-                "timestamp": self._last_sync.isoformat()
+                "timestamp": self._last_sync.isoformat(),
             }
 
     def pull_from_supabase(self, since: datetime | None = None) -> int:
@@ -601,33 +607,38 @@ class VectorSyncer:
                         signature_hash=row.get("signature_hash", ""),
                         metadata=row.get("metadata", {}),
                         priority=row.get("priority", Priority.WARM.value),
-                        sync_status="synced"
+                        sync_status="synced",
                     )
 
                     # Add to cache and local index
                     self.cache.put(entry.id, entry)
 
-                    new_row = pl.DataFrame([{
-                        "id": entry.id,
-                        "embedding": json.dumps(entry.embedding),
-                        "text": entry.text,
-                        "signature_hash": entry.signature_hash,
-                        "metadata": json.dumps(entry.metadata),
-                        "priority": entry.priority,
-                        "last_accessed": entry.last_accessed.isoformat(),
-                        "created_at": entry.created_at.isoformat(),
-                        "sync_status": entry.sync_status
-                    }], schema={
-                        "id": pl.Utf8,
-                        "embedding": pl.Utf8,
-                        "text": pl.Utf8,
-                        "signature_hash": pl.Utf8,
-                        "metadata": pl.Utf8,
-                        "priority": pl.Int8,
-                        "last_accessed": pl.Utf8,
-                        "created_at": pl.Utf8,
-                        "sync_status": pl.Utf8
-                    })
+                    new_row = pl.DataFrame(
+                        [
+                            {
+                                "id": entry.id,
+                                "embedding": json.dumps(entry.embedding),
+                                "text": entry.text,
+                                "signature_hash": entry.signature_hash,
+                                "metadata": json.dumps(entry.metadata),
+                                "priority": entry.priority,
+                                "last_accessed": entry.last_accessed.isoformat(),
+                                "created_at": entry.created_at.isoformat(),
+                                "sync_status": entry.sync_status,
+                            }
+                        ],
+                        schema={
+                            "id": pl.Utf8,
+                            "embedding": pl.Utf8,
+                            "text": pl.Utf8,
+                            "signature_hash": pl.Utf8,
+                            "metadata": pl.Utf8,
+                            "priority": pl.Int8,
+                            "last_accessed": pl.Utf8,
+                            "created_at": pl.Utf8,
+                            "sync_status": pl.Utf8,
+                        },
+                    )
 
                     self._local_df = pl.concat([self._local_df, new_row])
                     pulled += 1
@@ -649,13 +660,13 @@ class VectorSyncer:
             "cache_hits": self.stats["cache_hits"],
             "cache_misses": self.stats["cache_misses"],
             "cache_hit_rate": (
-                self.stats["cache_hits"] /
-                max(1, self.stats["cache_hits"] + self.stats["cache_misses"])
+                self.stats["cache_hits"]
+                / max(1, self.stats["cache_hits"] + self.stats["cache_misses"])
             ),
             "pending_sync": len(self._pending_sync),
             "last_sync": self._last_sync.isoformat() if self._last_sync else None,
             "supabase_queries": self.stats["supabase_queries"],
-            "sync_operations": self.stats["sync_operations"]
+            "sync_operations": self.stats["sync_operations"],
         }
 
     def export_to_ipc(self, output_path: str | None = None) -> str:
@@ -679,9 +690,7 @@ class VectorSyncer:
 _vector_syncer: VectorSyncer | None = None
 
 
-def get_vector_syncer(
-    store_type: VectorStoreType = VectorStoreType.HYBRID
-) -> VectorSyncer:
+def get_vector_syncer(store_type: VectorStoreType = VectorStoreType.HYBRID) -> VectorSyncer:
     """Get or create VectorSyncer singleton."""
     global _vector_syncer
 

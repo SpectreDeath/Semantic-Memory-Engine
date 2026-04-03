@@ -25,6 +25,7 @@ try:
     from nltk.corpus import stopwords
     from nltk.probability import FreqDist
     from nltk.tokenize import sent_tokenize, word_tokenize
+
     NLTK_AVAILABLE = True
 except ImportError:
     NLTK_AVAILABLE = False
@@ -34,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 class SummarizationType(Enum):
     """Types of summarization approaches."""
+
     EXTRACTIVE = "extractive"
     QUERY_FOCUSED = "query_focused"
     MULTI_DOCUMENT = "multi_document"
@@ -43,6 +45,7 @@ class SummarizationType(Enum):
 @dataclass
 class SentenceScore:
     """Score for a sentence in the document."""
+
     sentence: str
     score: float
     order: int  # Original order in document
@@ -52,6 +55,7 @@ class SentenceScore:
 @dataclass
 class Summary:
     """Complete summarization result."""
+
     original_text: str
     summary_text: str
     summary_type: SummarizationType
@@ -66,6 +70,7 @@ class Summary:
 @dataclass
 class MultiDocumentSummary:
     """Multi-document summarization result."""
+
     documents: list[str]
     summary: str
     common_themes: list[str]
@@ -80,16 +85,20 @@ class TextSummarizer:
         self.has_nltk = NLTK_AVAILABLE
         if self.has_nltk:
             try:
-                self.stop_words = set(stopwords.words('english'))
+                self.stop_words = set(stopwords.words("english"))
             except:
                 logger.warning("NLTK stopwords not available, using basic set")
                 self.stop_words = self._get_basic_stopwords()
         else:
             self.stop_words = self._get_basic_stopwords()
 
-    def summarize(self, text: str, ratio: float = 0.3,
-                 summary_type: SummarizationType = SummarizationType.EXTRACTIVE,
-                 query: str | None = None) -> Summary:
+    def summarize(
+        self,
+        text: str,
+        ratio: float = 0.3,
+        summary_type: SummarizationType = SummarizationType.EXTRACTIVE,
+        query: str | None = None,
+    ) -> Summary:
         """
         Summarize text with specified approach.
 
@@ -112,8 +121,9 @@ class TextSummarizer:
         else:
             return self._summarize_extractive(text, ratio)
 
-    def multi_document_summarize(self, documents: list[str],
-                                ratio: float = 0.3) -> MultiDocumentSummary:
+    def multi_document_summarize(
+        self, documents: list[str], ratio: float = 0.3
+    ) -> MultiDocumentSummary:
         """Summarize multiple documents together."""
         if not documents:
             return MultiDocumentSummary([], "", [], {})
@@ -137,14 +147,16 @@ class TextSummarizer:
             documents=documents,
             summary=summary_result.summary_text,
             common_themes=common_themes,
-            doc_coverage=doc_coverage
+            doc_coverage=doc_coverage,
         )
 
     def _summarize_extractive(self, text: str, ratio: float) -> Summary:
         """Extractive summarization - select important sentences."""
         sentences = self._split_sentences(text)
         if len(sentences) < 2:
-            return self._create_summary_from_sentences(text, sentences, sentences, ratio, SummarizationType.EXTRACTIVE)
+            return self._create_summary_from_sentences(
+                text, sentences, sentences, ratio, SummarizationType.EXTRACTIVE
+            )
 
         # Score sentences
         scored_sentences = self._score_sentences(sentences)
@@ -171,15 +183,16 @@ class TextSummarizer:
             num_sentences_summary=len(selected),
             key_sentences=selected[:5],
             keywords=keywords,
-            score=self._calculate_summary_score(sentences, selected)
+            score=self._calculate_summary_score(sentences, selected),
         )
 
     def _summarize_query_focused(self, text: str, query: str, ratio: float) -> Summary:
         """Query-focused summarization."""
         sentences = self._split_sentences(text)
         if len(sentences) < 2:
-            return self._create_summary_from_sentences(text, sentences, sentences, ratio,
-                                                      SummarizationType.QUERY_FOCUSED)
+            return self._create_summary_from_sentences(
+                text, sentences, sentences, ratio, SummarizationType.QUERY_FOCUSED
+            )
 
         # Score sentences based on query relevance
         query_terms = set(self._tokenize(query.lower()))
@@ -190,15 +203,15 @@ class TextSummarizer:
             term_freq = self._calculate_term_frequency(sentence, query_terms)
             sentence_score = self._calculate_sentence_score(sentence) * (1 + term_freq * 2)
 
-            keywords = [w for w in self._tokenize(sentence.lower())
-                       if w in query_terms and w not in self.stop_words]
+            keywords = [
+                w
+                for w in self._tokenize(sentence.lower())
+                if w in query_terms and w not in self.stop_words
+            ]
 
-            scored_sentences.append(SentenceScore(
-                sentence=sentence,
-                score=sentence_score,
-                order=idx,
-                keywords=keywords
-            ))
+            scored_sentences.append(
+                SentenceScore(sentence=sentence, score=sentence_score, order=idx, keywords=keywords)
+            )
 
         # Select top by score
         scored_sentences.sort(key=lambda x: x.score, reverse=True)
@@ -217,7 +230,7 @@ class TextSummarizer:
             num_sentences_summary=len(selected),
             key_sentences=selected[:5],
             keywords=keywords,
-            score=self._calculate_summary_score(sentences, selected)
+            score=self._calculate_summary_score(sentences, selected),
         )
 
     def _summarize_abstractive(self, text: str, ratio: float) -> Summary:
@@ -242,7 +255,7 @@ class TextSummarizer:
             num_sentences_summary=len(self._split_sentences(abstract_summary)),
             key_sentences=scored_sentences[:5],
             keywords=keywords,
-            score=0.7  # Abstractive summaries are harder to score
+            score=0.7,  # Abstractive summaries are harder to score
         )
 
     def _score_sentences(self, sentences: list[str]) -> list[SentenceScore]:
@@ -266,12 +279,14 @@ class TextSummarizer:
                     if word_score > freq_dist.get(max(freq_dist, key=freq_dist.get), 0) * 0.5:
                         keywords.append(word)
 
-            scored.append(SentenceScore(
-                sentence=sentence,
-                score=score / max(len(sentence.split()), 1),  # Normalize by length
-                order=idx,
-                keywords=keywords
-            ))
+            scored.append(
+                SentenceScore(
+                    sentence=sentence,
+                    score=score / max(len(sentence.split()), 1),  # Normalize by length
+                    order=idx,
+                    keywords=keywords,
+                )
+            )
 
         # Sort by score
         scored.sort(key=lambda x: x.score, reverse=True)
@@ -308,8 +323,9 @@ class TextSummarizer:
         # Common themes appear in multiple documents
         return [word for word, count in freq.most_common(5) if count > 1]
 
-    def _generate_from_keywords(self, keywords: list[str], sentences: list[str],
-                               ratio: float) -> str:
+    def _generate_from_keywords(
+        self, keywords: list[str], sentences: list[str], ratio: float
+    ) -> str:
         """Generate abstractive summary from keywords."""
         # Select sentences containing most keywords
         keyword_set = set(keywords)
@@ -333,8 +349,7 @@ class TextSummarizer:
 
         return " ".join(s[1] for s in selected)
 
-    def _calculate_summary_score(self, original: list[str],
-                                selected: list[SentenceScore]) -> float:
+    def _calculate_summary_score(self, original: list[str], selected: list[SentenceScore]) -> float:
         """Calculate quality score of summary."""
         if not original:
             return 0.0
@@ -375,7 +390,7 @@ class TextSummarizer:
                 pass
 
         # Fallback: simple split on periods
-        sentences = text.split('.')
+        sentences = text.split(".")
         return [s.strip() for s in sentences if s.strip()]
 
     def _tokenize(self, text: str) -> list[str]:
@@ -388,22 +403,74 @@ class TextSummarizer:
 
         # Fallback: simple split
         import re
-        return re.findall(r'\b\w+\b', text.lower())
+
+        return re.findall(r"\b\w+\b", text.lower())
 
     def _get_basic_stopwords(self) -> set:
         """Get basic set of stopwords if NLTK not available."""
         return {
-            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-            'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'be',
-            'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should',
-            'could', 'may', 'might', 'can', 'this', 'that', 'these', 'those',
-            'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who',
-            'when', 'where', 'why', 'how'
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "from",
+            "as",
+            "is",
+            "was",
+            "are",
+            "were",
+            "be",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "should",
+            "could",
+            "may",
+            "might",
+            "can",
+            "this",
+            "that",
+            "these",
+            "those",
+            "i",
+            "you",
+            "he",
+            "she",
+            "it",
+            "we",
+            "they",
+            "what",
+            "which",
+            "who",
+            "when",
+            "where",
+            "why",
+            "how",
         }
 
-    def _create_summary_from_sentences(self, text: str, original: list[str],
-                                       summary_sentences: list[str],
-                                       ratio: float, summary_type: SummarizationType) -> Summary:
+    def _create_summary_from_sentences(
+        self,
+        text: str,
+        original: list[str],
+        summary_sentences: list[str],
+        ratio: float,
+        summary_type: SummarizationType,
+    ) -> Summary:
         """Helper to create Summary object."""
         summary_text = " ".join(summary_sentences)
         keywords = self._extract_keywords(text, top_n=10)
@@ -417,7 +484,7 @@ class TextSummarizer:
             num_sentences_summary=len(summary_sentences),
             key_sentences=[],
             keywords=keywords,
-            score=0.6
+            score=0.6,
         )
 
     def _create_empty_summary(self, text: str) -> Summary:
@@ -431,5 +498,5 @@ class TextSummarizer:
             num_sentences_summary=0,
             key_sentences=[],
             keywords=[],
-            score=0.0
+            score=0.0,
         )

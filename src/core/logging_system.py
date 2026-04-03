@@ -30,6 +30,7 @@ _context: ContextVar[dict[str, Any]] = ContextVar("logging_context", default={})
 
 class LogLevel(Enum):
     """Log severity levels."""
+
     DEBUG = logging.DEBUG
     INFO = logging.INFO
     WARNING = logging.WARNING
@@ -202,7 +203,7 @@ class StructuredLogger:
             lno=0,
             msg=message,
             args=(),
-            exc_info=None if not exc_info else True
+            exc_info=None if not exc_info else True,
         )
 
         # Attach extra fields
@@ -292,9 +293,7 @@ class LogManager:
         # File handler with rotation
         log_path = Path(log_dir) / log_file
         file_handler = logging.handlers.RotatingFileHandler(
-            log_path,
-            maxBytes=rotate_size_mb * 1024 * 1024,
-            backupCount=backup_count
+            log_path, maxBytes=rotate_size_mb * 1024 * 1024, backupCount=backup_count
         )
         file_handler.setLevel(level)
         file_handler.setFormatter(formatter)

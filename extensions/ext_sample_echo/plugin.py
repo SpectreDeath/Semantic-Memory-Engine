@@ -10,11 +10,13 @@ from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.ForensicEcho")
 
+
 class ForensicEchoExtension(BasePlugin):
     """
     Migrated Forensic Echo Extension (v1.1.1).
     Standard Boilerplate for Lawnmower Man Extensions.
     """
+
     def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
 
@@ -42,7 +44,7 @@ class ForensicEchoExtension(BasePlugin):
             "size_bytes": stats.st_size,
             "created": datetime.fromtimestamp(stats.st_ctime).isoformat(),
             "modified": datetime.fromtimestamp(stats.st_mtime).isoformat(),
-            "plugin": "Forensic Echo v1.1.1"
+            "plugin": "Forensic Echo v1.1.1",
         }
 
         # NexusAPI: use nexus_api.get_hsm() — no gateway imports
@@ -55,6 +57,7 @@ class ForensicEchoExtension(BasePlugin):
         metadata["integrity_status"] = "Hardware-Signed"
 
         return json.dumps(metadata, indent=2)
+
 
 def register_extension(manifest: dict[str, Any], nexus_api: Any):
     return ForensicEchoExtension(manifest, nexus_api)

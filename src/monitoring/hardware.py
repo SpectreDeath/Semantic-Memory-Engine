@@ -4,6 +4,7 @@ from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("BasementMonitor")
 
+
 @mcp.tool()
 def get_thermal_stats() -> str:
     """Checks the laptop health in the cold basement."""
@@ -29,6 +30,7 @@ def get_thermal_stats() -> str:
         gpu_info = "GPU: Error accessing NVML"
 
     return f"--- HARDWARE STATUS ---\nCPU: {cpu}%\n{gpu_info}"
+
 
 if __name__ == "__main__":
     mcp.run()

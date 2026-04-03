@@ -14,7 +14,4 @@ class MockProvider(SMEAIProvider):
         return f"[MOCK AI RESULT] Flow: {flow_name} | Input: {input_data}"
 
     def get_metadata(self) -> dict[str, Any]:
-        return {
-            "provider": "Mock",
-            "status": "simulated"
-        }
+        return {"provider": "Mock", "status": "simulated"}

@@ -1,4 +1,4 @@
-'''
+"""
 MIT License
 
 Copyright (c) 2023 Fast Data Science Ltd (https://fastdatascience.com)
@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-'''
+"""
 
 import numpy as np
 import pandas as pd
@@ -58,9 +58,14 @@ def get_calibration_curve(corpus: Corpus) -> tuple:
     num_books = len(corpus.authors)
 
     for i in range(num_books):
-        tmp_train_corpus = Corpus(every_item_but_one(corpus.authors, i), every_item_but_one(corpus.books, i),
-                                  every_item_but_one(corpus.tokens, i))
-        tmp_test_corpus = Corpus(corpus.authors[i:i + 1], corpus.books[i:i + 1], corpus.tokens[i:i + 1])
+        tmp_train_corpus = Corpus(
+            every_item_but_one(corpus.authors, i),
+            every_item_but_one(corpus.books, i),
+            every_item_but_one(corpus.tokens, i),
+        )
+        tmp_test_corpus = Corpus(
+            corpus.authors[i : i + 1], corpus.books[i : i + 1], corpus.tokens[i : i + 1]
+        )
 
         true_author = tmp_test_corpus.authors[0]
 
@@ -72,7 +77,7 @@ def get_calibration_curve(corpus: Corpus) -> tuple:
     return np.asarray(ground_truths), np.asarray(delta_values)
 
 
-def calibrate(corpus: Corpus, model = LogisticRegression(class_weight="balanced")):
+def calibrate(corpus: Corpus, model=LogisticRegression(class_weight="balanced")):
     ground_truths, delta_values = get_calibration_curve(corpus)
 
     model.fit(np.reshape(delta_values, (-1, 1)), ground_truths)
@@ -93,8 +98,8 @@ def predict_proba(train_corpus: Corpus, test_corpus: Corpus) -> pd.DataFrame:
     df_probas = pd.DataFrame()
     for test_author_idx in range(df_delta.shape[1]):
         values = train_corpus.probability_model.predict_proba(
-            np.reshape(list(df_delta.iloc[:, test_author_idx]), (-1, 1)))[:,
-                 1]
+            np.reshape(list(df_delta.iloc[:, test_author_idx]), (-1, 1))
+        )[:, 1]
         df_probas[df_delta.columns[test_author_idx]] = list(values)
 
     df_probas.index = df_delta.index

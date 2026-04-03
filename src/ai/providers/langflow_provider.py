@@ -22,6 +22,7 @@ class LangflowProvider(SMEAIProvider):
         if flow_name == "concept_lookup":
             # This is a bit of a leak, but keeps current logic working
             from src.ai.tools.conceptnet import format_concept_summary, get_concept_with_cache
+
             results = get_concept_with_cache(input_data)
             return format_concept_summary(results)
 
@@ -39,8 +40,4 @@ class LangflowProvider(SMEAIProvider):
         return str(result)
 
     def get_metadata(self) -> dict[str, Any]:
-        return {
-            "provider": "Langflow",
-            "flows_directory": self.flows_dir,
-            "status": "active"
-        }
+        return {"provider": "Langflow", "flows_directory": self.flows_dir, "status": "active"}

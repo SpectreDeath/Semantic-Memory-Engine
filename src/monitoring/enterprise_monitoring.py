@@ -24,22 +24,28 @@ import requests
 
 logger = logging.getLogger("SME.EnterpriseMonitoring")
 
+
 class AlertSeverity(Enum):
     """Alert severity levels."""
+
     INFO = "INFO"
     WARNING = "WARNING"
     CRITICAL = "CRITICAL"
     EMERGENCY = "EMERGENCY"
 
+
 class AlertStatus(Enum):
     """Alert status."""
+
     ACTIVE = "ACTIVE"
     ACKNOWLEDGED = "ACKNOWLEDGED"
     RESOLVED = "RESOLVED"
 
+
 @dataclass
 class Alert:
     """Enterprise alert data structure."""
+
     alert_id: str
     title: str
     description: str
@@ -56,27 +62,32 @@ class Alert:
     resolved_at: datetime | None = None
     metadata: dict[str, Any] = None
 
+
 @dataclass
 class MetricThreshold:
     """Metric threshold configuration."""
+
     metric_type: str
     extension_id: str | None
     warning_threshold: float | None
     critical_threshold: float | None
     emergency_threshold: float | None
     evaluation_window: int  # seconds
-    cooldown_period: int    # seconds between alerts
+    cooldown_period: int  # seconds between alerts
+
 
 @dataclass
 class DashboardWidget:
     """Dashboard widget configuration."""
+
     widget_id: str
     title: str
     widget_type: str  # LINE_CHART, BAR_CHART, GAUGE, TABLE, etc.
     metrics: list[str]
-    time_range: str   # LAST_HOUR, LAST_24H, LAST_7D, etc.
+    time_range: str  # LAST_HOUR, LAST_24H, LAST_7D, etc.
     refresh_interval: int  # seconds
     position: dict[str, int]  # x, y, width, height
+
 
 class EnterpriseMonitoringSystem:
     """
@@ -99,18 +110,18 @@ class EnterpriseMonitoringSystem:
 
         # Configuration
         self.config = {
-            'alert_retention_hours': 168,  # 7 days
-            'metrics_retention_hours': 72,  # 3 days
-            'dashboard_refresh_interval': 30,  # seconds
-            'alert_cooldown_minutes': 5,
-            'enable_email_notifications': False,
-            'enable_webhook_notifications': False,
-            'email_smtp_server': '',
-            'email_smtp_port': 587,
-            'email_username': '',
-            'email_password': '',
-            'webhook_url': '',
-            'webhook_timeout': 10
+            "alert_retention_hours": 168,  # 7 days
+            "metrics_retention_hours": 72,  # 3 days
+            "dashboard_refresh_interval": 30,  # seconds
+            "alert_cooldown_minutes": 5,
+            "enable_email_notifications": False,
+            "enable_webhook_notifications": False,
+            "email_smtp_server": "",
+            "email_smtp_port": 587,
+            "email_username": "",
+            "email_password": "",
+            "webhook_url": "",
+            "webhook_timeout": 10,
         }
 
         # Default thresholds
@@ -156,67 +167,68 @@ class EnterpriseMonitoringSystem:
         """Setup default metric thresholds."""
         default_thresholds = [
             MetricThreshold(
-                metric_type='response_time',
+                metric_type="response_time",
                 extension_id=None,
                 warning_threshold=1.0,
                 critical_threshold=3.0,
                 emergency_threshold=10.0,
                 evaluation_window=300,  # 5 minutes
-                cooldown_period=300     # 5 minutes
+                cooldown_period=300,  # 5 minutes
             ),
             MetricThreshold(
-                metric_type='error_rate',
+                metric_type="error_rate",
                 extension_id=None,
                 warning_threshold=0.05,  # 5%
                 critical_threshold=0.15,  # 15%
                 emergency_threshold=0.30,  # 30%
                 evaluation_window=300,
-                cooldown_period=600      # 10 minutes
+                cooldown_period=600,  # 10 minutes
             ),
             MetricThreshold(
-                metric_type='cpu_usage',
+                metric_type="cpu_usage",
                 extension_id=None,
                 warning_threshold=70.0,  # 70%
                 critical_threshold=85.0,  # 85%
                 emergency_threshold=95.0,  # 95%
                 evaluation_window=120,  # 2 minutes
-                cooldown_period=180     # 3 minutes
+                cooldown_period=180,  # 3 minutes
             ),
             MetricThreshold(
-                metric_type='memory_usage',
+                metric_type="memory_usage",
                 extension_id=None,
                 warning_threshold=75.0,  # 75%
                 critical_threshold=90.0,  # 90%
                 emergency_threshold=95.0,  # 95%
                 evaluation_window=120,
-                cooldown_period=180
+                cooldown_period=180,
             ),
             MetricThreshold(
-                metric_type='disk_usage',
+                metric_type="disk_usage",
                 extension_id=None,
                 warning_threshold=80.0,  # 80%
                 critical_threshold=90.0,  # 90%
                 emergency_threshold=95.0,  # 95%
                 evaluation_window=300,
-                cooldown_period=600
-            )
+                cooldown_period=600,
+            ),
         ]
 
         self.thresholds.extend(default_thresholds)
         logger.info(f"Setup {len(default_thresholds)} default thresholds")
 
-    def add_metric(self, extension_id: str, metric_type: str, value: float,
-                   timestamp: datetime | None = None):
+    def add_metric(
+        self, extension_id: str, metric_type: str, value: float, timestamp: datetime | None = None
+    ):
         """Add a metric value for monitoring."""
         if timestamp is None:
             timestamp = datetime.now()
 
         metric_key = f"{extension_id}:{metric_type}"
         metric_data = {
-            'timestamp': timestamp,
-            'value': value,
-            'extension_id': extension_id,
-            'metric_type': metric_type
+            "timestamp": timestamp,
+            "value": value,
+            "extension_id": extension_id,
+            "metric_type": metric_type,
         }
 
         self.metrics_buffer[metric_key].append(metric_data)
@@ -236,29 +248,30 @@ class EnterpriseMonitoringSystem:
 
             # Get recent metrics within evaluation window
             recent_metrics = [
-                m for m in self.metrics_buffer[metric_key]
-                if current_time - m['timestamp'] <= timedelta(seconds=threshold.evaluation_window)
+                m
+                for m in self.metrics_buffer[metric_key]
+                if current_time - m["timestamp"] <= timedelta(seconds=threshold.evaluation_window)
             ]
 
             if not recent_metrics:
                 continue
 
             # Calculate average value over evaluation window
-            avg_value = sum(m['value'] for m in recent_metrics) / len(recent_metrics)
+            avg_value = sum(m["value"] for m in recent_metrics) / len(recent_metrics)
 
             # Check thresholds
             self._check_threshold_violation(threshold, avg_value, current_time)
 
     def _evaluate_metric_thresholds(self, metric_key: str, metric_data: dict[str, Any]):
         """Evaluate thresholds for a specific metric in real-time."""
-        current_time = metric_data['timestamp']
+        current_time = metric_data["timestamp"]
 
         for threshold in self.thresholds:
             # Check if this threshold applies to this metric
-            if threshold.metric_type != metric_data['metric_type']:
+            if threshold.metric_type != metric_data["metric_type"]:
                 continue
 
-            if threshold.extension_id and threshold.extension_id != metric_data['extension_id']:
+            if threshold.extension_id and threshold.extension_id != metric_data["extension_id"]:
                 continue
 
             # Check if we're in cooldown period
@@ -266,9 +279,11 @@ class EnterpriseMonitoringSystem:
                 continue
 
             # Check threshold violation
-            self._check_threshold_violation(threshold, metric_data['value'], current_time)
+            self._check_threshold_violation(threshold, metric_data["value"], current_time)
 
-    def _check_threshold_violation(self, threshold: MetricThreshold, value: float, timestamp: datetime):
+    def _check_threshold_violation(
+        self, threshold: MetricThreshold, value: float, timestamp: datetime
+    ):
         """Check if a threshold violation has occurred."""
         severity = None
 
@@ -287,16 +302,18 @@ class EnterpriseMonitoringSystem:
 
         # Check recent alerts for this threshold
         recent_alerts = [
-            alert for alert in self.alerts.values()
-            if (alert.extension_id == threshold.extension_id or alert.extension_id is None) and
-               alert.metric_type == threshold.metric_type and
-               current_time - alert.timestamp <= timedelta(seconds=threshold.cooldown_period)
+            alert
+            for alert in self.alerts.values()
+            if (alert.extension_id == threshold.extension_id or alert.extension_id is None)
+            and alert.metric_type == threshold.metric_type
+            and current_time - alert.timestamp <= timedelta(seconds=threshold.cooldown_period)
         ]
 
         return len(recent_alerts) > 0
 
-    def _create_alert(self, threshold: MetricThreshold, value: float,
-                     severity: AlertSeverity, timestamp: datetime):
+    def _create_alert(
+        self, threshold: MetricThreshold, value: float, severity: AlertSeverity, timestamp: datetime
+    ):
         """Create a new alert."""
         alert_id = f"{threshold.metric_type}_{threshold.extension_id or 'GLOBAL'}_{int(timestamp.timestamp())}"
 
@@ -304,7 +321,7 @@ class EnterpriseMonitoringSystem:
             alert_id=alert_id,
             title=f"{severity.value} Alert: {threshold.metric_type}",
             description=f"Threshold violation for {threshold.metric_type} on {threshold.extension_id or 'GLOBAL'}. "
-                       f"Value: {value:.2f}, Threshold: {self._get_threshold_value(threshold, severity):.2f}",
+            f"Value: {value:.2f}, Threshold: {self._get_threshold_value(threshold, severity):.2f}",
             severity=severity,
             status=AlertStatus.ACTIVE,
             extension_id=threshold.extension_id,
@@ -313,10 +330,10 @@ class EnterpriseMonitoringSystem:
             threshold=self._get_threshold_value(threshold, severity),
             timestamp=timestamp,
             metadata={
-                'threshold_config': asdict(threshold),
-                'evaluation_window': threshold.evaluation_window,
-                'cooldown_period': threshold.cooldown_period
-            }
+                "threshold_config": asdict(threshold),
+                "evaluation_window": threshold.evaluation_window,
+                "cooldown_period": threshold.cooldown_period,
+            },
         )
 
         self.alerts[alert_id] = alert
@@ -343,7 +360,7 @@ class EnterpriseMonitoringSystem:
     def _trigger_alert_callbacks(self, alert: Alert):
         """Trigger registered callbacks for an alert."""
         # Trigger global callbacks
-        for callback in self.alert_callbacks.get('*', []):
+        for callback in self.alert_callbacks.get("*", []):
             try:
                 callback(alert)
             except Exception as e:
@@ -359,18 +376,20 @@ class EnterpriseMonitoringSystem:
 
     def _send_notifications(self, alert: Alert):
         """Send notifications for an alert."""
-        if not self.config.get('enable_email_notifications') and not self.config.get('enable_webhook_notifications'):
+        if not self.config.get("enable_email_notifications") and not self.config.get(
+            "enable_webhook_notifications"
+        ):
             return
 
         # Prepare notification message
         message = self._format_alert_message(alert)
 
         # Send email notifications
-        if self.config.get('enable_email_notifications'):
+        if self.config.get("enable_email_notifications"):
             self._send_email_notification(alert, message)
 
         # Send webhook notifications
-        if self.config.get('enable_webhook_notifications'):
+        if self.config.get("enable_webhook_notifications"):
             self._send_webhook_notification(alert, message)
 
     def _format_alert_message(self, alert: Alert) -> str:
@@ -379,11 +398,11 @@ class EnterpriseMonitoringSystem:
 ALERT: {alert.severity.value} - {alert.title}
 
 Description: {alert.description}
-Extension: {alert.extension_id or 'GLOBAL'}
+Extension: {alert.extension_id or "GLOBAL"}
 Metric: {alert.metric_type}
 Value: {alert.value:.2f}
 Threshold: {alert.threshold:.2f}
-Time: {alert.timestamp.strftime('%Y-%m-%d %H:%M:%S')}
+Time: {alert.timestamp.strftime("%Y-%m-%d %H:%M:%S")}
 
 Status: {alert.status.value}
 Alert ID: {alert.alert_id}
@@ -392,10 +411,10 @@ Alert ID: {alert.alert_id}
     def _send_email_notification(self, alert: Alert, message: str):
         """Send email notification for an alert."""
         try:
-            smtp_server = self.config.get('email_smtp_server')
-            smtp_port = self.config.get('email_smtp_port', 587)
-            username = self.config.get('email_username')
-            password = self.config.get('email_password')
+            smtp_server = self.config.get("email_smtp_server")
+            smtp_port = self.config.get("email_smtp_port", 587)
+            username = self.config.get("email_username")
+            password = self.config.get("email_password")
 
             if not all([smtp_server, username, password]):
                 logger.warning("Email notification skipped: missing configuration")
@@ -403,11 +422,11 @@ Alert ID: {alert.alert_id}
 
             # Create message
             msg = MIMEMultipart()
-            msg['From'] = username
-            msg['To'] = self.config.get('email_recipients', username)
-            msg['Subject'] = f"[{alert.severity.value}] {alert.title}"
+            msg["From"] = username
+            msg["To"] = self.config.get("email_recipients", username)
+            msg["Subject"] = f"[{alert.severity.value}] {alert.title}"
 
-            msg.attach(MIMEText(message, 'plain'))
+            msg.attach(MIMEText(message, "plain"))
 
             # Send email
             with smtplib.SMTP(smtp_server, smtp_port) as server:
@@ -423,24 +442,24 @@ Alert ID: {alert.alert_id}
     def _send_webhook_notification(self, alert: Alert, message: str):
         """Send webhook notification for an alert."""
         try:
-            webhook_url = self.config.get('webhook_url')
-            timeout = self.config.get('webhook_timeout', 10)
+            webhook_url = self.config.get("webhook_url")
+            timeout = self.config.get("webhook_timeout", 10)
 
             if not webhook_url:
                 logger.warning("Webhook notification skipped: missing URL")
                 return
 
             payload = {
-                'alert_id': alert.alert_id,
-                'severity': alert.severity.value,
-                'title': alert.title,
-                'description': alert.description,
-                'extension_id': alert.extension_id,
-                'metric_type': alert.metric_type,
-                'value': alert.value,
-                'threshold': alert.threshold,
-                'timestamp': alert.timestamp.isoformat(),
-                'status': alert.status.value
+                "alert_id": alert.alert_id,
+                "severity": alert.severity.value,
+                "title": alert.title,
+                "description": alert.description,
+                "extension_id": alert.extension_id,
+                "metric_type": alert.metric_type,
+                "value": alert.value,
+                "threshold": alert.threshold,
+                "timestamp": alert.timestamp.isoformat(),
+                "status": alert.status.value,
             }
 
             response = requests.post(webhook_url, json=payload, timeout=timeout)
@@ -471,43 +490,46 @@ Alert ID: {alert.alert_id}
 
             logger.info(f"Alert {alert_id} resolved by {resolved_by}")
 
-    def get_active_alerts(self, extension_id: str | None = None,
-                         severity: AlertSeverity | None = None) -> list[Alert]:
+    def get_active_alerts(
+        self, extension_id: str | None = None, severity: AlertSeverity | None = None
+    ) -> list[Alert]:
         """Get active alerts."""
-        active_alerts = [alert for alert in self.alerts.values()
-                        if alert.status == AlertStatus.ACTIVE]
+        active_alerts = [
+            alert for alert in self.alerts.values() if alert.status == AlertStatus.ACTIVE
+        ]
 
         if extension_id:
-            active_alerts = [alert for alert in active_alerts
-                           if alert.extension_id == extension_id]
+            active_alerts = [alert for alert in active_alerts if alert.extension_id == extension_id]
 
         if severity:
-            active_alerts = [alert for alert in active_alerts
-                           if alert.severity == severity]
+            active_alerts = [alert for alert in active_alerts if alert.severity == severity]
 
         return sorted(active_alerts, key=lambda x: x.timestamp, reverse=True)
 
     def get_alert_history(self, hours: int = 24, extension_id: str | None = None) -> list[Alert]:
         """Get alert history."""
         cutoff_time = datetime.now() - timedelta(hours=hours)
-        history = [alert for alert in self.alert_history
-                  if alert.timestamp >= cutoff_time]
+        history = [alert for alert in self.alert_history if alert.timestamp >= cutoff_time]
 
         if extension_id:
-            history = [alert for alert in history
-                      if alert.extension_id == extension_id]
+            history = [alert for alert in history if alert.extension_id == extension_id]
 
         return sorted(history, key=lambda x: x.timestamp, reverse=True)
 
     def add_threshold(self, threshold: MetricThreshold):
         """Add a new metric threshold."""
         self.thresholds.append(threshold)
-        logger.info(f"Added threshold for {threshold.metric_type} on {threshold.extension_id or 'GLOBAL'}")
+        logger.info(
+            f"Added threshold for {threshold.metric_type} on {threshold.extension_id or 'GLOBAL'}"
+        )
 
     def remove_threshold(self, metric_type: str, extension_id: str | None = None):
         """Remove a metric threshold."""
-        self.thresholds = [t for t in self.thresholds
-                          if not (t.metric_type == metric_type and t.extension_id == extension_id)]
+        self.thresholds = [
+            t
+            for t in self.thresholds
+            if not (t.metric_type == metric_type and t.extension_id == extension_id)
+        ]
         logger.info(f"Removed threshold for {metric_type} on {extension_id or 'GLOBAL'}")
 
     def add_alert_callback(self, extension_id: str, callback: Callable[[Alert], None]):
@@ -519,8 +541,7 @@ Alert ID: {alert.alert_id}
         """Remove an alert callback for an extension."""
         if extension_id in self.alert_callbacks:
             self.alert_callbacks[extension_id] = [
-                cb for cb in self.alert_callbacks[extension_id]
-                if cb != callback
+                cb for cb in self.alert_callbacks[extension_id] if cb != callback
             ]
         logger.info(f"Removed alert callback for {extension_id}")
 
@@ -531,22 +552,26 @@ Alert ID: {alert.alert_id}
 
     def _cleanup_old_data(self):
         """Clean up old metrics and resolved alerts."""
-        cutoff_time = datetime.now() - timedelta(hours=self.config['metrics_retention_hours'])
+        cutoff_time = datetime.now() - timedelta(hours=self.config["metrics_retention_hours"])
 
         # Clean up old metrics
         for metric_key, buffer in self.metrics_buffer.items():
-            self.metrics_buffer[metric_key] = deque([
-                m for m in buffer if m['timestamp'] >= cutoff_time
-            ], maxlen=1000)
+            self.metrics_buffer[metric_key] = deque(
+                [m for m in buffer if m["timestamp"] >= cutoff_time], maxlen=1000
+            )
 
         # Clean up old resolved alerts
-        cutoff_time = datetime.now() - timedelta(hours=self.config['alert_retention_hours'])
-        self.alert_history = [alert for alert in self.alert_history
-                             if alert.timestamp >= cutoff_time or alert.status != AlertStatus.RESOLVED]
+        cutoff_time = datetime.now() - timedelta(hours=self.config["alert_retention_hours"])
+        self.alert_history = [
+            alert
+            for alert in self.alert_history
+            if alert.timestamp >= cutoff_time or alert.status != AlertStatus.RESOLVED
+        ]
 
         # Clean up old active alerts (shouldn't happen, but just in case)
-        self.alerts = {aid: alert for aid, alert in self.alerts.items()
-                      if alert.timestamp >= cutoff_time}
+        self.alerts = {
+            aid: alert for aid, alert in self.alerts.items() if alert.timestamp >= cutoff_time
+        }
 
     def _start_dashboard_updates(self):
         """Start dashboard update process."""
@@ -554,7 +579,7 @@ Alert ID: {alert.alert_id}
         # For now, just log that dashboard updates are ready
         logger.info("Dashboard updates ready")
 
-    def get_dashboard_data(self, dashboard_id: str = 'main') -> dict[str, Any]:
+    def get_dashboard_data(self, dashboard_id: str = "main") -> dict[str, Any]:
         """Get dashboard data for the main dashboard."""
         current_time = datetime.now()
 
@@ -562,31 +587,38 @@ Alert ID: {alert.alert_id}
         recent_metrics = {}
         for metric_key, buffer in self.metrics_buffer.items():
             recent_metrics[metric_key] = [
-                {'timestamp': m['timestamp'].isoformat(), 'value': m['value']}
+                {"timestamp": m["timestamp"].isoformat(), "value": m["value"]}
                 for m in list(buffer)[-100:]  # Last 100 data points
             ]
 
         # Get alert summary
         alert_summary = {
-            'total_active': len([a for a in self.alerts.values() if a.status == AlertStatus.ACTIVE]),
-            'by_severity': {
-                severity.value: len([a for a in self.alerts.values()
-                                   if a.status == AlertStatus.ACTIVE and a.severity == severity])
+            "total_active": len(
+                [a for a in self.alerts.values() if a.status == AlertStatus.ACTIVE]
+            ),
+            "by_severity": {
+                severity.value: len(
+                    [
+                        a
+                        for a in self.alerts.values()
+                        if a.status == AlertStatus.ACTIVE and a.severity == severity
+                    ]
+                )
                 for severity in AlertSeverity
             },
-            'by_extension': defaultdict(int)
+            "by_extension": defaultdict(int),
         }
 
         for alert in self.alerts.values():
             if alert.status == AlertStatus.ACTIVE and alert.extension_id:
-                alert_summary['by_extension'][alert.extension_id] += 1
+                alert_summary["by_extension"][alert.extension_id] += 1
 
         return {
-            'timestamp': current_time.isoformat(),
-            'metrics': recent_metrics,
-            'alerts': alert_summary,
-            'system_status': self._get_system_status(),
-            'performance_metrics': self._get_performance_metrics()
+            "timestamp": current_time.isoformat(),
+            "metrics": recent_metrics,
+            "alerts": alert_summary,
+            "system_status": self._get_system_status(),
+            "performance_metrics": self._get_performance_metrics(),
         }
 
     def _get_system_status(self) -> dict[str, Any]:
@@ -601,9 +633,9 @@ Alert ID: {alert.alert_id}
             status = "HEALTHY"
 
         return {
-            'status': status,
-            'active_alerts': len(active_alerts),
-            'last_check': datetime.now().isoformat()
+            "status": status,
+            "active_alerts": len(active_alerts),
+            "last_check": datetime.now().isoformat(),
         }
 
     def _get_performance_metrics(self) -> dict[str, Any]:
@@ -616,30 +648,33 @@ Alert ID: {alert.alert_id}
         error_rates = []
 
         for metric_key, buffer in self.metrics_buffer.items():
-            if 'response_time' in metric_key:
-                response_times.extend([m['value'] for m in buffer])
-            elif 'error_rate' in metric_key:
-                error_rates.extend([m['value'] for m in buffer])
+            if "response_time" in metric_key:
+                response_times.extend([m["value"] for m in buffer])
+            elif "error_rate" in metric_key:
+                error_rates.extend([m["value"] for m in buffer])
 
         return {
-            'avg_response_time': sum(response_times) / len(response_times) if response_times else 0.0,
-            'avg_error_rate': sum(error_rates) / len(error_rates) if error_rates else 0.0,
-            'total_metrics': sum(len(buffer) for buffer in self.metrics_buffer.values()),
-            'active_extensions': len({m['extension_id'] for buffer in self.metrics_buffer.values()
-                                       for m in buffer})
+            "avg_response_time": sum(response_times) / len(response_times)
+            if response_times
+            else 0.0,
+            "avg_error_rate": sum(error_rates) / len(error_rates) if error_rates else 0.0,
+            "total_metrics": sum(len(buffer) for buffer in self.metrics_buffer.values()),
+            "active_extensions": len(
+                {m["extension_id"] for buffer in self.metrics_buffer.values() for m in buffer}
+            ),
         }
 
     def export_monitoring_data(self) -> dict[str, Any]:
         """Export monitoring system data."""
         return {
-            'config': self.config,
-            'thresholds': [asdict(t) for t in self.thresholds],
-            'active_alerts_count': len(self.alerts),
-            'alert_history_count': len(self.alert_history),
-            'metrics_buffers': {k: len(v) for k, v in self.metrics_buffer.items()},
-            'alert_callbacks': {k: len(v) for k, v in self.alert_callbacks.items()},
-            'monitoring_status': 'ACTIVE' if self.monitoring_active else 'INACTIVE',
-            'last_updated': datetime.now().isoformat()
+            "config": self.config,
+            "thresholds": [asdict(t) for t in self.thresholds],
+            "active_alerts_count": len(self.alerts),
+            "alert_history_count": len(self.alert_history),
+            "metrics_buffers": {k: len(v) for k, v in self.metrics_buffer.items()},
+            "alert_callbacks": {k: len(v) for k, v in self.alert_callbacks.items()},
+            "monitoring_status": "ACTIVE" if self.monitoring_active else "INACTIVE",
+            "last_updated": datetime.now().isoformat(),
         }
 
 

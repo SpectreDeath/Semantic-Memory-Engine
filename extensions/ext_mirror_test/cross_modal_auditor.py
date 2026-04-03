@@ -30,19 +30,21 @@ try:
     from transformers import CLIPModel, CLIPProcessor
 except ImportError as e:
     print(f"⚠️  Missing dependencies for Cross-Modal Auditor: {e}")
-    print("Please install required packages: pip install torch torchvision transformers pillow nltk")
+    print(
+        "Please install required packages: pip install torch torchvision transformers pillow nltk"
+    )
 
 
 # Configure logging for the cross-modal auditor
-logger = logging.getLogger('mirror_test.cross_modal_auditor')
+logger = logging.getLogger("mirror_test.cross_modal_auditor")
 logger.setLevel(logging.INFO)
 
 # Create file handler for cross-modal audit events
-audit_handler = logging.FileHandler('cross_modal_audit_events.log')
+audit_handler = logging.FileHandler("cross_modal_audit_events.log")
 audit_handler.setLevel(logging.INFO)
 
 # Create formatter and add it to handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 audit_handler.setFormatter(formatter)
 
 # Add handler to logger
@@ -52,15 +54,16 @@ logger.addHandler(audit_handler)
 @dataclass
 class AuditResult:
     """Result of cross-modal synchronization audit."""
+
     __slots__ = [
-        'detected_keywords',
-        'hallucination_detected',
-        'image_features',
-        'missing_keywords',
-        'severity',
-        'sync_score',
-        'text_features',
-        'timestamp'
+        "detected_keywords",
+        "hallucination_detected",
+        "image_features",
+        "missing_keywords",
+        "severity",
+        "sync_score",
+        "text_features",
+        "timestamp",
     ]
 
     sync_score: float
@@ -91,13 +94,13 @@ class CrossModalAuditor:
 
         # Initialize NLTK resources
         try:
-            nltk.download('punkt', quiet=True)
-            nltk.download('averaged_perceptron_tagger', quiet=True)
-            nltk.download('stopwords', quiet=True)
+            nltk.download("punkt", quiet=True)
+            nltk.download("averaged_perceptron_tagger", quiet=True)
+            nltk.download("stopwords", quiet=True)
         except Exception as e:
             print(f"⚠️  Warning: Could not download NLTK resources: {e}")
 
-        self.stop_words = set(stopwords.words('english'))
+        self.stop_words = set(stopwords.words("english"))
 
     def _initialize_model(self) -> bool:
         """Initialize the CLIP model and processor."""
@@ -148,21 +151,21 @@ class CrossModalAuditor:
                     continue
 
                 # Nouns: NN, NNS, NNP, NNPS
-                if pos.startswith('NN'):
+                if pos.startswith("NN"):
                     nouns.append(word)
                 # Adjectives: JJ, JJR, JJS
-                elif pos.startswith('JJ'):
+                elif pos.startswith("JJ"):
                     adjectives.append(word)
 
             return {
-                'nouns': list(set(nouns)),  # Remove duplicates
-                'adjectives': list(set(adjectives))
+                "nouns": list(set(nouns)),  # Remove duplicates
+                "adjectives": list(set(adjectives)),
             }
 
         except Exception as e:
             print(f"⚠️  Warning: Failed to extract keywords: {e}")
             logger.warning(f"Keyword extraction failed: {e}")
-            return {'nouns': [], 'adjectives': []}
+            return {"nouns": [], "adjectives": []}
 
     def _preprocess_image(self, image_path: str) -> torch.Tensor | None:
         """
@@ -180,15 +183,16 @@ class CrossModalAuditor:
 
             # Preprocess with CLIP processor
             inputs = self.processor(images=image, return_tensors="pt")
-            return inputs['pixel_values'].to(self.device)
+            return inputs["pixel_values"].to(self.device)
 
         except Exception as e:
             print(f"❌ Failed to process image {image_path}: {e}")
             logger.exception(f"Image preprocessing failed: {e}")
             return None
 
-    def _calculate_similarity(self, image_features: torch.Tensor,
-                            text_features: torch.Tensor) -> float:
+    def _calculate_similarity(
+        self, image_features: torch.Tensor, text_features: torch.Tensor
+    ) -> float:
         """
         Calculate cosine similarity between image and text features.
 
@@ -222,27 +226,30 @@ class CrossModalAuditor:
         test_prompts = []
 
         # Base prompt with all nouns
-        if keywords['nouns']:
+        if keywords["nouns"]:
             base_prompt = f"A photo of {', '.join(keywords['nouns'])}"
             test_prompts.append(base_prompt)
 
         # Prompts with adjectives
-        if keywords['adjectives'] and keywords['nouns']:
-            adj_prompt = f"A {', '.join(keywords['adjectives'])} photo of {', '.join(keywords['nouns'])}"
+        if keywords["adjectives"] and keywords["nouns"]:
+            adj_prompt = (
+                f"A {', '.join(keywords['adjectives'])} photo of {', '.join(keywords['nouns'])}"
+            )
             test_prompts.append(adj_prompt)
 
         # Individual noun prompts
-        for noun in keywords['nouns']:
+        for noun in keywords["nouns"]:
             test_prompts.append(f"A photo of {noun}")
 
         # Individual adjective prompts (contextual)
-        for adj in keywords['adjectives']:
+        for adj in keywords["adjectives"]:
             test_prompts.append(f"A {adj} scene")
 
         return test_prompts
 
-    def audit_multimodal_sync(self, image_path: str, prompt: str,
-                            threshold: float = 65.0) -> AuditResult:
+    def audit_multimodal_sync(
+        self, image_path: str, prompt: str, threshold: float = 65.0
+    ) -> AuditResult:
         """
         Audit image-text synchronization using CLIP model.
 
@@ -262,7 +269,7 @@ class CrossModalAuditor:
                 severity="HIGH",
                 detected_keywords=[],
                 missing_keywords=[],
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
         print(f"🔍 Starting multimodal audit for: {image_path}")
@@ -270,7 +277,9 @@ class CrossModalAuditor:
 
         # Extract keywords from prompt
         keywords = self._extract_keywords(prompt)
-        print(f"🔑 Extracted keywords - Nouns: {keywords['nouns']}, Adjectives: {keywords['adjectives']}")
+        print(
+            f"🔑 Extracted keywords - Nouns: {keywords['nouns']}, Adjectives: {keywords['adjectives']}"
+        )
 
         # Preprocess image
         image_tensor = self._preprocess_image(image_path)
@@ -280,8 +289,8 @@ class CrossModalAuditor:
                 hallucination_detected=True,
                 severity="HIGH",
                 detected_keywords=[],
-                missing_keywords=keywords['nouns'] + keywords['adjectives'],
-                timestamp=datetime.now()
+                missing_keywords=keywords["nouns"] + keywords["adjectives"],
+                timestamp=datetime.now(),
             )
 
         # Generate test prompts
@@ -345,11 +354,11 @@ class CrossModalAuditor:
             sync_score=round(sync_score, 2),
             hallucination_detected=hallucination_detected,
             severity=severity,
-            detected_keywords=keywords['nouns'] + keywords['adjectives'],
+            detected_keywords=keywords["nouns"] + keywords["adjectives"],
             missing_keywords=[],
             image_features=image_features.cpu().numpy(),
             text_features=avg_text_features,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
 
@@ -370,15 +379,17 @@ def audit_multimodal_sync(image_path: str, prompt: str, threshold: float = 65.0)
 
     # Convert result to dictionary for return
     return {
-        'sync_score': result.sync_score,
-        'hallucination_detected': result.hallucination_detected,
-        'severity': result.severity,
-        'detected_keywords': result.detected_keywords,
-        'missing_keywords': result.missing_keywords,
-        'timestamp': result.timestamp.isoformat(),
-        'status': 'MULTIMODAL HALLUCINATION DETECTED' if result.hallucination_detected else 'SYNC VERIFIED'
+        "sync_score": result.sync_score,
+        "hallucination_detected": result.hallucination_detected,
+        "severity": result.severity,
+        "detected_keywords": result.detected_keywords,
+        "missing_keywords": result.missing_keywords,
+        "timestamp": result.timestamp.isoformat(),
+        "status": "MULTIMODAL HALLUCINATION DETECTED"
+        if result.hallucination_detected
+        else "SYNC VERIFIED",
     }
 
 
 # Export the main function for use as a tool
-__all__ = ['AuditResult', 'CrossModalAuditor', 'audit_multimodal_sync']
+__all__ = ["AuditResult", "CrossModalAuditor", "audit_multimodal_sync"]

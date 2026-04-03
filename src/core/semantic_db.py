@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class SemanticMemory:
     def __init__(self, collection_name="laboratory_memories"):
-        self.db_path = get_path('storage', 'base_dir') + "/chroma_db"
+        self.db_path = get_path("storage", "base_dir") + "/chroma_db"
         self.client = chromadb.PersistentClient(path=self.db_path)
         # Using a default local embedding function
         self.ef = embedding_functions.DefaultEmbeddingFunction()
@@ -23,8 +23,7 @@ class SemanticMemory:
         tenant_collection = get_tenant_collection_name(collection_name)
 
         self.collection = self.client.get_or_create_collection(
-            name=tenant_collection,
-            embedding_function=self.ef
+            name=tenant_collection, embedding_function=self.ef
         )
 
         # Initialize semantic graph for enhanced relationships
@@ -33,11 +32,7 @@ class SemanticMemory:
 
     def add_fact(self, fact_id: str, fact_text: str, metadata: dict | None = None):
         """Adds a fact to the vector database."""
-        self.collection.add(
-            documents=[fact_text],
-            metadatas=[metadata or {}],
-            ids=[fact_id]
-        )
+        self.collection.add(documents=[fact_text], metadatas=[metadata or {}], ids=[fact_id])
         self._fact_index.add(fact_id)
 
     def add_fact_with_semantics(
@@ -45,7 +40,7 @@ class SemanticMemory:
         fact_id: str,
         fact_text: str,
         extract_variants: bool = True,
-        metadata: dict | None = None
+        metadata: dict | None = None,
     ):
         """
         Add a fact and automatically include its semantic variants.
@@ -76,47 +71,45 @@ class SemanticMemory:
             # Add synonyms with metadata
             for syn_idx, synonym in enumerate(meaning.synonyms[:3]):
                 variant_id = f"{fact_id}_syn_{term_idx}_{syn_idx}"
-                variant_text = f"Semantic variant of '{term}': {synonym}. From: {fact_text[:100]}..."
+                variant_text = (
+                    f"Semantic variant of '{term}': {synonym}. From: {fact_text[:100]}..."
+                )
                 self.add_fact(
                     variant_id,
                     variant_text,
                     metadata={
                         **(metadata or {}),
-                        'related_to': fact_id,
-                        'relation_type': 'synonym',
-                        'original_term': term,
-                        'variant': synonym
-                    }
+                        "related_to": fact_id,
+                        "relation_type": "synonym",
+                        "original_term": term,
+                        "variant": synonym,
+                    },
                 )
 
             # Add hypernyms (broader concepts) with metadata
             for hyp_idx, hypernym in enumerate(meaning.hypernyms[:2]):
                 variant_id = f"{fact_id}_hyp_{term_idx}_{hyp_idx}"
-                variant_text = f"Broader concept of '{term}': {hypernym}. From: {fact_text[:100]}..."
+                variant_text = (
+                    f"Broader concept of '{term}': {hypernym}. From: {fact_text[:100]}..."
+                )
                 self.add_fact(
                     variant_id,
                     variant_text,
                     metadata={
                         **(metadata or {}),
-                        'related_to': fact_id,
-                        'relation_type': 'hypernym',
-                        'original_term': term,
-                        'broader_concept': hypernym
-                    }
+                        "related_to": fact_id,
+                        "relation_type": "hypernym",
+                        "original_term": term,
+                        "broader_concept": hypernym,
+                    },
                 )
 
     def search(self, query: str, n_results: int = 5) -> dict:
         """Performs semantic search."""
-        return self.collection.query(
-            query_texts=[query],
-            n_results=n_results
-        )
+        return self.collection.query(query_texts=[query], n_results=n_results)
 
     def search_with_semantic_expansion(
-        self,
-        query: str,
-        n_results: int = 5,
-        include_variants: bool = True
+        self, query: str, n_results: int = 5, include_variants: bool = True
     ) -> dict:
         """
         Perform semantic search with automatic query expansion.
@@ -152,20 +145,18 @@ class SemanticMemory:
         for expanded_query in expanded_queries[1:]:  # Skip original
             variant_results = self.search(expanded_query, n_results)
             # Merge results (simple deduplication)
-            if variant_results.get('ids'):
-                for idx, doc_id in enumerate(variant_results['ids'][0]):
-                    if doc_id not in all_results.get('ids', [[]])[0]:
-                        all_results['ids'][0].append(doc_id)
-                        if 'documents' in variant_results:
-                            all_results['documents'][0].append(
-                                variant_results['documents'][0][idx]
-                            )
+            if variant_results.get("ids"):
+                for idx, doc_id in enumerate(variant_results["ids"][0]):
+                    if doc_id not in all_results.get("ids", [[]])[0]:
+                        all_results["ids"][0].append(doc_id)
+                        if "documents" in variant_results:
+                            all_results["documents"][0].append(variant_results["documents"][0][idx])
 
         # Limit to n_results
-        if all_results.get('ids'):
-            all_results['ids'][0] = all_results['ids'][0][:n_results]
-            if 'documents' in all_results:
-                all_results['documents'][0] = all_results['documents'][0][:n_results]
+        if all_results.get("ids"):
+            all_results["ids"][0] = all_results["ids"][0][:n_results]
+            if "documents" in all_results:
+                all_results["documents"][0] = all_results["documents"][0][:n_results]
 
         return all_results
 
@@ -173,9 +164,7 @@ class SemanticMemory:
         """
         Retrieve all documents associated with a specific context_id.
         """
-        return self.collection.get(
-            where={"context_id": context_id}
-        )
+        return self.collection.get(where={"context_id": context_id})
 
     def find_clusters(self, threshold: float = 0.1) -> dict:
         """
@@ -188,9 +177,7 @@ class SemanticMemory:
         pass
 
     def detect_semantic_gaps(
-        self,
-        central_concept: str,
-        existing_facts: set[str] | None = None
+        self, central_concept: str, existing_facts: set[str] | None = None
     ) -> list[dict]:
         """
         Detect knowledge gaps in memory by analyzing semantic relationships.
@@ -213,17 +200,12 @@ class SemanticMemory:
             existing_facts = self._fact_index
 
         # Get semantic gaps
-        gaps = self.semantic_graph.detect_semantic_gaps(
-            central_concept,
-            existing_facts
-        )
+        gaps = self.semantic_graph.detect_semantic_gaps(central_concept, existing_facts)
 
         return gaps
 
     def get_semantic_neighbors(
-        self,
-        concept: str,
-        relation_type: str | None = None
+        self, concept: str, relation_type: str | None = None
     ) -> dict[str, list[str]]:
         """
         Get all semantically related concepts for a given term.
@@ -252,7 +234,21 @@ class SemanticMemory:
         # In production, use POS tagging for better results
         words = text.lower().split()
         # Filter out common words and short terms
-        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'is', 'was', 'are'}
-        key_terms = [w.strip('.,!?;:') for w in words
-                     if w.lower() not in stop_words and len(w) > 3]
+        stop_words = {
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "is",
+            "was",
+            "are",
+        }
+        key_terms = [w.strip(".,!?;:") for w in words if w.lower() not in stop_words and len(w) > 3]
         return list(set(key_terms))  # Remove duplicates

@@ -8,13 +8,13 @@ DIAGNOSTIC_TOOLS = {
         description="Check system health: CPU, RAM, database status, and data integrity",
         factory_method="create_system_monitor",
         category="diagnostics",
-        parameters={}
+        parameters={},
     ),
     "get_memory_stats": ToolDefinition(
         name="get_memory_stats",
         description="Get statistics about stored knowledge: facts, vectors, entries",
         factory_method="create_centrifuge",
         category="diagnostics",
-        parameters={}
+        parameters={},
     ),
 }

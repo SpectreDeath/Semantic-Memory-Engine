@@ -7,6 +7,7 @@ WEB_SEARCH_SCRIPT = "D:/mcp_servers/web_search.py"
 WATCHER_LOGS = "D:/mcp_servers/logs"
 STORAGE_JAIL = "D:/mcp_servers/storage"
 
+
 def run_agent_mission(topic):
     print(f"🕵️ Agent Mission Started: Investigating '{topic}'")
 
@@ -26,7 +27,7 @@ def run_agent_mission(topic):
 
     # 3. REPORT: Find the latest log generated
     print("📂 Step 3: Compiling final intelligence report...")
-    logs = [os.path.join(WATCHER_LOGS, f) for f in os.listdir(WATCHER_LOGS) if f.endswith('.json')]
+    logs = [os.path.join(WATCHER_LOGS, f) for f in os.listdir(WATCHER_LOGS) if f.endswith(".json")]
     if not logs:
         print("⚠️ No logs found. Did the Watcher script crash?")
         return
@@ -36,6 +37,7 @@ def run_agent_mission(topic):
     print("\n✨ MISSION COMPLETE ✨")
     print(f"📄 Full Report Saved: {latest_log}")
     print("👉 PASTE THE CONTENT OF THIS LOG TO WHITERABBITNEO FOR FINAL DEBRIEF.")
+
 
 if __name__ == "__main__":
     query = input("Enter Topic or URL for investigation: ")

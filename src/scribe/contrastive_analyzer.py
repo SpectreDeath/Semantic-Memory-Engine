@@ -8,6 +8,7 @@ from src.core.config import Config
 
 logger = logging.getLogger(__name__)
 
+
 class ContrastiveAnalyzer:
     """
     Contrastive lexical analysis for authorship discrimination.
@@ -17,7 +18,7 @@ class ContrastiveAnalyzer:
 
     def __init__(self, db_path: str | None = None):
         config = Config()
-        base_dir = config.get_path('storage.base_dir')
+        base_dir = config.get_path("storage.base_dir")
         self.db_path = db_path or str(base_dir / "storage" / "scribe_profiles.sqlite")
 
     def _get_author_texts(self, author_id: str) -> list[str]:
@@ -47,10 +48,7 @@ class ContrastiveAnalyzer:
         return [f"Sample text for {author_id} passage {i}" for i in range(max(1, count))]
 
     def _calculate_zeta_scores(
-        self,
-        texts_a: list[str],
-        texts_b: list[str],
-        min_freq: int = 2
+        self, texts_a: list[str], texts_b: list[str], min_freq: int = 2
     ) -> dict[str, float]:
         """
         Calculates Zeta scores for word discrimination.
@@ -107,10 +105,7 @@ class ContrastiveAnalyzer:
         return zeta_scores
 
     def get_contrastive_lexicon(
-        self,
-        author_a_id: str,
-        author_b_id: str,
-        top_n: int = 10
+        self, author_a_id: str, author_b_id: str, top_n: int = 10
     ) -> dict[str, Any]:
         """
         Identifies distinctive lexical markers between two authors.
@@ -135,7 +130,7 @@ class ContrastiveAnalyzer:
                 "preferred_a": [],
                 "preferred_b": [],
                 "labels": [],
-                "scores": []
+                "scores": [],
             }
 
         # Calculate Zeta scores
@@ -159,13 +154,7 @@ class ContrastiveAnalyzer:
         return {
             "author_a": author_a_id,
             "author_b": author_b_id,
-            "preferred_a": {
-                "words": labels_a,
-                "scores": scores_a
-            },
-            "preferred_b": {
-                "words": labels_b,
-                "scores": scores_b
-            },
-            "total_markers_found": len(zeta_scores)
+            "preferred_a": {"words": labels_a, "scores": scores_a},
+            "preferred_b": {"words": labels_b, "scores": scores_b},
+            "total_markers_found": len(zeta_scores),
         }

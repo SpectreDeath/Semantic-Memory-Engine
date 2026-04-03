@@ -1,4 +1,4 @@
-'''
+"""
 MIT License
 
 Copyright (c) 2023 Fast Data Science Ltd (https://fastdatascience.com)
@@ -25,46 +25,48 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-'''
+"""
 
 import re
 
-is_number_pattern = re.compile(r'.*\d.*')
+is_number_pattern = re.compile(r".*\d.*")
 
 re_words = re.compile(r"\w+")
 
 # pronouns
-stopwords = {"he",
-             "her",
-             "hers",
-             "herself",
-             "him",
-             "himself",
-             "his",
-             "i",
-             "me",
-             "mine",
-             "my",
-             "myself",
-             "our",
-             "ours",
-             "ourselves",
-             "she",
-             "thee",
-             "their",
-             "them",
-             "themselves",
-             "they",
-             "thou",
-             "thy",
-             "thyself",
-             "us",
-             "we",
-             "ye",
-             "you",
-             "your",
-             "yours",
-             "yourself", }
+stopwords = {
+    "he",
+    "her",
+    "hers",
+    "herself",
+    "him",
+    "himself",
+    "his",
+    "i",
+    "me",
+    "mine",
+    "my",
+    "myself",
+    "our",
+    "ours",
+    "ourselves",
+    "she",
+    "thee",
+    "their",
+    "them",
+    "themselves",
+    "they",
+    "thou",
+    "thy",
+    "thyself",
+    "us",
+    "we",
+    "ye",
+    "you",
+    "your",
+    "yours",
+    "yourself",
+}
 
 
 def tokenise_remove_pronouns_en(text: str) -> list:

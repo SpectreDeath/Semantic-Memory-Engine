@@ -8,6 +8,7 @@ mcp = FastMCP("WhitesFileManager")
 # The "Jail" directory - only files inside here can be accessed
 BASE_DIR = os.path.normpath("D:/mcp_servers/storage")
 
+
 def get_safe_path(requested_path: str) -> str:
     """Ensures the path is within the allowed BASE_DIR."""
     # Resolve to absolute path
@@ -18,6 +19,7 @@ def get_safe_path(requested_path: str) -> str:
         raise PermissionError(f"Access denied: {requested_path} is outside the allowed directory.")
 
     return target_path
+
 
 @mcp.tool()
 def read_local_file(file_path: str) -> str:
@@ -32,6 +34,7 @@ def read_local_file(file_path: str) -> str:
     except Exception as e:
         return f"Error reading file: {e!s}"
 
+
 @mcp.tool()
 def list_directory_contents(dir_path: str = ".") -> str:
     """
@@ -44,6 +47,7 @@ def list_directory_contents(dir_path: str = ".") -> str:
         return "\n".join(items)
     except Exception as e:
         return f"Error listing directory: {e!s}"
+
 
 if __name__ == "__main__":
     mcp.run()

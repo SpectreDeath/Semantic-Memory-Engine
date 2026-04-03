@@ -19,24 +19,29 @@ logger = logging.getLogger("LawnmowerMan.Governor")
 # Try to import pynvml, fallback to CPU monitoring if not available
 try:
     import pynvml
+
     HAS_NVML = True
 except ImportError:
     HAS_NVML = False
     logger.warning("[Governor] pynvml not available, falling back to CPU memory monitoring")
+
 
 class VRAMState(Enum):
     NORMAL = "normal"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 @dataclass
 class IngestionTask:
     """Represents a task in the ingestion pipeline."""
+
     task_id: str
     raw_data: str
     metadata: dict[str, Any]
     timestamp: datetime
     status: str = "pending"  # pending, running, completed, delayed
+
 
 class ResourceMonitor:
     """Monitors system resources, particularly VRAM usage."""
@@ -61,7 +66,9 @@ class ResourceMonitor:
                 except Exception as e:
                     logger.warning(f"[Governor] NVML init failed: {e}")
 
-        logger.info(f"[Governor] Resource monitoring started (VRAM threshold: {self.vram_threshold_gb}GB)")
+        logger.info(
+            f"[Governor] Resource monitoring started (VRAM threshold: {self.vram_threshold_gb}GB)"
+        )
 
     def stop_monitoring(self):
         """Stop background VRAM monitoring."""
@@ -77,14 +84,15 @@ class ResourceMonitor:
                 vram_usage = self.get_vram_usage_gb()
                 with self._lock:
                     self.current_vram_usage = vram_usage
-                    self.vram_history.append({
-                        'timestamp': datetime.now(),
-                        'vram_usage': vram_usage
-                    })
+                    self.vram_history.append(
+                        {"timestamp": datetime.now(), "vram_usage": vram_usage}
+                    )
 
                 # Log significant changes
                 if vram_usage > self.vram_threshold_gb:
-                    logger.warning(f"[Governor] VRAM usage critical: {vram_usage:.2f}GB > {self.vram_threshold_gb}GB")
+                    logger.warning(
+                        f"[Governor] VRAM usage critical: {vram_usage:.2f}GB > {self.vram_threshold_gb}GB"
+                    )
 
                 time.sleep(1.0)  # Monitor every second
 
@@ -137,13 +145,11 @@ class ResourceMonitor:
             "vram_state": self.get_vram_state().value,
             "should_delay": self.should_delay_ingestion(),
             "recent_readings": [
-                {
-                    "timestamp": h['timestamp'].isoformat(),
-                    "vram_usage": round(h['vram_usage'], 2)
-                }
+                {"timestamp": h["timestamp"].isoformat(), "vram_usage": round(h["vram_usage"], 2)}
                 for h in recent_history
-            ]
+            ],
         }
+
 
 class Governor(BasePlugin):
     """
@@ -179,10 +185,12 @@ class Governor(BasePlugin):
             "completed_tasks": 0,
             "delayed_tasks": 0,
             "failed_tasks": 0,
-            "avg_processing_time": 0.0
+            "avg_processing_time": 0.0,
         }
 
-        logger.info(f"[{self.plugin_id}] Governor initialized with VRAM threshold: {self.vram_threshold_gb}GB")
+        logger.info(
+            f"[{self.plugin_id}] Governor initialized with VRAM threshold: {self.vram_threshold_gb}GB"
+        )
 
     async def on_startup(self):
         """
@@ -242,10 +250,7 @@ class Governor(BasePlugin):
 
         # Create ingestion task
         task = IngestionTask(
-            task_id=task_id,
-            raw_data=raw_data,
-            metadata=metadata,
-            timestamp=datetime.now()
+            task_id=task_id, raw_data=raw_data, metadata=metadata, timestamp=datetime.now()
         )
 
         try:
@@ -253,14 +258,16 @@ class Governor(BasePlugin):
             await self.ingestion_queue.put(task)
             self.stats["total_tasks"] += 1
 
-            logger.info(f"[{self.plugin_id}] Task {task_id} queued (Queue size: {self.ingestion_queue.qsize()})")
+            logger.info(
+                f"[{self.plugin_id}] Task {task_id} queued (Queue size: {self.ingestion_queue.qsize()})"
+            )
 
             # Return immediate response indicating task is queued
             return {
                 "status": "queued",
                 "task_id": task_id,
                 "queue_position": self.ingestion_queue.qsize(),
-                "resource_status": self.resource_monitor.get_status_info()
+                "resource_status": self.resource_monitor.get_status_info(),
             }
 
         except asyncio.QueueFull:
@@ -268,14 +275,11 @@ class Governor(BasePlugin):
             return {
                 "status": "rejected",
                 "reason": "queue_full",
-                "queue_size": self.ingestion_queue.qsize()
+                "queue_size": self.ingestion_queue.qsize(),
             }
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Error queuing task {task_id}: {e}")
-            return {
-                "status": "error",
-                "reason": str(e)
-            }
+            return {"status": "error", "reason": str(e)}
 
     def get_tools(self) -> list:
         return [
@@ -283,7 +287,7 @@ class Governor(BasePlugin):
             self.get_governor_stats,
             self.get_queue_status,
             self.set_vram_threshold,
-            self.clear_queue
+            self.clear_queue,
         ]
 
     async def get_resource_status(self) -> str:
@@ -305,7 +309,7 @@ class Governor(BasePlugin):
                 "avg_processing_time": self.stats["avg_processing_time"],
                 "queue_size": self.ingestion_queue.qsize(),
                 "queue_max_size": self.max_queue_size,
-                "resource_monitoring": self.resource_monitor.monitoring
+                "resource_monitoring": self.resource_monitor.monitoring,
             }
             return json.dumps(stats, indent=2)
         except Exception as e:
@@ -318,7 +322,7 @@ class Governor(BasePlugin):
                 "current_size": self.ingestion_queue.qsize(),
                 "max_size": self.max_queue_size,
                 "is_full": self.ingestion_queue.full(),
-                "is_empty": self.ingestion_queue.empty()
+                "is_empty": self.ingestion_queue.empty(),
             }
             return json.dumps(queue_info, indent=2)
         except Exception as e:
@@ -330,11 +334,14 @@ class Governor(BasePlugin):
             val = float(threshold_gb)
             self.vram_threshold_gb = val
             self.resource_monitor.vram_threshold_gb = val
-            return json.dumps({
-                "status": "success",
-                "new_threshold_gb": val,
-                "message": f"VRAM threshold set to {val}GB"
-            }, indent=2)
+            return json.dumps(
+                {
+                    "status": "success",
+                    "new_threshold_gb": val,
+                    "message": f"VRAM threshold set to {val}GB",
+                },
+                indent=2,
+            )
         except Exception as e:
             return json.dumps({"error": f"Failed to set VRAM threshold: {e!s}"})
 
@@ -350,11 +357,14 @@ class Governor(BasePlugin):
                 except asyncio.QueueEmpty:
                     break
 
-            return json.dumps({
-                "status": "success",
-                "cleared_tasks": cleared_count,
-                "message": f"Cleared {cleared_count} tasks from queue"
-            }, indent=2)
+            return json.dumps(
+                {
+                    "status": "success",
+                    "cleared_tasks": cleared_count,
+                    "message": f"Cleared {cleared_count} tasks from queue",
+                },
+                indent=2,
+            )
         except Exception as e:
             return json.dumps({"error": f"Failed to clear queue: {e!s}"})
 
@@ -366,7 +376,9 @@ class Governor(BasePlugin):
                 if self.resource_monitor.should_delay_ingestion():
                     self.stats["delayed_tasks"] += 1
                     delay_seconds = self.cache_clear_delay_seconds
-                    logger.info(f"[{self.plugin_id}] VRAM usage high, delaying next task for {delay_seconds}s")
+                    logger.info(
+                        f"[{self.plugin_id}] VRAM usage high, delaying next task for {delay_seconds}s"
+                    )
 
                     # Wait for resource levels to drop or timeout
                     await asyncio.sleep(delay_seconds)
@@ -374,10 +386,7 @@ class Governor(BasePlugin):
 
                 # Get next task from queue (with timeout)
                 try:
-                    task = await asyncio.wait_for(
-                        self.ingestion_queue.get(),
-                        timeout=1.0
-                    )
+                    task = await asyncio.wait_for(self.ingestion_queue.get(), timeout=1.0)
                 except TimeoutError:
                     continue  # No tasks available, continue loop
 
@@ -413,7 +422,9 @@ class Governor(BasePlugin):
             # Store completion in database
             await self._store_task_completion(task, results, processing_time)
 
-            logger.info(f"[{self.plugin_id}] Task {task.task_id} completed in {processing_time:.2f}s")
+            logger.info(
+                f"[{self.plugin_id}] Task {task.task_id} completed in {processing_time:.2f}s"
+            )
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Failed to process task {task.task_id}: {e}")
@@ -429,27 +440,33 @@ class Governor(BasePlugin):
             "sda_result": None,
             "apb_result": None,
             "logic_auditor_result": None,
-            "pipeline_status": "completed"
+            "pipeline_status": "completed",
         }
 
         try:
             # 1. Execute SDA (Semantic Deception Analysis)
-            if self.sda_plugin and hasattr(self.sda_plugin, 'on_ingestion'):
+            if self.sda_plugin and hasattr(self.sda_plugin, "on_ingestion"):
                 sda_result = await self.sda_plugin.on_ingestion(raw_data, metadata)
                 pipeline_results["sda_result"] = sda_result
-                logger.debug(f"[{self.plugin_id}] SDA completed: {sda_result.get('status', 'unknown')}")
+                logger.debug(
+                    f"[{self.plugin_id}] SDA completed: {sda_result.get('status', 'unknown')}"
+                )
 
             # 2. Execute APB (Adversarial Pattern Breaker)
-            if self.apb_plugin and hasattr(self.apb_plugin, 'on_ingestion'):
+            if self.apb_plugin and hasattr(self.apb_plugin, "on_ingestion"):
                 apb_result = await self.apb_plugin.on_ingestion(raw_data, metadata)
                 pipeline_results["apb_result"] = apb_result
-                logger.debug(f"[{self.plugin_id}] APB completed: {apb_result.get('status', 'unknown')}")
+                logger.debug(
+                    f"[{self.plugin_id}] APB completed: {apb_result.get('status', 'unknown')}"
+                )
 
             # 3. Execute LogicAuditor
-            if self.logic_auditor_plugin and hasattr(self.logic_auditor_plugin, 'on_ingestion'):
+            if self.logic_auditor_plugin and hasattr(self.logic_auditor_plugin, "on_ingestion"):
                 logic_result = await self.logic_auditor_plugin.on_ingestion(raw_data, metadata)
                 pipeline_results["logic_auditor_result"] = logic_result
-                logger.debug(f"[{self.plugin_id}] LogicAuditor completed: {logic_result.get('status', 'unknown')}")
+                logger.debug(
+                    f"[{self.plugin_id}] LogicAuditor completed: {logic_result.get('status', 'unknown')}"
+                )
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Pipeline execution failed: {e}")
@@ -469,20 +486,25 @@ class Governor(BasePlugin):
 
             status_info = self.resource_monitor.get_status_info()
 
-            self.nexus.nexus.execute(sql, (
-                task.timestamp.isoformat(),
-                status_info["vram_usage_gb"],
-                status_info["vram_state"],
-                self.ingestion_queue.qsize(),
-                self.stats["total_tasks"],
-                self.stats["completed_tasks"],
-                self.stats["delayed_tasks"],
-                self.stats["failed_tasks"]
-            ))
+            self.nexus.nexus.execute(
+                sql,
+                (
+                    task.timestamp.isoformat(),
+                    status_info["vram_usage_gb"],
+                    status_info["vram_state"],
+                    self.ingestion_queue.qsize(),
+                    self.stats["total_tasks"],
+                    self.stats["completed_tasks"],
+                    self.stats["delayed_tasks"],
+                    self.stats["failed_tasks"],
+                ),
+            )
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Failed to store task start: {e}")
 
-    async def _store_task_completion(self, task: IngestionTask, results: dict[str, Any], processing_time: float):
+    async def _store_task_completion(
+        self, task: IngestionTask, results: dict[str, Any], processing_time: float
+    ):
         """Store task completion information in database."""
         try:
             # Update the existing record with completion info
@@ -492,11 +514,9 @@ class Governor(BasePlugin):
                 WHERE timestamp = ?
             """
 
-            self.nexus.nexus.execute(sql, (
-                processing_time,
-                json.dumps(results),
-                task.timestamp.isoformat()
-            ))
+            self.nexus.nexus.execute(
+                sql, (processing_time, json.dumps(results), task.timestamp.isoformat())
+            )
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Failed to store task completion: {e}")
 
@@ -509,10 +529,7 @@ class Governor(BasePlugin):
                 WHERE timestamp = ?
             """
 
-            self.nexus.nexus.execute(sql, (
-                error,
-                task.timestamp.isoformat()
-            ))
+            self.nexus.nexus.execute(sql, (error, task.timestamp.isoformat()))
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Failed to store task failure: {e}")
 
@@ -525,14 +542,18 @@ class Governor(BasePlugin):
             self.stats["avg_processing_time"] = new_time
         else:
             # Weighted average: (old_avg * (n-1) + new_time) / n
-            self.stats["avg_processing_time"] = ((current_avg * (completed - 1)) + new_time) / completed
+            self.stats["avg_processing_time"] = (
+                (current_avg * (completed - 1)) + new_time
+            ) / completed
 
     def register_plugins(self, sda_plugin=None, apb_plugin=None, logic_auditor_plugin=None):
         """Register the plugins to be managed by the Governor."""
         self.sda_plugin = sda_plugin
         self.apb_plugin = apb_plugin
         self.logic_auditor_plugin = logic_auditor_plugin
-        logger.info(f"[{self.plugin_id}] Registered plugins: SDA={sda_plugin is not None}, APB={apb_plugin is not None}, LogicAuditor={logic_auditor_plugin is not None}")
+        logger.info(
+            f"[{self.plugin_id}] Registered plugins: SDA={sda_plugin is not None}, APB={apb_plugin is not None}, LogicAuditor={logic_auditor_plugin is not None}"
+        )
 
 
 def create_plugin(manifest: dict[str, Any], nexus_api: Any):

@@ -24,7 +24,8 @@ import psutil
 
 logger = logging.getLogger("SME.Performance")
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class LRUCache:
     """Thread-safe LRU Cache implementation for SME extensions."""
@@ -50,7 +51,7 @@ class LRUCache:
                 # Move to end (most recently used)
                 self.cache.move_to_end(key)
                 self.hits += 1
-                return entry['value']
+                return entry["value"]
 
             self.misses += 1
             return None
@@ -60,10 +61,7 @@ class LRUCache:
         with self.lock:
             if key in self.cache:
                 self.cache.move_to_end(key)
-            self.cache[key] = {
-                'value': value,
-                'timestamp': datetime.now()
-            }
+            self.cache[key] = {"value": value, "timestamp": datetime.now()}
 
             # Remove oldest items if cache is full
             if len(self.cache) > self.max_size:
@@ -71,7 +69,7 @@ class LRUCache:
 
     def _is_expired(self, entry: dict[str, Any]) -> bool:
         """Check if cache entry has expired."""
-        age = datetime.now() - entry['timestamp']
+        age = datetime.now() - entry["timestamp"]
         return bool(age.total_seconds() > self.ttl_seconds)
 
     def clear(self):
@@ -87,12 +85,12 @@ class LRUCache:
             total_requests = self.hits + self.misses
             hit_rate = (self.hits / total_requests * 100) if total_requests > 0 else 0
             return {
-                'size': len(self.cache),
-                'max_size': self.max_size,
-                'hits': self.hits,
-                'misses': self.misses,
-                'hit_rate': round(hit_rate, 2),
-                'ttl_seconds': self.ttl_seconds
+                "size": len(self.cache),
+                "max_size": self.max_size,
+                "hits": self.hits,
+                "misses": self.misses,
+                "hit_rate": round(hit_rate, 2),
+                "ttl_seconds": self.ttl_seconds,
             }
 
 
@@ -124,11 +122,11 @@ class PerformanceMonitor:
         """Get performance statistics for an operation."""
         with self.lock:
             if operation_name not in self.operation_times:
-                return {'error': 'Operation not found'}
+                return {"error": "Operation not found"}
 
             times = self.operation_times[operation_name]
             if not times:
-                return {'error': 'No data available'}
+                return {"error": "No data available"}
 
             avg_time = sum(times) / len(times)
             min_time = min(times)
@@ -141,14 +139,14 @@ class PerformanceMonitor:
             p99 = sorted_times[int(len(sorted_times) * 0.99)]
 
             return {
-                'operation': operation_name,
-                'count': len(times),
-                'avg_time': round(avg_time, 4),
-                'min_time': round(min_time, 4),
-                'max_time': round(max_time, 4),
-                'p50_time': round(p50, 4),
-                'p95_time': round(p95, 4),
-                'p99_time': round(p99, 4)
+                "operation": operation_name,
+                "count": len(times),
+                "avg_time": round(avg_time, 4),
+                "min_time": round(min_time, 4),
+                "max_time": round(max_time, 4),
+                "p50_time": round(p50, 4),
+                "p95_time": round(p95, 4),
+                "p99_time": round(p99, 4),
             }
 
     def get_all_stats(self) -> dict[str, Any]:
@@ -186,6 +184,7 @@ def cache_result(max_size: int = 100, ttl_seconds: int = 300):
         max_size: Maximum number of cached items
         ttl_seconds: Time to live in seconds
     """
+
     def decorator(func: Callable) -> Callable:
         cache = LRUCache(max_size, ttl_seconds)
 
@@ -226,6 +225,7 @@ def cache_result(max_size: int = 100, ttl_seconds: int = 300):
         # Add cache management methods
         def clear_cache():
             cache.clear()
+
         def get_cache_stats():
             return cache.get_stats()
 
@@ -247,11 +247,7 @@ def _create_cache_key(func_name: str, args: tuple, kwargs: dict) -> str:
     """Create a cache key from function name, args, and kwargs."""
 
     # Convert args and kwargs to a hashable string
-    key_data = {
-        'func': func_name,
-        'args': args,
-        'kwargs': kwargs
-    }
+    key_data = {"func": func_name, "args": args, "kwargs": kwargs}
 
     key_str = json.dumps(key_data, sort_keys=True, default=str)
     return hashlib.md5(key_str.encode()).hexdigest()
@@ -273,9 +269,7 @@ class ResourceMonitor:
 
         self.monitoring = True
         self.monitor_thread = threading.Thread(
-            target=self._monitor_loop,
-            args=(interval_seconds,),
-            daemon=True
+            target=self._monitor_loop, args=(interval_seconds,), daemon=True
         )
         self.monitor_thread.start()
         logger.info("Resource monitoring started")
@@ -316,7 +310,7 @@ class ResourceMonitor:
             memory_total_gb = memory.total / (1024**3)
 
             # Disk usage
-            disk = psutil.disk_usage('/')
+            disk = psutil.disk_usage("/")
             disk_percent = disk.percent
             disk_free_gb = disk.free / (1024**3)
 
@@ -326,26 +320,26 @@ class ResourceMonitor:
             process_cpu = process.cpu_percent()
 
             return {
-                'timestamp': datetime.now().isoformat(),
-                'cpu_percent': cpu_percent,
-                'memory_percent': memory_percent,
-                'memory_used_gb': round(memory_used_gb, 2),
-                'memory_total_gb': round(memory_total_gb, 2),
-                'disk_percent': disk_percent,
-                'disk_free_gb': round(disk_free_gb, 2),
-                'process_memory_mb': round(process_memory, 2),
-                'process_cpu_percent': process_cpu
+                "timestamp": datetime.now().isoformat(),
+                "cpu_percent": cpu_percent,
+                "memory_percent": memory_percent,
+                "memory_used_gb": round(memory_used_gb, 2),
+                "memory_total_gb": round(memory_total_gb, 2),
+                "disk_percent": disk_percent,
+                "disk_free_gb": round(disk_free_gb, 2),
+                "process_memory_mb": round(process_memory, 2),
+                "process_cpu_percent": process_cpu,
             }
         except Exception as e:
             logger.exception(f"Failed to collect resource stats: {e}")
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     def get_current_stats(self) -> dict[str, Any]:
         """Get current resource usage."""
         try:
             return self._collect_resource_stats()
         except Exception as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     def get_optimization_suggestions(self) -> list[str]:
         """Get optimization suggestions based on resource usage."""
@@ -353,24 +347,30 @@ class ResourceMonitor:
 
         try:
             current = self.get_current_stats()
-            if 'error' in current:
-                return ['Unable to collect resource statistics']
+            if "error" in current:
+                return ["Unable to collect resource statistics"]
 
             # CPU suggestions
-            if current['cpu_percent'] > 80:
-                suggestions.append("High CPU usage detected - consider optimizing algorithms or adding caching")
+            if current["cpu_percent"] > 80:
+                suggestions.append(
+                    "High CPU usage detected - consider optimizing algorithms or adding caching"
+                )
 
             # Memory suggestions
-            if current['memory_percent'] > 80:
-                suggestions.append("High memory usage detected - consider clearing caches or optimizing data structures")
+            if current["memory_percent"] > 80:
+                suggestions.append(
+                    "High memory usage detected - consider clearing caches or optimizing data structures"
+                )
 
             # Disk suggestions
-            if current['disk_percent'] > 90:
+            if current["disk_percent"] > 90:
                 suggestions.append("Low disk space detected - consider cleaning up temporary files")
 
             # Process-specific suggestions
-            if current['process_memory_mb'] > 1000:  # > 1GB
-                suggestions.append("High process memory usage - consider implementing memory pooling")
+            if current["process_memory_mb"] > 1000:  # > 1GB
+                suggestions.append(
+                    "High process memory usage - consider implementing memory pooling"
+                )
 
             if not suggestions:
                 suggestions.append("Resource usage is within normal ranges")
@@ -394,8 +394,9 @@ class AsyncBatchProcessor:
         self.batch_size = batch_size
         self.semaphore = asyncio.Semaphore(max_concurrent)
 
-    async def process_items(self, items: list, process_func: Callable,
-                          progress_callback: None | Callable = None) -> list:
+    async def process_items(
+        self, items: list, process_func: Callable, progress_callback: None | Callable = None
+    ) -> list:
         """
         Process items in batches with concurrency control.
 
@@ -411,7 +412,7 @@ class AsyncBatchProcessor:
 
         # Process in batches
         for i in range(0, len(items), self.batch_size):
-            batch = items[i:i + self.batch_size]
+            batch = items[i : i + self.batch_size]
             batch_results = await self._process_batch(batch, process_func)
             results.extend(batch_results)
 
@@ -422,6 +423,7 @@ class AsyncBatchProcessor:
 
     async def _process_batch(self, batch: list, process_func: Callable) -> list:
         """Process a single batch with concurrency control."""
+
         async def process_with_semaphore(item):
             async with self.semaphore:
                 return await process_func(item)

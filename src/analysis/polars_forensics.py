@@ -43,6 +43,7 @@ ENTITY_RELATIONSHIP_SCHEMA = {
 # Core Polars Processing Functions
 # ============================================================================
 
+
 def load_forensic_events(file_path: str) -> pl.DataFrame:
     """
     Load forensic events from CSV or Parquet.
@@ -56,15 +57,17 @@ def load_forensic_events(file_path: str) -> pl.DataFrame:
     path = pathlib.Path(file_path)
     suffix = path.suffix.lower()
 
-    if suffix == '.csv':
+    if suffix == ".csv":
         return pl.read_csv(file_path)
-    elif suffix == '.parquet':
+    elif suffix == ".parquet":
         return pl.read_parquet(file_path)
     else:
         raise ValueError(f"Unsupported file format: {suffix}")
 
 
-def detect_anomalies(df: pl.DataFrame, column: str = "risk_score", threshold: float = 0.8) -> pl.DataFrame:
+def detect_anomalies(
+    df: pl.DataFrame, column: str = "risk_score", threshold: float = 0.8
+) -> pl.DataFrame:
     """
     Detect anomalies in forensic data based on risk score.
 
@@ -90,14 +93,18 @@ def calculate_entity_centrality(relationships: pl.DataFrame) -> pl.DataFrame:
         DataFrame with entity centrality scores
     """
     # Calculate in-degree centrality
-    in_degree = relationships.group_by("target").agg(
-        pl.col("weight").sum().alias("in_centrality")
-    ).rename({"target": "entity"})
+    in_degree = (
+        relationships.group_by("target")
+        .agg(pl.col("weight").sum().alias("in_centrality"))
+        .rename({"target": "entity"})
+    )
 
     # Calculate out-degree centrality
-    out_degree = relationships.group_by("source").agg(
-        pl.col("weight").sum().alias("out_centrality")
-    ).rename({"source": "entity"})
+    out_degree = (
+        relationships.group_by("source")
+        .agg(pl.col("weight").sum().alias("out_centrality"))
+        .rename({"source": "entity"})
+    )
 
     # Combine and calculate total
     result = in_degree.join(out_degree, on="entity", how="outer").fill_null(0)
@@ -108,7 +115,9 @@ def calculate_entity_centrality(relationships: pl.DataFrame) -> pl.DataFrame:
     return result
 
 
-def detect_synthetic_patterns(df: pl.DataFrame, probability_column: str = "synthetic_probability") -> dict[str, Any]:
+def detect_synthetic_patterns(
+    df: pl.DataFrame, probability_column: str = "synthetic_probability"
+) -> dict[str, Any]:
     """
     Detect synthetic patterns in forensic data.
 
@@ -123,7 +132,9 @@ def detect_synthetic_patterns(df: pl.DataFrame, probability_column: str = "synth
 
     # High probability of synthetic content
     high_prob = df.filter(pl.col(probability_column) > 0.8)
-    medium_prob = df.filter((pl.col(probability_column) > 0.5) & (pl.col(probability_column) <= 0.8))
+    medium_prob = df.filter(
+        (pl.col(probability_column) > 0.5) & (pl.col(probability_column) <= 0.8)
+    )
     low_prob = df.filter(pl.col(probability_column) <= 0.5)
 
     return {
@@ -131,7 +142,9 @@ def detect_synthetic_patterns(df: pl.DataFrame, probability_column: str = "synth
         "high_synthetic_probability": len(high_prob),
         "medium_synthetic_probability": len(medium_prob),
         "low_synthetic_probability": len(low_prob),
-        "high_prob_percentage": round(len(high_prob) / total_records * 100, 2) if total_records > 0 else 0,
+        "high_prob_percentage": round(len(high_prob) / total_records * 100, 2)
+        if total_records > 0
+        else 0,
         "avg_synthetic_probability": df[probability_column].mean(),
     }
 
@@ -151,9 +164,7 @@ def temporal_pattern_analysis(df: pl.DataFrame, timestamp_col: str = "timestamp"
     df_sorted = df.sort(timestamp_col)
 
     # Calculate time deltas between events
-    time_deltas = df_sorted.select(
-        pl.col(timestamp_col).diff().alias("delta")
-    ).drop_nulls()
+    time_deltas = df_sorted.select(pl.col(timestamp_col).diff().alias("delta")).drop_nulls()
 
     return {
         "earliest_event": df[timestamp_col].min(),
@@ -178,7 +189,9 @@ def calculate_trust_scores(df: pl.DataFrame) -> pl.DataFrame:
     """
     return df.with_columns(
         # Trust is inverse of risk and synthetic probability
-        ((1 - pl.col("risk_score")) * (1 - pl.col("synthetic_probability")) * 100).alias("trust_score")
+        ((1 - pl.col("risk_score")) * (1 - pl.col("synthetic_probability")) * 100).alias(
+            "trust_score"
+        )
     )
 
 
@@ -204,6 +217,7 @@ def group_by_entity_type(df: pl.DataFrame, entity_col: str = "user") -> dict[str
 # ============================================================================
 # SME Integration Functions
 # ============================================================================
+
 
 def process_forensic_batch(data: list[dict[str, Any]]) -> dict[str, Any]:
     """
@@ -234,9 +248,11 @@ def process_forensic_batch(data: list[dict[str, Any]]) -> dict[str, Any]:
         "top_entities": sorted(entity_counts.items(), key=lambda x: x[1], reverse=True)[:10],
         "trust_distribution": {
             "high_trust": len(trust_scores.filter(pl.col("trust_score") > 80)),
-            "medium_trust": len(trust_scores.filter((pl.col("trust_score") > 50) & (pl.col("trust_score") <= 80))),
+            "medium_trust": len(
+                trust_scores.filter((pl.col("trust_score") > 50) & (pl.col("trust_score") <= 80))
+            ),
             "low_trust": len(trust_scores.filter(pl.col("trust_score") <= 50)),
-        }
+        },
     }
 
 
@@ -262,9 +278,15 @@ def export_to_parquet(df: pl.DataFrame, output_path: str) -> str:
 if __name__ == "__main__":
     # Create sample forensic data
     sample_data = [
-        {"timestamp": 1700000000 + i * 3600, "source_ip": f"192.168.1.{i%255}",
-         "dest_ip": "10.0.0.1", "action": "login", "user": f"user{i%5}",
-         "risk_score": 0.3 + (i % 10) * 0.07, "synthetic_probability": 0.1 + (i % 5) * 0.15}
+        {
+            "timestamp": 1700000000 + i * 3600,
+            "source_ip": f"192.168.1.{i % 255}",
+            "dest_ip": "10.0.0.1",
+            "action": "login",
+            "user": f"user{i % 5}",
+            "risk_score": 0.3 + (i % 10) * 0.07,
+            "synthetic_probability": 0.1 + (i % 5) * 0.15,
+        }
         for i in range(100)
     ]
 

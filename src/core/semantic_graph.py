@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SemanticRelation:
     """Represents a semantic relationship between concepts."""
+
     word: str
     related_word: str
     relation_type: str  # synonym, antonym, hypernym, hyponym
@@ -46,12 +47,13 @@ class SemanticRelation:
 @dataclass
 class ConceptMeaning:
     """Comprehensive semantic analysis of a concept."""
+
     word: str
     definitions: list[str]
     synonyms: list[str]
     antonyms: list[str]
     hypernyms: list[str]  # Broader/more general concepts
-    hyponyms: list[str]   # Narrower/more specific concepts
+    hyponyms: list[str]  # Narrower/more specific concepts
     related_words: list[SemanticRelation]
     total_meanings: int
 
@@ -120,7 +122,7 @@ class SemanticGraph:
                 hypernyms=hypernyms[:max_relations],
                 hyponyms=hyponyms[:max_relations],
                 related_words=related_words[:max_relations],
-                total_meanings=len(synsets)
+                total_meanings=len(synsets),
             )
 
             # Cache result
@@ -149,10 +151,10 @@ class SemanticGraph:
             return {}
 
         return {
-            'synonyms': meaning.synonyms,
-            'antonyms': meaning.antonyms,
-            'hypernyms': meaning.hypernyms,
-            'hyponyms': meaning.hyponyms,
+            "synonyms": meaning.synonyms,
+            "antonyms": meaning.antonyms,
+            "hypernyms": meaning.hypernyms,
+            "hyponyms": meaning.hyponyms,
         }
 
     def calculate_semantic_similarity(self, word1: str, word2: str) -> float:
@@ -219,7 +221,7 @@ class SemanticGraph:
                     continue
 
                 # Add all related concepts
-                for related in (meaning.synonyms + meaning.hypernyms + meaning.hyponyms):
+                for related in meaning.synonyms + meaning.hypernyms + meaning.hyponyms:
                     if related not in visited:
                         result[f"depth_{level}"].add(related)
                         next_level.add(related)
@@ -254,36 +256,42 @@ class SemanticGraph:
         # Check synonyms
         for synonym in meaning.synonyms:
             if synonym not in existing_concepts:
-                gaps.append({
-                    'gap': synonym,
-                    'type': 'synonym',
-                    'reason': f'Synonym of {concept}',
-                    'priority': 'high'
-                })
+                gaps.append(
+                    {
+                        "gap": synonym,
+                        "type": "synonym",
+                        "reason": f"Synonym of {concept}",
+                        "priority": "high",
+                    }
+                )
 
         # Check hypernyms (broader concepts)
         for hypernym in meaning.hypernyms:
             if hypernym not in existing_concepts:
-                gaps.append({
-                    'gap': hypernym,
-                    'type': 'hypernym',
-                    'reason': f'Broader concept of {concept}',
-                    'priority': 'medium'
-                })
+                gaps.append(
+                    {
+                        "gap": hypernym,
+                        "type": "hypernym",
+                        "reason": f"Broader concept of {concept}",
+                        "priority": "medium",
+                    }
+                )
 
         # Check hyponyms (narrower concepts)
         for hyponym in meaning.hyponyms[:5]:  # Limit to top 5
             if hyponym not in existing_concepts:
-                gaps.append({
-                    'gap': hyponym,
-                    'type': 'hyponym',
-                    'reason': f'Specific instance of {concept}',
-                    'priority': 'low'
-                })
+                gaps.append(
+                    {
+                        "gap": hyponym,
+                        "type": "hyponym",
+                        "reason": f"Specific instance of {concept}",
+                        "priority": "low",
+                    }
+                )
 
         return gaps
 
-    def get_concept_hierarchy(self, word: str, direction: str = 'both') -> dict:
+    def get_concept_hierarchy(self, word: str, direction: str = "both") -> dict:
         """
         Get the concept hierarchy (taxonomy) for a word.
 
@@ -302,15 +310,15 @@ class SemanticGraph:
             return {}
 
         hierarchy = {
-            'word': word,
-            'definitions': meaning.definitions[:1] if meaning.definitions else []
+            "word": word,
+            "definitions": meaning.definitions[:1] if meaning.definitions else [],
         }
 
-        if direction in ('up', 'both'):
-            hierarchy['broader_concepts'] = meaning.hypernyms
+        if direction in ("up", "both"):
+            hierarchy["broader_concepts"] = meaning.hypernyms
 
-        if direction in ('down', 'both'):
-            hierarchy['specific_examples'] = meaning.hyponyms[:5]
+        if direction in ("down", "both"):
+            hierarchy["specific_examples"] = meaning.hyponyms[:5]
 
         return hierarchy
 
@@ -322,7 +330,7 @@ class SemanticGraph:
         lemmas = set()
         for synset in synsets:
             for lemma in synset.lemmas():
-                lemmas.add(lemma.name().replace('_', ' '))
+                lemmas.add(lemma.name().replace("_", " "))
         return sorted(lemmas)
 
     @staticmethod
@@ -332,7 +340,7 @@ class SemanticGraph:
         for synset in synsets:
             for lemma in synset.lemmas():
                 for antonym in lemma.antonyms():
-                    antonyms.add(antonym.name().replace('_', ' '))
+                    antonyms.add(antonym.name().replace("_", " "))
         return sorted(antonyms)
 
     @staticmethod
@@ -342,7 +350,7 @@ class SemanticGraph:
         for synset in synsets:
             for hyp in synset.hypernyms()[:max_count]:
                 for lemma in hyp.lemmas():
-                    hypernyms.add(lemma.name().replace('_', ' '))
+                    hypernyms.add(lemma.name().replace("_", " "))
         return sorted(hypernyms)[:max_count]
 
     @staticmethod
@@ -352,7 +360,7 @@ class SemanticGraph:
         for synset in synsets:
             for hyp in synset.hyponyms()[:max_count]:
                 for lemma in hyp.lemmas():
-                    hyponyms.add(lemma.name().replace('_', ' '))
+                    hyponyms.add(lemma.name().replace("_", " "))
         return sorted(hyponyms)[:max_count]
 
     @staticmethod
@@ -361,42 +369,38 @@ class SemanticGraph:
         synonyms: list[str],
         antonyms: list[str],
         hypernyms: list[str],
-        hyponyms: list[str]
+        hyponyms: list[str],
     ) -> list[SemanticRelation]:
         """Build semantic relation objects."""
         relations = []
 
         for syn in synonyms:
-            relations.append(SemanticRelation(
-                word=word,
-                related_word=syn,
-                relation_type='synonym',
-                confidence=0.9
-            ))
+            relations.append(
+                SemanticRelation(
+                    word=word, related_word=syn, relation_type="synonym", confidence=0.9
+                )
+            )
 
         for ant in antonyms:
-            relations.append(SemanticRelation(
-                word=word,
-                related_word=ant,
-                relation_type='antonym',
-                confidence=0.85
-            ))
+            relations.append(
+                SemanticRelation(
+                    word=word, related_word=ant, relation_type="antonym", confidence=0.85
+                )
+            )
 
         for hyp in hypernyms:
-            relations.append(SemanticRelation(
-                word=word,
-                related_word=hyp,
-                relation_type='hypernym',
-                confidence=0.8
-            ))
+            relations.append(
+                SemanticRelation(
+                    word=word, related_word=hyp, relation_type="hypernym", confidence=0.8
+                )
+            )
 
         for hyp in hyponyms:
-            relations.append(SemanticRelation(
-                word=word,
-                related_word=hyp,
-                relation_type='hyponym',
-                confidence=0.75
-            ))
+            relations.append(
+                SemanticRelation(
+                    word=word, related_word=hyp, relation_type="hyponym", confidence=0.75
+                )
+            )
 
         return relations
 

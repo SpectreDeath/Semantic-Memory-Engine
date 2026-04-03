@@ -9,7 +9,7 @@ import sqlite3
 def check_database():
     """Check the structure of the knowledge_core.sqlite database."""
     try:
-        conn = sqlite3.connect('data/knowledge_core.sqlite')
+        conn = sqlite3.connect("data/knowledge_core.sqlite")
         cursor = conn.cursor()
 
         # Get all tables
@@ -43,6 +43,7 @@ def check_database():
 
     except Exception as e:
         print(f"Error: {e}")
+
 
 if __name__ == "__main__":
     check_database()

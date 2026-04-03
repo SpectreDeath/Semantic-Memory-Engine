@@ -9,8 +9,7 @@ def get_dvc_history(file_path):
     dvc_file = f"{file_path}.dvc"
     try:
         result = subprocess.run(
-            ["git", "log", "--oneline", dvc_file],
-            capture_output=True, text=True, cwd=os.getcwd()
+            ["git", "log", "--oneline", dvc_file], capture_output=True, text=True, cwd=os.getcwd()
         )
         history = []
         for line in result.stdout.splitlines():
@@ -20,6 +19,7 @@ def get_dvc_history(file_path):
     except Exception as e:
         print(f"Error fetching DVC history: {e}")
         return []
+
 
 def fetch_historical_json(file_path, commit_hash):
     """Use 'dvc get' to retrieve a historical version of a JSON file."""
@@ -33,10 +33,11 @@ def fetch_historical_json(file_path, commit_hash):
         # Command: dvc get . data/raw/osint_results.json --rev <hash> -o <out>
         subprocess.run(
             ["dvc", "get", ".", file_path, "--rev", commit_hash, "-o", str(temp_file)],
-            check=True, cwd=os.getcwd()
+            check=True,
+            cwd=os.getcwd(),
         )
 
-        with open(temp_file, encoding='utf-8') as f:
+        with open(temp_file, encoding="utf-8") as f:
             return json.load(f)
     except Exception as e:
         print(f"Error fetching historical JSON ({commit_hash}): {e}")

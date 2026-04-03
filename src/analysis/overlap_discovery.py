@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SemanticConnection:
     """Represents a semantic link between two documents/contexts."""
+
     source_context: str
     target_context: str
     similarity_score: float
@@ -54,7 +55,7 @@ class OverlapDiscovery:
 
         # 1. Get representative embeddings for the source context
         source_data = self.semantic_db.get_by_context(context_id)
-        if not source_data or not source_data.get('documents'):
+        if not source_data or not source_data.get("documents"):
             logger.info(f"No data found for context {context_id}")
             return []
 
@@ -63,25 +64,27 @@ class OverlapDiscovery:
         connections = []
         seen_contexts = {context_id}
 
-        for doc_text in source_data['documents'][:3]: # Sample 3 documents
+        for doc_text in source_data["documents"][:3]:  # Sample 3 documents
             results = self.semantic_db.search(doc_text, limit=limit * 2)
 
-            for i, target_doc in enumerate(results.get('documents', [[]])[0]):
-                target_meta = results.get('metadatas', [[]])[0][i]
-                target_context = target_meta.get('context_id', 'unknown')
-                distance = results.get('distances', [[]])[0][i]
+            for i, target_doc in enumerate(results.get("documents", [[]])[0]):
+                target_meta = results.get("metadatas", [[]])[0][i]
+                target_context = target_meta.get("context_id", "unknown")
+                distance = results.get("distances", [[]])[0][i]
 
                 # Convert distance to similarity (simplified)
                 similarity = 1.0 - (distance / 2.0)
 
                 if target_context not in seen_contexts and similarity > 0.7:
-                    connections.append(SemanticConnection(
-                        source_context=context_id,
-                        target_context=target_context,
-                        similarity_score=similarity,
-                        overlapping_concepts=target_meta.get('keywords', []),
-                        sample_text=target_doc[:100] + "..."
-                    ))
+                    connections.append(
+                        SemanticConnection(
+                            source_context=context_id,
+                            target_context=target_context,
+                            similarity_score=similarity,
+                            overlapping_concepts=target_meta.get("keywords", []),
+                            sample_text=target_doc[:100] + "...",
+                        )
+                    )
                     seen_contexts.add(target_context)
 
                 if len(connections) >= limit:

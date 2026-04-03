@@ -32,7 +32,10 @@ def extract_targets():
 
     # NLP Filtering Layer
     from src.utils.entity_filter import filter_targets
+
     targets = filter_targets(candidates)
 
-    logger.info(f"🔍 Filtered {len(candidates)} candidates down to {len(targets)} high-probability targets.")
+    logger.info(
+        f"🔍 Filtered {len(candidates)} candidates down to {len(targets)} high-probability targets."
+    )
     return targets[:5]  # Limit for the operational run

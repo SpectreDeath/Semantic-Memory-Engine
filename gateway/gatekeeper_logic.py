@@ -2,22 +2,29 @@ import glob
 import json
 import math
 import os
+import os as _os
 import re
 import statistics
 from collections import Counter
+from pathlib import Path as _Path
 from typing import Any
 
-VAULT_PATH = r"d:\SME\data\grok_vault"
-SIGNATURES_PATH = r"d:\SME\data\signatures.json"
+_DEFAULT_VAULT = str(_Path(__file__).resolve().parent.parent / "data" / "grok_vault")
+_DEFAULT_SIGS = str(_Path(__file__).resolve().parent.parent / "data" / "signatures.json")
+
+VAULT_PATH = _os.environ.get("SME_GROK_VAULT_PATH", _DEFAULT_VAULT)
+SIGNATURES_PATH = _os.environ.get("SME_SIGNATURES_PATH", _DEFAULT_SIGS)
 _VAULT_CACHE = None
 _SIGNATURES_CACHE = None
 
+
 def _get_ngrams(text: str, n: int = 3) -> set:
     """Generate n-grams from text."""
-    words = re.findall(r'\b\w+\b', text.lower())
+    words = re.findall(r"\b\w+\b", text.lower())
     if len(words) < n:
         return set()
     return set(zip(*[words[i:] for i in range(n)], strict=False))
+
 
 def load_vault() -> list[set]:
     """Load vault signatures (cached). Returns list of n-gram sets."""
@@ -31,13 +38,14 @@ def load_vault() -> list[set]:
 
     for file_path in glob.glob(os.path.join(VAULT_PATH, "*.txt")):
         try:
-            with open(file_path, encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 content = f.read()
                 if content:
                     _VAULT_CACHE.append(_get_ngrams(content))
         except Exception:
             pass
     return _VAULT_CACHE
+
 
 class TrustScorer:
     """
@@ -64,7 +72,7 @@ class TrustScorer:
         if not text:
             return 0.0
         # Split into sentences
-        sentences = re.split(r'[.!?]+', text)
+        sentences = re.split(r"[.!?]+", text)
         sentences = [s.strip() for s in sentences if s.strip()]
         if len(sentences) < 2:
             return 0.0
@@ -142,7 +150,7 @@ class TrustScorer:
 
         # 1. Vectorize Input Text (Relative Frequency of Feature Words)
         # Tokenize simply
-        words = re.findall(r'\b\w+\b', text.lower())
+        words = re.findall(r"\b\w+\b", text.lower())
         total_words = len(words)
         if total_words == 0:
             return {"family": "Unknown", "confidence": 0.0}
@@ -161,9 +169,9 @@ class TrustScorer:
         best_family = "Unknown"
         max_similarity = 0.0
 
-        norm_a = math.sqrt(sum(x*x for x in vector_a))
+        norm_a = math.sqrt(sum(x * x for x in vector_a))
         if norm_a == 0:
-             return {"family": "Unknown", "confidence": 0.0}
+            return {"family": "Unknown", "confidence": 0.0}
 
         for family, data in families.items():
             vector_b = data.get("vector")
@@ -171,7 +179,7 @@ class TrustScorer:
                 continue
 
             dot_product = sum(a * b for a, b in zip(vector_a, vector_b, strict=False))
-            norm_b = math.sqrt(sum(x*x for x in vector_b))
+            norm_b = math.sqrt(sum(x * x for x in vector_b))
 
             if norm_b > 0:
                 similarity = dot_product / (norm_a * norm_b)
@@ -182,14 +190,18 @@ class TrustScorer:
         # Threshold Check
         confidence_pct = round(max_similarity * 100, 1)
         attribution = {
-            "family": best_family if confidence_pct > 80 else "Unknown", # Threshold for attribution
+            "family": best_family
+            if confidence_pct > 80
+            else "Unknown",  # Threshold for attribution
             "confidence": confidence_pct,
-            "raw_similarity": max_similarity
+            "raw_similarity": max_similarity,
         }
         return attribution
 
     @classmethod
-    def calculate_trust_score(cls, entropy: float, burstiness: float, vault_proximity: float = 0.0) -> dict[str, Any]:
+    def calculate_trust_score(
+        cls, entropy: float, burstiness: float, vault_proximity: float = 0.0
+    ) -> dict[str, Any]:
         """
         Calculates the Normalized Trust Score (NTS).
         """
@@ -230,24 +242,31 @@ class TrustScorer:
                 "penalties": {
                     "entropy_deficit": round(entropy_penalty, 1),
                     "burstiness_penalty": round(burstiness_penalty, 1),
-                    "vault_penalty": round(vault_penalty, 1)
-                }
-            }
+                    "vault_penalty": round(vault_penalty, 1),
+                },
+            },
         }
+
 
 # Backward Compatibility Wrappers
 def analyze_model_origin(text: str) -> dict[str, Any]:
     return TrustScorer.analyze_model_origin(text)
 
+
 # Backward Compatibility Wrappers
 def calculate_entropy(data: str) -> float:
     return TrustScorer.calculate_entropy(data)
 
+
 def calculate_burstiness(text: str) -> float:
     return TrustScorer.calculate_burstiness(text)
+
 
 def calculate_vault_proximity(text: str) -> float:
     return TrustScorer.calculate_vault_proximity(text)
 
-def calculate_trust_score(entropy: float, burstiness: float, vault_proximity: float = 0.0) -> dict[str, Any]:
+
+def calculate_trust_score(
+    entropy: float, burstiness: float, vault_proximity: float = 0.0
+) -> dict[str, Any]:
     return TrustScorer.calculate_trust_score(entropy, burstiness, vault_proximity)

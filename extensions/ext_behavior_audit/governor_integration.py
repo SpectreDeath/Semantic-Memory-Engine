@@ -15,15 +15,15 @@ from enum import Enum
 from typing import Any
 
 # Configure logging for governor integration
-logger = logging.getLogger('behavior_audit.governor_integration')
+logger = logging.getLogger("behavior_audit.governor_integration")
 logger.setLevel(logging.INFO)
 
 # Create file handler for governor integration events
-governor_handler = logging.FileHandler('behavior_audit_governor_integration_events.log')
+governor_handler = logging.FileHandler("behavior_audit_governor_integration_events.log")
 governor_handler.setLevel(logging.INFO)
 
 # Create formatter and add it to handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 governor_handler.setFormatter(formatter)
 
 # Add handler to logger
@@ -32,17 +32,19 @@ logger.addHandler(governor_handler)
 
 class GovernorStatus(Enum):
     """Governor status levels."""
-    NORMAL = "NORMAL"      # Green - Safe to run text analysis
-    WARNING = "WARNING"    # Yellow - Caution, may have resource constraints
+
+    NORMAL = "NORMAL"  # Green - Safe to run text analysis
+    WARNING = "WARNING"  # Yellow - Caution, may have resource constraints
     CRITICAL = "CRITICAL"  # Red - High resource usage, avoid heavy operations
-    UNKNOWN = "UNKNOWN"    # Status unknown
+    UNKNOWN = "UNKNOWN"  # Status unknown
 
 
 class GPUUsageLevel(Enum):
     """GPU usage levels for resource monitoring."""
-    LOW = "LOW"           # GPU usage < 30%
-    MEDIUM = "MEDIUM"     # GPU usage 30-70%
-    HIGH = "HIGH"         # GPU usage > 70%
+
+    LOW = "LOW"  # GPU usage < 30%
+    MEDIUM = "MEDIUM"  # GPU usage 30-70%
+    HIGH = "HIGH"  # GPU usage > 70%
     UNKNOWN = "UNKNOWN"
 
 
@@ -133,25 +135,31 @@ class BehaviorAuditGovernorIntegration:
         self._last_status_check = datetime.now()
 
         # Safe conditions: Governor NORMAL and GPU usage not HIGH (to keep GPU free for rnj-1)
-        is_safe = (governor_status == GovernorStatus.NORMAL and
-                  gpu_usage in [GPUUsageLevel.LOW, GPUUsageLevel.MEDIUM])
+        is_safe = governor_status == GovernorStatus.NORMAL and gpu_usage in [
+            GPUUsageLevel.LOW,
+            GPUUsageLevel.MEDIUM,
+        ]
 
         if is_safe:
             logger.info(f"Safe to analyze: Governor={governor_status.value}, GPU={gpu_usage.value}")
         else:
-            logger.warning(f"Analysis blocked: Governor={governor_status.value}, GPU={gpu_usage.value}")
+            logger.warning(
+                f"Analysis blocked: Governor={governor_status.value}, GPU={gpu_usage.value}"
+            )
 
         return is_safe
 
     def get_status_info(self) -> dict[str, Any]:
         """Get current status information."""
         return {
-            'governor_status': self._governor_status.value,
-            'gpu_usage_level': self._gpu_usage_level.value,
-            'last_status_check': self._last_status_check.isoformat() if self._last_status_check else None,
-            'analysis_count': self._analysis_count,
-            'total_analysis_time': self._total_analysis_time,
-            'is_safe_to_analyze': self.is_safe_to_analyze()
+            "governor_status": self._governor_status.value,
+            "gpu_usage_level": self._gpu_usage_level.value,
+            "last_status_check": self._last_status_check.isoformat()
+            if self._last_status_check
+            else None,
+            "analysis_count": self._analysis_count,
+            "total_analysis_time": self._total_analysis_time,
+            "is_safe_to_analyze": self.is_safe_to_analyze(),
         }
 
     def record_analysis(self, analysis_time: float):
@@ -159,11 +167,14 @@ class BehaviorAuditGovernorIntegration:
         self._analysis_count += 1
         self._total_analysis_time += analysis_time
 
-        logger.info(f"Analysis completed in {analysis_time:.2f}s. Total analyses: {self._analysis_count}")
+        logger.info(
+            f"Analysis completed in {analysis_time:.2f}s. Total analyses: {self._analysis_count}"
+        )
 
 
-def safe_audit_rhetorical_behavior(text: str,
-                                  governor_check: BehaviorAuditGovernorIntegration | None = None) -> dict[str, Any]:
+def safe_audit_rhetorical_behavior(
+    text: str, governor_check: BehaviorAuditGovernorIntegration | None = None
+) -> dict[str, Any]:
     """
     Safe wrapper for audit_rhetorical_behavior that checks Governor status and GPU usage.
 
@@ -190,20 +201,20 @@ def safe_audit_rhetorical_behavior(text: str,
         print(f"⚠️  {warning_message}")
 
         return {
-            'sentiment_volatility': 0.0,
-            'type_token_ratio': 0.0,
-            'lexical_diversity_score': 0.0,
-            'emphatic_qualifiers_count': 0,
-            'non_contracted_denials_count': 0,
-            'synthetic_repetitiveness_score': 0.0,
-            'deceptive_indicators': [],
-            'anomaly_detected': False,
-            'confidence_score': 0.0,
-            'timestamp': datetime.now().isoformat(),
-            'status': 'ANALYSIS_BLOCKED_DUE_TO_RESOURCE_CONSTRAINTS',
-            'governor_status': status_info['governor_status'],
-            'gpu_usage_level': status_info['gpu_usage_level'],
-            'reason': 'Governor status not NORMAL or GPU usage too high (rnj-1 needs GPU)'
+            "sentiment_volatility": 0.0,
+            "type_token_ratio": 0.0,
+            "lexical_diversity_score": 0.0,
+            "emphatic_qualifiers_count": 0,
+            "non_contracted_denials_count": 0,
+            "synthetic_repetitiveness_score": 0.0,
+            "deceptive_indicators": [],
+            "anomaly_detected": False,
+            "confidence_score": 0.0,
+            "timestamp": datetime.now().isoformat(),
+            "status": "ANALYSIS_BLOCKED_DUE_TO_RESOURCE_CONSTRAINTS",
+            "governor_status": status_info["governor_status"],
+            "gpu_usage_level": status_info["gpu_usage_level"],
+            "reason": "Governor status not NORMAL or GPU usage too high (rnj-1 needs GPU)",
         }
 
     # Import the actual analysis function
@@ -227,39 +238,40 @@ def safe_audit_rhetorical_behavior(text: str,
     except ImportError as e:
         logger.exception(f"Failed to import analysis function: {e}")
         return {
-            'sentiment_volatility': 0.0,
-            'type_token_ratio': 0.0,
-            'lexical_diversity_score': 0.0,
-            'emphatic_qualifiers_count': 0,
-            'non_contracted_denials_count': 0,
-            'synthetic_repetitiveness_score': 0.0,
-            'deceptive_indicators': [],
-            'anomaly_detected': False,
-            'confidence_score': 0.0,
-            'timestamp': datetime.now().isoformat(),
-            'status': 'ANALYSIS_FAILED_TO_IMPORT',
-            'error': str(e)
+            "sentiment_volatility": 0.0,
+            "type_token_ratio": 0.0,
+            "lexical_diversity_score": 0.0,
+            "emphatic_qualifiers_count": 0,
+            "non_contracted_denials_count": 0,
+            "synthetic_repetitiveness_score": 0.0,
+            "deceptive_indicators": [],
+            "anomaly_detected": False,
+            "confidence_score": 0.0,
+            "timestamp": datetime.now().isoformat(),
+            "status": "ANALYSIS_FAILED_TO_IMPORT",
+            "error": str(e),
         }
     except Exception as e:
         logger.exception(f"Analysis execution failed: {e}")
         return {
-            'sentiment_volatility': 0.0,
-            'type_token_ratio': 0.0,
-            'lexical_diversity_score': 0.0,
-            'emphatic_qualifiers_count': 0,
-            'non_contracted_denials_count': 0,
-            'synthetic_repetitiveness_score': 0.0,
-            'deceptive_indicators': [],
-            'anomaly_detected': False,
-            'confidence_score': 0.0,
-            'timestamp': datetime.now().isoformat(),
-            'status': 'ANALYSIS_EXECUTION_FAILED',
-            'error': str(e)
+            "sentiment_volatility": 0.0,
+            "type_token_ratio": 0.0,
+            "lexical_diversity_score": 0.0,
+            "emphatic_qualifiers_count": 0,
+            "non_contracted_denials_count": 0,
+            "synthetic_repetitiveness_score": 0.0,
+            "deceptive_indicators": [],
+            "anomaly_detected": False,
+            "confidence_score": 0.0,
+            "timestamp": datetime.now().isoformat(),
+            "status": "ANALYSIS_EXECUTION_FAILED",
+            "error": str(e),
         }
 
 
-def safe_audit_rhetorical_behavior_tool(text: str,
-                                     governor_check: BehaviorAuditGovernorIntegration | None = None) -> str:
+def safe_audit_rhetorical_behavior_tool(
+    text: str, governor_check: BehaviorAuditGovernorIntegration | None = None
+) -> str:
     """Tool wrapper that returns a JSON string."""
     result = safe_audit_rhetorical_behavior(text, governor_check)
     return json.dumps(result, indent=2)
@@ -311,18 +323,18 @@ def create_behavior_audit_governor_hook() -> Callable:
                 print("✅ Behavior Audit Governor reports NORMAL status - text analysis safe")
 
             return {
-                'status': 'hook_executed',
-                'new_governor_status': status,
-                'timestamp': datetime.now().isoformat(),
-                'action_taken': 'status_updated'
+                "status": "hook_executed",
+                "new_governor_status": status,
+                "timestamp": datetime.now().isoformat(),
+                "action_taken": "status_updated",
             }
 
         except Exception as e:
             logger.exception(f"Behavior Audit Governor status hook failed: {e}")
             return {
-                'status': 'hook_failed',
-                'error': str(e),
-                'timestamp': datetime.now().isoformat()
+                "status": "hook_failed",
+                "error": str(e),
+                "timestamp": datetime.now().isoformat(),
             }
 
     return behavior_audit_governor_status_hook
@@ -330,10 +342,10 @@ def create_behavior_audit_governor_hook() -> Callable:
 
 # Export the main functions for use by the extension system
 __all__ = [
-    'BehaviorAuditGovernorIntegration',
-    'GPUUsageLevel',
-    'GovernorStatus',
-    'create_behavior_audit_governor_hook',
-    'safe_audit_rhetorical_behavior',
-    'safe_audit_rhetorical_behavior_tool'
+    "BehaviorAuditGovernorIntegration",
+    "GPUUsageLevel",
+    "GovernorStatus",
+    "create_behavior_audit_governor_hook",
+    "safe_audit_rhetorical_behavior",
+    "safe_audit_rhetorical_behavior_tool",
 ]

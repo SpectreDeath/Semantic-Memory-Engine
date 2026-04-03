@@ -189,9 +189,7 @@ class ScrapeGraphHarvester:
                     "prompt": request.prompt,
                     "model": request.model,
                     "nodes_created": len(memory_nodes),
-                    "entities_extracted": len(
-                        {e for node in memory_nodes for e in node.entities}
-                    ),
+                    "entities_extracted": len({e for node in memory_nodes for e in node.entities}),
                     "trust_score": round(
                         sum(n.trust_score for n in memory_nodes) / len(memory_nodes), 2
                     ),
@@ -233,9 +231,7 @@ class ScrapeGraphHarvester:
                     "model": request.model,
                     "results_count": len(result.results),
                     "nodes_created": len(memory_nodes),
-                    "entities_extracted": len(
-                        {e for node in memory_nodes for e in node.entities}
-                    ),
+                    "entities_extracted": len({e for node in memory_nodes for e in node.entities}),
                     "trust_score": round(
                         sum(n.trust_score for n in memory_nodes) / len(memory_nodes), 2
                     ),
@@ -277,9 +273,7 @@ class ScrapeGraphHarvester:
                     "model": request.model,
                     "markdown_length": len(result.markdown),
                     "nodes_created": len(memory_nodes),
-                    "entities_extracted": len(
-                        {e for node in memory_nodes for e in node.entities}
-                    ),
+                    "entities_extracted": len({e for node in memory_nodes for e in node.entities}),
                     "trust_score": round(
                         sum(n.trust_score for n in memory_nodes) / len(memory_nodes), 2
                     ),

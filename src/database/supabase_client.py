@@ -9,6 +9,7 @@ key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 try:
     from supabase import Client, create_client
+
     if not url or not key:
         print("⚠️ Warning: Supabase credentials not found in .env file.")
         supabase: Client = None
@@ -16,8 +17,11 @@ try:
         supabase: Client = create_client(url, key)
 except Exception as e:
     # Handle both ImportError (missing package) and initialization errors
-    print(f"⚠️ Warning: Supabase client failed to initialize due to environmental incompatibility: {e}")
+    print(
+        f"⚠️ Warning: Supabase client failed to initialize due to environmental incompatibility: {e}"
+    )
     supabase = None
+
 
 def sync_osint_results_to_supabase(scan_results):
     """Sync a single OSINT scan result to Supabase."""
@@ -29,11 +33,18 @@ def sync_osint_results_to_supabase(scan_results):
 
     try:
         # 1. Upsert Actor
-        actor_res = supabase.table("actors").upsert({
-            "username": username,
-            "last_scanned": timestamp,
-            "metadata": {"last_scan_summary": scan_results}
-        }, on_conflict="username").execute()
+        actor_res = (
+            supabase.table("actors")
+            .upsert(
+                {
+                    "username": username,
+                    "last_scanned": timestamp,
+                    "metadata": {"last_scan_summary": scan_results},
+                },
+                on_conflict="username",
+            )
+            .execute()
+        )
 
         if not actor_res.data:
             return None
@@ -43,54 +54,73 @@ def sync_osint_results_to_supabase(scan_results):
         # 2. Upsert Footprints
         footprints = []
         for p in scan_results.get("platforms", []):
-            footprints.append({
-                "actor_id": actor_id,
-                "platform_name": p["name"],
-                "url": p.get("url"),
-                "status": p["status"],
-                "discovered_at": timestamp
-            })
+            footprints.append(
+                {
+                    "actor_id": actor_id,
+                    "platform_name": p["name"],
+                    "url": p.get("url"),
+                    "status": p["status"],
+                    "discovered_at": timestamp,
+                }
+            )
 
         if footprints:
-            supabase.table("footprints").upsert(footprints, on_conflict="actor_id,platform_name").execute()
+            supabase.table("footprints").upsert(
+                footprints, on_conflict="actor_id,platform_name"
+            ).execute()
 
         return actor_id
     except Exception as e:
         print(f"❌ Supabase OSINT Sync Error: {e}")
         return None
 
+
 def sync_news_to_supabase(news_list):
     """Sync a list of news articles to Supabase."""
     if not supabase or not news_list:
         return
     try:
-        supabase.table("news_articles").upsert([{
-            "title": n.get("title"),
-            "summary": n.get("summary"),
-            "source_feed": n.get("source_feed"),
-            "url": n.get("link") or n.get("url"),
-            "published_at": n.get("published"),
-            "sentiment_polarity": n.get("sentiment_polarity")
-        } for n in news_list], on_conflict="url").execute()
+        supabase.table("news_articles").upsert(
+            [
+                {
+                    "title": n.get("title"),
+                    "summary": n.get("summary"),
+                    "source_feed": n.get("source_feed"),
+                    "url": n.get("link") or n.get("url"),
+                    "published_at": n.get("published"),
+                    "sentiment_polarity": n.get("sentiment_polarity"),
+                }
+                for n in news_list
+            ],
+            on_conflict="url",
+        ).execute()
     except Exception as e:
         print(f"❌ Supabase News Sync Error: {e}")
+
 
 def sync_research_to_supabase(research_list):
     """Sync a list of research papers to Supabase."""
     if not supabase or not research_list:
         return
     try:
-        supabase.table("research_papers").upsert([{
-            "paper_id": p.get("paperId"),
-            "title": p.get("title"),
-            "abstract": p.get("abstract"),
-            "authors": p.get("authors"),
-            "year": p.get("year"),
-            "url": p.get("url"),
-            "ingested_at": p.get("ingested_at")
-        } for p in research_list], on_conflict="paper_id").execute()
+        supabase.table("research_papers").upsert(
+            [
+                {
+                    "paper_id": p.get("paperId"),
+                    "title": p.get("title"),
+                    "abstract": p.get("abstract"),
+                    "authors": p.get("authors"),
+                    "year": p.get("year"),
+                    "url": p.get("url"),
+                    "ingested_at": p.get("ingested_at"),
+                }
+                for p in research_list
+            ],
+            on_conflict="paper_id",
+        ).execute()
     except Exception as e:
         print(f"❌ Supabase Research Sync Error: {e}")
+
 
 def test_connection():
     """Verify the connection to Supabase."""
@@ -103,6 +133,7 @@ def test_connection():
     except Exception as e:
         print(f"❌ Connection Failed: {e}")
         return False
+
 
 def get_threat_leads():
     """Fetch all records from the threat_leads table."""

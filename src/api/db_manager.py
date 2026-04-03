@@ -203,9 +203,7 @@ class ForensicDBManager:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def compare_signatures(
-        sig_a: dict[str, Any], sig_b: dict[str, Any]
-    ) -> float:
+    def compare_signatures(sig_a: dict[str, Any], sig_b: dict[str, Any]) -> float:
         """
         Compute Euclidean distance between two rhetorical signatures.
 
@@ -221,11 +219,7 @@ class ForensicDBManager:
         delta_parallelism = sig_a["parallelism_score"] - sig_b["parallelism_score"]
         delta_superlative = sig_a["superlative_count"] - sig_b["superlative_count"]
 
-        distance = math.sqrt(
-            delta_alliteration ** 2
-            + delta_parallelism ** 2
-            + delta_superlative ** 2
-        )
+        distance = math.sqrt(delta_alliteration**2 + delta_parallelism**2 + delta_superlative**2)
 
         logger.debug(f"Signature distance: {distance:.4f}")
         return distance

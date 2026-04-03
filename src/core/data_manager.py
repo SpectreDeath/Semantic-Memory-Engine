@@ -46,6 +46,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CorpusInfo:
     """Information about a corpus/lexicon."""
+
     name: str
     identifier: str
     description: str
@@ -64,22 +65,22 @@ class DataManager:
 
     # Core required resources for SimpleMem functionality
     REQUIRED_RESOURCES = {
-        'wordnet': 'WordNet lexical database',
-        'punkt': 'Punkt tokenizer',
-        'averaged_perceptron_tagger': 'POS tagger',
-        'stopwords': 'Common stopwords list',
-        'wordnet_ic': 'Information content for WordNet',
-        'omw-1.4': 'Open Multilingual Wordnet',
+        "wordnet": "WordNet lexical database",
+        "punkt": "Punkt tokenizer",
+        "averaged_perceptron_tagger": "POS tagger",
+        "stopwords": "Common stopwords list",
+        "wordnet_ic": "Information content for WordNet",
+        "omw-1.4": "Open Multilingual Wordnet",
     }
 
     # Optional resources for enhanced functionality
     OPTIONAL_RESOURCES = {
-        'verbnet': 'VerbNet lexicon',
-        'framenet': 'FrameNet lexicon',
-        'propbank': 'PropBank corpus',
-        'conll2000': 'CoNLL chunking corpus',
-        'brown': 'Brown corpus',
-        'universal_tagset': 'Universal POS tagset',
+        "verbnet": "VerbNet lexicon",
+        "framenet": "FrameNet lexicon",
+        "propbank": "PropBank corpus",
+        "conll2000": "CoNLL chunking corpus",
+        "brown": "Brown corpus",
+        "universal_tagset": "Universal POS tagset",
     }
 
     def __init__(self):
@@ -191,13 +192,12 @@ class DataManager:
             return []
 
         try:
-            return [lemma.name() for synset in wordnet.synsets(word)
-                    for lemma in synset.lemmas()]
+            return [lemma.name() for synset in wordnet.synsets(word) for lemma in synset.lemmas()]
         except Exception as e:
             logger.exception(f"Error getting lemmas for '{word}': {e}")
             return []
 
-    def get_stopwords(self, language: str = 'english') -> set[str]:
+    def get_stopwords(self, language: str = "english") -> set[str]:
         """
         Get stopwords for a language.
 
@@ -237,6 +237,7 @@ class DataManager:
 
         try:
             from nltk.tokenize import word_tokenize
+
             return word_tokenize(text)
         except Exception as e:
             logger.exception(f"Error tokenizing text: {e}")
@@ -253,14 +254,15 @@ class DataManager:
             List of sentences
         """
         if not self._available:
-            return text.split('.')
+            return text.split(".")
 
         try:
             from nltk.tokenize import sent_tokenize
+
             return sent_tokenize(text)
         except Exception as e:
             logger.exception(f"Error sentence tokenizing: {e}")
-            return text.split('.')
+            return text.split(".")
 
     def list_available_resources(self) -> dict[str, list[CorpusInfo]]:
         """
@@ -279,7 +281,7 @@ class DataManager:
                 description=desc,
                 size_mb=0.0,  # Would be fetched from NLTK
                 installed=self._check_resource(res_id),
-                required=True
+                required=True,
             )
             for res_id, desc in self.REQUIRED_RESOURCES.items()
         ]
@@ -291,14 +293,14 @@ class DataManager:
                 description=desc,
                 size_mb=0.0,
                 installed=self._check_resource(res_id),
-                required=False
+                required=False,
             )
             for res_id, desc in self.OPTIONAL_RESOURCES.items()
         ]
 
         return {
-            'required': required_info,
-            'optional': optional_info,
+            "required": required_info,
+            "optional": optional_info,
         }
 
     def health_check(self) -> dict[str, bool]:
@@ -323,9 +325,9 @@ class DataManager:
             print("❌ DataManager not available")
             return
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print("📊 NLTK Data Manager Status")
-        print("="*70)
+        print("=" * 70)
 
         print("\n✅ Required Resources:")
         for resource_id, desc in self.REQUIRED_RESOURCES.items():
@@ -337,7 +339,7 @@ class DataManager:
             status = "✅" if self._check_resource(resource_id) else "⭐"
             print(f"  {status} {resource_id:30} - {desc}")
 
-        print("\n" + "="*70 + "\n")
+        print("\n" + "=" * 70 + "\n")
 
     def clear_cache(self):
         """Clear internal cache."""
@@ -354,13 +356,14 @@ class DataManager:
 
         try:
             # Try to load the resource
-            if resource_id == 'wordnet':
-                _ = wordnet.synsets('test')
-            elif resource_id == 'stopwords':
-                _ = stopwords.words('english')
-            elif resource_id == 'punkt':
+            if resource_id == "wordnet":
+                _ = wordnet.synsets("test")
+            elif resource_id == "stopwords":
+                _ = stopwords.words("english")
+            elif resource_id == "punkt":
                 from nltk.tokenize import word_tokenize
-                _ = word_tokenize('test')
+
+                _ = word_tokenize("test")
             # Generic check via downloader
             elif self.downloader:
                 return self.downloader.is_installed(resource_id)
@@ -374,7 +377,7 @@ class DataManager:
         if nltk:
             # Check configured path first
             try:
-                data_dir = self.config.get_safe('nltk.data_dir')
+                data_dir = self.config.get_safe("nltk.data_dir")
                 if data_dir:
                     return Path(data_dir)
             except Exception:
@@ -385,4 +388,4 @@ class DataManager:
                 return Path(nltk.data.path[0])
 
         # Final fallback
-        return Path.home() / 'nltk_data'
+        return Path.home() / "nltk_data"

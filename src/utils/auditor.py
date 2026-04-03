@@ -46,7 +46,9 @@ def load_data(file_path: str) -> pd.DataFrame:
         raise AuditorError(f"Error loading file '{file_path}': {exc}") from exc
 
 
-def detect_outliers(df: pd.DataFrame, contamination: float = 0.1, random_state: int = 42) -> pd.DataFrame:
+def detect_outliers(
+    df: pd.DataFrame, contamination: float = 0.1, random_state: int = 42
+) -> pd.DataFrame:
     """
     Detect outliers using Isolation Forest.
 
@@ -63,7 +65,7 @@ def detect_outliers(df: pd.DataFrame, contamination: float = 0.1, random_state: 
 
     if len(numeric_cols) == 0:
         print("Warning: No numerical columns found. Adding is_outlier=False for all rows.")
-        df['is_outlier'] = False
+        df["is_outlier"] = False
         return df
 
     # Handle missing values by filling with column medians (non-mutating assignment,
@@ -95,30 +97,33 @@ def detect_outliers(df: pd.DataFrame, contamination: float = 0.1, random_state: 
         is_outlier = outlier_labels == -1
 
     # Attach result column to the original dataframe
-    df['is_outlier'] = is_outlier
+    df["is_outlier"] = is_outlier
     return df
 
 
 def main() -> None:
     """Main execution function."""
-    parser = argparse.ArgumentParser(description='Data Guard Auditor - Outlier Detection')
-    parser.add_argument('input_file', help='Input CSV file path')
+    parser = argparse.ArgumentParser(description="Data Guard Auditor - Outlier Detection")
+    parser.add_argument("input_file", help="Input CSV file path")
     parser.add_argument(
-        '--output', '-o',
-        default='data/results/audit_results.csv',
-        help='Output CSV file path (default: data/results/audit_results.csv)',
+        "--output",
+        "-o",
+        default="data/results/audit_results.csv",
+        help="Output CSV file path (default: data/results/audit_results.csv)",
     )
     parser.add_argument(
-        '--contamination', '-c',
+        "--contamination",
+        "-c",
         type=float,
         default=0.1,
-        help='Expected proportion of outliers (default: 0.1)',
+        help="Expected proportion of outliers (default: 0.1)",
     )
     parser.add_argument(
-        '--random-state', '-r',
+        "--random-state",
+        "-r",
         type=int,
         default=42,
-        help='Random seed for reproducibility (default: 42)',
+        help="Random seed for reproducibility (default: 42)",
     )
 
     args = parser.parse_args()
@@ -138,10 +143,10 @@ def main() -> None:
     )
 
     print(f"Saving results to {args.output}...")
-    os.makedirs(os.path.dirname(args.output) or '.', exist_ok=True)
+    os.makedirs(os.path.dirname(args.output) or ".", exist_ok=True)
     df_with_outliers.to_csv(args.output, index=False)
 
-    outlier_count = int(df_with_outliers['is_outlier'].sum())
+    outlier_count = int(df_with_outliers["is_outlier"].sum())
     total_count = len(df_with_outliers)
     outlier_percentage = (outlier_count / total_count) * 100
 

@@ -35,13 +35,13 @@ PYTHON_EXE = PROJECT_ROOT / ".venv" / "Scripts" / "python.exe"
 VALID_MODES = ("project", "trust", "knowledge", "synthetic")
 
 # Bipartite Deep-Stream constants
-CHUNK_SIZE = 5000           # max nodes per chunk before VRAM check
-CAUTION_THRESHOLD_MB = 5800 # from constitution & spec 004
+CHUNK_SIZE = 5000  # max nodes per chunk before VRAM check
+CAUTION_THRESHOLD_MB = 5800  # from constitution & spec 004
 VRAM_RETRY_DELAY_S = 10
 VRAM_MAX_RETRIES = 3
 
 # Node colours (RGB 0.0–1.0)
-TARGET_COLOR = (1.0, 0.2, 0.2)   # Red for primary threat actors
+TARGET_COLOR = (1.0, 0.2, 0.2)  # Red for primary threat actors
 FOOTPRINT_COLOR = (0.3, 0.5, 1.0)  # Blue for secondary artifacts
 
 # ---------------------------------------------------------------------------
@@ -52,10 +52,12 @@ mcp = FastMCP("GephiExporter")
 
 # ========================== VRAM GUARD ====================================
 
+
 def _get_vram_usage_mb() -> int:
     """Return current VRAM usage in MB via pynvml, or -1 on failure."""
     try:
         import pynvml
+
         pynvml.nvmlInit()
         handle = pynvml.nvmlDeviceGetHandleByIndex(0)
         mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
@@ -96,6 +98,7 @@ def _wait_for_vram_headroom() -> dict:
 
 # ========================== BIPARTITE BUILDER =============================
 
+
 def _build_bipartite_graph(rows: list[dict]) -> tuple[list[dict], list[dict]]:
     """
     Build bipartite node/edge lists from threat_leads rows.
@@ -111,17 +114,19 @@ def _build_bipartite_graph(rows: list[dict]) -> tuple[list[dict], list[dict]]:
         if value not in footprint_registry:
             fid = f"fp_{len(footprint_registry)}"
             footprint_registry[value] = fid
-            nodes.append({
-                "id": fid,
-                "label": value,
-                "node_class": "footprint",
-                "probability_score": 0.0,
-                "source_origin": "derived",
-                "r": FOOTPRINT_COLOR[0],
-                "g": FOOTPRINT_COLOR[1],
-                "b": FOOTPRINT_COLOR[2],
-                "size": 20,
-            })
+            nodes.append(
+                {
+                    "id": fid,
+                    "label": value,
+                    "node_class": "footprint",
+                    "probability_score": 0.0,
+                    "source_origin": "derived",
+                    "r": FOOTPRINT_COLOR[0],
+                    "g": FOOTPRINT_COLOR[1],
+                    "b": FOOTPRINT_COLOR[2],
+                    "size": 20,
+                }
+            )
         return footprint_registry[value]
 
     # Pass 1 — Target nodes
@@ -155,12 +160,14 @@ def _build_bipartite_graph(rows: list[dict]) -> tuple[list[dict], list[dict]]:
                 if alias:
                     fid = _get_footprint_id(alias)
                     footprints_for_target.append(fid)
-                    edges.append({
-                        "id": f"e_{tid}_{fid}",
-                        "source": tid,
-                        "target": fid,
-                        "type": "owns_alias",
-                    })
+                    edges.append(
+                        {
+                            "id": f"e_{tid}_{fid}",
+                            "source": tid,
+                            "target": fid,
+                            "type": "owns_alias",
+                        }
+                    )
 
         # IP addresses
         ips = row.get("ip_addresses", row.get("ips", ""))
@@ -170,12 +177,14 @@ def _build_bipartite_graph(rows: list[dict]) -> tuple[list[dict], list[dict]]:
                 if ip:
                     fid = _get_footprint_id(ip)
                     footprints_for_target.append(fid)
-                    edges.append({
-                        "id": f"e_{tid}_{fid}",
-                        "source": tid,
-                        "target": fid,
-                        "type": "uses_ip",
-                    })
+                    edges.append(
+                        {
+                            "id": f"e_{tid}_{fid}",
+                            "source": tid,
+                            "target": fid,
+                            "type": "uses_ip",
+                        }
+                    )
 
         # Fingerprints / tool artifacts
         fingerprints = row.get("fingerprints", row.get("metadata_fingerprints", ""))
@@ -185,12 +194,14 @@ def _build_bipartite_graph(rows: list[dict]) -> tuple[list[dict], list[dict]]:
                 if fp:
                     fid = _get_footprint_id(fp)
                     footprints_for_target.append(fid)
-                    edges.append({
-                        "id": f"e_{tid}_{fid}",
-                        "source": tid,
-                        "target": fid,
-                        "type": "leaves_fingerprint",
-                    })
+                    edges.append(
+                        {
+                            "id": f"e_{tid}_{fid}",
+                            "source": tid,
+                            "target": fid,
+                            "type": "leaves_fingerprint",
+                        }
+                    )
 
         # Store footprints list on Target node for co-occurrence computation
         target_node["_footprints"] = footprints_for_target  # transient, stripped before output
@@ -202,13 +213,15 @@ def _build_bipartite_graph(rows: list[dict]) -> tuple[list[dict], list[dict]]:
             t2 = target_nodes[j]
             shared = set(t1.get("_footprints", [])) & set(t2.get("_footprints", []))
             if shared:
-                edges.append({
-                    "id": f"cooccur_{t1['id']}_{t2['id']}",
-                    "source": t1["id"],
-                    "target": t2["id"],
-                    "type": "co_occurrence",
-                    "weight": len(shared),
-                })
+                edges.append(
+                    {
+                        "id": f"cooccur_{t1['id']}_{t2['id']}",
+                        "source": t1["id"],
+                        "target": t2["id"],
+                        "type": "co_occurrence",
+                        "weight": len(shared),
+                    }
+                )
 
     # Strip transient key
     for n in nodes:
@@ -219,6 +232,7 @@ def _build_bipartite_graph(rows: list[dict]) -> tuple[list[dict], list[dict]]:
 
 # ========================== GEXF WRITER ===================================
 
+
 def _write_gexf(nodes: list[dict], edges: list[dict], output_path: Path) -> str:
     """Write a bipartite graph to a .gexf file with streaming writes."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -227,51 +241,79 @@ def _write_gexf(nodes: list[dict], edges: list[dict], output_path: Path) -> str:
         f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
         f.write('<gexf xmlns="http://gexf.net/1.3" version="1.3">\n')
         f.write('  <meta lastmodifieddate="{}">\n'.format(datetime.now().strftime("%Y-%m-%d")))
-        f.write('    <creator>SME Gephi Exporter — Bipartite Deep-Stream</creator>\n')
-        f.write('  </meta>\n')
+        f.write("    <creator>SME Gephi Exporter — Bipartite Deep-Stream</creator>\n")
+        f.write("  </meta>\n")
         f.write('  <graph defaultedgetype="undirected" mode="static">\n')
 
         # Attribute declarations
         f.write('    <attributes class="node">\n')
-        for i, attr in enumerate(["node_class", "probability_score", "source_origin",
-                                   "confidence_score", "first_seen", "incident_type", "ai_verdict"]):
+        for i, attr in enumerate(
+            [
+                "node_class",
+                "probability_score",
+                "source_origin",
+                "confidence_score",
+                "first_seen",
+                "incident_type",
+                "ai_verdict",
+            ]
+        ):
             atype = "float" if attr in ("probability_score", "confidence_score") else "string"
             f.write(f'      <attribute id="{i}" title="{attr}" type="{atype}"/>\n')
-        f.write('    </attributes>\n')
+        f.write("    </attributes>\n")
 
         # Nodes
-        f.write('    <nodes>\n')
-        attr_keys = ["node_class", "probability_score", "source_origin",
-                     "confidence_score", "first_seen", "incident_type", "ai_verdict"]
+        f.write("    <nodes>\n")
+        attr_keys = [
+            "node_class",
+            "probability_score",
+            "source_origin",
+            "confidence_score",
+            "first_seen",
+            "incident_type",
+            "ai_verdict",
+        ]
         for node in nodes:
-            label = str(node.get("label", "")).replace("&", "&amp;").replace('"', "&quot;").replace("<", "&lt;")
+            label = (
+                str(node.get("label", ""))
+                .replace("&", "&amp;")
+                .replace('"', "&quot;")
+                .replace("<", "&lt;")
+            )
             f.write(f'      <node id="{node["id"]}" label="{label}">\n')
-            f.write('        <attvalues>\n')
+            f.write("        <attvalues>\n")
             for i, key in enumerate(attr_keys):
                 val = str(node.get(key, "")).replace("&", "&amp;").replace('"', "&quot;")
                 f.write(f'          <attvalue for="{i}" value="{val}"/>\n')
-            f.write('        </attvalues>\n')
-            r, g, b = int(node.get("r", 0.5) * 255), int(node.get("g", 0.5) * 255), int(node.get("b", 0.5) * 255)
+            f.write("        </attvalues>\n")
+            r, g, b = (
+                int(node.get("r", 0.5) * 255),
+                int(node.get("g", 0.5) * 255),
+                int(node.get("b", 0.5) * 255),
+            )
             f.write(f'        <viz:color r="{r}" g="{g}" b="{b}"/>\n')
             f.write(f'        <viz:size value="{node.get("size", 30)}"/>\n')
-            f.write('      </node>\n')
-        f.write('    </nodes>\n')
+            f.write("      </node>\n")
+        f.write("    </nodes>\n")
 
         # Edges
-        f.write('    <edges>\n')
+        f.write("    <edges>\n")
         for edge in edges:
             weight = f' weight="{edge["weight"]}"' if "weight" in edge else ""
-            f.write(f'      <edge id="{edge["id"]}" source="{edge["source"]}" '
-                    f'target="{edge["target"]}" label="{edge.get("type", "")}"{weight}/>\n')
-        f.write('    </edges>\n')
+            f.write(
+                f'      <edge id="{edge["id"]}" source="{edge["source"]}" '
+                f'target="{edge["target"]}" label="{edge.get("type", "")}"{weight}/>\n'
+            )
+        f.write("    </edges>\n")
 
-        f.write('  </graph>\n')
-        f.write('</gexf>\n')
+        f.write("  </graph>\n")
+        f.write("</gexf>\n")
 
     return str(output_path)
 
 
 # ========================== GEPHI LIVE PUSH ===============================
+
 
 def _stream_to_gephi(nodes: list[dict], edges: list[dict], workspace: str) -> dict:
     """
@@ -281,6 +323,7 @@ def _stream_to_gephi(nodes: list[dict], edges: list[dict], workspace: str) -> di
     try:
         import requests
         from gephistreamer import GephiREST, Streamer, graph
+
         requests.get("http://localhost:8080", timeout=2)
     except Exception:
         return {"connected": False, "reason": "Gephi not reachable on localhost:8080"}
@@ -294,8 +337,9 @@ def _stream_to_gephi(nodes: list[dict], edges: list[dict], workspace: str) -> di
         n = graph.Node(
             node["id"],
             label=node.get("label", ""),
-            attributes={k: v for k, v in node.items()
-                        if k not in ("id", "label", "r", "g", "b", "size")}
+            attributes={
+                k: v for k, v in node.items() if k not in ("id", "label", "r", "g", "b", "size")
+            },
         )
         n.r = node.get("r", 0.5)
         n.g = node.get("g", 0.5)
@@ -320,8 +364,10 @@ def _stream_to_gephi(nodes: list[dict], edges: list[dict], workspace: str) -> di
     # Edges
     for edge in edges:
         e = graph.Edge(
-            edge["id"], edge["source"], edge["target"],
-            attributes={"type": edge.get("type", ""), "weight": edge.get("weight", 1)}
+            edge["id"],
+            edge["source"],
+            edge["target"],
+            attributes={"type": edge.get("type", ""), "weight": edge.get("weight", 1)},
         )
         if "weight" in edge:
             e.weight = edge["weight"]
@@ -337,6 +383,7 @@ def _stream_to_gephi(nodes: list[dict], edges: list[dict], workspace: str) -> di
 
 
 # ========================== MCP TOOLS =====================================
+
 
 @mcp.tool()
 def stream_forensics(
@@ -420,10 +467,12 @@ def gephi_export(mode: str = "trust", workspace: str = "workspace0") -> str:
         JSON string with export status and file path.
     """
     if mode not in VALID_MODES:
-        return json.dumps({
-            "status": "error",
-            "message": f"Invalid mode '{mode}'. Choose from: {', '.join(VALID_MODES)}"
-        })
+        return json.dumps(
+            {
+                "status": "error",
+                "message": f"Invalid mode '{mode}'. Choose from: {', '.join(VALID_MODES)}",
+            }
+        )
 
     EXPORT_DIR.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -432,8 +481,10 @@ def gephi_export(mode: str = "trust", workspace: str = "workspace0") -> str:
     cmd = [
         str(PYTHON_EXE),
         str(GEPHI_BRIDGE),
-        "--mode", mode,
-        "--workspace", workspace,
+        "--mode",
+        mode,
+        "--workspace",
+        workspace,
     ]
 
     try:
@@ -448,22 +499,27 @@ def gephi_export(mode: str = "trust", workspace: str = "workspace0") -> str:
 
         gephi_available = "Mock processing" not in result.stdout
 
-        return json.dumps({
-            "status": "success",
-            "mode": mode,
-            "workspace": workspace,
-            "output_file": str(output_file),
-            "gephi_connected": gephi_available,
-            "bridge_output": result.stdout.strip()[-500:],
-            "note": (
-                "Graph exported and streamed to Gephi."
-                if gephi_available
-                else "File saved. Gephi is not running — open Gephi and load the file manually."
-            ),
-        }, indent=2)
+        return json.dumps(
+            {
+                "status": "success",
+                "mode": mode,
+                "workspace": workspace,
+                "output_file": str(output_file),
+                "gephi_connected": gephi_available,
+                "bridge_output": result.stdout.strip()[-500:],
+                "note": (
+                    "Graph exported and streamed to Gephi."
+                    if gephi_available
+                    else "File saved. Gephi is not running — open Gephi and load the file manually."
+                ),
+            },
+            indent=2,
+        )
 
     except subprocess.TimeoutExpired:
-        return json.dumps({"status": "error", "message": "Gephi bridge timed out after 120 seconds."})
+        return json.dumps(
+            {"status": "error", "message": "Gephi bridge timed out after 120 seconds."}
+        )
     except FileNotFoundError:
         return json.dumps({"status": "error", "message": f"Python not found at {PYTHON_EXE}."})
     except Exception as exc:
@@ -483,17 +539,20 @@ def gephi_list_exports() -> str:
     exports = []
     for f in sorted(EXPORT_DIR.glob("*.gexf"), key=os.path.getmtime, reverse=True):
         stat = f.stat()
-        exports.append({
-            "file": f.name,
-            "path": str(f),
-            "size_kb": round(stat.st_size / 1024, 1),
-            "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
-        })
+        exports.append(
+            {
+                "file": f.name,
+                "path": str(f),
+                "size_kb": round(stat.st_size / 1024, 1),
+                "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+            }
+        )
 
     return json.dumps(exports, indent=2)
 
 
 # ========================== DATA FETCH ====================================
+
 
 def _fetch_threat_leads() -> list[dict]:
     """
@@ -504,6 +563,7 @@ def _fetch_threat_leads() -> list[dict]:
     try:
         # Import only within 3.14 context
         from src.database.supabase_client import get_threat_leads
+
         results = get_threat_leads()
         if results:
             return results
@@ -512,6 +572,7 @@ def _fetch_threat_leads() -> list[dict]:
 
     # Fallback: try local CSV
     import csv
+
     csv_path = PROJECT_ROOT / "data" / "results" / "threat_leads.csv"
     if csv_path.exists():
         with open(csv_path, encoding="utf-8") as f:

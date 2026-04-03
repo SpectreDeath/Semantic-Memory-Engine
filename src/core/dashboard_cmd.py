@@ -10,6 +10,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+
 class DashboardOrchestrator:
     """Manages the lifecycle of the Control Room components."""
 
@@ -26,16 +27,17 @@ class DashboardOrchestrator:
             # 1. Start FastAPI Backend
             print("   -> Starting Backend API (Port 8000)...")
             api_cmd = [
-                sys.executable, "-m", "uvicorn",
+                sys.executable,
+                "-m",
+                "uvicorn",
                 "src.api.main:app",
-                "--host", "127.0.0.1",
-                "--port", "8000"
+                "--host",
+                "127.0.0.1",
+                "--port",
+                "8000",
             ]
             self.api_process = subprocess.Popen(
-                api_cmd,
-                cwd=self.root_dir,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE
+                api_cmd, cwd=self.root_dir, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE
             )
 
             # 2. Start Frontend Dev Server
@@ -48,11 +50,7 @@ class DashboardOrchestrator:
 
             frontend_cmd = ["npm", "run", "dev"]
             # Use shell=True for npm on Windows
-            self.frontend_process = subprocess.Popen(
-                frontend_cmd,
-                cwd=frontend_dir,
-                shell=True
-            )
+            self.frontend_process = subprocess.Popen(frontend_cmd, cwd=frontend_dir, shell=True)
 
             print("\n✅ Control Room is initializing!")
             print("   - API:      http://127.0.0.1:8000")
@@ -82,13 +80,18 @@ class DashboardOrchestrator:
             self.api_process.terminate()
         if self.frontend_process:
             # On Windows, terminating a shell process needs care
-            subprocess.call(['taskkill', '/F', '/T', '/PID', str(self.frontend_process.pid)],
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            subprocess.call(
+                ["taskkill", "/F", "/T", "/PID", str(self.frontend_process.pid)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
         logger.info("Control Room shutdown complete")
+
 
 def main(args=None):
     orchestrator = DashboardOrchestrator()
     orchestrator.start()
+
 
 if __name__ == "__main__":
     main()

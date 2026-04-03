@@ -10,6 +10,7 @@ from typing import Any
 
 logger = logging.getLogger("LawnmowerMan.SemanticAuditor")
 
+
 class SemanticAuditor:
     """
     Semantic Auditor v1.0
@@ -45,18 +46,22 @@ class SemanticAuditor:
             # 1. Load master signature from signatures.json
             master_signature = self._load_master_signature(model_family)
             if not master_signature:
-                return json.dumps({
-                    "error": f"Master signature not found for model family: {model_family}",
-                    "status": "failed"
-                })
+                return json.dumps(
+                    {
+                        "error": f"Master signature not found for model family: {model_family}",
+                        "status": "failed",
+                    }
+                )
 
             # 2. Pull last 50 samples from nexus_db
             recent_samples = self._get_recent_samples(model_family, limit=50)
             if not recent_samples:
-                return json.dumps({
-                    "error": f"No recent samples found for model family: {model_family}",
-                    "status": "failed"
-                })
+                return json.dumps(
+                    {
+                        "error": f"No recent samples found for model family: {model_family}",
+                        "status": "failed",
+                    }
+                )
 
             # 3. Calculate semantic centroid of recent samples
             centroid = self._calculate_semantic_centroid(recent_samples)
@@ -66,7 +71,9 @@ class SemanticAuditor:
 
             # 5. Check for logic shift warning
             warning_triggered = drift_score > 0.15
-            warning_message = "[LOGIC SHIFT DETECTED]" if warning_triggered else "No significant drift detected"
+            warning_message = (
+                "[LOGIC SHIFT DETECTED]" if warning_triggered else "No significant drift detected"
+            )
 
             # 6. Return results
             result = {
@@ -80,18 +87,17 @@ class SemanticAuditor:
                 "analysis": {
                     "master_vector_length": len(master_signature.get("vector", [])),
                     "centroid_vector_length": len(centroid),
-                    "features_compared": len([f for f in master_signature.get("features", []) if f in centroid])
-                }
+                    "features_compared": len(
+                        [f for f in master_signature.get("features", []) if f in centroid]
+                    ),
+                },
             }
 
             return json.dumps(result, indent=2)
 
         except Exception as e:
             logger.exception(f"Error in semantic stability audit: {e}")
-            return json.dumps({
-                "error": str(e),
-                "status": "failed"
-            })
+            return json.dumps({"error": str(e), "status": "failed"})
 
     def _load_master_signature(self, model_family: str) -> dict[str, Any] | None:
         """Load the master signature for the specified model family."""
@@ -111,7 +117,7 @@ class SemanticAuditor:
             return {
                 "features": signatures.get("features", []),
                 "vector": family_data.get("vector", []),
-                "family": model_family
+                "family": model_family,
             }
 
         except Exception as e:
@@ -152,10 +158,14 @@ class SemanticAuditor:
                 metadata = row.get("metadata", "{}")
 
                 if text_sample:
-                    samples.append({
-                        "text": text_sample,
-                        "metadata": json.loads(metadata) if isinstance(metadata, str) else metadata
-                    })
+                    samples.append(
+                        {
+                            "text": text_sample,
+                            "metadata": json.loads(metadata)
+                            if isinstance(metadata, str)
+                            else metadata,
+                        }
+                    )
 
             return samples
 
@@ -199,7 +209,9 @@ class SemanticAuditor:
             return {}
 
         # Get features from master signature for consistent vectorization
-        master_signature = self._load_master_signature("GPT-Family")  # Use GPT as default for feature list
+        master_signature = self._load_master_signature(
+            "GPT-Family"
+        )  # Use GPT as default for feature list
         if not master_signature:
             return {}
 
@@ -255,7 +267,9 @@ class SemanticAuditor:
 
         return feature_vector
 
-    def _calculate_drift_score(self, master_signature: dict[str, Any], centroid: dict[str, float]) -> float:
+    def _calculate_drift_score(
+        self, master_signature: dict[str, Any], centroid: dict[str, float]
+    ) -> float:
         """
         Calculate drift score using cosine distance between master signature and centroid.
         """

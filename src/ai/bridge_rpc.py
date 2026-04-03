@@ -10,8 +10,11 @@ import sys
 from typing import Any
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger("SME-Bridge")
+
 
 class AsyncSMEBridge:
     """Handles JSON-RPC requests from the VS Code frontend asynchronously."""
@@ -21,6 +24,7 @@ class AsyncSMEBridge:
         try:
             from src.core.data_manager import DataManager
             from src.core.semantic_db import SemanticMemory
+
             self.data_manager = DataManager()
             self.memory = SemanticMemory()
         except ImportError as e:
@@ -79,7 +83,7 @@ class AsyncSMEBridge:
             {"id": "ctx_001", "label": "Project Odyssey: Orchestration", "type": "context"},
             {"id": "doc_442", "label": "Incident Report: VRAM Spike", "type": "document"},
             {"id": "fpt_991", "label": "Stylometric Profile: Suspect_Alpha", "type": "fingerprint"},
-            {"id": "auth_01", "label": "Author: spectre", "type": "context"}
+            {"id": "auth_01", "label": "Author: spectre", "type": "context"},
         ]
 
     async def search_memory(self, params: dict) -> Any:
@@ -89,8 +93,7 @@ class AsyncSMEBridge:
                 # Perform a threaded or async friendly call
                 loop = asyncio.get_running_loop()
                 results = await loop.run_in_executor(
-                    None,
-                    lambda: self.memory.search_with_semantic_expansion(query, n_results=5)
+                    None, lambda: self.memory.search_with_semantic_expansion(query, n_results=5)
                 )
 
                 matches = []
@@ -105,25 +108,48 @@ class AsyncSMEBridge:
                 logger.exception(f"Error searching memory: {e}")
 
         # Fallback to mock
-        return [{"id": "match_1", "text": f"Found semantic alignment for '{query}' in Cluster: Forensics"}]
+        return [
+            {
+                "id": "match_1",
+                "text": f"Found semantic alignment for '{query}' in Cluster: Forensics",
+            }
+        ]
 
     async def index_project(self, params: dict) -> Any:
         path = params.get("path", ".")
         # Simulate some asynchronous work. We could trigger a real file walk and indexing here.
         await asyncio.sleep(0.5)
-        return {"status": "success", "message": f"Successfully indexed {path} into SME Vector Store."}
+        return {
+            "status": "success",
+            "message": f"Successfully indexed {path} into SME Vector Store.",
+        }
 
     async def analyze_document(self, params: dict) -> Any:
         params.get("path", "unknown")
         # Mocking forensic outliers (burstiness, entropy) for testing UI decorations
         return {
             "markers": [
-                {"line": 5, "type": "high_burstiness", "score": 0.92, "message": "Low entropy burst detected. Possible synthetic smoothing."},
-                {"line": 12, "type": "styling_outlier", "score": 0.85, "message": "Stylometric shift: Rhetorical pattern mismatch from baseline."},
-                {"line": 25, "type": "high_entropy", "score": 0.12, "message": "Extremely low entropy. High probability of boilerplate or masking."}
+                {
+                    "line": 5,
+                    "type": "high_burstiness",
+                    "score": 0.92,
+                    "message": "Low entropy burst detected. Possible synthetic smoothing.",
+                },
+                {
+                    "line": 12,
+                    "type": "styling_outlier",
+                    "score": 0.85,
+                    "message": "Stylometric shift: Rhetorical pattern mismatch from baseline.",
+                },
+                {
+                    "line": 25,
+                    "type": "high_entropy",
+                    "score": 0.12,
+                    "message": "Extremely low entropy. High probability of boilerplate or masking.",
+                },
             ],
             "global_score": 0.74,
-            "verdict": "SUSPICIOUS"
+            "verdict": "SUSPICIOUS",
         }
 
     async def get_semantic_graph(self, params: dict) -> Any:
@@ -144,38 +170,36 @@ class AsyncSMEBridge:
                 {"source": "doc_442", "target": "ent_02", "value": 3},
                 {"source": "fpt_991", "target": "auth_01", "value": 1},
                 {"source": "auth_01", "target": "ent_01", "value": 4},
-            ]
+            ],
         }
 
     async def read_directory(self, params: dict) -> Any:
         # Mapping semantic directory mapping
         path = params.get("path", "/")
         if path == "/":
-            return [
-                ["Contexts", 2],
-                ["Documents", 2],
-                ["Fingerprints", 2],
-                ["Author Profiles", 2]
-            ]
+            return [["Contexts", 2], ["Documents", 2], ["Fingerprints", 2], ["Author Profiles", 2]]
 
         cluster = path.split("/")[1]
         return [
             [f"{cluster}_summary_v1.json", 1],
             [f"{cluster}_raw_evidence.md", 1],
-            ["archive", 2]
+            ["archive", 2],
         ]
 
     async def read_file(self, params: dict) -> Any:
         path = params.get("path", "unknown")
         # Returning structured content that looks "forensic"
         return {
-            "content": json.dumps({
-                "node_id": path,
-                "classification": "RESTRICTED",
-                "extracted_entities": ["spectre", "Ollama", "GTX-1660-Ti"],
-                "confidence_score": 0.98,
-                "summary": "This semantic node represents a core memory fragment of the SME Odyssey modernization."
-            }, indent=2)
+            "content": json.dumps(
+                {
+                    "node_id": path,
+                    "classification": "RESTRICTED",
+                    "extracted_entities": ["spectre", "Ollama", "GTX-1660-Ti"],
+                    "confidence_score": 0.98,
+                    "summary": "This semantic node represents a core memory fragment of the SME Odyssey modernization.",
+                },
+                indent=2,
+            )
         }
 
     async def log_telemetry(self, params: dict) -> Any:
@@ -190,6 +214,7 @@ class AsyncSMEBridge:
 
     def error_response(self, request_id: Any, code: int, message: str) -> dict:
         return {"jsonrpc": "2.0", "error": {"code": code, "message": message}, "id": request_id}
+
 
 async def process_messages(bridge: AsyncSMEBridge):
     """Reads JSON-RPC messages from stdin asynchronously."""
@@ -206,7 +231,7 @@ async def process_messages(bridge: AsyncSMEBridge):
             break
 
         try:
-            request = json.loads(line.decode('utf-8'))
+            request = json.loads(line.decode("utf-8"))
 
             # Fire and forget request handling so we don't block reading
             asyncio.create_task(handle_and_respond(bridge, request))
@@ -215,6 +240,7 @@ async def process_messages(bridge: AsyncSMEBridge):
             logger.exception(f"Failed to parse line: {e}")
         except Exception as e:
             logger.exception(f"Unexpected error: {e}")
+
 
 async def handle_and_respond(bridge: AsyncSMEBridge, request: dict):
     loop = asyncio.get_running_loop()
@@ -225,12 +251,13 @@ async def handle_and_respond(bridge: AsyncSMEBridge, request: dict):
         await loop.run_in_executor(None, sys.stdout.write, response_str)
         await loop.run_in_executor(None, sys.stdout.flush)
     except Exception as e:
-         logger.exception(f"Error handling request and responding: {e}")
+        logger.exception(f"Error handling request and responding: {e}")
 
 
 async def main():
     bridge = AsyncSMEBridge()
     await process_messages(bridge)
+
 
 if __name__ == "__main__":
     if sys.platform == "win32":

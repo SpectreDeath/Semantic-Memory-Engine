@@ -8,6 +8,7 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+
 class NetworkGenerator:
     """
     Generates interactive network visualizations of author similarity.
@@ -16,8 +17,9 @@ class NetworkGenerator:
 
     def __init__(self, db_path: str | None = None):
         from src.core.config import Config
+
         config = Config()
-        base_dir = config.get_path('storage.base_dir')
+        base_dir = config.get_path("storage.base_dir")
         self.db_path = db_path or str(base_dir / "storage" / "scribe_profiles.sqlite")
 
     def _get_all_authors(self, limit: int = 100) -> list[str]:
@@ -33,10 +35,13 @@ class NetworkGenerator:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT DISTINCT author_id FROM author_profiles
             LIMIT ?
-        """, (limit,))
+        """,
+            (limit,),
+        )
 
         authors = [row[0] for row in cursor.fetchall()]
         conn.close()
@@ -66,10 +71,7 @@ class NetworkGenerator:
         return matrix
 
     def generate_network(
-        self,
-        threshold: float = 1.2,
-        max_nodes: int = 100,
-        output_path: str | None = None
+        self, threshold: float = 1.2, max_nodes: int = 100, output_path: str | None = None
     ) -> str:
         """
         Generates an interactive network visualization.
@@ -117,10 +119,7 @@ class NetworkGenerator:
                         # Weight for visualization: closer = thicker edge
                         weight = 1.0 / (distance + 0.1)  # Avoid division by zero
                         G.add_edge(
-                            author_a,
-                            author_b,
-                            weight=weight,
-                            title=f"Distance: {distance:.2f}"
+                            author_a, author_b, weight=weight, title=f"Distance: {distance:.2f}"
                         )
 
         logger.info(f"Network: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges")
@@ -131,7 +130,7 @@ class NetworkGenerator:
             width="100%",
             bgcolor="#0e1117",  # Match Streamlit dark theme
             font_color="#e0e0e0",
-            notebook=False
+            notebook=False,
         )
 
         net.from_nx(G)
@@ -154,8 +153,9 @@ class NetworkGenerator:
         # 5. Save HTML
         if output_path is None:
             from src.core.config import Config
+
             config = Config()
-            base_dir = config.get_path('storage.base_dir')
+            base_dir = config.get_path("storage.base_dir")
             output_path = str(base_dir / "storage" / "forensic_network.html")
 
         os.makedirs(os.path.dirname(output_path), exist_ok=True)

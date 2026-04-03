@@ -1,4 +1,4 @@
-'''
+"""
 MIT License
 
 Copyright (c) 2023 Fast Data Science Ltd (https://fastdatascience.com)
@@ -25,11 +25,13 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-'''
+"""
+
 
 class Corpus:
-
-    def __init__(self, authors: list | None = None, books: list | None = None, tokens: list | None = None):
+    def __init__(
+        self, authors: list | None = None, books: list | None = None, tokens: list | None = None
+    ):
         """
         Create a new corpus object, which is empty by default, but which can be initialised optionally with a set of books.
         :param authors: A list of strings representing author names. If a set of books are being used to initialise the corpus, len(authors) must equal len(books) and len(tokens)
@@ -47,7 +49,7 @@ class Corpus:
             self.tokens = []
             self.texts = []
 
-        self.probability_model = None # Not calibrated
+        self.probability_model = None  # Not calibrated
 
     def add_book(self, author: str, book: str, text: str):
         """
@@ -56,7 +58,7 @@ class Corpus:
         :param book: The book title as string.
         :param text: The book content as string.
         """
-        assert (len(self.tokens) == 0)
+        assert len(self.tokens) == 0
         self.authors.append(author)
         self.books.append(book)
         self.texts.append(text)
@@ -83,9 +85,12 @@ class Corpus:
         new_tokens = []
 
         for author_id in range(len(self.authors)):
-            for ctr, segment_start in enumerate(range(0, len(self.tokens[author_id]), segment_length)):
+            for ctr, segment_start in enumerate(
+                range(0, len(self.tokens[author_id]), segment_length)
+            ):
                 segment_tokens = self.tokens[author_id][
-                                 segment_start:min(segment_start + segment_length, len(self.tokens[author_id]))]
+                    segment_start : min(segment_start + segment_length, len(self.tokens[author_id]))
+                ]
                 new_authors.append(self.authors[author_id])
                 new_books.append(self.books[author_id] + "_" + str(ctr))
                 new_tokens.append(segment_tokens)

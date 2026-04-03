@@ -1,4 +1,3 @@
-
 import numpy as np
 
 
@@ -25,6 +24,7 @@ def calculate_cosine_delta(v1: np.ndarray, v2: np.ndarray) -> float:
 
     # Combined Forensic Metric: Weighted combination of angular and linear distance
     return float(0.5 * (1.0 - cosine_sim) + 0.5 * manhattan_dist)
+
 
 def calculate_symmetrized_kl_divergence(p: np.ndarray, q: np.ndarray) -> float:
     """

@@ -30,14 +30,8 @@ class ForensicNexus:
 
     def __init__(self, base_dir: str | None = None):
         # Prefer explicit arg → env var → project-relative default
-        self.base_dir = (
-            base_dir
-            or os.environ.get("SME_DATA_DIR")
-            or _DEFAULT_DATA_DIR
-        )
-        self.primary_path = os.path.normpath(
-            os.path.join(self.base_dir, "forensic_nexus.db")
-        )
+        self.base_dir = base_dir or os.environ.get("SME_DATA_DIR") or _DEFAULT_DATA_DIR
+        self.primary_path = os.path.normpath(os.path.join(self.base_dir, "forensic_nexus.db"))
 
         # Ensure directories exist
         os.makedirs(os.path.dirname(self.primary_path), exist_ok=True)
@@ -57,15 +51,9 @@ class ForensicNexus:
 
     def _attach_subordinates(self):
         databases = {
-            "lab": os.path.normpath(
-                os.path.join(self.base_dir, "storage", "laboratory.db")
-            ),
-            "prov": os.path.normpath(
-                os.path.join(self.base_dir, "provenance.db")
-            ),
-            "core": os.path.normpath(
-                os.path.join(self.base_dir, "knowledge_core.sqlite")
-            ),
+            "lab": os.path.normpath(os.path.join(self.base_dir, "storage", "laboratory.db")),
+            "prov": os.path.normpath(os.path.join(self.base_dir, "provenance.db")),
+            "core": os.path.normpath(os.path.join(self.base_dir, "knowledge_core.sqlite")),
         }
 
         # Ensure lab storage dir exists
@@ -84,14 +72,10 @@ class ForensicNexus:
                 attached = [row[1] for row in cursor.fetchall()]
 
                 if schema not in attached:
-                    self.conn.execute(
-                        f"ATTACH DATABASE '{abs_path}' AS {schema}"
-                    )
+                    self.conn.execute(f"ATTACH DATABASE '{abs_path}' AS {schema}")
                     logger.info(f"Nexus: Attached {schema} from {abs_path}")
             except Exception as e:
-                logger.warning(
-                    f"Nexus: Failed to attach {schema} ({abs_path}): {e}"
-                )
+                logger.warning(f"Nexus: Failed to attach {schema} ({abs_path}): {e}")
 
     def attach_db(self, db_path: str, schema_name: str):
         """Dynamically attach a new database to the nexus."""
@@ -105,12 +89,8 @@ class ForensicNexus:
             if not all(c.isalnum() or c == "_" for c in schema_name):
                 raise ValueError(f"Invalid schema name: {schema_name}")
 
-            self.conn.execute(
-                f"ATTACH DATABASE '{abs_path}' AS {schema_name}"
-            )
-            logger.info(
-                f"Nexus: Dynamically attached {schema_name} from {abs_path}"
-            )
+            self.conn.execute(f"ATTACH DATABASE '{abs_path}' AS {schema_name}")
+            logger.info(f"Nexus: Dynamically attached {schema_name} from {abs_path}")
         except Exception as e:
             if "already in use" in str(e):
                 return  # Already attached — not an error

@@ -1,4 +1,3 @@
-
 import numpy as np
 
 
@@ -42,6 +41,7 @@ def calculate_tfidf(tokenized_docs: list[list[str]]) -> tuple[np.ndarray, list[s
     tfidf = tf * idf
 
     return tfidf, vocabulary
+
 
 def calculate_kl_divergence(p: np.ndarray, q: np.ndarray) -> float:
     """

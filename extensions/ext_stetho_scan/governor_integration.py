@@ -14,15 +14,15 @@ from enum import Enum
 from typing import Any
 
 # Configure logging for governor integration
-logger = logging.getLogger('stetho_scan.governor_integration')
+logger = logging.getLogger("stetho_scan.governor_integration")
 logger.setLevel(logging.INFO)
 
 # Create file handler for governor integration events
-governor_handler = logging.FileHandler('stetho_governor_integration_events.log')
+governor_handler = logging.FileHandler("stetho_governor_integration_events.log")
 governor_handler.setLevel(logging.INFO)
 
 # Create formatter and add it to handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 governor_handler.setFormatter(formatter)
 
 # Add handler to logger
@@ -31,17 +31,19 @@ logger.addHandler(governor_handler)
 
 class GovernorStatus(Enum):
     """Governor status levels."""
-    NORMAL = "NORMAL"      # Green - Safe to run watermark detection
-    WARNING = "WARNING"    # Yellow - Caution, may have resource constraints
+
+    NORMAL = "NORMAL"  # Green - Safe to run watermark detection
+    WARNING = "WARNING"  # Yellow - Caution, may have resource constraints
     CRITICAL = "CRITICAL"  # Red - High resource usage, avoid heavy operations
-    UNKNOWN = "UNKNOWN"    # Status unknown
+    UNKNOWN = "UNKNOWN"  # Status unknown
 
 
 class CPUUsageLevel(Enum):
     """CPU usage levels for resource monitoring."""
-    LOW = "LOW"           # CPU usage < 50%
-    MEDIUM = "MEDIUM"     # CPU usage 50-80%
-    HIGH = "HIGH"         # CPU usage > 80%
+
+    LOW = "LOW"  # CPU usage < 50%
+    MEDIUM = "MEDIUM"  # CPU usage 50-80%
+    HIGH = "HIGH"  # CPU usage > 80%
     UNKNOWN = "UNKNOWN"
 
 
@@ -137,25 +139,31 @@ class StethoGovernorIntegration:
         self._last_status_check = datetime.now()
 
         # Safe conditions: Governor NORMAL and CPU usage not HIGH
-        is_safe = (governor_status == GovernorStatus.NORMAL and
-                  cpu_usage in [CPUUsageLevel.LOW, CPUUsageLevel.MEDIUM])
+        is_safe = governor_status == GovernorStatus.NORMAL and cpu_usage in [
+            CPUUsageLevel.LOW,
+            CPUUsageLevel.MEDIUM,
+        ]
 
         if is_safe:
             logger.info(f"Safe to detect: Governor={governor_status.value}, CPU={cpu_usage.value}")
         else:
-            logger.warning(f"Detection blocked: Governor={governor_status.value}, CPU={cpu_usage.value}")
+            logger.warning(
+                f"Detection blocked: Governor={governor_status.value}, CPU={cpu_usage.value}"
+            )
 
         return is_safe
 
     def get_status_info(self) -> dict[str, Any]:
         """Get current status information."""
         return {
-            'governor_status': self._governor_status.value,
-            'cpu_usage_level': self._cpu_usage_level.value,
-            'last_status_check': self._last_status_check.isoformat() if self._last_status_check else None,
-            'detection_count': self._detection_count,
-            'total_detection_time': self._total_detection_time,
-            'is_safe_to_detect': self.is_safe_to_detect()
+            "governor_status": self._governor_status.value,
+            "cpu_usage_level": self._cpu_usage_level.value,
+            "last_status_check": self._last_status_check.isoformat()
+            if self._last_status_check
+            else None,
+            "detection_count": self._detection_count,
+            "total_detection_time": self._total_detection_time,
+            "is_safe_to_detect": self.is_safe_to_detect(),
         }
 
     def record_detection(self, detection_time: float):
@@ -163,11 +171,14 @@ class StethoGovernorIntegration:
         self._detection_count += 1
         self._total_detection_time += detection_time
 
-        logger.info(f"Detection completed in {detection_time:.2f}s. Total detections: {self._detection_count}")
+        logger.info(
+            f"Detection completed in {detection_time:.2f}s. Total detections: {self._detection_count}"
+        )
 
 
-def safe_detect_watermark_pulse(text: str,
-                               governor_check: StethoGovernorIntegration | None = None) -> dict[str, Any]:
+def safe_detect_watermark_pulse(
+    text: str, governor_check: StethoGovernorIntegration | None = None
+) -> dict[str, Any]:
     """
     Safe wrapper for detect_watermark_pulse that checks Governor status and CPU usage.
 
@@ -194,16 +205,16 @@ def safe_detect_watermark_pulse(text: str,
         print(f"⚠️  {warning_message}")
 
         return {
-            'has_invisible_markers': False,
-            'z_score_analysis': {},
-            'provider_signature': None,
-            'confidence_score': 0.0,
-            'detected_markers': [],
-            'timestamp': datetime.now().isoformat(),
-            'status': 'DETECTION_BLOCKED_DUE_TO_RESOURCE_CONSTRAINTS',
-            'governor_status': status_info['governor_status'],
-            'cpu_usage_level': status_info['cpu_usage_level'],
-            'reason': 'Governor status not NORMAL or CPU usage too high'
+            "has_invisible_markers": False,
+            "z_score_analysis": {},
+            "provider_signature": None,
+            "confidence_score": 0.0,
+            "detected_markers": [],
+            "timestamp": datetime.now().isoformat(),
+            "status": "DETECTION_BLOCKED_DUE_TO_RESOURCE_CONSTRAINTS",
+            "governor_status": status_info["governor_status"],
+            "cpu_usage_level": status_info["cpu_usage_level"],
+            "reason": "Governor status not NORMAL or CPU usage too high",
         }
 
     # Import the actual detection function
@@ -227,26 +238,26 @@ def safe_detect_watermark_pulse(text: str,
     except ImportError as e:
         logger.exception(f"Failed to import detection function: {e}")
         return {
-            'has_invisible_markers': False,
-            'z_score_analysis': {},
-            'provider_signature': None,
-            'confidence_score': 0.0,
-            'detected_markers': [],
-            'timestamp': datetime.now().isoformat(),
-            'status': 'DETECTION_FAILED_TO_IMPORT',
-            'error': str(e)
+            "has_invisible_markers": False,
+            "z_score_analysis": {},
+            "provider_signature": None,
+            "confidence_score": 0.0,
+            "detected_markers": [],
+            "timestamp": datetime.now().isoformat(),
+            "status": "DETECTION_FAILED_TO_IMPORT",
+            "error": str(e),
         }
     except Exception as e:
         logger.exception(f"Detection execution failed: {e}")
         return {
-            'has_invisible_markers': False,
-            'z_score_analysis': {},
-            'provider_signature': None,
-            'confidence_score': 0.0,
-            'detected_markers': [],
-            'timestamp': datetime.now().isoformat(),
-            'status': 'DETECTION_EXECUTION_FAILED',
-            'error': str(e)
+            "has_invisible_markers": False,
+            "z_score_analysis": {},
+            "provider_signature": None,
+            "confidence_score": 0.0,
+            "detected_markers": [],
+            "timestamp": datetime.now().isoformat(),
+            "status": "DETECTION_EXECUTION_FAILED",
+            "error": str(e),
         }
 
 
@@ -296,18 +307,18 @@ def create_stetho_governor_hook() -> Callable:
                 print("✅ Stetho Governor reports NORMAL status - watermark detection safe")
 
             return {
-                'status': 'hook_executed',
-                'new_governor_status': status,
-                'timestamp': datetime.now().isoformat(),
-                'action_taken': 'status_updated'
+                "status": "hook_executed",
+                "new_governor_status": status,
+                "timestamp": datetime.now().isoformat(),
+                "action_taken": "status_updated",
             }
 
         except Exception as e:
             logger.exception(f"Stetho Governor status hook failed: {e}")
             return {
-                'status': 'hook_failed',
-                'error': str(e),
-                'timestamp': datetime.now().isoformat()
+                "status": "hook_failed",
+                "error": str(e),
+                "timestamp": datetime.now().isoformat(),
             }
 
     return stetho_governor_status_hook
@@ -315,9 +326,9 @@ def create_stetho_governor_hook() -> Callable:
 
 # Export the main functions for use by the extension system
 __all__ = [
-    'CPUUsageLevel',
-    'GovernorStatus',
-    'StethoGovernorIntegration',
-    'create_stetho_governor_hook',
-    'safe_detect_watermark_pulse'
+    "CPUUsageLevel",
+    "GovernorStatus",
+    "StethoGovernorIntegration",
+    "create_stetho_governor_hook",
+    "safe_detect_watermark_pulse",
 ]

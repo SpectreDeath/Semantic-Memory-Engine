@@ -15,15 +15,15 @@ from enum import Enum
 from typing import Any
 
 # Configure logging for governor integration
-logger = logging.getLogger('mirror_test.governor_integration')
+logger = logging.getLogger("mirror_test.governor_integration")
 logger.setLevel(logging.INFO)
 
 # Create file handler for governor integration events
-governor_handler = logging.FileHandler('governor_integration_events.log')
+governor_handler = logging.FileHandler("governor_integration_events.log")
 governor_handler.setLevel(logging.INFO)
 
 # Create formatter and add it to handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 governor_handler.setFormatter(formatter)
 
 # Add handler to logger
@@ -32,10 +32,11 @@ logger.addHandler(governor_handler)
 
 class GovernorStatus(Enum):
     """Governor status levels."""
-    NORMAL = "NORMAL"      # Green - Safe to run audits
-    WARNING = "WARNING"    # Yellow - Caution, may have resource constraints
+
+    NORMAL = "NORMAL"  # Green - Safe to run audits
+    WARNING = "WARNING"  # Yellow - Caution, may have resource constraints
     CRITICAL = "CRITICAL"  # Red - High resource usage, avoid heavy operations
-    UNKNOWN = "UNKNOWN"    # Status unknown
+    UNKNOWN = "UNKNOWN"  # Status unknown
 
 
 class GovernorIntegration:
@@ -107,11 +108,13 @@ class GovernorIntegration:
     def get_status_info(self) -> dict[str, Any]:
         """Get current status information."""
         return {
-            'governor_status': self._governor_status.value,
-            'last_status_check': self._last_status_check.isoformat() if self._last_status_check else None,
-            'audit_count': self._audit_count,
-            'total_audit_time': self._total_audit_time,
-            'is_safe_to_audit': self.is_safe_to_audit()
+            "governor_status": self._governor_status.value,
+            "last_status_check": self._last_status_check.isoformat()
+            if self._last_status_check
+            else None,
+            "audit_count": self._audit_count,
+            "total_audit_time": self._total_audit_time,
+            "is_safe_to_audit": self.is_safe_to_audit(),
         }
 
     def record_audit(self, audit_time: float):
@@ -122,9 +125,12 @@ class GovernorIntegration:
         logger.info(f"Audit completed in {audit_time:.2f}s. Total audits: {self._audit_count}")
 
 
-def safe_audit_multimodal_sync(image_path: str, prompt: str,
-                              threshold: float = 65.0,
-                              governor_check: GovernorIntegration | None = None) -> dict[str, Any]:
+def safe_audit_multimodal_sync(
+    image_path: str,
+    prompt: str,
+    threshold: float = 65.0,
+    governor_check: GovernorIntegration | None = None,
+) -> dict[str, Any]:
     """
     Safe wrapper for audit_multimodal_sync that checks Governor status.
 
@@ -153,15 +159,15 @@ def safe_audit_multimodal_sync(image_path: str, prompt: str,
         print(f"⚠️  {warning_message}")
 
         return {
-            'sync_score': 0.0,
-            'hallucination_detected': False,  # No hallucination detected due to blocked audit
-            'severity': 'BLOCKED',
-            'detected_keywords': [],
-            'missing_keywords': [],
-            'timestamp': datetime.now().isoformat(),
-            'status': 'AUDIT_BLOCKED_DUE_TO_RESOURCE_CONSTRAINTS',
-            'governor_status': status_info['governor_status'],
-            'reason': 'Governor status is not NORMAL (Green)'
+            "sync_score": 0.0,
+            "hallucination_detected": False,  # No hallucination detected due to blocked audit
+            "severity": "BLOCKED",
+            "detected_keywords": [],
+            "missing_keywords": [],
+            "timestamp": datetime.now().isoformat(),
+            "status": "AUDIT_BLOCKED_DUE_TO_RESOURCE_CONSTRAINTS",
+            "governor_status": status_info["governor_status"],
+            "reason": "Governor status is not NORMAL (Green)",
         }
 
     # Import the actual audit function
@@ -185,32 +191,35 @@ def safe_audit_multimodal_sync(image_path: str, prompt: str,
     except ImportError as e:
         logger.exception(f"Failed to import audit function: {e}")
         return {
-            'sync_score': 0.0,
-            'hallucination_detected': False,
-            'severity': 'ERROR',
-            'detected_keywords': [],
-            'missing_keywords': [],
-            'timestamp': datetime.now().isoformat(),
-            'status': 'AUDIT_FAILED_TO_IMPORT',
-            'error': str(e)
+            "sync_score": 0.0,
+            "hallucination_detected": False,
+            "severity": "ERROR",
+            "detected_keywords": [],
+            "missing_keywords": [],
+            "timestamp": datetime.now().isoformat(),
+            "status": "AUDIT_FAILED_TO_IMPORT",
+            "error": str(e),
         }
     except Exception as e:
         logger.exception(f"Audit execution failed: {e}")
         return {
-            'sync_score': 0.0,
-            'hallucination_detected': False,
-            'severity': 'ERROR',
-            'detected_keywords': [],
-            'missing_keywords': [],
-            'timestamp': datetime.now().isoformat(),
-            'status': 'AUDIT_EXECUTION_FAILED',
-            'error': str(e)
+            "sync_score": 0.0,
+            "hallucination_detected": False,
+            "severity": "ERROR",
+            "detected_keywords": [],
+            "missing_keywords": [],
+            "timestamp": datetime.now().isoformat(),
+            "status": "AUDIT_EXECUTION_FAILED",
+            "error": str(e),
         }
 
 
-def safe_audit_multimodal_sync_tool(image_path: str, prompt: str,
-                                 threshold: float = 65.0,
-                                 governor_check: GovernorIntegration | None = None) -> str:
+def safe_audit_multimodal_sync_tool(
+    image_path: str,
+    prompt: str,
+    threshold: float = 65.0,
+    governor_check: GovernorIntegration | None = None,
+) -> str:
     """Tool wrapper that returns a JSON string."""
     result = safe_audit_multimodal_sync(image_path, prompt, threshold, governor_check)
     return json.dumps(result, indent=2)
@@ -262,18 +271,18 @@ def create_governor_aware_hook() -> Callable:
                 print("✅ Governor reports NORMAL status - operations safe")
 
             return {
-                'status': 'hook_executed',
-                'new_governor_status': status,
-                'timestamp': datetime.now().isoformat(),
-                'action_taken': 'status_updated'
+                "status": "hook_executed",
+                "new_governor_status": status,
+                "timestamp": datetime.now().isoformat(),
+                "action_taken": "status_updated",
             }
 
         except Exception as e:
             logger.exception(f"Governor status hook failed: {e}")
             return {
-                'status': 'hook_failed',
-                'error': str(e),
-                'timestamp': datetime.now().isoformat()
+                "status": "hook_failed",
+                "error": str(e),
+                "timestamp": datetime.now().isoformat(),
             }
 
     return governor_status_hook
@@ -281,9 +290,9 @@ def create_governor_aware_hook() -> Callable:
 
 # Export the main functions for use by the extension system
 __all__ = [
-    'GovernorIntegration',
-    'GovernorStatus',
-    'create_governor_aware_hook',
-    'safe_audit_multimodal_sync',
-    'safe_audit_multimodal_sync_tool'
+    "GovernorIntegration",
+    "GovernorStatus",
+    "create_governor_aware_hook",
+    "safe_audit_multimodal_sync",
+    "safe_audit_multimodal_sync_tool",
 ]

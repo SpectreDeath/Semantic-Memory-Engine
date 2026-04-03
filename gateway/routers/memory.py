@@ -32,9 +32,7 @@ def register(
     # ------------------------------------------------------------------
 
     @mcp.tool()
-    def semantic_search(
-        query: str, limit: int = 5, session_id: str | None = None
-    ) -> str:
+    def semantic_search(query: str, limit: int = 5, session_id: str | None = None) -> str:
         """
         Search the knowledge base using semantic vector similarity.
 
@@ -82,9 +80,7 @@ def register(
         return json.dumps(result, indent=2, default=str)
 
     @mcp.tool()
-    def save_memory(
-        fact: str, source: str = "user_input", session_id: str | None = None
-    ) -> str:
+    def save_memory(fact: str, source: str = "user_input", session_id: str | None = None) -> str:
         """
         Persist a new fact or insight to the long-term knowledge base.
 
@@ -133,9 +129,7 @@ def register(
 
             db_path = os.environ.get("SME_DB_PATH", "data/knowledge_core.sqlite")
             if os.path.exists(db_path):
-                stats["storage"]["knowledge_db_mb"] = round(
-                    os.path.getsize(db_path) / (1024 ** 2), 2
-                )
+                stats["storage"]["knowledge_db_mb"] = round(os.path.getsize(db_path) / (1024**2), 2)
 
             chroma_path = "data/chroma_db"
             if os.path.exists(chroma_path):
@@ -144,7 +138,7 @@ def register(
                     for dirpath, _, filenames in os.walk(chroma_path)
                     for fname in filenames
                 )
-                stats["storage"]["chroma_db_mb"] = round(total_size / (1024 ** 2), 2)
+                stats["storage"]["chroma_db_mb"] = round(total_size / (1024**2), 2)
 
             stats["health"] = "healthy"
 
@@ -160,9 +154,7 @@ def register(
     # ------------------------------------------------------------------
 
     @mcp.tool()
-    def store_session_entry(
-        key: str, value: Any, session_id: str | None = None
-    ) -> str:
+    def store_session_entry(key: str, value: Any, session_id: str | None = None) -> str:
         """
         Persist arbitrary data (like stylistic baselines or suspect vectors)
         in the session scratchpad.
@@ -183,12 +175,8 @@ def register(
         return json.dumps(session.to_dict(), indent=2)
 
     @mcp.tool()
-    def update_scratchpad(
-        key: str, value: Any, session_id: str | None = None
-    ) -> str:
+    def update_scratchpad(key: str, value: Any, session_id: str | None = None) -> str:
         """Store temporary facts or context in the session scratchpad."""
         session = session_manager.get_session(session_id)
         session.update_scratchpad(key, value)
-        return json.dumps(
-            {"success": True, "session_id": session.session_id, "key": key}
-        )
+        return json.dumps({"success": True, "session_id": session.session_id, "key": key})

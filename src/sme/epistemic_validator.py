@@ -5,21 +5,23 @@ from gateway.hardware_security import get_hsm
 
 logger = logging.getLogger("SME.Epistemic")
 
+
 class DataNode:
     """
     High-performance data structure for file metadata.
     Uses __slots__ to minimize RAM overhead during recursive audits.
     """
+
     __slots__ = [
-        'attribution',
-        'burstiness',
-        'entropy',
-        'file',
-        'nts',
-        'path',
-        'sda_warning',
-        'vault_proximity',
-        'verdict'
+        "attribution",
+        "burstiness",
+        "entropy",
+        "file",
+        "nts",
+        "path",
+        "sda_warning",
+        "vault_proximity",
+        "verdict",
     ]
 
     def __init__(self, **kwargs):
@@ -29,16 +31,18 @@ class DataNode:
     def to_dict(self):
         return {slot: getattr(self, slot) for slot in self.__slots__}
 
+
 class EpistemicValidator:
     """
     Evaluates forensic claims based on Epistemic Reliabilism and source provenance.
     Optimized with __slots__ for memory efficiency during large audits.
     """
-    __slots__ = ['category', 'core']
+
+    __slots__ = ["category", "core"]
 
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'forensics'
+        self.category = "forensics"
 
     def evaluate_claim(self, claim: str, evidence_sources: list):
         """
@@ -51,7 +55,7 @@ class EpistemicValidator:
         hardware_verified = True
 
         for source in evidence_sources:
-            s_id = source.get('id', 'Unknown')
+            s_id = source.get("id", "Unknown")
             # Query the core for reliability metadata
             provenance = self.core.get_source_reliability(s_id)
             tier = provenance.get("tier", 1)  # 1 (Low) to 5 (High)
@@ -64,16 +68,22 @@ class EpistemicValidator:
                 if hsm.verify_integrity(s_id, db_hash, hw_sig):
                     justifications.append(f"Source '{s_id}': Hardware Integrity Verified (TPM).")
                 else:
-                    justifications.append(f"CRITICAL: Source '{s_id}' TAMPER ALERT! Signature mismatch.")
+                    justifications.append(
+                        f"CRITICAL: Source '{s_id}' TAMPER ALERT! Signature mismatch."
+                    )
                     hardware_verified = False
-                    tier = 0 # invalidate the source
+                    tier = 0  # invalidate the source
             elif db_hash:
-                 justifications.append(f"Source '{s_id}': No Hardware Signature found. Relying on soft hash.")
+                justifications.append(
+                    f"Source '{s_id}': No Hardware Signature found. Relying on soft hash."
+                )
 
             trust = tier / 5.0
             score += trust
             tamper_info = " [Tamper-Evident]" if provenance.get("tamper_evident") else ""
-            justifications.append(f"Source '{s_id}' provides Tier-{tier} grounding (Trust: {trust}){tamper_info}.")
+            justifications.append(
+                f"Source '{s_id}' provides Tier-{tier} grounding (Trust: {trust}){tamper_info}."
+            )
 
         # Normalize score between 0.0 and 1.0
         cq = min(score, 1.0)
@@ -96,5 +106,5 @@ class EpistemicValidator:
             "hardware_verified": hardware_verified,
             "audit_trail": justifications,
             "epistemic_stance": "Hardware-Anchored Reliabilism",
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }

@@ -35,32 +35,29 @@ from scipy.spatial.distance import cosine
 
 # Download required NLTK data (newer versions use punkt_tab)
 try:
-    nltk.data.find('tokenizers/punkt_tab')
+    nltk.data.find("tokenizers/punkt_tab")
 except LookupError:
     try:
-        nltk.download('punkt_tab', quiet=True)
+        nltk.download("punkt_tab", quiet=True)
     except:
         # Fallback for older NLTK versions
         try:
-            nltk.data.find('tokenizers/punkt')
+            nltk.data.find("tokenizers/punkt")
         except LookupError:
-            nltk.download('punkt', quiet=True)
+            nltk.download("punkt", quiet=True)
 
 # ============================================================================
 # CONFIGURATION & SETUP
 # ============================================================================
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(name)s] %(levelname)s: %(message)s'
-)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 from src.core.config import Config
 
 config = Config()
-DB_PATH = str(config.get_path('storage.base_dir') / "storage" / "centrifuge_db.sqlite")
-SCRIBE_DB_PATH = str(config.get_path('storage.base_dir') / "storage" / "scribe_profiles.sqlite")
+DB_PATH = str(config.get_path("storage.base_dir") / "storage" / "centrifuge_db.sqlite")
+SCRIBE_DB_PATH = str(config.get_path("storage.base_dir") / "storage" / "scribe_profiles.sqlite")
 
 # Linguistic thresholds for anomaly detection
 ANOMALY_THRESHOLDS = {
@@ -74,9 +71,11 @@ ANOMALY_THRESHOLDS = {
 # DATA MODELS
 # ============================================================================
 
+
 @dataclass
 class LinguisticFingerprint:
     """Complete linguistic profile of a writer."""
+
     author_id: str | None = None
     avg_sentence_length: float = 0.0
     sentence_length_std: float = 0.0
@@ -104,6 +103,7 @@ class LinguisticFingerprint:
 @dataclass
 class AuthorshipMatch:
     """Result of comparing unknown text against known profiles."""
+
     author_id: str
     author_name: str
     confidence_score: float  # 0-100
@@ -115,6 +115,7 @@ class AuthorshipMatch:
 @dataclass
 class AnomalyReport:
     """Stylistic anomaly detection report."""
+
     author_id: str
     author_name: str
     anomalies_detected: list[str]
@@ -128,6 +129,7 @@ class AnomalyReport:
 # ============================================================================
 # SCRIBE ENGINE - CORE CLASS
 # ============================================================================
+
 
 class ScribeEngine:
     """
@@ -152,7 +154,9 @@ class ScribeEngine:
     # TOOL 1: EXTRACT LINGUISTIC FINGERPRINT
     # ========================================================================
 
-    def extract_linguistic_fingerprint(self, text: str, author_id: str | None = None) -> LinguisticFingerprint:
+    def extract_linguistic_fingerprint(
+        self, text: str, author_id: str | None = None
+    ) -> LinguisticFingerprint:
         """
         Transform raw text into a numerical fingerprint vector.
 
@@ -222,10 +226,12 @@ class ScribeEngine:
                 signal_weights=signal_weights,
                 signal_vector=signal_vector,
                 text_sample_count=len(words),
-                created_at=datetime.utcnow().isoformat()
+                created_at=datetime.utcnow().isoformat(),
             )
 
-            logger.info(f"✅ Fingerprint extracted: {len(fingerprint.signal_vector)} signal dimensions")
+            logger.info(
+                f"✅ Fingerprint extracted: {len(fingerprint.signal_vector)} signal dimensions"
+            )
             return fingerprint
 
         except Exception as e:
@@ -237,9 +243,7 @@ class ScribeEngine:
     # ========================================================================
 
     def compare_to_profiles(
-        self,
-        unknown_fingerprint: LinguisticFingerprint,
-        min_confidence: float = 50.0
+        self, unknown_fingerprint: LinguisticFingerprint, min_confidence: float = 50.0
     ) -> list[AuthorshipMatch]:
         """
         Compare an unknown fingerprint against all known author profiles.
@@ -268,14 +272,12 @@ class ScribeEngine:
             for profile in known_profiles:
                 # Calculate composite similarity score
                 signal_similarity = self._calculate_signal_similarity(
-                    unknown_fingerprint.signal_vector,
-                    profile['signal_vector']
+                    unknown_fingerprint.signal_vector, profile["signal_vector"]
                 )
 
                 # Weighted metrics comparison
                 metrics_similarity = self._compare_linguistic_metrics(
-                    unknown_fingerprint,
-                    LinguisticFingerprint(**profile)
+                    unknown_fingerprint, LinguisticFingerprint(**profile)
                 )
 
                 # Composite score (70% signal + 30% metrics)
@@ -292,12 +294,12 @@ class ScribeEngine:
 
                 if confidence >= min_confidence:
                     match = AuthorshipMatch(
-                        author_id=profile['author_id'],
-                        author_name=profile.get('author_name', 'Unknown'),
+                        author_id=profile["author_id"],
+                        author_name=profile.get("author_name", "Unknown"),
                         confidence_score=confidence,
                         fingerprint_similarity=signal_similarity,
                         reasoning=reasoning,
-                        match_strength=self._classify_match_strength(confidence)
+                        match_strength=self._classify_match_strength(confidence),
                     )
                     matches.append(match)
 
@@ -323,6 +325,7 @@ class ScribeEngine:
         """
         try:
             from src.core.factory import ToolFactory
+
             stylo = ToolFactory.create_stylo_wrapper()
 
             status = stylo.get_status()
@@ -333,19 +336,15 @@ class ScribeEngine:
                     "instructions": [
                         "1. Download R from cran.r-project.org",
                         "2. Run in R: install.packages('stylo')",
-                        "3. Run in terminal: pip install rpy2"
-                    ]
+                        "3. Run in terminal: pip install rpy2",
+                    ],
                 }
 
             if not corpus_path:
                 return {"status": "error", "reason": "No corpus path provided for Delta analysis"}
 
             results = stylo.analyze_distance(text, corpus_path)
-            return {
-                "status": "success",
-                "results": results,
-                "engine": "R-Stylo (Burrows Delta)"
-            }
+            return {"status": "success", "results": results, "engine": "R-Stylo (Burrows Delta)"}
         except Exception as e:
             logger.exception(f"Stylo attribution failed: {e}")
             return {"status": "error", "reason": str(e)}
@@ -355,9 +354,7 @@ class ScribeEngine:
     # ========================================================================
 
     def calculate_attribution_score(
-        self,
-        unknown_text: str,
-        candidate_author_id: str
+        self, unknown_text: str, candidate_author_id: str
     ) -> tuple[float, dict]:
         """
         Calculate precise attribution probability for a specific author.
@@ -390,30 +387,35 @@ class ScribeEngine:
             candidate_profile = LinguisticFingerprint(**candidate_profile_dict)
 
             # Step 3: Calculate component scores
-            signal_score = self._calculate_signal_similarity(
-                unknown_fp.signal_vector,
-                candidate_profile.signal_vector
-            ) * 100
+            signal_score = (
+                self._calculate_signal_similarity(
+                    unknown_fp.signal_vector, candidate_profile.signal_vector
+                )
+                * 100
+            )
 
-            metrics_score = self._compare_linguistic_metrics(
-                unknown_fp,
-                candidate_profile
-            ) * 100
+            metrics_score = self._compare_linguistic_metrics(unknown_fp, candidate_profile) * 100
 
-            punctuation_score = self._compare_punctuation_profiles(
-                unknown_fp.punctuation_profile,
-                candidate_profile.punctuation_profile
-            ) * 100
+            punctuation_score = (
+                self._compare_punctuation_profiles(
+                    unknown_fp.punctuation_profile, candidate_profile.punctuation_profile
+                )
+                * 100
+            )
 
-            diversity_score = self._compare_lexical_diversity(
-                unknown_fp.type_token_ratio,
-                candidate_profile.type_token_ratio
-            ) * 100
+            diversity_score = (
+                self._compare_lexical_diversity(
+                    unknown_fp.type_token_ratio, candidate_profile.type_token_ratio
+                )
+                * 100
+            )
 
-            voice_ratio_score = self._compare_voice_ratios(
-                unknown_fp.passive_voice_ratio,
-                candidate_profile.passive_voice_ratio
-            ) * 100
+            voice_ratio_score = (
+                self._compare_voice_ratios(
+                    unknown_fp.passive_voice_ratio, candidate_profile.passive_voice_ratio
+                )
+                * 100
+            )
 
             # Step 4: Weighted composite (signal is most important)
             breakdown = {
@@ -427,16 +429,16 @@ class ScribeEngine:
                     "metrics": 0.25,
                     "punctuation": 0.15,
                     "diversity": 0.15,
-                    "voice": 0.05
-                }
+                    "voice": 0.05,
+                },
             }
 
             final_score = (
-                signal_score * 0.40 +
-                metrics_score * 0.25 +
-                punctuation_score * 0.15 +
-                diversity_score * 0.15 +
-                voice_ratio_score * 0.05
+                signal_score * 0.40
+                + metrics_score * 0.25
+                + punctuation_score * 0.15
+                + diversity_score * 0.15
+                + voice_ratio_score * 0.05
             )
 
             breakdown["final_attribution_score"] = final_score
@@ -453,11 +455,7 @@ class ScribeEngine:
     # TOOL 4: IDENTIFY STYLISTIC ANOMALIES
     # ========================================================================
 
-    def identify_stylistic_anomalies(
-        self,
-        author_id: str,
-        new_text: str
-    ) -> AnomalyReport | None:
+    def identify_stylistic_anomalies(self, author_id: str, new_text: str) -> AnomalyReport | None:
         """
         Detect when a "known" author's style suddenly changes.
 
@@ -492,8 +490,8 @@ class ScribeEngine:
 
             # Check 1: Sentence length shift
             sentence_shift = abs(
-                (new_fp.avg_sentence_length - baseline_fp.avg_sentence_length) /
-                max(baseline_fp.avg_sentence_length, 1.0)
+                (new_fp.avg_sentence_length - baseline_fp.avg_sentence_length)
+                / max(baseline_fp.avg_sentence_length, 1.0)
             )
             if sentence_shift > ANOMALY_THRESHOLDS["sentence_length_shift"]:
                 anomalies.append(
@@ -504,13 +502,10 @@ class ScribeEngine:
 
             # Check 2: Signal consistency
             signal_shift = self._calculate_signal_consistency_shift(
-                baseline_fp.signal_weights,
-                new_fp.signal_weights
+                baseline_fp.signal_weights, new_fp.signal_weights
             )
             if signal_shift > ANOMALY_THRESHOLDS["signal_consistency_drop"]:
-                anomalies.append(
-                    f"⚠️ SIGNAL SHIFT: Rhetorical patterns changed {signal_shift:.0%}"
-                )
+                anomalies.append(f"⚠️ SIGNAL SHIFT: Rhetorical patterns changed {signal_shift:.0%}")
                 severity_scores.append(signal_shift)
 
             # Check 3: Vocabulary shift
@@ -524,13 +519,10 @@ class ScribeEngine:
 
             # Check 4: Punctuation changes
             punct_shift = self._calculate_punctuation_shift(
-                baseline_fp.punctuation_profile,
-                new_fp.punctuation_profile
+                baseline_fp.punctuation_profile, new_fp.punctuation_profile
             )
             if punct_shift > ANOMALY_THRESHOLDS["punctuation_variation"]:
-                anomalies.append(
-                    f"⚠️ PUNCTUATION: Usage patterns changed {punct_shift:.0%}"
-                )
+                anomalies.append(f"⚠️ PUNCTUATION: Usage patterns changed {punct_shift:.0%}")
                 severity_scores.append(punct_shift)
 
             # Check 5: Voice ratio (often signals AI-generated text)
@@ -549,7 +541,7 @@ class ScribeEngine:
 
                 report = AnomalyReport(
                     author_id=author_id,
-                    author_name=baseline_dict.get('author_name', 'Unknown'),
+                    author_name=baseline_dict.get("author_name", "Unknown"),
                     anomalies_detected=anomalies,
                     severity=self._classify_severity(avg_severity),
                     confidence=confidence,
@@ -557,18 +549,20 @@ class ScribeEngine:
                         "avg_sentence_length": baseline_fp.avg_sentence_length,
                         "type_token_ratio": baseline_fp.type_token_ratio,
                         "passive_voice_ratio": baseline_fp.passive_voice_ratio,
-                        "signal_count": len(baseline_fp.signal_weights)
+                        "signal_count": len(baseline_fp.signal_weights),
                     },
                     current_profile={
                         "avg_sentence_length": new_fp.avg_sentence_length,
                         "type_token_ratio": new_fp.type_token_ratio,
                         "passive_voice_ratio": new_fp.passive_voice_ratio,
-                        "signal_count": len(new_fp.signal_weights)
+                        "signal_count": len(new_fp.signal_weights),
                     },
-                    analysis_timestamp=datetime.utcnow().isoformat()
+                    analysis_timestamp=datetime.utcnow().isoformat(),
                 )
 
-                logger.info(f"🚨 Anomalies detected ({len(anomalies)} issues, {report.severity} severity)")
+                logger.info(
+                    f"🚨 Anomalies detected ({len(anomalies)} issues, {report.severity} severity)"
+                )
                 return report
 
             logger.info("✅ No anomalies detected - style is consistent")
@@ -610,7 +604,7 @@ class ScribeEngine:
 
         for sent in sentences:
             # Simple detection: "was/were" + past participle
-            if re.search(r'\b(was|were|is|are|be|been|being)\s+\w+ed\b', sent, re.IGNORECASE):
+            if re.search(r"\b(was|were|is|are|be|been|being)\s+\w+ed\b", sent, re.IGNORECASE):
                 passive_count += 1
 
         return passive_count / len(sentences) if sentences else 0.0
@@ -621,7 +615,11 @@ class ScribeEngine:
 
         for sent in sentences:
             # Count conjunctions as rough proxy for clauses
-            conj_count = len(re.findall(r'\b(and|but|or|because|since|although|if|when|where)\b', sent, re.IGNORECASE))
+            conj_count = len(
+                re.findall(
+                    r"\b(and|but|or|because|since|although|if|when|where)\b", sent, re.IGNORECASE
+                )
+            )
             clause_counts.append(conj_count + 1)  # At least 1 main clause
 
         return np.mean(clause_counts) if clause_counts else 1.0
@@ -630,7 +628,7 @@ class ScribeEngine:
         """Extract punctuation usage patterns ("sparks")."""
         total_chars = len(text)
 
-        punct_chars = [',', '.', '!', '?', ';', ':', '"', "'", '-', '—', '…', '(', ')']
+        punct_chars = [",", ".", "!", "?", ";", ":", '"', "'", "-", "—", "…", "(", ")"]
         profile = {}
 
         for p in punct_chars:
@@ -695,7 +693,9 @@ class ScribeEngine:
         # Cosine similarity (1 = identical, 0 = orthogonal)
         return 1 - cosine(v1, v2)
 
-    def _compare_linguistic_metrics(self, fp1: LinguisticFingerprint, fp2: LinguisticFingerprint) -> float:
+    def _compare_linguistic_metrics(
+        self, fp1: LinguisticFingerprint, fp2: LinguisticFingerprint
+    ) -> float:
         """Compare overall linguistic metrics (sentence length, complexity, etc)."""
         metrics = [
             (fp1.avg_sentence_length, fp2.avg_sentence_length),
@@ -753,7 +753,9 @@ class ScribeEngine:
         diff = abs(ratio1 - ratio2)
         return 1.0 - min(diff, 1.0)
 
-    def _calculate_signal_consistency_shift(self, baseline_signals: dict, new_signals: dict) -> float:
+    def _calculate_signal_consistency_shift(
+        self, baseline_signals: dict, new_signals: dict
+    ) -> float:
         """Measure how much the signal distribution has changed."""
         if not baseline_signals or not new_signals:
             return 0.0
@@ -909,8 +911,12 @@ class ScribeEngine:
 
             # Performance indices
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_author_id ON author_profiles(author_id)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_attribution_author ON attribution_history(candidate_author_id)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_anomaly_author ON anomaly_reports(author_id)")
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_attribution_author ON attribution_history(candidate_author_id)"
+            )
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_anomaly_author ON anomaly_reports(author_id)"
+            )
 
             conn.commit()
             logger.info("✅ Scribe database tables initialized")
@@ -931,7 +937,8 @@ class ScribeEngine:
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO author_profiles (
                     author_id, author_name, avg_sentence_length, sentence_length_std,
                     avg_word_length, lexical_diversity, type_token_ratio,
@@ -939,24 +946,26 @@ class ScribeEngine:
                     punctuation_profile, signal_weights, signal_vector,
                     text_sample_count, created_at, updated_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                fingerprint.author_id or f"author_{int(datetime.utcnow().timestamp())}",
-                author_name,
-                fingerprint.avg_sentence_length,
-                fingerprint.sentence_length_std,
-                fingerprint.avg_word_length,
-                fingerprint.lexical_diversity,
-                fingerprint.type_token_ratio,
-                fingerprint.passive_voice_ratio,
-                fingerprint.active_voice_ratio,
-                fingerprint.avg_clause_count,
-                json.dumps(fingerprint.punctuation_profile),
-                json.dumps(fingerprint.signal_weights),
-                json.dumps(fingerprint.signal_vector),
-                fingerprint.text_sample_count,
-                fingerprint.created_at,
-                datetime.utcnow().isoformat()
-            ))
+            """,
+                (
+                    fingerprint.author_id or f"author_{int(datetime.utcnow().timestamp())}",
+                    author_name,
+                    fingerprint.avg_sentence_length,
+                    fingerprint.sentence_length_std,
+                    fingerprint.avg_word_length,
+                    fingerprint.lexical_diversity,
+                    fingerprint.type_token_ratio,
+                    fingerprint.passive_voice_ratio,
+                    fingerprint.active_voice_ratio,
+                    fingerprint.avg_clause_count,
+                    json.dumps(fingerprint.punctuation_profile),
+                    json.dumps(fingerprint.signal_weights),
+                    json.dumps(fingerprint.signal_vector),
+                    fingerprint.text_sample_count,
+                    fingerprint.created_at,
+                    datetime.utcnow().isoformat(),
+                ),
+            )
 
             conn.commit()
             logger.info(f"✅ Profile saved for {author_name}")
@@ -980,15 +989,15 @@ class ScribeEngine:
             profile = dict(zip(cols, row, strict=False))
 
             # Deserialize JSON fields
-            profile['punctuation_profile'] = json.loads(profile['punctuation_profile'] or '{}')
-            profile['signal_weights'] = json.loads(profile['signal_weights'] or '{}')
-            profile['signal_vector'] = json.loads(profile['signal_vector'] or '[]')
+            profile["punctuation_profile"] = json.loads(profile["punctuation_profile"] or "{}")
+            profile["signal_weights"] = json.loads(profile["signal_weights"] or "{}")
+            profile["signal_vector"] = json.loads(profile["signal_vector"] or "[]")
 
             # Remove non-dataclass fields before reconstruction
-            profile.pop('author_name', None)
-            profile.pop('samples_count', None)
-            profile.pop('avg_confidence', None)
-            profile.pop('updated_at', None)
+            profile.pop("author_name", None)
+            profile.pop("samples_count", None)
+            profile.pop("avg_confidence", None)
+            profile.pop("updated_at", None)
 
             return profile
 
@@ -1010,15 +1019,15 @@ class ScribeEngine:
                 profile = dict(zip(cols, row, strict=False))
 
                 # Deserialize JSON fields
-                profile['punctuation_profile'] = json.loads(profile['punctuation_profile'] or '{}')
-                profile['signal_weights'] = json.loads(profile['signal_weights'] or '{}')
-                profile['signal_vector'] = json.loads(profile['signal_vector'] or '[]')
+                profile["punctuation_profile"] = json.loads(profile["punctuation_profile"] or "{}")
+                profile["signal_weights"] = json.loads(profile["signal_weights"] or "{}")
+                profile["signal_vector"] = json.loads(profile["signal_vector"] or "[]")
 
                 # Remove non-dataclass fields
-                profile.pop('author_name', None)
-                profile.pop('samples_count', None)
-                profile.pop('avg_confidence', None)
-                profile.pop('updated_at', None)
+                profile.pop("author_name", None)
+                profile.pop("samples_count", None)
+                profile.pop("avg_confidence", None)
+                profile.pop("updated_at", None)
 
                 profiles.append(profile)
 
@@ -1027,25 +1036,30 @@ class ScribeEngine:
         finally:
             conn.close()
 
-    def save_attribution_result(self, unknown_text_hash: str, result: AuthorshipMatch, breakdown: dict):
+    def save_attribution_result(
+        self, unknown_text_hash: str, result: AuthorshipMatch, breakdown: dict
+    ):
         """Save attribution result to history."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO attribution_history (
                     unknown_text_hash, candidate_author_id, attribution_score,
                     confidence_level, breakdown, created_at
                 ) VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                unknown_text_hash,
-                result.author_id,
-                result.confidence_score,
-                result.match_strength,
-                json.dumps(breakdown),
-                datetime.utcnow().isoformat()
-            ))
+            """,
+                (
+                    unknown_text_hash,
+                    result.author_id,
+                    result.confidence_score,
+                    result.match_strength,
+                    json.dumps(breakdown),
+                    datetime.utcnow().isoformat(),
+                ),
+            )
 
             conn.commit()
 
@@ -1058,21 +1072,24 @@ class ScribeEngine:
         cursor = conn.cursor()
 
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO anomaly_reports (
                     author_id, anomalies_detected, severity, confidence,
                     baseline_profile, current_profile, analysis_timestamp, created_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                report.author_id,
-                json.dumps(report.anomalies_detected),
-                report.severity,
-                report.confidence,
-                json.dumps(report.baseline_profile),
-                json.dumps(report.current_profile),
-                report.analysis_timestamp,
-                datetime.utcnow().isoformat()
-            ))
+            """,
+                (
+                    report.author_id,
+                    json.dumps(report.anomalies_detected),
+                    report.severity,
+                    report.confidence,
+                    json.dumps(report.baseline_profile),
+                    json.dumps(report.current_profile),
+                    report.analysis_timestamp,
+                    datetime.utcnow().isoformat(),
+                ),
+            )
 
             conn.commit()
             logger.info(f"✅ Anomaly report saved for {report.author_id}")
@@ -1108,7 +1125,7 @@ class ScribeEngine:
                 "total_anomaly_reports": anomaly_count,
                 "avg_profile_confidence": avg_profile_confidence,
                 "database_path": self.db_path,
-                "status": "operational"
+                "status": "operational",
             }
 
         finally:
@@ -1118,6 +1135,7 @@ class ScribeEngine:
 # ============================================================================
 # MCP TOOL FUNCTIONS (Exposed to SimpleMem)
 # ============================================================================
+
 
 def extract_linguistic_fingerprint_tool(text: str, author_id: str | None = None) -> dict:
     """
@@ -1143,7 +1161,7 @@ def extract_linguistic_fingerprint_tool(text: str, author_id: str | None = None)
         },
         "signal_dimensions": len(fingerprint.signal_vector),
         "text_analyzed": fingerprint.text_sample_count,
-        "created_at": fingerprint.created_at
+        "created_at": fingerprint.created_at,
     }
 
 
@@ -1166,10 +1184,10 @@ def compare_to_profiles_tool(unknown_text: str, min_confidence: float = 50.0) ->
                 "author_name": m.author_name,
                 "confidence_score": round(m.confidence_score, 1),
                 "match_strength": m.match_strength,
-                "reasoning": m.reasoning
+                "reasoning": m.reasoning,
             }
             for m in matches[:10]  # Top 10 matches
-        ]
+        ],
     }
 
 
@@ -1193,7 +1211,7 @@ def calculate_attribution_score_tool(unknown_text: str, candidate_author_id: str
             "punctuation_habits": round(breakdown.get("punctuation_habits", 0), 1),
             "lexical_diversity": round(breakdown.get("lexical_diversity", 0), 1),
             "voice_ratio_match": round(breakdown.get("voice_ratio_match", 0), 1),
-        }
+        },
     }
 
 
@@ -1211,7 +1229,7 @@ def identify_stylistic_anomalies_tool(author_id: str, new_text: str) -> dict:
             "status": "success",
             "author_id": author_id,
             "anomalies_found": False,
-            "message": "No stylistic anomalies detected - writing style is consistent"
+            "message": "No stylistic anomalies detected - writing style is consistent",
         }
 
     return {
@@ -1221,7 +1239,7 @@ def identify_stylistic_anomalies_tool(author_id: str, new_text: str) -> dict:
         "severity": report.severity,
         "confidence": round(report.confidence, 1),
         "anomalies": report.anomalies_detected,
-        "analysis_timestamp": report.analysis_timestamp
+        "analysis_timestamp": report.analysis_timestamp,
     }
 
 
@@ -1235,11 +1253,12 @@ def get_scribe_stats_tool() -> dict:
 # DEMO / TESTING
 # ============================================================================
 
+
 async def demo_scribe():
     """Demo showing all 4 Scribe tools in action."""
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🖋️ SCRIBE ENGINE DEMO - Forensic Authorship Analysis")
-    print("="*80)
+    print("=" * 80)
 
     scribe = ScribeEngine()
 
@@ -1252,13 +1271,11 @@ async def demo_scribe():
         communities. Furthermore, the statistical analysis thereof demonstrates
         considerable consistency across multiple dimensions.
         """,
-
         "author_casual": """
         So like, I was thinking about how people talk differently, you know?
         And it's kinda wild how like, some folks are super formal and others are
         just chill. I mean, it makes sense when you think about it, right?
         """,
-
         "author_technical": """
         The algorithm processes input vectors through a series of transformations.
         Each layer performs dimensionality reduction via PCA. Performance metrics
@@ -1287,9 +1304,7 @@ async def demo_scribe():
 
     print("\n🔍 Step 2: Comparing Unknown Text to Profiles")
     print("-" * 80)
-    matches = scribe.compare_to_profiles(
-        scribe.extract_linguistic_fingerprint(unknown_academic)
-    )
+    matches = scribe.compare_to_profiles(scribe.extract_linguistic_fingerprint(unknown_academic))
     for i, match in enumerate(matches, 1):
         print(f"{i}. {match.author_name} ({match.match_strength})")
         print(f"   Confidence: {match.confidence_score:.1f}%")
@@ -1298,10 +1313,7 @@ async def demo_scribe():
     # Step 3: Attribution score for specific author
     print("\n📈 Step 3: Attribution Score (Academic Author)")
     print("-" * 80)
-    score, breakdown = scribe.calculate_attribution_score(
-        unknown_academic,
-        "author_academic"
-    )
+    score, breakdown = scribe.calculate_attribution_score(unknown_academic, "author_academic")
     print(f"Final Score: {score:.1f}%")
     print(f"Confidence: {breakdown.get('confidence_level')}")
     print("\nComponent Breakdown:")
@@ -1336,9 +1348,9 @@ async def demo_scribe():
     print(f"Attributions Performed: {stats['total_attributions']}")
     print(f"Anomaly Reports: {stats['total_anomaly_reports']}")
 
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("✅ SCRIBE DEMO COMPLETE")
-    print("="*80)
+    print("=" * 80)
 
 
 if __name__ == "__main__":

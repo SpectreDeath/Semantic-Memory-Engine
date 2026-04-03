@@ -12,6 +12,7 @@ from pathlib import Path
 
 DB_PATH = "d:/mcp_servers/storage/laboratory.db"
 
+
 def migrate_add_raw_content_table():
     """Create raw_content table for Harvester archival."""
     conn = sqlite3.connect(DB_PATH)
@@ -123,12 +124,12 @@ def get_table_stats():
     conn.close()
 
     return {
-        'total_rows': total_rows,
-        'total_html_bytes': total_html_bytes,
-        'total_markdown_bytes': total_markdown_bytes,
-        'avg_quality': avg_quality,
-        'processed_count': processed_count,
-        'unprocessed_count': total_rows - processed_count
+        "total_rows": total_rows,
+        "total_html_bytes": total_html_bytes,
+        "total_markdown_bytes": total_markdown_bytes,
+        "avg_quality": avg_quality,
+        "processed_count": processed_count,
+        "unprocessed_count": total_rows - processed_count,
     }
 
 
@@ -137,11 +138,14 @@ def cleanup_old_entries(days: int = 30):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
-    cursor.execute("""
+    cursor.execute(
+        """
         DELETE FROM raw_content
         WHERE processed_by_loom = 0
         AND timestamp < datetime('now', '-' || ? || ' days')
-    """, (days,))
+    """,
+        (days,),
+    )
 
     deleted = cursor.rowcount
     conn.commit()
@@ -232,13 +236,13 @@ def report_database_status():
         print(f"   Total records: {stats['total_rows']}")
         print(f"   Processed (by Loom): {stats['processed_count']}")
         print(f"   Pending: {stats['unprocessed_count']}")
-        print(f"   HTML storage: {stats['total_html_bytes'] / (1024*1024):.1f} MB")
-        print(f"   Markdown storage: {stats['total_markdown_bytes'] / (1024*1024):.1f} MB")
+        print(f"   HTML storage: {stats['total_html_bytes'] / (1024 * 1024):.1f} MB")
+        print(f"   Markdown storage: {stats['total_markdown_bytes'] / (1024 * 1024):.1f} MB")
         print(f"   Avg quality score: {stats['avg_quality']:.0f}/100")
 
         # Storage capacity
         capacity_mb = 5000  # 5GB
-        used_mb = (stats['total_html_bytes'] + stats['total_markdown_bytes']) / (1024*1024)
+        used_mb = (stats["total_html_bytes"] + stats["total_markdown_bytes"]) / (1024 * 1024)
         remaining_mb = capacity_mb - used_mb
         usage_pct = (used_mb / capacity_mb) * 100
 

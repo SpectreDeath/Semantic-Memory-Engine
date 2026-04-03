@@ -27,27 +27,32 @@ from typing import Any
 
 logger = logging.getLogger("SME.SocialIntelligence.ContentModerator")
 
+
 @dataclass
 class ModerationResult:
     """Result of content moderation."""
+
     content_id: str
     content_type: str  # "text", "image", "video", "mixed"
     moderation_score: float  # 0.0 to 1.0 (higher = more problematic)
-    moderation_level: str   # "allow", "flag", "block"
+    moderation_level: str  # "allow", "flag", "block"
     detected_issues: list[str]
     confidence: float
     suggested_action: str
     metadata: dict[str, Any]
 
+
 @dataclass
 class UserModerationProfile:
     """User moderation profile for behavior analysis."""
+
     user_id: str
     violation_history: list[dict[str, Any]]
     trust_score: float
     risk_level: str
     last_moderation_action: str | None
     moderation_count: int
+
 
 class ContentModerator:
     """
@@ -72,19 +77,35 @@ class ContentModerator:
         """Load NSFW content detection lexicon."""
         return {
             # Explicit content
-            "porn": 0.9, "sex": 0.8, "nude": 0.9, "xxx": 0.9,
-            "adult": 0.7, "erotic": 0.8, "sexual": 0.8,
-
+            "porn": 0.9,
+            "sex": 0.8,
+            "nude": 0.9,
+            "xxx": 0.9,
+            "adult": 0.7,
+            "erotic": 0.8,
+            "sexual": 0.8,
             # Violence and gore
-            "kill": 0.6, "murder": 0.9, "violence": 0.8, "gore": 0.9,
-            "blood": 0.7, "weapon": 0.6, "gun": 0.7, "knife": 0.7,
-
+            "kill": 0.6,
+            "murder": 0.9,
+            "violence": 0.8,
+            "gore": 0.9,
+            "blood": 0.7,
+            "weapon": 0.6,
+            "gun": 0.7,
+            "knife": 0.7,
             # Substance abuse
-            "drug": 0.8, "cocaine": 0.9, "heroin": 0.9, "meth": 0.9,
-            "alcohol": 0.5, "weed": 0.7, "marijuana": 0.8,
-
+            "drug": 0.8,
+            "cocaine": 0.9,
+            "heroin": 0.9,
+            "meth": 0.9,
+            "alcohol": 0.5,
+            "weed": 0.7,
+            "marijuana": 0.8,
             # Self-harm
-            "suicide": 0.9, "selfharm": 0.9, "cutting": 0.8, "die": 0.7
+            "suicide": 0.9,
+            "selfharm": 0.9,
+            "cutting": 0.8,
+            "die": 0.7,
         }
 
     def _load_spam_patterns(self) -> list[dict[str, Any]]:
@@ -93,48 +114,61 @@ class ContentModerator:
             {
                 "pattern": r"(?i)(?:buy|sell|cheap|free|win|prize|money|earn|$$$)",
                 "weight": 0.3,
-                "description": "Commercial spam keywords"
+                "description": "Commercial spam keywords",
             },
             {
                 "pattern": r"(?:http[s]?://|www\.)\S{20,}",
                 "weight": 0.4,
-                "description": "Excessive URL length"
+                "description": "Excessive URL length",
             },
             {
                 "pattern": r"(.)\1{3,}",
                 "weight": 0.2,
-                "description": "Excessive character repetition"
+                "description": "Excessive character repetition",
             },
             {
                 "pattern": r"(?i)(?:click|link|visit|download|install)",
                 "weight": 0.2,
-                "description": "Clickbait language"
+                "description": "Clickbait language",
             },
-            {
-                "pattern": r"[A-Z]{10,}",
-                "weight": 0.3,
-                "description": "Excessive capitalization"
-            }
+            {"pattern": r"[A-Z]{10,}", "weight": 0.3, "description": "Excessive capitalization"},
         ]
 
     def _load_hate_speech_lexicon(self) -> dict[str, float]:
         """Load hate speech detection lexicon."""
         return {
             # Racial slurs
-            "nigger": 1.0, "nigga": 0.9, "chink": 0.9, "spic": 0.9,
-            "wetback": 0.9, "kike": 0.9, "gook": 0.9, "coon": 0.9,
-
+            "nigger": 1.0,
+            "nigga": 0.9,
+            "chink": 0.9,
+            "spic": 0.9,
+            "wetback": 0.9,
+            "kike": 0.9,
+            "gook": 0.9,
+            "coon": 0.9,
             # Religious hate
-            "jew": 0.6, "muslim": 0.6, "christian": 0.6, "islam": 0.7,
-            "terrorist": 0.8, "infidel": 0.8, "heretic": 0.7,
-
+            "jew": 0.6,
+            "muslim": 0.6,
+            "christian": 0.6,
+            "islam": 0.7,
+            "terrorist": 0.8,
+            "infidel": 0.8,
+            "heretic": 0.7,
             # Gender/sexual orientation hate
-            "fag": 0.9, "faggot": 0.9, "dyke": 0.8, "tranny": 0.8,
-            "slut": 0.7, "whore": 0.8, "bitch": 0.6,
-
+            "fag": 0.9,
+            "faggot": 0.9,
+            "dyke": 0.8,
+            "tranny": 0.8,
+            "slut": 0.7,
+            "whore": 0.8,
+            "bitch": 0.6,
             # General hate
-            "hate": 0.7, "kill": 0.6, "death": 0.6, "destroy": 0.7,
-            "eliminate": 0.8, "exterminate": 0.9
+            "hate": 0.7,
+            "kill": 0.6,
+            "death": 0.6,
+            "destroy": 0.7,
+            "eliminate": 0.8,
+            "exterminate": 0.9,
         }
 
     def _load_quality_rules(self) -> dict[str, Any]:
@@ -148,8 +182,8 @@ class ContentModerator:
             "forbidden_patterns": [
                 r"^\s*$",  # Empty content
                 r"^[^\w\s]+$",  # Only symbols
-                r"^\d{10,}$"  # Only numbers
-            ]
+                r"^\d{10,}$",  # Only numbers
+            ],
         }
 
     def _load_moderation_policies(self) -> dict[str, Any]:
@@ -161,7 +195,7 @@ class ContentModerator:
             "quality_threshold": 0.3,
             "combined_threshold": 0.8,
             "user_trust_boost": 0.1,  # Reduce scores for trusted users
-            "user_penalty": 0.2      # Increase scores for problematic users
+            "user_penalty": 0.2,  # Increase scores for problematic users
         }
 
     async def moderate_content(self, content: dict[str, Any]) -> ModerationResult:
@@ -196,7 +230,7 @@ class ContentModerator:
                     detected_issues=[],
                     confidence=1.0,
                     suggested_action="allow",
-                    metadata={"reason": "empty_content"}
+                    metadata={"reason": "empty_content"},
                 )
 
             # Get user profile
@@ -222,9 +256,7 @@ class ContentModerator:
             )
 
             # Determine suggested action
-            suggested_action = self._determine_suggested_action(
-                moderation_level, detected_issues
-            )
+            suggested_action = self._determine_suggested_action(moderation_level, detected_issues)
 
             # Calculate confidence
             confidence = self._calculate_moderation_confidence(
@@ -247,8 +279,8 @@ class ContentModerator:
                     "spam_score": spam_score,
                     "hate_score": hate_score,
                     "quality_score": quality_score,
-                    "user_trust_score": user_profile.trust_score if user_profile else 0.5
-                }
+                    "user_trust_score": user_profile.trust_score if user_profile else 0.5,
+                },
             )
 
         except Exception as e:
@@ -261,7 +293,7 @@ class ContentModerator:
                 detected_issues=["moderation_error"],
                 confidence=0.0,
                 suggested_action="manual_review",
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
 
     async def moderate_batch(self, content_batch: list[dict[str, Any]]) -> list[ModerationResult]:
@@ -287,9 +319,9 @@ class ContentModerator:
             logger.exception(f"Error moderating batch: {e}")
             return []
 
-    async def update_user_moderation_profile(self, user_id: str,
-                                           violation_type: str,
-                                           severity: float) -> UserModerationProfile:
+    async def update_user_moderation_profile(
+        self, user_id: str, violation_type: str, severity: float
+    ) -> UserModerationProfile:
         """
         Update user moderation profile based on violation.
 
@@ -309,7 +341,7 @@ class ContentModerator:
                 "type": violation_type,
                 "severity": severity,
                 "timestamp": datetime.now(),
-                "action": "violation_recorded"
+                "action": "violation_recorded",
             }
 
             profile.violation_history.append(violation)
@@ -352,7 +384,7 @@ class ContentModerator:
                 trust_score=1.0,  # Start with maximum trust
                 risk_level="low",
                 last_moderation_action=None,
-                moderation_count=0
+                moderation_count=0,
             )
 
         return self.user_profiles[user_id]
@@ -433,28 +465,30 @@ class ContentModerator:
 
         return min(quality_issues, 1.0)
 
-    def _calculate_combined_score(self, nsfw_score: float, spam_score: float,
-                                hate_score: float, quality_score: float,
-                                user_profile: UserModerationProfile) -> float:
+    def _calculate_combined_score(
+        self,
+        nsfw_score: float,
+        spam_score: float,
+        hate_score: float,
+        quality_score: float,
+        user_profile: UserModerationProfile,
+    ) -> float:
         """Calculate combined moderation score."""
         # Base scores with weights
-        weights = {
-            "nsfw": 0.3,
-            "spam": 0.2,
-            "hate": 0.4,
-            "quality": 0.1
-        }
+        weights = {"nsfw": 0.3, "spam": 0.2, "hate": 0.4, "quality": 0.1}
 
         base_score = (
-            nsfw_score * weights["nsfw"] +
-            spam_score * weights["spam"] +
-            hate_score * weights["hate"] +
-            quality_score * weights["quality"]
+            nsfw_score * weights["nsfw"]
+            + spam_score * weights["spam"]
+            + hate_score * weights["hate"]
+            + quality_score * weights["quality"]
         )
 
         # Apply user trust adjustment
         if user_profile:
-            trust_adjustment = (1.0 - user_profile.trust_score) * self.moderation_policies["user_penalty"]
+            trust_adjustment = (1.0 - user_profile.trust_score) * self.moderation_policies[
+                "user_penalty"
+            ]
             base_score += trust_adjustment
 
         return min(base_score, 1.0)
@@ -468,8 +502,9 @@ class ContentModerator:
         else:
             return "allow"
 
-    def _generate_detected_issues(self, nsfw_score: float, spam_score: float,
-                                hate_score: float, quality_score: float) -> list[str]:
+    def _generate_detected_issues(
+        self, nsfw_score: float, spam_score: float, hate_score: float, quality_score: float
+    ) -> list[str]:
         """Generate list of detected issues."""
         issues = []
 
@@ -487,8 +522,7 @@ class ContentModerator:
 
         return issues
 
-    def _determine_suggested_action(self, moderation_level: str,
-                                  detected_issues: list[str]) -> str:
+    def _determine_suggested_action(self, moderation_level: str, detected_issues: list[str]) -> str:
         """Determine suggested moderation action."""
         if moderation_level == "block":
             return "remove_content"
@@ -497,8 +531,9 @@ class ContentModerator:
         else:
             return "allow_content"
 
-    def _calculate_moderation_confidence(self, nsfw_score: float, spam_score: float,
-                                       hate_score: float, quality_score: float) -> float:
+    def _calculate_moderation_confidence(
+        self, nsfw_score: float, spam_score: float, hate_score: float, quality_score: float
+    ) -> float:
         """Calculate confidence in moderation decision."""
         # Higher confidence for extreme scores
         max_score = max(nsfw_score, spam_score, hate_score, quality_score)
@@ -512,8 +547,9 @@ class ContentModerator:
         else:
             return 0.3
 
-    async def _update_user_profile(self, user_id: str, moderation_level: str,
-                                 detected_issues: list[str]):
+    async def _update_user_profile(
+        self, user_id: str, moderation_level: str, detected_issues: list[str]
+    ):
         """Update user moderation profile."""
         self._get_user_profile(user_id)
 
@@ -529,8 +565,8 @@ class ContentModerator:
         # Check for leetspeak and character substitution
         obfuscated_patterns = [
             r"[n!][1i!][g@][g6][3e!]",  # nigge
-            r"[p@][0o][r!n]",          # porn
-            r"[s3$][3e!][x]",          # sex
+            r"[p@][0o][r!n]",  # porn
+            r"[s3$][3e!][x]",  # sex
         ]
 
         return any(re.search(pattern, text, re.IGNORECASE) for pattern in obfuscated_patterns)
@@ -538,8 +574,8 @@ class ContentModerator:
     def _contains_hate_patterns(self, text: str) -> bool:
         """Check for hate speech patterns."""
         hate_patterns = [
-            r"(?i)\bkill.*\b",     # Kill threats
-            r"(?i)\bdeath.*\b",    # Death threats
+            r"(?i)\bkill.*\b",  # Kill threats
+            r"(?i)\bdeath.*\b",  # Death threats
             r"(?i)\bdestroy.*\b",  # Destruction
         ]
 
@@ -570,7 +606,7 @@ class ContentModerator:
     def _has_excessive_repetition(self, text: str) -> bool:
         """Check for excessive character or word repetition."""
         # Check character repetition
-        if re.search(r'(.)\1{5,}', text):
+        if re.search(r"(.)\1{5,}", text):
             return True
 
         # Check word repetition
@@ -580,12 +616,12 @@ class ContentModerator:
     def _is_low_quality_language(self, text: str) -> bool:
         """Check if content has low language quality."""
         # Check for excessive symbols
-        symbol_ratio = len(re.findall(r'[^\w\s]', text)) / len(text) if text else 0
+        symbol_ratio = len(re.findall(r"[^\w\s]", text)) / len(text) if text else 0
         if symbol_ratio > 0.3:
             return True
 
         # Check for excessive numbers
-        number_ratio = len(re.findall(r'\d', text)) / len(text) if text else 0
+        number_ratio = len(re.findall(r"\d", text)) / len(text) if text else 0
         if number_ratio > 0.4:
             return True
 
@@ -609,8 +645,7 @@ class ContentModerator:
 
         # Calculate recent violations (last 30 days)
         recent_violations = [
-            v for v in profile.violation_history
-            if (datetime.now() - v["timestamp"]).days <= 30
+            v for v in profile.violation_history if (datetime.now() - v["timestamp"]).days <= 30
         ]
 
         if avg_severity > 0.7 or len(recent_violations) > 5:
@@ -623,20 +658,20 @@ class ContentModerator:
     def _normalize_text(self, text: str) -> str:
         """Normalize text for analysis."""
         # Remove extra whitespace
-        text = ' '.join(text.split())
+        text = " ".join(text.split())
 
         # Normalize unicode characters
-        text = unicodedata.normalize('NFKD', text)
+        text = unicodedata.normalize("NFKD", text)
 
         # Remove zero-width characters
-        text = re.sub(r'[\u200B-\u200D\uFEFF]', '', text)
+        text = re.sub(r"[\u200B-\u200D\uFEFF]", "", text)
 
         return text
 
     def _check_language_quality(self, text: str) -> float:
         """Check language quality and coherence."""
         # Simple language detection (would use proper library in production)
-        english_words = len(re.findall(r'\b[a-zA-Z]+\b', text))
+        english_words = len(re.findall(r"\b[a-zA-Z]+\b", text))
         total_words = len(text.split())
 
         if total_words == 0:
@@ -653,8 +688,8 @@ class ContentModerator:
     def _analyze_sentiment_extremes(self, text: str) -> float:
         """Analyze for extreme sentiment that might indicate problematic content."""
         # Simple sentiment analysis (would use proper model in production)
-        negative_words = ['hate', 'kill', 'die', 'death', 'destroy', 'bad', 'terrible']
-        positive_words = ['love', 'great', 'amazing', 'wonderful', 'best']
+        negative_words = ["hate", "kill", "die", "death", "destroy", "bad", "terrible"]
+        positive_words = ["love", "great", "amazing", "wonderful", "best"]
 
         text_lower = text.lower()
         negative_count = sum(1 for word in negative_words if word in text_lower)
@@ -675,10 +710,13 @@ class ContentModerator:
         profile = self._get_user_profile(user_id)
 
         # Check posting frequency (simplified)
-        recent_posts = len([
-            v for v in profile.violation_history
-            if (datetime.now() - v["timestamp"]).seconds < 3600  # Last hour
-        ])
+        recent_posts = len(
+            [
+                v
+                for v in profile.violation_history
+                if (datetime.now() - v["timestamp"]).seconds < 3600  # Last hour
+            ]
+        )
 
         if recent_posts > 10:  # More than 10 posts in an hour
             return 0.5
@@ -724,6 +762,8 @@ class ContentModerator:
             "block_rate": blocked_count / total_content if total_content > 0 else 0,
             "flag_rate": flagged_count / total_content if total_content > 0 else 0,
             "issue_distribution": issue_counts,
-            "average_confidence": sum(r.confidence for r in results) / len(results) if results else 0,
-            "report_generated": datetime.now().isoformat()
+            "average_confidence": sum(r.confidence for r in results) / len(results)
+            if results
+            else 0,
+            "report_generated": datetime.now().isoformat(),
         }

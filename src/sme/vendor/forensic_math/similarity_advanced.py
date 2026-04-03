@@ -8,7 +8,8 @@ class SimHash:
     Locality Sensitive Hashing (SimHash) for high-speed near-duplicate detection.
     Optimized with __slots__ for memory efficiency.
     """
-    __slots__ = ['hash_size']
+
+    __slots__ = ["hash_size"]
 
     def __init__(self, hash_size: int = 64):
         self.hash_size = hash_size
@@ -23,7 +24,7 @@ class SimHash:
 
         for token in tokens:
             # Create a traditional 64-bit hash for the token using MD5
-            h = int(hashlib.md5(token.encode('utf-8')).hexdigest()[:16], 16)
+            h = int(hashlib.md5(token.encode("utf-8")).hexdigest()[:16], 16)
 
             for i in range(self.hash_size):
                 bit = (h >> i) & 1
@@ -36,13 +37,14 @@ class SimHash:
         ans = 0
         for i in range(self.hash_size):
             if v[i] >= 0:
-                ans |= (1 << i)
+                ans |= 1 << i
         return int(ans)
 
     def distance(self, hash1: int, hash2: int) -> int:
         """Calculate Hamming distance between two SimHashes."""
         x = hash1 ^ hash2
-        return bin(x).count('1')
+        return bin(x).count("1")
+
 
 def calculate_simhash(tokens: list[str], hash_size: int = 64) -> int:
     """
@@ -50,6 +52,7 @@ def calculate_simhash(tokens: list[str], hash_size: int = 64) -> int:
     """
     sh = SimHash(hash_size)
     return sh.calculate(tokens)
+
 
 def calculate_simhash_similarity(h1: int, h2: int, hash_size: int = 64) -> float:
     """

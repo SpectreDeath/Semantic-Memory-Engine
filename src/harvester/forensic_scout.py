@@ -10,6 +10,7 @@ from bs4 import BeautifulSoup
 
 logger = logging.getLogger(__name__)
 
+
 class ForensicScout:
     """
     High-fidelity harvester for forensic analysis.
@@ -19,9 +20,11 @@ class ForensicScout:
 
     def __init__(self):
         self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": "ScribeForensic/1.0 (Research; +http://github.com/SpectreDeath/Semantic-Memory-Engine)"
-        })
+        self.session.headers.update(
+            {
+                "User-Agent": "ScribeForensic/1.0 (Research; +http://github.com/SpectreDeath/Semantic-Memory-Engine)"
+            }
+        )
         self._init_references()
 
     def _init_references(self):
@@ -40,26 +43,30 @@ class ForensicScout:
         Returns:
             List of text segments (paragraphs).
         """
-        soup = BeautifulSoup(raw_html, 'html.parser')
+        soup = BeautifulSoup(raw_html, "html.parser")
 
         # Remove noise
-        for tag in soup(['script', 'style', 'nav', 'header', 'footer', 'aside', 'iframe', 'noscript']):
+        for tag in soup(
+            ["script", "style", "nav", "header", "footer", "aside", "iframe", "noscript"]
+        ):
             tag.decompose()
 
         segments = []
 
         # Prioritize P tags for narrative flow
         # Also capture headings for context boundaries
-        for element in soup.find_all(['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'blockquote']):
-            text = element.get_text(separator=' ', strip=True)
+        for element in soup.find_all(["p", "h1", "h2", "h3", "h4", "h5", "h6", "li", "blockquote"]):
+            text = element.get_text(separator=" ", strip=True)
             # Filter logic: Allow headings even if short, but filter tiny paragraphs/list items
-            is_heading = element.name.startswith('h')
+            is_heading = element.name.startswith("h")
             if len(text) > 30 or (is_heading and len(text) > 5):
                 segments.append(text)
 
         return segments
 
-    def harvest(self, url: str, author_id: str | None = None) -> Generator[dict[str, Any], None, None]:
+    def harvest(
+        self, url: str, author_id: str | None = None
+    ) -> Generator[dict[str, Any], None, None]:
         """
         Streams harvested content in memory-efficient chunks.
 
@@ -100,7 +107,7 @@ class ForensicScout:
                         "timestamp": timestamp,
                         "author_id": author_id,
                         "text": "\n\n".join(current_chunk),
-                        "chunk_size": current_word_count
+                        "chunk_size": current_word_count,
                     }
                     current_chunk = []
                     current_word_count = 0
@@ -112,7 +119,7 @@ class ForensicScout:
                     "timestamp": timestamp,
                     "author_id": author_id,
                     "text": "\n\n".join(current_chunk),
-                    "chunk_size": current_word_count
+                    "chunk_size": current_word_count,
                 }
 
         except Exception as e:

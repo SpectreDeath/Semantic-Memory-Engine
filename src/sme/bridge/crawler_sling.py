@@ -9,19 +9,21 @@ from src.sme.vendor import faststylometry, forensic_files, forensic_math
 
 logger = logging.getLogger(__name__)
 
+
 class CrawlerSling:
     """
     Bridges asynchronous web crawling with multi-phase forensic analysis.
     Optimized for low-VRAM environments (GTX 1660 Ti).
     """
-    __slots__ = ('client',)
+
+    __slots__ = ("client",)
 
     def __init__(self):
         self.client = httpx.AsyncClient(
             timeout=30.0,
             follow_redirects=True,
             verify=False,  # Bypassing local certificate issues for forensic ingestion
-            headers={"User-Agent": "Lawnmower-SME-Forensic-Crawler/1.0"}
+            headers={"User-Agent": "Lawnmower-SME-Forensic-Crawler/1.0"},
         )
 
     async def process_source(self, url: str) -> dict[str, Any]:
@@ -77,8 +79,8 @@ class CrawlerSling:
                 "prose_preview": prose[:200] + "...",
                 "fingerprint_summary": {
                     "unique_tokens": len(word_counts),
-                    "lexical_richness": round(len(word_counts) / len(tokens), 4) if tokens else 0
-                }
+                    "lexical_richness": round(len(word_counts) / len(tokens), 4) if tokens else 0,
+                },
             }
 
         except Exception as e:
@@ -90,6 +92,7 @@ class CrawlerSling:
 
     async def close(self):
         await self.client.aclose()
+
 
 async def ingest_forensic_target(url: str) -> dict[str, Any]:
     """Standalone wrapper for the gateway tool."""

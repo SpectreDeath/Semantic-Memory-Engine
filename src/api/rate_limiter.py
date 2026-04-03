@@ -74,18 +74,14 @@ class TokenBucket:
         """Refill tokens based on time elapsed."""
         now = datetime.now()
         elapsed = (now - self.last_refill).total_seconds()
-        self.tokens = min(
-            self.capacity,
-            self.tokens + elapsed * self.refill_rate
-        )
+        self.tokens = min(self.capacity, self.tokens + elapsed * self.refill_rate)
         self.last_refill = now
 
 
 class RateLimiter:
     """Rate limiting with token bucket algorithm."""
 
-    def __init__(self, default_limit: str = "100/minute",
-                 cleanup_interval: int = 300):
+    def __init__(self, default_limit: str = "100/minute", cleanup_interval: int = 300):
         """
         Initialize rate limiter.
 
@@ -109,17 +105,12 @@ class RateLimiter:
         Returns:
             (capacity, refill_rate) tuple
         """
-        parts = limit_str.split('/')
+        parts = limit_str.split("/")
         count = int(parts[0])
 
         period = parts[1] if len(parts) > 1 else "minute"
 
-        periods = {
-            "second": 1,
-            "minute": 60,
-            "hour": 3600,
-            "day": 86400
-        }
+        periods = {"second": 1, "minute": 60, "hour": 3600, "day": 86400}
 
         period_seconds = periods.get(period, 60)
         refill_rate = count / period_seconds
@@ -207,12 +198,9 @@ class RateLimiter:
                 content={
                     "error": "Too many requests",
                     "message": "Rate limit exceeded. Please try again later.",
-                    "remaining": remaining
+                    "remaining": remaining,
                 },
-                headers={
-                    "Retry-After": "60",
-                    "X-RateLimit-Remaining": str(remaining)
-                }
+                headers={"Retry-After": "60", "X-RateLimit-Remaining": str(remaining)},
             )
 
         # Call next middleware/handler
@@ -234,26 +222,26 @@ class RateLimiter:
             async def endpoint():
                 return {"status": "ok"}
         """
+
         def decorator(func):
             @wraps(func)
             async def wrapper(request: Request, *args, **kwargs):
                 client_ip = request.client.host if request.client else "unknown"
 
                 if not self.is_allowed(client_ip, limit_str):
-                    return JSONResponse(
-                        status_code=429,
-                        content={"error": "Rate limit exceeded"}
-                    )
+                    return JSONResponse(status_code=429, content={"error": "Rate limit exceeded"})
 
                 return await func(*args, **kwargs)
+
             return wrapper
+
         return decorator
 
     def get_stats(self) -> dict:
         """Get rate limiter statistics."""
         return {
-            'active_buckets': len(self.buckets),
-            'default_limit': self.default_limit,
-            'cleanup_interval': self.cleanup_interval,
-            'last_cleanup': self.last_cleanup.isoformat()
+            "active_buckets": len(self.buckets),
+            "default_limit": self.default_limit,
+            "cleanup_interval": self.cleanup_interval,
+            "last_cleanup": self.last_cleanup.isoformat(),
         }

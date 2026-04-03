@@ -6,6 +6,7 @@ import requests
 
 logger = logging.getLogger("LawnmowerMan.ArchivalDiff.Scout")
 
+
 class WaybackScout:
     """
     Handles discovery of archival snapshots via the Wayback Machine CDX API.
@@ -28,7 +29,7 @@ class WaybackScout:
             "output": "json",
             "fl": "timestamp,original,mimetype,statuscode,digest",
             "filter": "statuscode:200",
-            "collapse": "digest"  # Get unique versions
+            "collapse": "digest",  # Get unique versions
         }
 
         try:
@@ -46,7 +47,7 @@ class WaybackScout:
             snapshots = [dict(zip(keys, row, strict=False)) for row in data[1:]]
 
             # Sort by timestamp ascending
-            snapshots.sort(key=lambda x: x['timestamp'])
+            snapshots.sort(key=lambda x: x["timestamp"])
             return snapshots
 
         except Exception as e:
@@ -68,13 +69,13 @@ class WaybackScout:
         latest = snapshots[-1]
         previous = snapshots[-2]
 
-        if latest['digest'] != previous['digest']:
+        if latest["digest"] != previous["digest"]:
             return previous, latest
 
         # If they are same (unlikely with collapse), search backwards
-        latest_digest = latest['digest']
+        latest_digest = latest["digest"]
         for i in range(len(snapshots) - 2, -1, -1):
-            if snapshots[i]['digest'] != latest_digest:
+            if snapshots[i]["digest"] != latest_digest:
                 return snapshots[i], latest
 
         return None, latest
@@ -121,7 +122,7 @@ class WaybackScout:
             "This page has moved",
             "Access Denied",
             "window.location.replace",
-            "http-equiv=\"refresh\""
+            'http-equiv="refresh"',
         ]
 
         lower_content = content.lower()

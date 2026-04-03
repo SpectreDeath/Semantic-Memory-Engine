@@ -57,7 +57,7 @@ def s_m_e_full_intel_run():
     # Load raw data for packaging
     intel_package = {
         "osint": load_intel_data("data/raw/osint_results.json"),
-        "news": load_intel_data("data/raw/forensic_news.json")
+        "news": load_intel_data("data/raw/forensic_news.json"),
     }
 
     # Trigger Brain (Langflow Simulation/Runtime)

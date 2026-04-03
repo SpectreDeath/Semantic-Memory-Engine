@@ -13,6 +13,7 @@ from typing import Any
 # Try to import required libraries with fallbacks
 try:
     import numpy as np
+
     NUMPY_AVAILABLE = True
 except ImportError:
     NUMPY_AVAILABLE = False
@@ -23,27 +24,33 @@ from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.AdversarialTester")
 
+
 @dataclass
 class EvasionVariant:
     """Represents an evasion variant generated from a sample."""
+
     variant_id: str
     original_text: str
     modified_text: str
     variant_type: str
     modification_details: dict[str, Any]
 
+
 @dataclass
 class DetectionResult:
     """Represents detection results from SDA and APB."""
+
     sample_id: str
     sda_result: dict[str, Any]
     apb_result: dict[str, Any]
     combined_score: float
     detection_confidence: str
 
+
 @dataclass
 class SignatureVulnerability:
     """Represents a detected signature vulnerability."""
+
     sample_id: str
     variant_id: str
     original_detection: float
@@ -51,6 +58,7 @@ class SignatureVulnerability:
     vulnerability_score: float
     suggested_features: list[str]
     variant_details: dict[str, Any]
+
 
 class AdversarialTester(BasePlugin):
     """
@@ -73,14 +81,16 @@ class AdversarialTester(BasePlugin):
             self._word_obfuscation,
             self._structural_rewriting,
             self._semantic_preservation,
-            self._formatting_manipulation
+            self._formatting_manipulation,
         ]
 
         # Registered plugins for testing
         self.sda_plugin = None
         self.apb_plugin = None
 
-        logger.info(f"[{self.plugin_id}] Adversarial Tester initialized with {self.detection_threshold*100}% vulnerability threshold")
+        logger.info(
+            f"[{self.plugin_id}] Adversarial Tester initialized with {self.detection_threshold * 100}% vulnerability threshold"
+        )
 
     async def on_startup(self):
         """
@@ -107,7 +117,7 @@ class AdversarialTester(BasePlugin):
         """
         return {
             "status": "skipped",
-            "reason": "Adversarial Tester provides testing tools, not direct ingestion processing"
+            "reason": "Adversarial Tester provides testing tools, not direct ingestion processing",
         }
 
     def get_tools(self) -> list:
@@ -115,7 +125,7 @@ class AdversarialTester(BasePlugin):
             self.run_evasion_test,
             self.get_evasion_statistics,
             self.generate_evasion_report,
-            self.suggest_signature_improvements
+            self.suggest_signature_improvements,
         ]
 
     async def run_evasion_test(self, sample_id: str | None = None) -> str:
@@ -131,15 +141,13 @@ class AdversarialTester(BasePlugin):
             if sample_id:
                 sample = await self._fetch_sample_by_id(sample_id)
                 if not sample:
-                    return json.dumps({
-                        "error": f"Sample {sample_id} not found in forensic ledger"
-                    })
+                    return json.dumps({"error": f"Sample {sample_id} not found in forensic ledger"})
             else:
                 sample = await self._fetch_high_confidence_sample()
                 if not sample:
-                    return json.dumps({
-                        "error": "No high-confidence samples found in forensic ledger"
-                    })
+                    return json.dumps(
+                        {"error": "No high-confidence samples found in forensic ledger"}
+                    )
 
             logger.info(f"[{self.plugin_id}] Running evasion test on sample: {sample.sample_id}")
 
@@ -147,14 +155,18 @@ class AdversarialTester(BasePlugin):
             variants = self._generate_evasion_variants(sample.model_fingerprint, sample.sample_id)
 
             # Test original sample
-            original_result = await self._test_sample_detection(sample.model_fingerprint, sample.sample_id)
+            original_result = await self._test_sample_detection(
+                sample.model_fingerprint, sample.sample_id
+            )
 
             # Test variants
             variant_results = []
             vulnerabilities = []
 
             for variant in variants:
-                variant_result = await self._test_sample_detection(variant.modified_text, variant.variant_id)
+                variant_result = await self._test_sample_detection(
+                    variant.modified_text, variant.variant_id
+                )
                 variant_results.append(variant_result)
 
                 # Check for vulnerability
@@ -176,9 +188,7 @@ class AdversarialTester(BasePlugin):
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Error running evasion test: {e}")
-            return json.dumps({
-                "error": f"Failed to run evasion test: {e!s}"
-            })
+            return json.dumps({"error": f"Failed to run evasion test: {e!s}"})
 
     async def get_evasion_statistics(self) -> str:
         """Get statistics about evasion testing results."""
@@ -198,14 +208,16 @@ class AdversarialTester(BasePlugin):
 
             if format.lower() == "json":
                 output_file = os.path.join("D:", "SME", "reports", "evasion_test_report.json")
-                with open(output_file, 'w', encoding='utf-8') as f:
+                with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(report, f, indent=2, default=str)
-                return json.dumps({
-                    "status": "success",
-                    "output_file": output_file,
-                    "format": "JSON",
-                    "report": report
-                })
+                return json.dumps(
+                    {
+                        "status": "success",
+                        "output_file": output_file,
+                        "format": "JSON",
+                        "report": report,
+                    }
+                )
             else:
                 return json.dumps(report, indent=2, default=str)
 
@@ -227,7 +239,9 @@ class AdversarialTester(BasePlugin):
         """Register SDA and APB plugins for testing."""
         self.sda_plugin = sda_plugin
         self.apb_plugin = apb_plugin
-        logger.info(f"[{self.plugin_id}] Registered plugins: SDA={sda_plugin is not None}, APB={apb_plugin is not None}")
+        logger.info(
+            f"[{self.plugin_id}] Registered plugins: SDA={sda_plugin is not None}, APB={apb_plugin is not None}"
+        )
 
     async def _fetch_high_confidence_sample(self) -> Any | None:
         """Fetch a high-confidence sample from the forensic ledger."""
@@ -254,7 +268,7 @@ class AdversarialTester(BasePlugin):
                     source_plugin=row[4],
                     is_recurring=bool(row[6]),
                     recurring_with=row[7],
-                    metadata=metadata
+                    metadata=metadata,
                 )
 
             return None
@@ -286,7 +300,7 @@ class AdversarialTester(BasePlugin):
                     source_plugin=row[4],
                     is_recurring=bool(row[6]),
                     recurring_with=row[7],
-                    metadata=metadata
+                    metadata=metadata,
                 )
 
             return None
@@ -295,7 +309,9 @@ class AdversarialTester(BasePlugin):
             logger.exception(f"[{self.plugin_id}] Error fetching sample by ID: {e}")
             return None
 
-    def _generate_evasion_variants(self, original_text: str, sample_id: str) -> list[EvasionVariant]:
+    def _generate_evasion_variants(
+        self, original_text: str, sample_id: str
+    ) -> list[EvasionVariant]:
         """Generate 3 evasion variants using rnj-1 techniques."""
         variants = []
 
@@ -307,11 +323,11 @@ class AdversarialTester(BasePlugin):
             variant_text, details = technique(original_text)
 
             variant = EvasionVariant(
-                variant_id=f"{sample_id}_variant_{i+1}",
+                variant_id=f"{sample_id}_variant_{i + 1}",
                 original_text=original_text,
                 modified_text=variant_text,
                 variant_type=technique.__name__,
-                modification_details=details
+                modification_details=details,
             )
 
             variants.append(variant)
@@ -322,16 +338,16 @@ class AdversarialTester(BasePlugin):
     def _character_substitution(self, text: str) -> tuple[str, dict[str, Any]]:
         """Replace characters with visually similar alternatives."""
         substitutions = {
-            'a': ['@', '4', 'α'],
-            'e': ['3', '€', 'є'],
-            'i': ['1', '!', 'ι'],
-            'o': ['0', '°', 'ο'],
-            's': ['5', '$', 'ѕ'],
-            't': ['7', '+', 'τ'],
-            'l': ['1', '|', '£'],
-            'c': ['(', '<', '¢'],
-            'b': ['6', '8', 'β'],
-            'g': ['9', '6', '9']
+            "a": ["@", "4", "α"],
+            "e": ["3", "€", "є"],
+            "i": ["1", "!", "ι"],
+            "o": ["0", "°", "ο"],
+            "s": ["5", "$", "ѕ"],
+            "t": ["7", "+", "τ"],
+            "l": ["1", "|", "£"],
+            "c": ["(", "<", "¢"],
+            "b": ["6", "8", "β"],
+            "g": ["9", "6", "9"],
         }
 
         modified_text = text
@@ -348,7 +364,7 @@ class AdversarialTester(BasePlugin):
         return modified_text, {
             "technique": "character_substitution",
             "changes": changes,
-            "substitution_rate": len(changes) / len(text) if text else 0
+            "substitution_rate": len(changes) / len(text) if text else 0,
         }
 
     def _word_obfuscation(self, text: str) -> tuple[str, dict[str, Any]]:
@@ -362,22 +378,22 @@ class AdversarialTester(BasePlugin):
                 if random.random() < 0.5:
                     # Insert random character
                     pos = random.randint(1, len(word) - 1)
-                    char = random.choice('abcdefghijklmnopqrstuvwxyz')
+                    char = random.choice("abcdefghijklmnopqrstuvwxyz")
                     words[i] = word[:pos] + char + word[pos:]
                     changes.append(f"inserted '{char}' at position {pos}")
                 else:
                     # Replace random character
                     pos = random.randint(0, len(word) - 1)
                     old_char = word[pos]
-                    new_char = random.choice('abcdefghijklmnopqrstuvwxyz')
-                    words[i] = word[:pos] + new_char + word[pos+1:]
+                    new_char = random.choice("abcdefghijklmnopqrstuvwxyz")
+                    words[i] = word[:pos] + new_char + word[pos + 1 :]
                     changes.append(f"replaced '{old_char}' with '{new_char}' at position {pos}")
 
-        modified_text = ' '.join(words)
+        modified_text = " ".join(words)
         return modified_text, {
             "technique": "word_obfuscation",
             "changes": changes,
-            "obfuscation_rate": len(changes) / len(words) if words else 0
+            "obfuscation_rate": len(changes) / len(words) if words else 0,
         }
 
     def _structural_rewriting(self, text: str) -> tuple[str, dict[str, Any]]:
@@ -388,36 +404,35 @@ class AdversarialTester(BasePlugin):
         # Add/remove spaces
         if random.random() < 0.5:
             # Add extra spaces
-            modified_text = re.sub(r'(\w)(\w)', r'\1 \2', text)
+            modified_text = re.sub(r"(\w)(\w)", r"\1 \2", text)
             changes.append("added extra spaces between characters")
         else:
             # Remove spaces
-            modified_text = text.replace(' ', '')
+            modified_text = text.replace(" ", "")
             changes.append("removed all spaces")
 
         # Change case randomly
         if random.random() < 0.3:
-            modified_text = ''.join(
-                c.upper() if random.random() < 0.5 else c.lower()
-                for c in modified_text
+            modified_text = "".join(
+                c.upper() if random.random() < 0.5 else c.lower() for c in modified_text
             )
             changes.append("randomized character case")
 
         return modified_text, {
             "technique": "structural_rewriting",
             "changes": changes,
-            "structural_changes": len(changes)
+            "structural_changes": len(changes),
         }
 
     def _semantic_preservation(self, text: str) -> tuple[str, dict[str, Any]]:
         """Preserve semantic meaning while changing structure."""
         # Replace words with synonyms (simple implementation)
         synonym_map = {
-            'test': ['trial', 'experiment', 'assessment'],
-            'sample': ['example', 'specimen', 'instance'],
-            'detection': ['identification', 'recognition', 'discovery'],
-            'anomaly': ['irregularity', 'abnormality', 'deviation'],
-            'pattern': ['sequence', 'structure', 'design']
+            "test": ["trial", "experiment", "assessment"],
+            "sample": ["example", "specimen", "instance"],
+            "detection": ["identification", "recognition", "discovery"],
+            "anomaly": ["irregularity", "abnormality", "deviation"],
+            "pattern": ["sequence", "structure", "design"],
         }
 
         words = text.lower().split()
@@ -429,11 +444,11 @@ class AdversarialTester(BasePlugin):
                 words[i] = synonym
                 changes.append(f"{word} -> {synonym}")
 
-        modified_text = ' '.join(words)
+        modified_text = " ".join(words)
         return modified_text, {
             "technique": "semantic_preservation",
             "changes": changes,
-            "semantic_changes": len(changes)
+            "semantic_changes": len(changes),
         }
 
     def _formatting_manipulation(self, text: str) -> tuple[str, dict[str, Any]]:
@@ -442,10 +457,10 @@ class AdversarialTester(BasePlugin):
 
         # Add Unicode homoglyphs
         homoglyphs = {
-            'a': 'а',  # Cyrillic a
-            'e': 'е',  # Cyrillic e
-            'o': 'о',  # Cyrillic o
-            'c': 'с',  # Cyrillic c
+            "a": "а",  # Cyrillic a
+            "e": "е",  # Cyrillic e
+            "o": "о",  # Cyrillic o
+            "c": "с",  # Cyrillic c
         }
 
         modified_text = text
@@ -457,7 +472,7 @@ class AdversarialTester(BasePlugin):
         # Add invisible characters
         if random.random() < 0.4:
             # Add zero-width characters
-            zero_width = '\u200B'  # Zero width space
+            zero_width = "\u200b"  # Zero width space
             pos = random.randint(0, len(modified_text))
             modified_text = modified_text[:pos] + zero_width + modified_text[pos:]
             changes.append(f"added zero-width character at position {pos}")
@@ -465,7 +480,7 @@ class AdversarialTester(BasePlugin):
         return modified_text, {
             "technique": "formatting_manipulation",
             "changes": changes,
-            "formatting_changes": len(changes)
+            "formatting_changes": len(changes),
         }
 
     async def _test_sample_detection(self, text: str, sample_id: str) -> DetectionResult:
@@ -475,26 +490,30 @@ class AdversarialTester(BasePlugin):
             apb_result = {"status": "not_tested", "score": 0.0, "details": {}}
 
             # Test with SDA
-            if self.sda_plugin and hasattr(self.sda_plugin, 'on_ingestion'):
+            if self.sda_plugin and hasattr(self.sda_plugin, "on_ingestion"):
                 try:
-                    sda_response = await self.sda_plugin.on_ingestion(text, {"source": "adversarial_test"})
+                    sda_response = await self.sda_plugin.on_ingestion(
+                        text, {"source": "adversarial_test"}
+                    )
                     sda_result = {
                         "status": "tested",
                         "score": sda_response.get("deception_score", 0.0),
-                        "details": sda_response
+                        "details": sda_response,
                     }
                 except Exception as e:
                     logger.warning(f"[{self.plugin_id}] SDA test failed: {e}")
                     sda_result = {"status": "failed", "score": 0.0, "error": str(e)}
 
             # Test with APB
-            if self.apb_plugin and hasattr(self.apb_plugin, 'on_ingestion'):
+            if self.apb_plugin and hasattr(self.apb_plugin, "on_ingestion"):
                 try:
-                    apb_response = await self.apb_plugin.on_ingestion(text, {"source": "adversarial_test"})
+                    apb_response = await self.apb_plugin.on_ingestion(
+                        text, {"source": "adversarial_test"}
+                    )
                     apb_result = {
                         "status": "tested",
                         "score": apb_response.get("anomaly_score", 0.0),
-                        "details": apb_response
+                        "details": apb_response,
                     }
                 except Exception as e:
                     logger.warning(f"[{self.plugin_id}] APB test failed: {e}")
@@ -516,7 +535,7 @@ class AdversarialTester(BasePlugin):
                 sda_result=sda_result,
                 apb_result=apb_result,
                 combined_score=combined_score,
-                detection_confidence=confidence
+                detection_confidence=confidence,
             )
 
         except Exception as e:
@@ -526,7 +545,7 @@ class AdversarialTester(BasePlugin):
                 sda_result={"status": "error", "score": 0.0, "error": str(e)},
                 apb_result={"status": "error", "score": 0.0, "error": str(e)},
                 combined_score=0.0,
-                detection_confidence="ERROR"
+                detection_confidence="ERROR",
             )
 
     def _is_vulnerability(self, original: DetectionResult, variant: DetectionResult) -> bool:
@@ -540,8 +559,10 @@ class AdversarialTester(BasePlugin):
 
             # Check if detection dropped below 50%
             if variant_score < self.detection_threshold:
-                logger.warning(f"[{self.plugin_id}] VULNERABILITY DETECTED: {variant.sample_id} "
-                             f"dropped from {original_score:.3f} to {variant_score:.3f}")
+                logger.warning(
+                    f"[{self.plugin_id}] VULNERABILITY DETECTED: {variant.sample_id} "
+                    f"dropped from {original_score:.3f} to {variant_score:.3f}"
+                )
                 return True
 
             return False
@@ -550,8 +571,13 @@ class AdversarialTester(BasePlugin):
             logger.exception(f"[{self.plugin_id}] Error checking vulnerability: {e}")
             return False
 
-    def _analyze_vulnerability(self, sample_id: str, variant: EvasionVariant,
-                             original: DetectionResult, variant_result: DetectionResult) -> SignatureVulnerability:
+    def _analyze_vulnerability(
+        self,
+        sample_id: str,
+        variant: EvasionVariant,
+        original: DetectionResult,
+        variant_result: DetectionResult,
+    ) -> SignatureVulnerability:
         """Analyze and create vulnerability report."""
         vulnerability_score = original.combined_score - variant_result.combined_score
 
@@ -565,46 +591,57 @@ class AdversarialTester(BasePlugin):
             variant_detection=variant_result.combined_score,
             vulnerability_score=vulnerability_score,
             suggested_features=suggestions,
-            variant_details=variant.modification_details
+            variant_details=variant.modification_details,
         )
 
-    def _generate_signature_suggestions(self, variant: EvasionVariant,
-                                      original: DetectionResult, variant_result: DetectionResult) -> list[str]:
+    def _generate_signature_suggestions(
+        self, variant: EvasionVariant, original: DetectionResult, variant_result: DetectionResult
+    ) -> list[str]:
         """Generate suggestions for signature improvements."""
         suggestions = []
 
         variant_type = variant.variant_type
 
         if variant_type == "_character_substitution":
-            suggestions.extend([
-                "Add character homoglyph detection",
-                "Implement character frequency analysis",
-                "Include Unicode normalization checks"
-            ])
+            suggestions.extend(
+                [
+                    "Add character homoglyph detection",
+                    "Implement character frequency analysis",
+                    "Include Unicode normalization checks",
+                ]
+            )
         elif variant_type == "_word_obfuscation":
-            suggestions.extend([
-                "Add word boundary analysis",
-                "Implement n-gram pattern matching",
-                "Include dictionary-based validation"
-            ])
+            suggestions.extend(
+                [
+                    "Add word boundary analysis",
+                    "Implement n-gram pattern matching",
+                    "Include dictionary-based validation",
+                ]
+            )
         elif variant_type == "_structural_rewriting":
-            suggestions.extend([
-                "Add structural pattern analysis",
-                "Implement whitespace normalization",
-                "Include case-insensitive matching"
-            ])
+            suggestions.extend(
+                [
+                    "Add structural pattern analysis",
+                    "Implement whitespace normalization",
+                    "Include case-insensitive matching",
+                ]
+            )
         elif variant_type == "_semantic_preservation":
-            suggestions.extend([
-                "Add semantic similarity detection",
-                "Implement synonym mapping",
-                "Include context-aware analysis"
-            ])
+            suggestions.extend(
+                [
+                    "Add semantic similarity detection",
+                    "Implement synonym mapping",
+                    "Include context-aware analysis",
+                ]
+            )
         elif variant_type == "_formatting_manipulation":
-            suggestions.extend([
-                "Add Unicode normalization",
-                "Implement invisible character detection",
-                "Include encoding validation"
-            ])
+            suggestions.extend(
+                [
+                    "Add Unicode normalization",
+                    "Implement invisible character detection",
+                    "Include encoding validation",
+                ]
+            )
 
         # Add general suggestions
         if variant_result.combined_score < 0.3:
@@ -613,9 +650,14 @@ class AdversarialTester(BasePlugin):
 
         return list(set(suggestions))  # Remove duplicates
 
-    def _generate_evasion_report(self, sample: Any, original: DetectionResult,
-                                variants: list[EvasionVariant], variant_results: list[DetectionResult],
-                                vulnerabilities: list[SignatureVulnerability]) -> dict[str, Any]:
+    def _generate_evasion_report(
+        self,
+        sample: Any,
+        original: DetectionResult,
+        variants: list[EvasionVariant],
+        variant_results: list[DetectionResult],
+        vulnerabilities: list[SignatureVulnerability],
+    ) -> dict[str, Any]:
         """Generate comprehensive evasion test report."""
         report = {
             "test_metadata": {
@@ -626,21 +668,25 @@ class AdversarialTester(BasePlugin):
                 "is_recurring": sample.is_recurring,
                 "test_timestamp": datetime.now().isoformat(),
                 "variant_count": len(variants),
-                "vulnerability_count": len(vulnerabilities)
+                "vulnerability_count": len(vulnerabilities),
             },
             "original_detection": {
                 "sda_score": original.sda_result.get("score", 0.0),
                 "apb_score": original.apb_result.get("score", 0.0),
                 "combined_score": original.combined_score,
-                "confidence": original.detection_confidence
+                "confidence": original.detection_confidence,
             },
             "variant_analysis": [],
             "vulnerabilities": [],
             "summary": {
                 "vulnerability_rate": len(vulnerabilities) / len(variants) if variants else 0,
-                "average_detection_drop": self._calculate_avg_detection_drop(original, variant_results),
-                "most_effective_techniques": self._get_effective_techniques(variants, variant_results)
-            }
+                "average_detection_drop": self._calculate_avg_detection_drop(
+                    original, variant_results
+                ),
+                "most_effective_techniques": self._get_effective_techniques(
+                    variants, variant_results
+                ),
+            },
         }
 
         # Add variant analysis
@@ -653,9 +699,9 @@ class AdversarialTester(BasePlugin):
                     "sda_score": result.sda_result.get("score", 0.0),
                     "apb_score": result.apb_result.get("score", 0.0),
                     "combined_score": result.combined_score,
-                    "confidence": result.detection_confidence
+                    "confidence": result.detection_confidence,
                 },
-                "detection_drop": original.combined_score - result.combined_score
+                "detection_drop": original.combined_score - result.combined_score,
             }
             report["variant_analysis"].append(variant_analysis)
 
@@ -667,13 +713,15 @@ class AdversarialTester(BasePlugin):
                 "variant_detection": vuln.variant_detection,
                 "vulnerability_score": vuln.vulnerability_score,
                 "suggested_features": vuln.suggested_features,
-                "variant_details": vuln.variant_details
+                "variant_details": vuln.variant_details,
             }
             report["vulnerabilities"].append(vuln_details)
 
         return report
 
-    def _calculate_avg_detection_drop(self, original: DetectionResult, results: list[DetectionResult]) -> float:
+    def _calculate_avg_detection_drop(
+        self, original: DetectionResult, results: list[DetectionResult]
+    ) -> float:
         """Calculate average detection drop across variants."""
         if not results:
             return 0.0
@@ -681,7 +729,9 @@ class AdversarialTester(BasePlugin):
         drops = [original.combined_score - result.combined_score for result in results]
         return sum(drops) / len(drops)
 
-    def _get_effective_techniques(self, variants: list[EvasionVariant], results: list[DetectionResult]) -> list[str]:
+    def _get_effective_techniques(
+        self, variants: list[EvasionVariant], results: list[DetectionResult]
+    ) -> list[str]:
         """Get most effective evasion techniques."""
         technique_drops = defaultdict(list)
 
@@ -725,17 +775,22 @@ class AdversarialTester(BasePlugin):
                      suggested_features, variant_details)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 """
-                self.nexus.nexus.execute(sql, (
-                    vuln.sample_id,
-                    vuln.variant_id,
-                    vuln.original_detection,
-                    vuln.variant_detection,
-                    vuln.vulnerability_score,
-                    json.dumps(vuln.suggested_features),
-                    json.dumps(vuln.variant_details)
-                ))
+                self.nexus.nexus.execute(
+                    sql,
+                    (
+                        vuln.sample_id,
+                        vuln.variant_id,
+                        vuln.original_detection,
+                        vuln.variant_detection,
+                        vuln.vulnerability_score,
+                        json.dumps(vuln.suggested_features),
+                        json.dumps(vuln.variant_details),
+                    ),
+                )
 
-            logger.info(f"[{self.plugin_id}] Saved {len(vulnerabilities)} vulnerabilities to database")
+            logger.info(
+                f"[{self.plugin_id}] Saved {len(vulnerabilities)} vulnerabilities to database"
+            )
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Error saving vulnerability data: {e}")
@@ -762,7 +817,7 @@ class AdversarialTester(BasePlugin):
                 "average_vulnerability_score": round(avg_score, 3),
                 "vulnerability_trends": "Data available in database",
                 "detection_threshold": self.detection_threshold,
-                "min_confidence_score": self.min_confidence_score
+                "min_confidence_score": self.min_confidence_score,
             }
 
             return stats
@@ -791,7 +846,7 @@ class AdversarialTester(BasePlugin):
                 "report_metadata": {
                     "report_type": "Adversarial Evasion Testing Report",
                     "generated_at": datetime.now().isoformat(),
-                    "version": "1.0"
+                    "version": "1.0",
                 },
                 "vulnerability_statistics": stats,
                 "recent_vulnerabilities": [
@@ -802,7 +857,7 @@ class AdversarialTester(BasePlugin):
                         "variant_detection": row[3],
                         "vulnerability_score": row[4],
                         "suggested_features": json.loads(row[5]) if row[5] else [],
-                        "detected_at": row[6]
+                        "detected_at": row[6],
                     }
                     for row in recent_vulns
                 ],
@@ -810,8 +865,8 @@ class AdversarialTester(BasePlugin):
                     "Review and implement suggested signature improvements",
                     "Monitor detection rates for known evasion techniques",
                     "Consider ensemble detection methods for improved robustness",
-                    "Regularly update signature patterns based on vulnerability analysis"
-                ]
+                    "Regularly update signature patterns based on vulnerability analysis",
+                ],
             }
 
             return report
@@ -864,11 +919,15 @@ class AdversarialTester(BasePlugin):
                 "signatures_json_recommendations": [
                     {
                         "feature": suggestion,
-                        "implementation_priority": "HIGH" if count > 5 else "MEDIUM" if count > 2 else "LOW",
-                        "description": f"Add detection for {suggestion.lower()}"
+                        "implementation_priority": "HIGH"
+                        if count > 5
+                        else "MEDIUM"
+                        if count > 2
+                        else "LOW",
+                        "description": f"Add detection for {suggestion.lower()}",
                     }
                     for suggestion, count in sorted_suggestions[:5]
-                ]
+                ],
             }
 
             return improvements
@@ -882,6 +941,7 @@ class AdversarialTester(BasePlugin):
 @dataclass
 class FingerprintRecord:
     """Represents a fingerprint record from the forensic ledger."""
+
     sample_id: str
     model_fingerprint: str
     combined_anomaly_score: float

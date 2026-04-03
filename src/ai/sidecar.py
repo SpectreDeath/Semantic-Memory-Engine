@@ -16,7 +16,9 @@ if str(PROJECT_ROOT) not in sys.path:
 from src.ai.providers.factory import get_provider
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger("Sidecar")
 
 app = FastAPI(title="SME AI Sidecar", version="1.0.0")
@@ -30,9 +32,11 @@ except Exception as e:
     logger.exception(f"Failed to initialize AI Provider: {e}")
     provider = None
 
+
 class AIRequest(BaseModel):
     flow_name: str
     input_data: Any
+
 
 @app.get("/health")
 async def health_check():
@@ -40,8 +44,9 @@ async def health_check():
     return {
         "status": "online",
         "provider": provider.__class__.__name__ if provider else "None",
-        "python_version": sys.version
+        "python_version": sys.version,
     }
+
 
 @app.post("/run")
 async def run_flow(request: AIRequest):
@@ -53,7 +58,7 @@ async def run_flow(request: AIRequest):
         # Serialize input_data if it's not a string (provider.run expects string/dict usually)
         input_data = request.input_data
         if not isinstance(input_data, (str, dict)):
-             input_data = str(input_data)
+            input_data = str(input_data)
 
         logger.info(f"Running flow: {request.flow_name}")
         result = provider.run(request.flow_name, input_data)
@@ -62,14 +67,18 @@ async def run_flow(request: AIRequest):
         logger.exception("Error executing flow in sidecar")
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.post("/sentinel/offload")
 async def sentinel_offload(payload: dict):
     """Signal from SentinelMonitor to reduce VRAM usage."""
     if hasattr(provider, "offload_to_ram"):
-        logger.warning(f"SENTINEL SIGNAL: Offloading layers to RAM. Pressure: {payload.get('vram_pressure')}")
+        logger.warning(
+            f"SENTINEL SIGNAL: Offloading layers to RAM. Pressure: {payload.get('vram_pressure')}"
+        )
         provider.offload_to_ram()
         return {"status": "offloading_initiated"}
     return {"status": "not_supported"}
+
 
 @app.post("/sentinel/switch_lens")
 async def sentinel_switch_lens(payload: dict):
@@ -83,6 +92,7 @@ async def sentinel_switch_lens(payload: dict):
         return {"status": "lens_shifted", "lens": lens}
     return {"status": "not_supported"}
 
+
 @app.post("/forensics/nexus_verify")
 async def verify_nexus(payload: dict):
     """
@@ -95,11 +105,12 @@ async def verify_nexus(payload: dict):
     try:
         # Prefer the operator's entity linker via HTTP when available
         import httpx
+
         operator_url = os.getenv("SME_OPERATOR_URL", "http://sme-operator:8000")
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.post(
                 f"{operator_url}/api/v1/link_entities",
-                json={"text": content, "knowledge_base": "custom"}
+                json={"text": content, "knowledge_base": "custom"},
             )
             if resp.status_code == 200:
                 data = resp.json()
@@ -107,26 +118,53 @@ async def verify_nexus(payload: dict):
     except Exception:
         # Fallback: simple word-tokeniser filtering stopwords and short tokens
         import string
+
         stopwords = {
-            "the", "a", "an", "is", "are", "was", "were", "in", "on", "at",
-            "to", "of", "and", "or", "but", "for", "with", "that", "this",
-            "it", "he", "she", "they", "we", "i", "my", "your", "our"
+            "the",
+            "a",
+            "an",
+            "is",
+            "are",
+            "was",
+            "were",
+            "in",
+            "on",
+            "at",
+            "to",
+            "of",
+            "and",
+            "or",
+            "but",
+            "for",
+            "with",
+            "that",
+            "this",
+            "it",
+            "he",
+            "she",
+            "they",
+            "we",
+            "i",
+            "my",
+            "your",
+            "our",
         }
         tokens = content.translate(str.maketrans("", "", string.punctuation)).split()
-        entities = list({
-            t for t in tokens
-            if len(t) > 3 and t[0].isupper() and t.lower() not in stopwords
-        })
+        entities = list(
+            {t for t in tokens if len(t) > 3 and t[0].isupper() and t.lower() not in stopwords}
+        )
 
     return {
         "status": "verified",
         "entities_found": entities,
         "entity_count": len(entities),
-        "recommendation": "proceed" if len(entities) > 0 else "flag"
+        "recommendation": "proceed" if len(entities) > 0 else "flag",
     }
+
 
 if __name__ == "__main__":
     import uvicorn
+
     # Defaulting to 8089 to avoid conflicts with Gephi (8080) or other services
     port = int(os.getenv("SME_SIDECAR_PORT", 8089))
     # Bind to 0.0.0.0 so the sidecar is reachable from other Docker containers.

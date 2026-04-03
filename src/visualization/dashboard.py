@@ -195,7 +195,10 @@ def main():
                     mode="markers",
                     name="Daily Sentiment",
                     marker={
-                        "size": 8, "color": df["compound"], "colorscale": "RdYlGn_r", "showscale": True
+                        "size": 8,
+                        "color": df["compound"],
+                        "colorscale": "RdYlGn_r",
+                        "showscale": True,
                     },
                     hovertemplate="<b>%{x|%Y-%m-%d}</b><br>Compound: %{y:.3f}<extra></extra>",
                 )
@@ -368,9 +371,9 @@ def main():
         if prediction["alert"] == "escalation_detected":
             st.error(f"""
             **Escalation Detected!**
-            - Trend: {prediction['trend']}
-            - Strength: {prediction['strength']:.4f}
-            - Recent sentiment mean: {prediction['recent_mean']:.4f}
+            - Trend: {prediction["trend"]}
+            - Strength: {prediction["strength"]:.4f}
+            - Recent sentiment mean: {prediction["recent_mean"]:.4f}
             - Dehumanizing rhetoric may be increasing
             """)
 
@@ -379,7 +382,7 @@ def main():
             for i, spike in enumerate(spikes[:5]):
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    st.write(f"**Event {i+1}**")
+                    st.write(f"**Event {i + 1}**")
                 with col2:
                     st.write(f"Z-Score: {spike['z_score']:.2f}")
                 with col3:

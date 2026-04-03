@@ -25,9 +25,11 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # ============================================================================
 
+
 @dataclass
 class TrendDriver:
     """Author identified as driving a trend"""
+
     author_id: str
     author_name: str
     trend_topic: str
@@ -43,6 +45,7 @@ class TrendDriver:
 @dataclass
 class TrendAnalysis:
     """Complete analysis of a trending topic"""
+
     topic: str
     trend_start_date: str
     trend_intensity: float  # 0-100
@@ -58,6 +61,7 @@ class TrendAnalysis:
 @dataclass
 class InfluenceChain:
     """Chain of how a trend spreads author-to-author"""
+
     trend_topic: str
     chain_length: int
     influencers: list[tuple[str, float]]  # (author, timestamp)
@@ -68,6 +72,7 @@ class InfluenceChain:
 # ============================================================================
 # TREND CORRELATOR ENGINE
 # ============================================================================
+
 
 class TrendCorrelator:
     """
@@ -86,7 +91,7 @@ class TrendCorrelator:
         self,
         trend_topic: str,
         article_data: list[dict],  # [{author_id, text, timestamp, url}, ...]
-        min_attribution_score: float = 70.0
+        min_attribution_score: float = 70.0,
     ) -> TrendAnalysis:
         """
         Find which authors are driving a specific trend.
@@ -108,9 +113,9 @@ class TrendCorrelator:
             author_timestamps = {}
 
             for article in article_data:
-                author_id = article['author_id']
-                text = article['text']
-                timestamp = article['timestamp']
+                author_id = article["author_id"]
+                text = article["text"]
+                timestamp = article["timestamp"]
 
                 if len(text) < 200:
                     continue
@@ -153,9 +158,9 @@ class TrendCorrelator:
 
                 # Composite score: consistency (40%), intensity (40%), volume (20%)
                 score = (
-                    (1 - consistency) * 40 +  # More consistent = higher
-                    intensity * 40 +
-                    min(100, article_count * 10) * 20 / 100
+                    (1 - consistency) * 40  # More consistent = higher
+                    + intensity * 40
+                    + min(100, article_count * 10) * 20 / 100
                 )
 
                 author_scores[author_id] = score
@@ -186,7 +191,7 @@ class TrendCorrelator:
                     last_mention=last_mention,
                     aggregate_signal_strength=author_signals[author_id],
                     estimated_reach=author_article_count[author_id] * 1000,  # Placeholder
-                    role=self._classify_role(score, primary_threshold, amplifier_threshold)
+                    role=self._classify_role(score, primary_threshold, amplifier_threshold),
                 )
 
                 if driver.role == "Primary Driver":
@@ -200,18 +205,22 @@ class TrendCorrelator:
 
             analysis = TrendAnalysis(
                 topic=trend_topic,
-                trend_start_date=min(author_timestamps[a] for a in author_fingerprints if author_timestamps[a]),
+                trend_start_date=min(
+                    author_timestamps[a] for a in author_fingerprints if author_timestamps[a]
+                ),
                 trend_intensity=np.mean([s for _, s in sorted_authors[:5]]),
                 primary_drivers=drivers,
                 amplifiers=amplifiers[:5],  # Top 5 amplifiers
                 article_count=len(article_data),
                 unique_authors=len(author_fingerprints),
                 estimated_total_reach=sum(author_article_count.values()) * 1000,
-                coordinated_promotion=coordinated['detected'],
-                coordination_confidence=coordinated['confidence']
+                coordinated_promotion=coordinated["detected"],
+                coordination_confidence=coordinated["confidence"],
             )
 
-            logger.info(f"✅ Trend analysis complete: {len(drivers)} drivers, {len(amplifiers)} amplifiers")
+            logger.info(
+                f"✅ Trend analysis complete: {len(drivers)} drivers, {len(amplifiers)} amplifiers"
+            )
             return analysis
 
         except Exception as e:
@@ -226,7 +235,7 @@ class TrendCorrelator:
         self,
         trend_topic: str,
         article_data: list[dict],  # Sorted by timestamp
-        max_chain_length: int = 10
+        max_chain_length: int = 10,
     ) -> InfluenceChain:
         """
         Trace how a trend spreads author-to-author over time.
@@ -246,15 +255,15 @@ class TrendCorrelator:
                 return InfluenceChain(trend_topic, 0, [], "None", 0)
 
             # Sort by timestamp
-            article_data = sorted(article_data, key=lambda x: x['timestamp'])
+            article_data = sorted(article_data, key=lambda x: x["timestamp"])
 
             influencers = []
             fingerprints_by_author = {}
 
             for article in article_data:
-                author_id = article['author_id']
-                text = article['text']
-                timestamp = article['timestamp']
+                author_id = article["author_id"]
+                text = article["text"]
+                timestamp = article["timestamp"]
 
                 if len(text) < 200:
                     continue
@@ -271,8 +280,7 @@ class TrendCorrelator:
                         prev_fp = fingerprints_by_author[influencers[-1][0]]
                         curr_fp = fingerprints_by_author[author_id]
                         self.scribe._calculate_signal_similarity(
-                            prev_fp.signal_vector,
-                            curr_fp.signal_vector
+                            prev_fp.signal_vector, curr_fp.signal_vector
                         )
                     else:
                         pass  # First in chain
@@ -309,7 +317,7 @@ class TrendCorrelator:
                 chain_length=len(influencers),
                 influencers=influencers,
                 estimated_spread_velocity=velocity,
-                amplification_factor=amplification
+                amplification_factor=amplification,
             )
 
             logger.info(f"✅ Influence chain: {len(influencers)} authors, {velocity} spread")
@@ -324,10 +332,7 @@ class TrendCorrelator:
     # ========================================================================
 
     def detect_campaign_patterns(
-        self,
-        trend_topic: str,
-        article_data: list[dict],
-        similarity_threshold: float = 0.75
+        self, trend_topic: str, article_data: list[dict], similarity_threshold: float = 0.75
     ) -> dict:
         """
         Detect coordinated promotion patterns (multiple authors pushing same narrative).
@@ -349,7 +354,7 @@ class TrendCorrelator:
             # Group articles by timeframe (e.g., same day)
             timeframe_groups = {}
             for article in article_data:
-                timestamp = article['timestamp']
+                timestamp = article["timestamp"]
                 timeframe = timestamp[:10]  # Date only
 
                 if timeframe not in timeframe_groups:
@@ -365,8 +370,8 @@ class TrendCorrelator:
                 # Check message similarity across authors
                 fingerprints = {}
                 for article in articles:
-                    author_id = article['author_id']
-                    text = article['text']
+                    author_id = article["author_id"]
+                    text = article["text"]
 
                     if author_id not in fingerprints:
                         fp = self.scribe.extract_linguistic_fingerprint(text)
@@ -375,10 +380,9 @@ class TrendCorrelator:
                 # Find pairs with high similarity
                 coordinated_pairs = []
                 for i, auth1 in enumerate(list(fingerprints.keys())):
-                    for auth2 in list(fingerprints.keys())[i+1:]:
+                    for auth2 in list(fingerprints.keys())[i + 1 :]:
                         sim = self.scribe._calculate_signal_similarity(
-                            fingerprints[auth1].signal_vector,
-                            fingerprints[auth2].signal_vector
+                            fingerprints[auth1].signal_vector, fingerprints[auth2].signal_vector
                         )
 
                         if sim > similarity_threshold:
@@ -387,10 +391,12 @@ class TrendCorrelator:
                 if len(coordinated_pairs) >= 2:
                     pattern = {
                         "date": timeframe,
-                        "authors_involved": list(set(sum([(a, b) for a, b, _ in coordinated_pairs], ()))),
+                        "authors_involved": list(
+                            set(sum([(a, b) for a, b, _ in coordinated_pairs], ()))
+                        ),
                         "coordinated_pairs": len(coordinated_pairs),
                         "avg_similarity": np.mean([s for _, _, s in coordinated_pairs]),
-                        "confidence": "High" if len(coordinated_pairs) >= 3 else "Medium"
+                        "confidence": "High" if len(coordinated_pairs) >= 3 else "Medium",
                     }
                     patterns.append(pattern)
                     logger.info(f"🎯 Campaign pattern detected on {timeframe}")
@@ -398,7 +404,7 @@ class TrendCorrelator:
             result = {
                 "detected": len(patterns) > 0,
                 "patterns": patterns,
-                "confidence": "High" if len(patterns) >= 2 else ("Medium" if patterns else "Low")
+                "confidence": "High" if len(patterns) >= 2 else ("Medium" if patterns else "Low"),
             }
 
             logger.info(f"✅ Campaign analysis complete: {len(patterns)} patterns detected")
@@ -429,7 +435,7 @@ class TrendCorrelator:
                     "score": f"{d.attribution_score:.1f}%",
                     "articles": d.article_count,
                     "reach": d.estimated_reach,
-                    "first_mention": d.first_mention
+                    "first_mention": d.first_mention,
                 }
                 for d in analysis.primary_drivers
             ],
@@ -437,19 +443,21 @@ class TrendCorrelator:
                 {
                     "author": a.author_id,
                     "score": f"{a.attribution_score:.1f}%",
-                    "articles": a.article_count
+                    "articles": a.article_count,
                 }
                 for a in analysis.amplifiers[:5]
             ],
             "coordinated_promotion": "Yes" if analysis.coordinated_promotion else "No",
-            "coordination_confidence": f"{analysis.coordination_confidence:.0f}%"
+            "coordination_confidence": f"{analysis.coordination_confidence:.0f}%",
         }
 
     # ========================================================================
     # HELPER METHODS
     # ========================================================================
 
-    def _classify_role(self, score: float, primary_threshold: float, amplifier_threshold: float) -> str:
+    def _classify_role(
+        self, score: float, primary_threshold: float, amplifier_threshold: float
+    ) -> str:
         """Classify author role based on contribution score"""
         if score >= primary_threshold:
             return "Primary Driver"
@@ -465,7 +473,7 @@ class TrendCorrelator:
 
         similarities = []
         for i, (auth1, _) in enumerate(top_authors):
-            for auth2, _ in top_authors[i+1:]:
+            for auth2, _ in top_authors[i + 1 :]:
                 if auth1 in fingerprints and auth2 in fingerprints:
                     fps1 = fingerprints[auth1]
                     fps2 = fingerprints[auth2]
@@ -473,17 +481,13 @@ class TrendCorrelator:
                     for fp1 in fps1[:1]:  # First article only
                         for fp2 in fps2[:1]:
                             sim = self.scribe._calculate_signal_similarity(
-                                fp1.signal_vector,
-                                fp2.signal_vector
+                                fp1.signal_vector, fp2.signal_vector
                             )
                             similarities.append(sim)
 
         if similarities:
             avg_sim = np.mean(similarities)
-            return {
-                "detected": avg_sim > 0.75,
-                "confidence": min(100, avg_sim * 100)
-            }
+            return {"detected": avg_sim > 0.75, "confidence": min(100, avg_sim * 100)}
         else:
             return {"detected": False, "confidence": 0}
 
@@ -491,6 +495,7 @@ class TrendCorrelator:
 # ============================================================================
 # MCP TOOL FUNCTIONS
 # ============================================================================
+
 
 def identify_trend_drivers_tool(trend_topic: str, articles: list[dict]) -> dict:
     """MCP Tool: Identify authors driving a trend"""
@@ -507,12 +512,12 @@ def identify_trend_drivers_tool(trend_topic: str, articles: list[dict]) -> dict:
                 "author_id": d.author_id,
                 "score": round(d.attribution_score, 1),
                 "articles": d.article_count,
-                "reach": d.estimated_reach
+                "reach": d.estimated_reach,
             }
             for d in analysis.primary_drivers
         ],
         "coordinated": analysis.coordinated_promotion,
-        "coordination_confidence": round(analysis.coordination_confidence, 1)
+        "coordination_confidence": round(analysis.coordination_confidence, 1),
     }
 
 
@@ -527,14 +532,14 @@ def trace_influence_tool(trend_topic: str, articles: list[dict]) -> dict:
         "chain_length": chain.chain_length,
         "influencers": chain.influencers,
         "spread_velocity": chain.estimated_spread_velocity,
-        "amplification": round(chain.amplification_factor, 2)
+        "amplification": round(chain.amplification_factor, 2),
     }
 
 
 if __name__ == "__main__":
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("📈 TREND CORRELATOR DEMO")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
     print("✅ TREND CORRELATOR READY")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")

@@ -36,7 +36,7 @@ class SourceDeAnonymizationEngine:
             return []
 
         features = self.signatures["features"]
-        words = re.findall(r'\b\w+\b', text.lower())
+        words = re.findall(r"\b\w+\b", text.lower())
         total_words = len(words)
 
         if total_words == 0:
@@ -84,16 +84,12 @@ class SourceDeAnonymizationEngine:
                 "detected_family": "Unknown",
                 "confidence": 0.0,
                 "similarity_scores": {},
-                "analysis": {
-                    "feature_count": 0,
-                    "total_words": 0,
-                    "feature_vector": []
-                }
+                "analysis": {"feature_count": 0, "total_words": 0, "feature_vector": []},
             }
 
         # Extract feature vector from input text
         feature_vector = self._extract_features(text)
-        words = re.findall(r'\b\w+\b', text.lower())
+        words = re.findall(r"\b\w+\b", text.lower())
         total_words = len(words)
 
         if not self.signatures or "families" not in self.signatures:
@@ -104,8 +100,8 @@ class SourceDeAnonymizationEngine:
                 "analysis": {
                     "feature_count": len(feature_vector),
                     "total_words": total_words,
-                    "feature_vector": feature_vector
-                }
+                    "feature_vector": feature_vector,
+                },
             }
 
         # Calculate similarity against each family
@@ -142,8 +138,8 @@ class SourceDeAnonymizationEngine:
                 "total_words": total_words,
                 "feature_vector": feature_vector,
                 "best_match": best_family,
-                "raw_similarity": max_similarity
-            }
+                "raw_similarity": max_similarity,
+            },
         }
 
     def get_signature_info(self) -> dict[str, Any]:
@@ -155,7 +151,7 @@ class SourceDeAnonymizationEngine:
             "features": self.signatures.get("features", []),
             "families": list(self.signatures.get("families", {}).keys()),
             "total_features": len(self.signatures.get("features", [])),
-            "total_families": len(self.signatures.get("families", {}))
+            "total_families": len(self.signatures.get("families", {})),
         }
 
     def add_signature_family(self, family_name: str, feature_vector: list[float]) -> bool:
@@ -170,7 +166,9 @@ class SourceDeAnonymizationEngine:
 
             expected_length = len(self.signatures["features"])
             if len(feature_vector) != expected_length:
-                raise ValueError(f"Vector length {len(feature_vector)} doesn't match expected length {expected_length}")
+                raise ValueError(
+                    f"Vector length {len(feature_vector)} doesn't match expected length {expected_length}"
+                )
 
             # Add or update family
             if "families" not in self.signatures:
@@ -179,7 +177,7 @@ class SourceDeAnonymizationEngine:
             self.signatures["families"][family_name] = {"vector": feature_vector}
 
             # Save to file
-            with open(self.signatures_path, 'w') as f:
+            with open(self.signatures_path, "w") as f:
                 json.dump(self.signatures, f, indent=2)
 
             return True
@@ -206,11 +204,14 @@ class SourceDeAnonymizationEngine:
             "analysis": {
                 "text_a_features": len(vector_a),
                 "text_b_features": len(vector_b),
-                "text_a_words": len(re.findall(r'\b\w+\b', text_a.lower())),
-                "text_b_words": len(re.findall(r'\b\w+\b', text_b.lower()))
-            }
+                "text_a_words": len(re.findall(r"\b\w+\b", text_a.lower())),
+                "text_b_words": len(re.findall(r"\b\w+\b", text_b.lower())),
+            },
         }
 
-def create_sda_engine(signatures_path: str = r"d:\SME\data\signatures.json") -> SourceDeAnonymizationEngine:
+
+def create_sda_engine(
+    signatures_path: str = r"d:\SME\data\signatures.json",
+) -> SourceDeAnonymizationEngine:
     """Factory function to create and return an SDA engine instance."""
     return SourceDeAnonymizationEngine(signatures_path)

@@ -5,11 +5,12 @@ from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("WebSearcher")
 
+
 @mcp.tool()
 def search_duckduckgo(query: str) -> str:
     """Searches the web for real-time information and returns snippets."""
     max_retries = 3
-    retry_delay = 2 # seconds
+    retry_delay = 2  # seconds
 
     for attempt in range(max_retries):
         try:
@@ -19,7 +20,9 @@ def search_duckduckgo(query: str) -> str:
                 results = ddgs.text(query, max_results=5)
                 if results:
                     for r in results:
-                        results_list.append(f"Title: {r['title']}\nSnippet: {r['body']}\nURL: {r['href']}\n")
+                        results_list.append(
+                            f"Title: {r['title']}\nSnippet: {r['body']}\nURL: {r['href']}\n"
+                        )
                     return "\n---\n".join(results_list)
                 else:
                     return "No results found for your query."
@@ -31,6 +34,7 @@ def search_duckduckgo(query: str) -> str:
             return f"Error after {max_retries} attempts: {e!s}"
 
     return "Search failed unexpectedly."
+
 
 if __name__ == "__main__":
     mcp.run()

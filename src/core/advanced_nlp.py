@@ -44,10 +44,11 @@ logger = logging.getLogger(__name__)
 
 class DependencyType(enum.Enum):
     """Dependency relationship types."""
+
     SUBJECT = "nsubj"  # Nominal subject
-    OBJECT = "dobj"    # Direct object
+    OBJECT = "dobj"  # Direct object
     INDIRECT_OBJECT = "iobj"  # Indirect object
-    MODIFIER = "mod"   # Modifier
+    MODIFIER = "mod"  # Modifier
     PREPOSITION = "prep"
     CONJUNCTION = "conj"
     NEGATION = "neg"
@@ -57,6 +58,7 @@ class DependencyType(enum.Enum):
 
 class CorefType(enum.Enum):
     """Coreference resolution types."""
+
     PRONOUN = "pronoun"
     DEFINITE_NP = "definite_np"
     PROPER_NOUN = "proper_noun"
@@ -66,78 +68,84 @@ class CorefType(enum.Enum):
 
 class SemanticRole(enum.Enum):
     """Semantic role types (PropBank-style)."""
-    AGENT = "A0"              # Who is doing the action
-    PATIENT = "A1"            # What is being acted upon
-    INSTRUMENT = "A2"         # What is used
-    LOCATION = "AM-LOC"       # Where
-    TEMPORAL = "AM-TMP"       # When
-    MANNER = "AM-MNR"         # How
-    PURPOSE = "AM-PRP"        # Why
-    CAUSE = "AM-CAU"          # Why (causal)
+
+    AGENT = "A0"  # Who is doing the action
+    PATIENT = "A1"  # What is being acted upon
+    INSTRUMENT = "A2"  # What is used
+    LOCATION = "AM-LOC"  # Where
+    TEMPORAL = "AM-TMP"  # When
+    MANNER = "AM-MNR"  # How
+    PURPOSE = "AM-PRP"  # Why
+    CAUSE = "AM-CAU"  # Why (causal)
     OTHER = "OTHER"
 
 
 @dataclasses.dataclass
 class DependencyRelation:
     """Dependency parse relation."""
-    head: str                  # Head word
-    head_pos: str             # Head POS tag
-    dependent: str            # Dependent word
-    dependent_pos: str        # Dependent POS tag
-    relation_type: str        # Dependency type (nsubj, obj, etc)
-    head_idx: int             # Head position in sentence
-    dependent_idx: int        # Dependent position
+
+    head: str  # Head word
+    head_pos: str  # Head POS tag
+    dependent: str  # Dependent word
+    dependent_pos: str  # Dependent POS tag
+    relation_type: str  # Dependency type (nsubj, obj, etc)
+    head_idx: int  # Head position in sentence
+    dependent_idx: int  # Dependent position
 
 
 @dataclasses.dataclass
 class CoreferenceChain:
     """Linked mentions of same entity."""
-    entity_id: int            # Unique entity ID
-    mentions: list[str]       # All mention texts
-    mention_indices: list[tuple[int, int]] # (start, end) positions
-    entity_type: str | None # PERSON, ORG, LOC, etc
-    representative: str       # Main/first mention
+
+    entity_id: int  # Unique entity ID
+    mentions: list[str]  # All mention texts
+    mention_indices: list[tuple[int, int]]  # (start, end) positions
+    entity_type: str | None  # PERSON, ORG, LOC, etc
+    representative: str  # Main/first mention
 
 
 @dataclasses.dataclass
 class SemanticRoleLabel:
     """Semantic role for predicate argument."""
-    predicate: str            # The action/state verb
-    predicate_idx: int        # Position in sentence
-    role: str                 # Role type (A0, A1, AM-LOC, etc)
-    argument: str             # The argument text
-    argument_span: tuple[int, int] # Character positions
+
+    predicate: str  # The action/state verb
+    predicate_idx: int  # Position in sentence
+    role: str  # Role type (A0, A1, AM-LOC, etc)
+    argument: str  # The argument text
+    argument_span: tuple[int, int]  # Character positions
 
 
 @dataclasses.dataclass
 class Event:
     """Extracted event with participants."""
-    event_trigger: str        # Main verb/action
-    event_type: str | None # EVENT_TYPE (if classified)
-    participants: dict[str, str] # Role -> entity mapping
-    temporal_info: str | None # When it happened
-    location: str | None   # Where it happened
-    confidence: float         # Extraction confidence
+
+    event_trigger: str  # Main verb/action
+    event_type: str | None  # EVENT_TYPE (if classified)
+    participants: dict[str, str]  # Role -> entity mapping
+    temporal_info: str | None  # When it happened
+    location: str | None  # Where it happened
+    confidence: float  # Extraction confidence
 
 
 @dataclasses.dataclass
 class AdvancedAnalysis:
     """Complete advanced NLP analysis."""
+
     text: str
     sentences: list[str]
-    base_analysis: nlp_pipeline.NLPAnalysis | None # From NLPPipeline
+    base_analysis: nlp_pipeline.NLPAnalysis | None  # From NLPPipeline
 
     # Dependency parsing
     dependencies: list[DependencyRelation]
-    parse_trees: list[str]    # Formatted tree strings
+    parse_trees: list[str]  # Formatted tree strings
 
     # Coreference resolution
     coreference_chains: list[CoreferenceChain]
-    resolved_text: str        # Text with coreferences resolved
+    resolved_text: str  # Text with coreferences resolved
 
     # Semantic role labeling
     semantic_roles: list[SemanticRoleLabel]
-    predicates: list[str]     # Identified predicates
+    predicates: list[str]  # Identified predicates
 
     # Event extraction
     events: list[Event]
@@ -227,7 +235,7 @@ class AdvancedNLPEngine:
             # Extract semantic summary
             key_participants = set()
             for chain in coref_chains:
-                if chain.entity_type in ('PERSON', 'ORG', 'GPE'):
+                if chain.entity_type in ("PERSON", "ORG", "GPE"):
                     key_participants.add(chain.representative)
 
             key_events = {e.event_trigger for e in events}
@@ -248,13 +256,15 @@ class AdvancedNLPEngine:
                 key_participants=key_participants,
                 key_events=key_events,
                 temporal_markers=temporal_markers,
-                spatial_markers=spatial_markers
+                spatial_markers=spatial_markers,
             )
 
-            logger.debug(f"Advanced analysis complete: "
-                        f"{len(dependencies)} deps, "
-                        f"{len(coref_chains)} coref chains, "
-                        f"{len(events)} events")
+            logger.debug(
+                f"Advanced analysis complete: "
+                f"{len(dependencies)} deps, "
+                f"{len(coref_chains)} coref chains, "
+                f"{len(events)} events"
+            )
 
             return analysis
 
@@ -287,8 +297,7 @@ class AdvancedNLPEngine:
         Returns:
             List of coreference chains
         """
-        return self._resolve_coreferences(text,
-                                         self.data_manager.sentence_tokenize(text))
+        return self._resolve_coreferences(text, self.data_manager.sentence_tokenize(text))
 
     def extract_semantic_roles(self, text: str) -> list[SemanticRoleLabel]:
         """
@@ -322,7 +331,7 @@ class AdvancedNLPEngine:
                     dependent_pos=token.pos_,
                     relation_type=token.dep_,
                     head_idx=token.head.i,
-                    dependent_idx=token.i
+                    dependent_idx=token.i,
                 )
                 dependencies.append(dep)
 
@@ -345,7 +354,7 @@ class AdvancedNLPEngine:
                     dependent_pos=token.pos_,
                     relation_type=token.dep_,
                     head_idx=token.head.i,
-                    dependent_idx=token.i
+                    dependent_idx=token.i,
                 )
                 dependencies.append(dep)
 
@@ -358,8 +367,7 @@ class AdvancedNLPEngine:
         logger.warning("NLTK dependency parsing requires specialized models")
         return []
 
-    def _resolve_coreferences(self, text: str,
-                             sentences: list[str]) -> list[CoreferenceChain]:
+    def _resolve_coreferences(self, text: str, sentences: list[str]) -> list[CoreferenceChain]:
         """
         Resolve coreferences using simple heuristics.
         Production: use neuralcoref or similar library.
@@ -386,7 +394,7 @@ class AdvancedNLPEngine:
                             mentions=mentions,
                             mention_indices=[(0, len(m)) for m in mentions],
                             entity_type=entity_type,
-                            representative=mentions[0]
+                            representative=mentions[0],
                         )
                         coref_chains.append(chain)
             except Exception as e:
@@ -394,8 +402,7 @@ class AdvancedNLPEngine:
 
         return coref_chains
 
-    def _apply_coref_resolution(self, text: str,
-                                chains: list[CoreferenceChain]) -> str:
+    def _apply_coref_resolution(self, text: str, chains: list[CoreferenceChain]) -> str:
         """Apply coreference resolution to text."""
         # Replace pronouns with entity representatives
         resolved = text
@@ -407,8 +414,7 @@ class AdvancedNLPEngine:
 
         return resolved
 
-    def _extract_semantic_roles(self, text: str,
-                               sentences: list[str]) -> list[SemanticRoleLabel]:
+    def _extract_semantic_roles(self, text: str, sentences: list[str]) -> list[SemanticRoleLabel]:
         """
         Extract semantic roles (simplified).
         Production: use semantic role labeling library
@@ -432,14 +438,18 @@ class AdvancedNLPEngine:
                                 predicate_idx=token.i,
                                 role=child.dep_,
                                 argument=child.text,
-                                argument_span=(child.idx, child.idx + len(child.text))
+                                argument_span=(child.idx, child.idx + len(child.text)),
                             )
                             roles.append(role)
 
         return roles
 
-    def _extract_events(self, text: str, semantic_roles: list[SemanticRoleLabel],
-                       coref_chains: list[CoreferenceChain]) -> list[Event]:
+    def _extract_events(
+        self,
+        text: str,
+        semantic_roles: list[SemanticRoleLabel],
+        coref_chains: list[CoreferenceChain],
+    ) -> list[Event]:
         """Extract events from semantic roles."""
         events = []
         processed_predicates = set()
@@ -447,8 +457,7 @@ class AdvancedNLPEngine:
         for sr in semantic_roles:
             if sr.predicate not in processed_predicates:
                 # Find all roles for this predicate
-                predicate_roles = [r for r in semantic_roles
-                                 if r.predicate == sr.predicate]
+                predicate_roles = [r for r in semantic_roles if r.predicate == sr.predicate]
 
                 # Build participant map
                 participants = {}
@@ -461,7 +470,7 @@ class AdvancedNLPEngine:
                     participants=participants,
                     temporal_info=None,
                     location=None,
-                    confidence=0.7  # Simplified
+                    confidence=0.7,  # Simplified
                 )
                 events.append(event)
                 processed_predicates.add(sr.predicate)
@@ -472,14 +481,43 @@ class AdvancedNLPEngine:
         """Extract temporal expressions."""
         # Simple extraction of common temporal markers
         temporal_words = [
-            'yesterday', 'today', 'tomorrow',
-            'morning', 'afternoon', 'evening', 'night',
-            'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday',
-            'Saturday', 'Sunday', 'January', 'February', 'March',
-            'April', 'May', 'June', 'July', 'August', 'September',
-            'October', 'November', 'December',
-            'ago', 'after', 'before', 'during', 'while', 'when',
-            'now', 'then', 'soon', 'later', 'earlier'
+            "yesterday",
+            "today",
+            "tomorrow",
+            "morning",
+            "afternoon",
+            "evening",
+            "night",
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+            "ago",
+            "after",
+            "before",
+            "during",
+            "while",
+            "when",
+            "now",
+            "then",
+            "soon",
+            "later",
+            "earlier",
         ]
 
         text_lower = text.lower()
@@ -493,10 +531,29 @@ class AdvancedNLPEngine:
     def _extract_spatial_markers(self, text: str) -> list[str]:
         """Extract spatial/location expressions."""
         spatial_words = [
-            'above', 'below', 'left', 'right', 'north', 'south',
-            'east', 'west', 'inside', 'outside', 'between', 'among',
-            'near', 'far', 'beside', 'behind', 'front', 'back',
-            'up', 'down', 'here', 'there', 'where'
+            "above",
+            "below",
+            "left",
+            "right",
+            "north",
+            "south",
+            "east",
+            "west",
+            "inside",
+            "outside",
+            "between",
+            "among",
+            "near",
+            "far",
+            "beside",
+            "behind",
+            "front",
+            "back",
+            "up",
+            "down",
+            "here",
+            "there",
+            "where",
         ]
 
         text_lower = text.lower()
@@ -507,8 +564,7 @@ class AdvancedNLPEngine:
 
         return found_markers
 
-    def _generate_parse_trees(self, text: str,
-                             sentences: list[str]) -> list[str]:
+    def _generate_parse_trees(self, text: str, sentences: list[str]) -> list[str]:
         """Generate formatted parse trees."""
         trees = []
 
@@ -556,26 +612,22 @@ class AdvancedNLPAnalyzer:
             return {}
 
         return {
-            'characters': list(analysis.key_participants),
-            'events': [e.event_trigger for e in analysis.events],
-            'locations': analysis.spatial_markers,
-            'timeline': analysis.temporal_markers,
-            'event_details': [
+            "characters": list(analysis.key_participants),
+            "events": [e.event_trigger for e in analysis.events],
+            "locations": analysis.spatial_markers,
+            "timeline": analysis.temporal_markers,
+            "event_details": [
                 {
-                    'action': e.event_trigger,
-                    'participants': e.participants,
-                    'confidence': e.confidence
+                    "action": e.event_trigger,
+                    "participants": e.participants,
+                    "confidence": e.confidence,
                 }
                 for e in analysis.events
             ],
-            'coreference_chains': [
-                {
-                    'entity': c.representative,
-                    'type': c.entity_type,
-                    'mentions': c.mentions
-                }
+            "coreference_chains": [
+                {"entity": c.representative, "type": c.entity_type, "mentions": c.mentions}
                 for c in analysis.coreference_chains
-            ]
+            ],
         }
 
     def analyze_relationships(self, text: str) -> dict:
@@ -593,21 +645,13 @@ class AdvancedNLPAnalyzer:
         relationships = {}
         for dep in analysis.dependencies:
             key = f"{dep.dependent} -{dep.relation_type}-> {dep.head}"
-            relationships[key] = {
-                'from': dep.dependent,
-                'type': dep.relation_type,
-                'to': dep.head
-            }
+            relationships[key] = {"from": dep.dependent, "type": dep.relation_type, "to": dep.head}
 
         return {
-            'dependencies': relationships,
-            'predicates': analysis.predicates,
-            'semantic_roles': [
-                {
-                    'predicate': sr.predicate,
-                    'role': sr.role,
-                    'argument': sr.argument
-                }
+            "dependencies": relationships,
+            "predicates": analysis.predicates,
+            "semantic_roles": [
+                {"predicate": sr.predicate, "role": sr.role, "argument": sr.argument}
                 for sr in analysis.semantic_roles
-            ]
+            ],
         }

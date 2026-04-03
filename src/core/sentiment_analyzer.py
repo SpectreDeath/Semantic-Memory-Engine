@@ -22,12 +22,14 @@ from enum import Enum
 
 try:
     from textblob import TextBlob
+
     TEXTBLOB_AVAILABLE = True
 except ImportError:
     TEXTBLOB_AVAILABLE = False
 
 try:
     from nltk.sentiment import SentimentIntensityAnalyzer
+
     VADER_AVAILABLE = True
 except ImportError:
     VADER_AVAILABLE = False
@@ -37,6 +39,7 @@ logger = logging.getLogger(__name__)
 
 class SentimentPolarity(Enum):
     """Sentiment classification categories."""
+
     VERY_NEGATIVE = "very_negative"
     NEGATIVE = "negative"
     NEUTRAL = "neutral"
@@ -46,6 +49,7 @@ class SentimentPolarity(Enum):
 
 class EmotionType(Enum):
     """Basic emotion categories (Ekman's 6 basic emotions)."""
+
     JOY = "joy"
     ANGER = "anger"
     FEAR = "fear"
@@ -57,6 +61,7 @@ class EmotionType(Enum):
 @dataclass
 class EmotionScore:
     """Score for a single emotion."""
+
     emotion: EmotionType
     score: float  # 0.0 to 1.0
     confidence: float  # 0.0 to 1.0
@@ -66,6 +71,7 @@ class EmotionScore:
 @dataclass
 class SentimentAnalysis:
     """Complete sentiment analysis result."""
+
     text: str
     polarity: SentimentPolarity
     polarity_score: float  # -1.0 to 1.0
@@ -83,6 +89,7 @@ class SentimentAnalysis:
 @dataclass
 class SentimentTrend:
     """Sentiment progression through text segments."""
+
     segments: list[str]
     sentiment_scores: list[float]
     polarity_progression: list[SentimentPolarity]
@@ -96,42 +103,97 @@ class SentimentAnalyzer:
     # Emotion keyword mappings
     EMOTION_KEYWORDS = {
         EmotionType.JOY: {
-            'positive': ['happy', 'joy', 'love', 'amazing', 'wonderful', 'great',
-                        'excellent', 'fantastic', 'delightful', 'cheerful', 'blessed'],
-            'negative': ['sad', 'miserable', 'heartbroken']
+            "positive": [
+                "happy",
+                "joy",
+                "love",
+                "amazing",
+                "wonderful",
+                "great",
+                "excellent",
+                "fantastic",
+                "delightful",
+                "cheerful",
+                "blessed",
+            ],
+            "negative": ["sad", "miserable", "heartbroken"],
         },
         EmotionType.ANGER: {
-            'positive': ['fury', 'enraged', 'furious', 'livid', 'angry', 'mad',
-                        'infuriated', 'outraged', 'incensed'],
-            'negative': ['calm', 'peaceful', 'serene']
+            "positive": [
+                "fury",
+                "enraged",
+                "furious",
+                "livid",
+                "angry",
+                "mad",
+                "infuriated",
+                "outraged",
+                "incensed",
+            ],
+            "negative": ["calm", "peaceful", "serene"],
         },
         EmotionType.FEAR: {
-            'positive': ['scared', 'afraid', 'terrified', 'frightened', 'anxious',
-                        'nervous', 'worried', 'fearful', 'dread'],
-            'negative': ['brave', 'courageous', 'confident']
+            "positive": [
+                "scared",
+                "afraid",
+                "terrified",
+                "frightened",
+                "anxious",
+                "nervous",
+                "worried",
+                "fearful",
+                "dread",
+            ],
+            "negative": ["brave", "courageous", "confident"],
         },
         EmotionType.SADNESS: {
-            'positive': ['sad', 'unhappy', 'miserable', 'depressed', 'sorrowful',
-                        'gloomy', 'melancholy', 'grief', 'mourning'],
-            'negative': ['happy', 'joyful', 'cheerful']
+            "positive": [
+                "sad",
+                "unhappy",
+                "miserable",
+                "depressed",
+                "sorrowful",
+                "gloomy",
+                "melancholy",
+                "grief",
+                "mourning",
+            ],
+            "negative": ["happy", "joyful", "cheerful"],
         },
         EmotionType.SURPRISE: {
-            'positive': ['surprised', 'shocked', 'amazed', 'astounded', 'startled',
-                        'astonished', 'stunned', 'bewildered'],
-            'negative': []
+            "positive": [
+                "surprised",
+                "shocked",
+                "amazed",
+                "astounded",
+                "startled",
+                "astonished",
+                "stunned",
+                "bewildered",
+            ],
+            "negative": [],
         },
         EmotionType.TRUST: {
-            'positive': ['trust', 'confident', 'believe', 'faith', 'reliable',
-                        'sincere', 'honest', 'loyal', 'dedicated'],
-            'negative': ['doubt', 'skeptical', 'suspicious']
-        }
+            "positive": [
+                "trust",
+                "confident",
+                "believe",
+                "faith",
+                "reliable",
+                "sincere",
+                "honest",
+                "loyal",
+                "dedicated",
+            ],
+            "negative": ["doubt", "skeptical", "suspicious"],
+        },
     }
 
     # Sarcasm indicators
     SARCASM_PATTERNS = [
-        r'\b(yeah|right|sure|great|wonderful)\b.*\b(not|hate|terrible|awful)\b',
-        r'\b(oh|wow)\b\s+\b(how|so|very)\b.*\b(great|amazing|wonderful)\b',
-        r'(?:.*?)(good|great|best|perfect)(?:.*?)(way to|now|just)',
+        r"\b(yeah|right|sure|great|wonderful)\b.*\b(not|hate|terrible|awful)\b",
+        r"\b(oh|wow)\b\s+\b(how|so|very)\b.*\b(great|amazing|wonderful)\b",
+        r"(?:.*?)(good|great|best|perfect)(?:.*?)(way to|now|just)",
     ]
 
     def __init__(self):
@@ -143,7 +205,9 @@ class SentimentAnalyzer:
             self.vader = SentimentIntensityAnalyzer()
 
         if not (self.has_textblob or self.has_vader):
-            logger.warning("No sentiment analysis backends available. Install textblob or nltk[vader]")
+            logger.warning(
+                "No sentiment analysis backends available. Install textblob or nltk[vader]"
+            )
 
     def analyze(self, text: str) -> SentimentAnalysis:
         """Perform complete sentiment analysis on text."""
@@ -189,12 +253,12 @@ class SentimentAnalyzer:
             intensity=intensity,
             is_sarcastic=is_sarcastic,
             is_mixed=is_mixed,
-            comparative=comparative
+            comparative=comparative,
         )
 
     def analyze_trend(self, text: str, segment_size: int = 50) -> SentimentTrend:
         """Analyze sentiment progression through text segments."""
-        sentences = [s.strip() for s in text.split('.') if s.strip()]
+        sentences = [s.strip() for s in text.split(".") if s.strip()]
         if not sentences:
             sentences = [text]
 
@@ -219,8 +283,10 @@ class SentimentAnalyzer:
 
         # Calculate volatility
         if len(sentiment_scores) > 1:
-            diffs = [abs(sentiment_scores[i+1] - sentiment_scores[i])
-                    for i in range(len(sentiment_scores)-1)]
+            diffs = [
+                abs(sentiment_scores[i + 1] - sentiment_scores[i])
+                for i in range(len(sentiment_scores) - 1)
+            ]
             volatility = sum(diffs) / len(diffs) if diffs else 0.0
         else:
             volatility = 0.0
@@ -230,7 +296,7 @@ class SentimentAnalyzer:
             sentiment_scores=sentiment_scores,
             polarity_progression=polarity_progression,
             trend_direction=trend_direction,
-            volatility=volatility
+            volatility=volatility,
         )
 
     def _calculate_polarity(self, text: str) -> float:
@@ -240,7 +306,7 @@ class SentimentAnalyzer:
 
         if self.has_vader:
             scores = self.vader.polarity_scores(text)
-            return scores.get('compound', 0.0)
+            return scores.get("compound", 0.0)
 
         if self.has_textblob:
             blob = TextBlob(text)
@@ -252,8 +318,18 @@ class SentimentAnalyzer:
         """Calculate subjectivity score."""
         if not self.has_textblob or not text.strip():
             # Simple heuristic: count subjective words
-            subjective_words = ['think', 'feel', 'believe', 'opinion', 'my', 'i',
-                              'seemed', 'appears', 'looks', 'sounds']
+            subjective_words = [
+                "think",
+                "feel",
+                "believe",
+                "opinion",
+                "my",
+                "i",
+                "seemed",
+                "appears",
+                "looks",
+                "sounds",
+            ]
             count = sum(1 for word in text.lower().split() if word in subjective_words)
             return min(count / max(len(text.split()), 1), 1.0)
 
@@ -266,8 +342,8 @@ class SentimentAnalyzer:
         emotions = {}
 
         for emotion_type, keywords_dict in self.EMOTION_KEYWORDS.items():
-            positive_matches = [w for w in keywords_dict['positive'] if w in text_lower]
-            negative_matches = [w for w in keywords_dict['negative'] if w in text_lower]
+            positive_matches = [w for w in keywords_dict["positive"] if w in text_lower]
+            negative_matches = [w for w in keywords_dict["negative"] if w in text_lower]
 
             score = (len(positive_matches) - len(negative_matches)) / max(
                 len(positive_matches) + len(negative_matches), 1
@@ -281,10 +357,7 @@ class SentimentAnalyzer:
             all_keywords = positive_matches + negative_matches
 
             emotions[emotion_type] = EmotionScore(
-                emotion=emotion_type,
-                score=score,
-                confidence=confidence,
-                keywords=all_keywords
+                emotion=emotion_type, score=score, confidence=confidence, keywords=all_keywords
             )
 
         return emotions
@@ -293,15 +366,16 @@ class SentimentAnalyzer:
         """Extract sentiment-bearing keywords."""
         all_keywords = []
         for emotion_keywords in self.EMOTION_KEYWORDS.values():
-            all_keywords.extend(emotion_keywords['positive'])
-            all_keywords.extend(emotion_keywords['negative'])
+            all_keywords.extend(emotion_keywords["positive"])
+            all_keywords.extend(emotion_keywords["negative"])
 
         text_lower = text.lower()
         found = [word for word in all_keywords if word in text_lower]
         return list(set(found))
 
-    def _calculate_intensity(self, text: str, polarity: float,
-                            emotions: dict[EmotionType, EmotionScore]) -> float:
+    def _calculate_intensity(
+        self, text: str, polarity: float, emotions: dict[EmotionType, EmotionScore]
+    ) -> float:
         """Calculate overall sentiment intensity."""
         # Factor 1: Polarity magnitude
         polarity_intensity = abs(polarity)
@@ -314,7 +388,7 @@ class SentimentAnalyzer:
         keyword_density = len(keywords) / max(len(text.split()), 1)
 
         # Combined intensity
-        intensity = (polarity_intensity * 0.5 + emotion_intensity * 0.3 + keyword_density * 0.2)
+        intensity = polarity_intensity * 0.5 + emotion_intensity * 0.3 + keyword_density * 0.2
         return min(intensity, 1.0)
 
     def _calculate_confidence(self, polarity: float, subjectivity: float) -> float:
@@ -323,7 +397,7 @@ class SentimentAnalyzer:
         polarity_confidence = abs(polarity)
         subjectivity_confidence = subjectivity
 
-        return (polarity_confidence * 0.7 + subjectivity_confidence * 0.3)
+        return polarity_confidence * 0.7 + subjectivity_confidence * 0.3
 
     def _detect_sarcasm(self, text: str) -> bool:
         """Detect potential sarcasm in text."""
@@ -366,5 +440,5 @@ class SentimentAnalyzer:
             intensity=0.0,
             is_sarcastic=False,
             is_mixed=False,
-            comparative=0.0
+            comparative=0.0,
         )

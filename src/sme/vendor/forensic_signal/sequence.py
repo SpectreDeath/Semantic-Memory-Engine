@@ -10,9 +10,12 @@ class SignalSequenceAnalyzer:
     Analyzes similarity between time-series sequences.
     Optimized with __slots__.
     """
+
     __slots__ = ()
 
-    def calculate_sequence_similarity(self, seq1: list[float] | np.ndarray, seq2: list[float] | np.ndarray) -> dict[str, Any]:
+    def calculate_sequence_similarity(
+        self, seq1: list[float] | np.ndarray, seq2: list[float] | np.ndarray
+    ) -> dict[str, Any]:
         """
         Calculates similarity using a simplified Dynamic Time Warping (DTW) algorithm.
         Returns the alignment cost (lower is more similar) and a normalized similarity score.
@@ -22,7 +25,11 @@ class SignalSequenceAnalyzer:
 
         n, m = len(s1), len(s2)
         if n == 0 or m == 0:
-            return {"similarity_score": 0.0, "alignment_cost": float('inf'), "status": "Empty Sequence"}
+            return {
+                "similarity_score": 0.0,
+                "alignment_cost": float("inf"),
+                "status": "Empty Sequence",
+            }
 
         # Initialize DTW matrix
         dtw_matrix = np.full((n + 1, m + 1), fill_value=np.inf)
@@ -32,9 +39,11 @@ class SignalSequenceAnalyzer:
         for i in range(1, n + 1):
             for j in range(1, m + 1):
                 cost = abs(s1[i - 1] - s2[j - 1])
-                dtw_matrix[i, j] = cost + min(dtw_matrix[i - 1, j],    # Insertion
-                                             dtw_matrix[i, j - 1],    # Deletion
-                                             dtw_matrix[i - 1, j - 1]) # Match
+                dtw_matrix[i, j] = cost + min(
+                    dtw_matrix[i - 1, j],  # Insertion
+                    dtw_matrix[i, j - 1],  # Deletion
+                    dtw_matrix[i - 1, j - 1],
+                )  # Match
 
         alignment_cost = float(dtw_matrix[n, m])
 
@@ -47,8 +56,9 @@ class SignalSequenceAnalyzer:
             "alignment_cost": round(alignment_cost, 4),
             "similarity_score": round(similarity_score, 4),
             "sequence_lengths": [n, m],
-            "status": "Success"
+            "status": "Success",
         }
+
 
 def calculate_sequence_similarity(seq1: list[float], seq2: list[float]) -> dict[str, Any]:
     """Standalone wrapper for DTW similarity."""

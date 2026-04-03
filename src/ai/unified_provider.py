@@ -32,6 +32,7 @@ except ImportError:
 
 class ProviderType(Enum):
     """Supported AI provider types."""
+
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     OLLAMA = "ollama"
@@ -43,6 +44,7 @@ class ProviderType(Enum):
 @dataclass
 class AIRequest:
     """Standardized AI request."""
+
     prompt: str
     model: str | None = None
     temperature: float = 0.7
@@ -55,6 +57,7 @@ class AIRequest:
 @dataclass
 class AIResponse:
     """Standardized AI response."""
+
     content: str
     provider: str
     model: str
@@ -107,7 +110,7 @@ class UnifiedAIProvider:
         self,
         default_provider: ProviderType = ProviderType.OLLAMA,
         enable_cache: bool = True,
-        cache_size: int = 1000
+        cache_size: int = 1000,
     ):
         self.default_provider = default_provider
         self.enable_cache = enable_cache
@@ -123,7 +126,7 @@ class UnifiedAIProvider:
             "cache_hits": 0,
             "total_cost": 0.0,
             "by_provider": defaultdict(int),
-            "errors": defaultdict(int)
+            "errors": defaultdict(int),
         }
 
         logger.info(f"UnifiedAI initialized with default: {default_provider.value}")
@@ -136,7 +139,7 @@ class UnifiedAIProvider:
             self.providers[ProviderType.OPENAI] = {
                 "api_key": os.getenv("OPENAI_API_KEY"),
                 "base_url": os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
-                "default_model": os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+                "default_model": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
             }
 
         # Anthropic
@@ -144,7 +147,7 @@ class UnifiedAIProvider:
             self.providers[ProviderType.ANTHROPIC] = {
                 "api_key": os.getenv("ANTHROPIC_API_KEY"),
                 "base_url": os.getenv("ANTHROPIC_BASE_URL", "https://api.anthropic.com"),
-                "default_model": os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307")
+                "default_model": os.getenv("ANTHROPIC_MODEL", "claude-3-haiku-20240307"),
             }
 
         # Ollama (local or Docker container)
@@ -154,21 +157,19 @@ class UnifiedAIProvider:
         self.providers[ProviderType.OLLAMA] = {
             "base_url": ollama_base_url,
             "default_model": os.getenv("OLLAMA_MODEL", "llama3.2"),
-            "is_docker": ollama_base_url.startswith("http://ollama:")
+            "is_docker": ollama_base_url.startswith("http://ollama:"),
         }
 
         # Langflow
         self.providers[ProviderType.LANGFLOW] = {
             "base_url": os.getenv("LANGFLOW_BASE_URL", "http://localhost:7860"),
-            "flow_id": os.getenv("LANGFLOW_FLOW_ID", "")
+            "flow_id": os.getenv("LANGFLOW_FLOW_ID", ""),
         }
 
         logger.info(f"Configured providers: {list(self.providers.keys())}")
 
     async def generate(
-        self,
-        request: AIRequest,
-        prefer_providers: list[ProviderType] | None = None
+        self, request: AIRequest, prefer_providers: list[ProviderType] | None = None
     ) -> AIResponse:
         """
         Generate AI response with automatic failover.
@@ -233,11 +234,7 @@ class UnifiedAIProvider:
         # All providers failed
         raise Exception(f"All AI providers failed. Last error: {last_error}")
 
-    async def _call_provider(
-        self,
-        provider: ProviderType,
-        request: AIRequest
-    ) -> AIResponse:
+    async def _call_provider(self, provider: ProviderType, request: AIRequest) -> AIResponse:
         """Call a specific provider."""
 
         start_time = time.time()
@@ -264,7 +261,7 @@ class UnifiedAIProvider:
 
         headers = {
             "Authorization": f"Bearer {config['api_key']}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         messages = []
@@ -276,7 +273,7 @@ class UnifiedAIProvider:
             "model": request.model or config["default_model"],
             "messages": messages,
             "max_tokens": request.max_tokens,
-            "temperature": request.temperature
+            "temperature": request.temperature,
         }
 
         url = f"{config['base_url']}/chat/completions"
@@ -295,7 +292,7 @@ class UnifiedAIProvider:
                 cost = self._calculate_openai_cost(
                     usage.get("prompt_tokens", 0),
                     usage.get("completion_tokens", 0),
-                    payload["model"]
+                    payload["model"],
                 )
 
                 self.stats["total_cost"] += cost
@@ -306,7 +303,7 @@ class UnifiedAIProvider:
                     model=payload["model"],
                     latency_ms=(time.time() - start_time) * 1000,
                     tokens_used=usage.get("total_tokens", 0),
-                    cost_usd=cost
+                    cost_usd=cost,
                 )
 
     async def _call_anthropic(self, request: AIRequest, start_time: float) -> AIResponse:
@@ -319,7 +316,7 @@ class UnifiedAIProvider:
         headers = {
             "x-api-key": config["api_key"],
             "anthropic-version": "2023-06-01",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         messages = [{"role": "user", "content": request.prompt}]
@@ -328,7 +325,7 @@ class UnifiedAIProvider:
             "model": request.model or config["default_model"],
             "max_tokens": request.max_tokens,
             "temperature": request.temperature,
-            "messages": messages
+            "messages": messages,
         }
 
         if request.system_prompt:
@@ -347,9 +344,7 @@ class UnifiedAIProvider:
                 usage = data.get("usage", {})
 
                 cost = self._calculate_anthropic_cost(
-                    usage.get("input_tokens", 0),
-                    usage.get("output_tokens", 0),
-                    payload["model"]
+                    usage.get("input_tokens", 0), usage.get("output_tokens", 0), payload["model"]
                 )
 
                 self.stats["total_cost"] += cost
@@ -360,7 +355,7 @@ class UnifiedAIProvider:
                     model=payload["model"],
                     latency_ms=(time.time() - start_time) * 1000,
                     tokens_used=usage.get("input_tokens", 0) + usage.get("output_tokens", 0),
-                    cost_usd=cost
+                    cost_usd=cost,
                 )
 
     async def _call_ollama(self, request: AIRequest, start_time: float) -> AIResponse:
@@ -374,10 +369,7 @@ class UnifiedAIProvider:
             "model": request.model or config["default_model"],
             "prompt": request.prompt,
             "stream": False,
-            "options": {
-                "temperature": request.temperature,
-                "num_ctx": request.max_tokens
-            }
+            "options": {"temperature": request.temperature, "num_ctx": request.max_tokens},
         }
 
         if request.system_prompt:
@@ -400,7 +392,7 @@ class UnifiedAIProvider:
                     model=payload["model"],
                     latency_ms=(time.time() - start_time) * 1000,
                     tokens_used=data.get("eval_count", 0),
-                    cost_usd=0.0  # Local, no cost
+                    cost_usd=0.0,  # Local, no cost
                 )
 
     async def _call_langflow(self, request: AIRequest, start_time: float) -> AIResponse:
@@ -410,11 +402,7 @@ class UnifiedAIProvider:
         if not aiohttp:
             raise ImportError("aiohttp required for Langflow")
 
-        payload = {
-            "input_value": request.prompt,
-            "output_type": "text",
-            "input_type": "chat"
-        }
+        payload = {"input_value": request.prompt, "output_type": "text", "input_type": "chat"}
 
         if config.get("flow_id"):
             url = f"{config['base_url']}/api/v1/run/{config['flow_id']}"
@@ -429,14 +417,20 @@ class UnifiedAIProvider:
 
                 data = await resp.json()
                 # Langflow response format varies
-                content = data.get("outputs", [{}])[0].get("outputs", [{}])[0].get("results", {}).get("text", {}).get("text", str(data))
+                content = (
+                    data.get("outputs", [{}])[0]
+                    .get("outputs", [{}])[0]
+                    .get("results", {})
+                    .get("text", {})
+                    .get("text", str(data))
+                )
 
                 return AIResponse(
                     content=content,
                     provider="langflow",
                     model="langflow",
                     latency_ms=(time.time() - start_time) * 1000,
-                    cost_usd=0.0
+                    cost_usd=0.0,
                 )
 
     async def _call_mock(self, request: AIRequest, start_time: float) -> AIResponse:
@@ -448,16 +442,18 @@ class UnifiedAIProvider:
             provider="mock",
             model="mock-model",
             latency_ms=100.0,
-            cost_usd=0.0
+            cost_usd=0.0,
         )
 
-    def _calculate_openai_cost(self, prompt_tokens: int, completion_tokens: int, model: str) -> float:
+    def _calculate_openai_cost(
+        self, prompt_tokens: int, completion_tokens: int, model: str
+    ) -> float:
         """Calculate OpenAI API cost."""
         pricing = {
             "gpt-4o-mini": {"prompt": 0.00015, "completion": 0.0006},
             "gpt-4o": {"prompt": 0.0025, "completion": 0.01},
             "gpt-4": {"prompt": 0.03, "completion": 0.06},
-            "gpt-3.5-turbo": {"prompt": 0.0015, "completion": 0.002}
+            "gpt-3.5-turbo": {"prompt": 0.0015, "completion": 0.002},
         }
 
         p = pricing.get(model, pricing["gpt-4o-mini"])
@@ -468,7 +464,7 @@ class UnifiedAIProvider:
         pricing = {
             "claude-3-haiku-20240307": {"input": 0.00025, "output": 0.00125},
             "claude-3-sonnet-20240229": {"input": 0.003, "output": 0.015},
-            "claude-3-opus-20240229": {"input": 0.015, "output": 0.075}
+            "claude-3-opus-20240229": {"input": 0.015, "output": 0.075},
         }
 
         p = pricing.get(model, pricing["claude-3-haiku-20240307"])
@@ -482,7 +478,7 @@ class UnifiedAIProvider:
             "cache_hit_rate": self.stats["cache_hits"] / max(1, self.stats["total_requests"]),
             "total_cost": self.stats["total_cost"],
             "by_provider": dict(self.stats["by_provider"]),
-            "errors": dict(self.stats["errors"])
+            "errors": dict(self.stats["errors"]),
         }
 
     def clear_cache(self):

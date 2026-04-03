@@ -35,6 +35,7 @@ def load_supabase_data(table_name):
         st.sidebar.warning(f"Supabase Load Failed ({table_name}): {e}")
         return None
 
+
 import sys
 
 from src.ui.report_gen import generate_session_report
@@ -49,6 +50,7 @@ if supabase:
 else:
     st.sidebar.info("📂 Mode: Local JSON Only")
 
+
 def run_script(command_list, label):
     st.sidebar.info(f"Initiating {label}...")
     log_area = st.empty()
@@ -61,17 +63,18 @@ def run_script(command_list, label):
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
-            cwd=os.getcwd()
+            cwd=os.getcwd(),
         )
         return_code = render_log_streamer(log_area, proc)
         if return_code == 0:
             st.sidebar.success(f"{label} Complete")
             st.balloons()
-            st.cache_data.clear() # Force reload
+            st.cache_data.clear()  # Force reload
         else:
             st.sidebar.error(f"{label} Failed")
     except Exception as e:
         st.sidebar.error(f"Error: {e}")
+
 
 # Row 1: Reporting
 st.sidebar.subheader("📄 Reporting")
@@ -89,6 +92,7 @@ with c1:
         try:
             os.makedirs("reports", exist_ok=True)
             from src.ui.report_gen import generate_session_report
+
             generate_session_report(report_file, osint_temp, news_temp, research_temp)
             st.success(f"Generated: {os.path.basename(report_file)}")
             with open(report_file, "rb") as f:
@@ -102,6 +106,7 @@ with c2:
         news_temp = load_intel_data("data/raw/forensic_news.json")
 
         from src.ui.analytics import batch_analyze_news
+
         sentiment_df = batch_analyze_news(news_temp) if news_temp else None
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M")
@@ -110,6 +115,7 @@ with c2:
         try:
             os.makedirs("data/reports", exist_ok=True)
             from src.ui.report_gen import generate_case_report
+
             generate_case_report(report_file, osint_temp, sentiment_df)
             st.success(f"Case Report Created: {os.path.basename(report_file)}")
             with open(report_file, "rb") as f:
@@ -134,7 +140,10 @@ st.sidebar.subheader("🛠️ Target Management")
 target_to_pivot = st.sidebar.text_input("Manual Pivot (Username)")
 if st.sidebar.button("🕵️ Pivot & Scan"):
     if is_valid_username(target_to_pivot):
-        run_script(["python", "src/gathering/osint_toolkit.py", "--username", target_to_pivot], f"Pivot Scan: {target_to_pivot}")
+        run_script(
+            ["python", "src/gathering/osint_toolkit.py", "--username", target_to_pivot],
+            f"Pivot Scan: {target_to_pivot}",
+        )
     else:
         st.sidebar.warning("Invalid username pattern.")
 
@@ -160,9 +169,16 @@ research_data = db_research if db_research else load_intel_data("data/raw/resear
 
 render_metric_cards(len(osint_data), len(news_data), len(research_data))
 
-tab_matrix, tab_research, tab_tactical, tab_news, tab_sentiment, tab_history = st.tabs([
-    "🧬 Identity Matrix", "🎓 Research Feed", "🕸️ Tactical View", "📰 News Flow", "🎭 Sentiment Radar", "🕰️ History Slider"
-])
+tab_matrix, tab_research, tab_tactical, tab_news, tab_sentiment, tab_history = st.tabs(
+    [
+        "🧬 Identity Matrix",
+        "🎓 Research Feed",
+        "🕸️ Tactical View",
+        "📰 News Flow",
+        "🎭 Sentiment Radar",
+        "🕰️ History Slider",
+    ]
+)
 
 with tab_matrix:
     render_identity_matrix(osint_data)
@@ -170,22 +186,32 @@ with tab_matrix:
 with tab_research:
     st.subheader("🎓 Academic Abstracts & Target Pivoting")
     if research_data:
-        for paper in sorted(research_data, key=lambda x: x.get('ingested_at', ''), reverse=True)[:10]:
+        for paper in sorted(research_data, key=lambda x: x.get("ingested_at", ""), reverse=True)[
+            :10
+        ]:
             with st.expander(f"📄 {paper.get('title')}"):
                 st.write(f"**TLDR:** {paper.get('tldr') or 'Summarization pending...'}")
-                st.write(f"**Abstract Snippet:** {paper.get('abstract')[:300] if paper.get('abstract') else 'N/A'}...")
+                st.write(
+                    f"**Abstract Snippet:** {paper.get('abstract')[:300] if paper.get('abstract') else 'N/A'}..."
+                )
 
                 st.write("**Identified Authors:**")
-                auth_cols = st.columns(len(paper.get('authors', [])) or 1)
-                for idx, author in enumerate(paper.get('authors', [])):
+                auth_cols = st.columns(len(paper.get("authors", [])) or 1)
+                for idx, author in enumerate(paper.get("authors", [])):
                     clean_name = author.replace(" ", "")
-                    if auth_cols[idx % len(auth_cols)].button(f"🔭 Pivot {clean_name}", key=f"pivot_{clean_name}_{paper.get('paperId')}"):
-                        run_script(["python", "src/gathering/osint_toolkit.py", "--username", clean_name], f"Auto-Pivot: {clean_name}")
+                    if auth_cols[idx % len(auth_cols)].button(
+                        f"🔭 Pivot {clean_name}", key=f"pivot_{clean_name}_{paper.get('paperId')}"
+                    ):
+                        run_script(
+                            ["python", "src/gathering/osint_toolkit.py", "--username", clean_name],
+                            f"Auto-Pivot: {clean_name}",
+                        )
     else:
         st.info("No research papers detected.")
 
 with tab_tactical:
     from src.ui.components import render_tactical_graph
+
     selected_node = render_tactical_graph(osint_data)
 
     if selected_node:
@@ -201,7 +227,7 @@ with tab_tactical:
                 log_entry = {
                     "timestamp": datetime.now().isoformat(),
                     "target": selected_node,
-                    "action": "Deep Trace Pivot"
+                    "action": "Deep Trace Pivot",
                 }
                 try:
                     logs = []
@@ -209,13 +235,16 @@ with tab_tactical:
                         with open(pivot_log) as f:
                             logs = json.load(f)
                     logs.append(log_entry)
-                    with open(pivot_log, 'w') as f:
+                    with open(pivot_log, "w") as f:
                         json.dump(logs, f, indent=4)
                 except:
                     pass
 
                 # Targeted Execution
-                run_script(["python", "src/gathering/osint_toolkit.py", "--username", selected_node], f"Deep Trace: {selected_node}")
+                run_script(
+                    ["python", "src/gathering/osint_toolkit.py", "--username", selected_node],
+                    f"Deep Trace: {selected_node}",
+                )
         else:
             clean_plat = selected_node.replace("plat_", "")
             st.sidebar.write(f"Platform: **{clean_plat}**")
@@ -229,15 +258,18 @@ with tab_news:
         # Ensure sentiment is available
         if "polarity" not in news_df.columns:
             from src.ui.analytics import batch_analyze_news
+
             news_df = batch_analyze_news(news_data)
 
         def color_sentiment(val):
-            if val < -0.3: return 'background-color: rgba(255, 75, 75, 0.2)' # Hostile
-            if val > 0.3: return 'background-color: rgba(35, 134, 54, 0.2)'  # Academic/Positive
-            return ''
+            if val < -0.3:
+                return "background-color: rgba(255, 75, 75, 0.2)"  # Hostile
+            if val > 0.3:
+                return "background-color: rgba(35, 134, 54, 0.2)"  # Academic/Positive
+            return ""
 
         styled_df = news_df[["title", "source_feed", "published", "polarity"]].style.applymap(
-            color_sentiment, subset=['polarity']
+            color_sentiment, subset=["polarity"]
         )
         st.dataframe(styled_df, use_container_width=True)
     else:
@@ -252,21 +284,23 @@ with tab_sentiment:
             avg_polarity = sentiment_df["polarity"].mean()
 
             # Gauge Chart
-            fig = go.Figure(go.Indicator(
-                mode = "gauge+number",
-                value = avg_polarity,
-                domain = {'x': [0, 1], 'y': [0, 1]},
-                title = {'text': "Collective Hostility/Tone (-1 to 1)"},
-                gauge = {
-                    'axis': {'range': [-1, 1]},
-                    'bar': {'color': "#ff4b4b" if avg_polarity < 0 else "#238636"},
-                    'steps': [
-                        {'range': [-1, -0.2], 'color': "rgba(255, 75, 75, 0.3)"},
-                        {'range': [-0.2, 0.2], 'color': "rgba(255, 255, 255, 0.1)"},
-                        {'range': [0.2, 1], 'color': "rgba(35, 134, 54, 0.3)"}
-                    ]
-                }
-            ))
+            fig = go.Figure(
+                go.Indicator(
+                    mode="gauge+number",
+                    value=avg_polarity,
+                    domain={"x": [0, 1], "y": [0, 1]},
+                    title={"text": "Collective Hostility/Tone (-1 to 1)"},
+                    gauge={
+                        "axis": {"range": [-1, 1]},
+                        "bar": {"color": "#ff4b4b" if avg_polarity < 0 else "#238636"},
+                        "steps": [
+                            {"range": [-1, -0.2], "color": "rgba(255, 75, 75, 0.3)"},
+                            {"range": [-0.2, 0.2], "color": "rgba(255, 255, 255, 0.1)"},
+                            {"range": [0.2, 1], "color": "rgba(35, 134, 54, 0.3)"},
+                        ],
+                    },
+                )
+            )
             st.plotly_chart(fig, use_container_width=True)
 
             # Identify Toxicity
@@ -284,16 +318,17 @@ with tab_history:
     dvc_history = get_dvc_history("data/raw/osint_results.json")
 
     if dvc_history:
-        ver_option = st.selectbox("Select Historical Snapshot (Rev)",
-                                 [f"{h['hash']} - {h['msg']}" for h in dvc_history])
+        ver_option = st.selectbox(
+            "Select Historical Snapshot (Rev)", [f"{h['hash']} - {h['msg']}" for h in dvc_history]
+        )
         commit_hash = ver_option.split(" ")[0]
 
         if st.button("🕒 Compare with Current"):
             hist_data = fetch_historical_json("data/raw/osint_results.json", commit_hash)
             if hist_data:
                 # Comparison Logic
-                curr_users = {s['username'] for s in osint_data}
-                hist_users = {s['username'] for s in hist_data}
+                curr_users = {s["username"] for s in osint_data}
+                hist_users = {s["username"] for s in hist_data}
 
                 new_actors = curr_users - hist_users
                 lost_actors = hist_users - curr_users

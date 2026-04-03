@@ -14,6 +14,7 @@ from src.core.config import Config
 
 logger = logging.getLogger(__name__)
 
+
 class AdaptiveLearner:
     """
     Manages evolving author fingerprints using temporal weighting and drift detection.
@@ -22,7 +23,7 @@ class AdaptiveLearner:
 
     def __init__(self, db_path: str | None = None):
         config = Config()
-        base_dir = config.get_path('storage.base_dir')
+        base_dir = config.get_path("storage.base_dir")
         self.db_path = db_path or str(base_dir / "storage" / "scribe_profiles.sqlite")
         self._ensure_tables()
 
@@ -40,7 +41,9 @@ class AdaptiveLearner:
             )
         """)
         # Ensure index on author_id
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_snapshots_author ON profile_snapshots(author_id)")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_snapshots_author ON profile_snapshots(author_id)"
+        )
         conn.commit()
         conn.close()
 
@@ -55,10 +58,13 @@ class AdaptiveLearner:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO profile_snapshots (author_id, signal_weights, timestamp)
                 VALUES (?, ?, ?)
-            """, (author_id, json.dumps(current_weights), datetime.utcnow().isoformat()))
+            """,
+                (author_id, json.dumps(current_weights), datetime.utcnow().isoformat()),
+            )
             conn.commit()
             logger.info(f"📸 Saved profile snapshot for {author_id}")
         except Exception as e:
@@ -66,7 +72,9 @@ class AdaptiveLearner:
         finally:
             conn.close()
 
-    def calculate_weighted_profile(self, author_id: str, decay_factor: float = 0.9) -> dict[str, float]:
+    def calculate_weighted_profile(
+        self, author_id: str, decay_factor: float = 0.9
+    ) -> dict[str, float]:
         """
         Retrieves historical snapshots and applies exponential decay.
 
@@ -81,11 +89,14 @@ class AdaptiveLearner:
         cursor = conn.cursor()
 
         # Get snapshots ordered by most recent first
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT signal_weights FROM profile_snapshots
             WHERE author_id = ?
             ORDER BY timestamp DESC
-        """, (author_id,))
+        """,
+            (author_id,),
+        )
 
         rows = cursor.fetchall()
         conn.close()
@@ -107,7 +118,7 @@ class AdaptiveLearner:
 
         # Apply decay: Weight = decay_factor ^ index (0 is most recent)
         for i, snap in enumerate(snapshots):
-            weight = decay_factor ** i
+            weight = decay_factor**i
             total_weight += weight
             for sig, val in snap.items():
                 weighted_sums[sig] += val * weight
@@ -116,11 +127,13 @@ class AdaptiveLearner:
         if total_weight > 0:
             final_weights = {sig: val / total_weight for sig, val in weighted_sums.items()}
         else:
-            final_weights = snapshots[0] # Fallback
+            final_weights = snapshots[0]  # Fallback
 
         return final_weights
 
-    def detect_style_drift(self, new_data: dict[str, float], author_id: str, threshold: float = 0.15) -> dict[str, Any]:
+    def detect_style_drift(
+        self, new_data: dict[str, float], author_id: str, threshold: float = 0.15
+    ) -> dict[str, Any]:
         """
         Flags if new content is a statistical outlier compared to weighted history.
 
@@ -146,7 +159,7 @@ class AdaptiveLearner:
 
         # Check for zero vectors to avoid NaN
         if np.all(vec_hist == 0) or np.all(vec_new == 0):
-             return {"drift_detected": False, "reason": "Zero vector", "distance": 0.0}
+            return {"drift_detected": False, "reason": "Zero vector", "distance": 0.0}
 
         # Manual cosine distance to avoid scipy dependency
         dot_product = np.dot(vec_hist, vec_new)
@@ -159,11 +172,13 @@ class AdaptiveLearner:
             "drift_detected": dist > threshold,
             "distance": float(dist),
             "threshold": threshold,
-            "is_outlier": dist > (threshold * 1.5) # Arbitrary outlier definition
+            "is_outlier": dist > (threshold * 1.5),  # Arbitrary outlier definition
         }
 
         if result["drift_detected"]:
-            logger.warning(f"⚠️ Style Drift Detected for {author_id}: Distance {dist:.4f} > {threshold}")
+            logger.warning(
+                f"⚠️ Style Drift Detected for {author_id}: Distance {dist:.4f} > {threshold}"
+            )
 
         return result
 
@@ -183,17 +198,17 @@ class AdaptiveLearner:
 
             # Expand the JSON signal_weights into columns
             # 1. Parse JSON
-            df['weights'] = df['signal_weights'].apply(json.loads)
+            df["weights"] = df["signal_weights"].apply(json.loads)
 
             # 2. Normalize JSON into columns
             # This creates a new DF with signal columns
-            signals_df = pd.json_normalize(df['weights'])
+            signals_df = pd.json_normalize(df["weights"])
 
             # 3. Join back with timestamp
-            result = pd.concat([df[['timestamp']], signals_df], axis=1)
+            result = pd.concat([df[["timestamp"]], signals_df], axis=1)
 
             # Convert timestamp to datetime
-            result['timestamp'] = pd.to_datetime(result['timestamp'])
+            result["timestamp"] = pd.to_datetime(result["timestamp"])
 
             return result
 
@@ -220,11 +235,14 @@ class AdaptiveLearner:
             # and ALL PREVIOUS snapshots to build the 'weighted profile'.
 
             # 1. Get latest snapshot ID and data
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT id, signal_weights FROM profile_snapshots
                 WHERE author_id = ?
                 ORDER BY timestamp DESC LIMIT 1
-            """, (author_id,))
+            """,
+                (author_id,),
+            )
             row = cursor.fetchone()
 
             if not row:
@@ -241,11 +259,14 @@ class AdaptiveLearner:
             # STRICTER: If we want to detect if the *new* thing is weird, we should compare against *old* things.
 
             # Let's fetch all others.
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT signal_weights FROM profile_snapshots
                 WHERE author_id = ? AND id != ?
                 ORDER BY timestamp DESC
-            """, (author_id, latest_id))
+            """,
+                (author_id, latest_id),
+            )
 
             history_rows = cursor.fetchall()
 
@@ -265,12 +286,16 @@ class AdaptiveLearner:
             decay_factor = 0.9
 
             for i, snap in enumerate(snapshots):
-                weight = decay_factor ** i
+                weight = decay_factor**i
                 total_weight += weight
                 for sig, val in snap.items():
                     weighted_sums[sig] += val * weight
 
-            history_profile = {sig: val / total_weight for sig, val in weighted_sums.items()} if total_weight > 0 else snapshots[0]
+            history_profile = (
+                {sig: val / total_weight for sig, val in weighted_sums.items()}
+                if total_weight > 0
+                else snapshots[0]
+            )
 
             # 3. Detect Drift
             # Use the internal manual cosine logic or call detect_style_drift helper if refactored
@@ -283,7 +308,7 @@ class AdaptiveLearner:
             vec_new = np.array([latest_data.get(k, 0.0) for k in sorted_keys], dtype=float)
 
             if np.all(vec_hist == 0) or np.all(vec_new == 0):
-                 return False, 0.0
+                return False, 0.0
 
             dot_product = np.dot(vec_hist, vec_new)
             norm_hist = np.linalg.norm(vec_hist)

@@ -10,18 +10,23 @@ from watchdog.observers import Observer
 from src.core.utils import get_path
 
 # --- SETUP ---
-WATCH_DIRECTORY = get_path('storage', 'base_dir') # Watching the base data dir or a specific subset
-LOG_DIRECTORY = get_path('storage', 'log_dir')
-DB_PATH = get_path('storage', 'db_path')
+WATCH_DIRECTORY = get_path("storage", "base_dir")  # Watching the base data dir or a specific subset
+LOG_DIRECTORY = get_path("storage", "log_dir")
+DB_PATH = get_path("storage", "db_path")
 os.makedirs(LOG_DIRECTORY, exist_ok=True)
 
 # Initialize the Brain
 analyzer = SentimentIntensityAnalyzer()
 custom_signals = {
-    "vermin": -3.5, "parasite": -3.5, "infestation": -2.5,
-    "entities": -1.0, "toxic": -2.0, "units": -1.5
+    "vermin": -3.5,
+    "parasite": -3.5,
+    "infestation": -2.5,
+    "entities": -1.0,
+    "toxic": -2.0,
+    "units": -1.5,
 }
 analyzer.lexicon.update(custom_signals)
+
 
 class AnalyzeHandler(FileSystemEventHandler):
     def on_created(self, event):
@@ -32,7 +37,7 @@ class AnalyzeHandler(FileSystemEventHandler):
     def process_file(self, file_path):
         time.sleep(1)
 
-        with open(file_path, encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         scores = analyzer.polarity_scores(content)
@@ -41,10 +46,19 @@ class AnalyzeHandler(FileSystemEventHandler):
         try:
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO sentiment_logs (source_file, neg, neu, pos, compound)
                 VALUES (?, ?, ?, ?, ?)
-            ''', (os.path.basename(file_path), scores['neg'], scores['neu'], scores['pos'], scores['compound']))
+            """,
+                (
+                    os.path.basename(file_path),
+                    scores["neg"],
+                    scores["neu"],
+                    scores["pos"],
+                    scores["compound"],
+                ),
+            )
             conn.commit()
             conn.close()
             print(f"💾 Archived to Centrifuge: {os.path.basename(file_path)}")
@@ -56,14 +70,15 @@ class AnalyzeHandler(FileSystemEventHandler):
             "timestamp": time.ctime(),
             "source_file": os.path.basename(file_path),
             "sentiment": scores,
-            "risk_status": "HIGH ALERT" if scores['neg'] > 0.4 else "NORMAL"
+            "risk_status": "HIGH ALERT" if scores["neg"] > 0.4 else "NORMAL",
         }
 
         # Save report to logs
         report_name = f"report_{os.path.basename(file_path)}.json"
-        with open(os.path.join(LOG_DIRECTORY, report_name), 'w') as out:
+        with open(os.path.join(LOG_DIRECTORY, report_name), "w") as out:
             json.dump(report, out, indent=4)
         print(f"✅ Analysis complete. Report saved to /logs/{report_name}")
+
 
 def load_brain():
     """Load professional signals from compiled JSON file."""
@@ -78,6 +93,7 @@ def load_brain():
             print(f"⚠️  Brain file not found: {compiled_signals_path}")
     except Exception as e:
         print(f"⚠️  Error loading brain: {e}")
+
 
 if __name__ == "__main__":
     # Load professional signals if available

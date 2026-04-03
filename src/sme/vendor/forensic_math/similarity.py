@@ -12,6 +12,7 @@ def dict_to_vectors(d1: dict[str, float], d2: dict[str, float]) -> tuple[np.ndar
     v2 = np.array([d2.get(k, 0.0) for k in all_keys])
     return v1, v2
 
+
 def calculate_cosine_similarity(vec1: np.ndarray, vec2: np.ndarray) -> float:
     """
     Calculates the cosine similarity between two vectors.

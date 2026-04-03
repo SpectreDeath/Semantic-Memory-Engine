@@ -56,11 +56,7 @@ class GhostTrapClient:
 
         return events
 
-    def get_recent_events(
-        self,
-        hours: int = 24,
-        limit: int = 100
-    ) -> list[dict[str, Any]]:
+    def get_recent_events(self, hours: int = 24, limit: int = 100) -> list[dict[str, Any]]:
         """
         Get events from the last N hours.
 
@@ -80,7 +76,7 @@ class GhostTrapClient:
         for event in events:
             try:
                 event_time = datetime.fromisoformat(
-                    event.get('timestamp', '').replace('Z', '+00:00')
+                    event.get("timestamp", "").replace("Z", "+00:00")
                 )
                 if event_time.replace(tzinfo=None) >= cutoff:
                     filtered.append(event)
@@ -90,11 +86,7 @@ class GhostTrapClient:
 
         return filtered
 
-    def get_alerts(
-        self,
-        hours: int = 24,
-        severity: str | None = None
-    ) -> list[dict[str, Any]]:
+    def get_alerts(self, hours: int = 24, severity: str | None = None) -> list[dict[str, Any]]:
         """
         Get alerts from Ghost-Trap.
 
@@ -113,13 +105,13 @@ class GhostTrapClient:
 
         for alert in alerts:
             # Apply severity filter
-            if severity and alert.get('severity') != severity:
+            if severity and alert.get("severity") != severity:
                 continue
 
             # Apply time filter
             try:
                 alert_time = datetime.fromisoformat(
-                    alert.get('timestamp', '').replace('Z', '+00:00')
+                    alert.get("timestamp", "").replace("Z", "+00:00")
                 )
                 if alert_time.replace(tzinfo=None) >= cutoff:
                     filtered.append(alert)
@@ -141,14 +133,21 @@ class GhostTrapClient:
         events = self.get_recent_events(hours)
 
         persistence_keywords = [
-            'persistence', 'autorun', 'startup', 'registry',
-            'scheduled_task', 'service', 'boot', 'launch_agent'
+            "persistence",
+            "autorun",
+            "startup",
+            "registry",
+            "scheduled_task",
+            "service",
+            "boot",
+            "launch_agent",
         ]
 
         return [
-            e for e in events
-            if any(kw in e.get('event_type', '').lower() for kw in persistence_keywords)
-            or any(kw in e.get('description', '').lower() for kw in persistence_keywords)
+            e
+            for e in events
+            if any(kw in e.get("event_type", "").lower() for kw in persistence_keywords)
+            or any(kw in e.get("description", "").lower() for kw in persistence_keywords)
         ]
 
     def check_path(self, path: str) -> dict[str, Any]:
@@ -167,15 +166,10 @@ class GhostTrapClient:
         path = os.path.normpath(path).lower()
 
         for event in events:
-            event_path = os.path.normpath(
-                event.get('path', event.get('target', ''))
-            ).lower()
+            event_path = os.path.normpath(event.get("path", event.get("target", ""))).lower()
 
             if path in event_path or event_path in path:
-                return {
-                    "flagged": True,
-                    "event": event
-                }
+                return {"flagged": True, "event": event}
 
         return {"flagged": False}
 
@@ -190,7 +184,7 @@ class GhostTrapClient:
             "recent_events_count": len(self._read_jsonl(self.events_file, 1000)),
             "recent_alerts_count": len(self._read_jsonl(self.alerts_file, 1000)),
             "last_event": events[0] if events else None,
-            "last_alert": alerts[0] if alerts else None
+            "last_alert": alerts[0] if alerts else None,
         }
 
 

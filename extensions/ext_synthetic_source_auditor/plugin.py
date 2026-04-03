@@ -3,10 +3,9 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+from collections.abc import Callable
 from datetime import datetime
 from typing import Any
-
-from collections.abc import Callable
 
 # Import shared logic
 from gateway.gatekeeper_logic import calculate_burstiness, calculate_entropy
@@ -17,6 +16,7 @@ try:
 except ImportError:
     import sys
     from pathlib import Path
+
     _dir = Path(__file__).resolve().parent
     if str(_dir) not in sys.path:
         sys.path.insert(0, str(_dir))
@@ -33,10 +33,10 @@ class AnalyticAuditor(BasePlugin):
     Synthetic Source Auditor (SSA) v1.0.
     Detects low-entropy synthetic text and vaults it for counter-intelligence.
     Now includes Source De-Anonymization (SDA) capabilities.
-    
+
     Extends BasePlugin to comply with the SME extension contract.
     """
-    
+
     def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
         # Initialize SDA engine
@@ -84,26 +84,28 @@ class AnalyticAuditor(BasePlugin):
         burstiness = calculate_burstiness(raw_data)
 
         # SDA Analysis for model attribution
-        sda_result = self.sda_engine.analyze_text(raw_data) if hasattr(self, 'sda_engine') else None
+        sda_result = self.sda_engine.analyze_text(raw_data) if hasattr(self, "sda_engine") else None
 
         # Threshold Check for Vaulting
         # Vault if clearly synthetic (Low Entropy OR Low Burstiness)
         if entropy < 4.0 or (burstiness < 2.0 and len(raw_data) > 100):
-            logger.warning(f"[{self.plugin_id}] SYNTHETIC SIGNAL (E:{entropy:.2f}, B:{burstiness:.2f}). Vaulting...")
+            logger.warning(
+                f"[{self.plugin_id}] SYNTHETIC SIGNAL (E:{entropy:.2f}, B:{burstiness:.2f}). Vaulting..."
+            )
             await self.vault_synthetic_pattern(raw_data, entropy, "DETECTED_SYNTHETIC")
             return {
                 "alert": "SYNTHETIC_DETECTED",
                 "entropy": entropy,
                 "burstiness": burstiness,
                 "sda_analysis": sda_result,
-                "action": "vaulted"
+                "action": "vaulted",
             }
 
         return {
             "status": "cleared",
             "entropy": entropy,
             "burstiness": burstiness,
-            "sda_analysis": sda_result
+            "sda_analysis": sda_result,
         }
 
     def get_tools(self) -> list[Callable[..., Any]]:
@@ -114,7 +116,7 @@ class AnalyticAuditor(BasePlugin):
             self.calculate_burstiness_metric,
             self.sda_analyze_model_origin,
             self.sda_get_signature_info,
-            self.sda_compare_texts
+            self.sda_compare_texts,
         ]
 
     async def calculate_burstiness_metric(self, text: str) -> str:
@@ -122,10 +124,14 @@ class AnalyticAuditor(BasePlugin):
         Calculates the Standard Deviation of sentence lengths (Burstiness).
         """
         burstiness = calculate_burstiness(text)
-        return json.dumps({
-            "burstiness_score": round(burstiness, 4),
-            "interpretation": "High Variance (Human)" if burstiness > 5.0 else "Low Variance (Synthetic)"
-        })
+        return json.dumps(
+            {
+                "burstiness_score": round(burstiness, 4),
+                "interpretation": "High Variance (Human)"
+                if burstiness > 5.0
+                else "Low Variance (Synthetic)",
+            }
+        )
 
     async def audit_text_integrity(self, text: str) -> str:
         """
@@ -137,6 +143,7 @@ class AnalyticAuditor(BasePlugin):
         # Import Gatekeeper Logic (Dynamic to avoid circular imports during startup if logic not ready)
         try:
             from gateway.gatekeeper_logic import calculate_trust_score, calculate_vault_proximity
+
             proximity = calculate_vault_proximity(text)
             trust_data = calculate_trust_score(entropy, burstiness, proximity)
             verdict = trust_data["label"]
@@ -146,15 +153,20 @@ class AnalyticAuditor(BasePlugin):
             verdict = "Likely Human" if entropy >= 4.0 else "Likely Synthetic"
             nts = "N/A"
 
-        return json.dumps({
-            "entropy_bits": round(entropy, 4),
-            "burstiness": round(burstiness, 4),
-            "trust_score": nts,
-            "verdict": verdict,
-            "thresholds": {"entropy": 4.0, "trust": 50}
-        }, indent=2)
+        return json.dumps(
+            {
+                "entropy_bits": round(entropy, 4),
+                "burstiness": round(burstiness, 4),
+                "trust_score": nts,
+                "verdict": verdict,
+                "thresholds": {"entropy": 4.0, "trust": 50},
+            },
+            indent=2,
+        )
 
-    async def vault_synthetic_pattern(self, text: str, score: float, source_id: str = "MANUAL_SUBMISSION") -> str:
+    async def vault_synthetic_pattern(
+        self, text: str, score: float, source_id: str = "MANUAL_SUBMISSION"
+    ) -> str:
         """
         Vaults a confirmed synthetic text sample into the Nexus baseline.
         """
@@ -167,7 +179,9 @@ class AnalyticAuditor(BasePlugin):
             VALUES (?, ?, ?, ?, ?)
         """
         try:
-            self.nexus.nexus.execute(sql, (source_id, text[:5000], score, timestamp, data_hash)) # Limit text size
+            self.nexus.nexus.execute(
+                sql, (source_id, text[:5000], score, timestamp, data_hash)
+            )  # Limit text size
             return json.dumps({"status": "vaulted", "id": data_hash, "score": score})
         except Exception as e:
             return json.dumps({"error": str(e)})
@@ -192,17 +206,22 @@ class AnalyticAuditor(BasePlugin):
             matches = []
             if res:
                 for row in res:
-                    matches.append({
-                        "source": row["source_id"],
-                        "baseline_entropy": row["entropy_score"],
-                        "delta": abs(entropy - row["entropy_score"])
-                    })
+                    matches.append(
+                        {
+                            "source": row["source_id"],
+                            "baseline_entropy": row["entropy_score"],
+                            "delta": abs(entropy - row["entropy_score"]),
+                        }
+                    )
 
-            return json.dumps({
-                "input_entropy": entropy,
-                "matches_found": len(matches),
-                "closest_matches": sorted(matches, key=lambda x: x['delta'])
-            }, indent=2)
+            return json.dumps(
+                {
+                    "input_entropy": entropy,
+                    "matches_found": len(matches),
+                    "closest_matches": sorted(matches, key=lambda x: x["delta"]),
+                },
+                indent=2,
+            )
 
         except Exception as e:
             return json.dumps({"error": str(e)})

@@ -12,6 +12,7 @@ from src.core.config import Config
 
 logger = logging.getLogger(__name__)
 
+
 class ImpostorsChecker:
     """
     Authorship verification using the Impostors Method.
@@ -21,7 +22,7 @@ class ImpostorsChecker:
 
     def __init__(self, db_path: str | None = None):
         config = Config()
-        base_dir = config.get_path('storage.base_dir')
+        base_dir = config.get_path("storage.base_dir")
         self.db_path = db_path or str(base_dir / "storage" / "scribe_profiles.sqlite")
 
     def _get_author_vocabulary(self, author_id: str) -> Counter:
@@ -31,10 +32,7 @@ class ImpostorsChecker:
         """
         # Placeholder - in production would fetch actual text samples
         # For now, return dummy vocab
-        return Counter({
-            f"word_{author_id}_{i}": random.randint(10, 100)
-            for i in range(100)
-        })
+        return Counter({f"word_{author_id}_{i}": random.randint(10, 100) for i in range(100)})
 
     def _load_impostor_pool(self, exclude_author: str, pool_size: int = 20) -> list[str]:
         """
@@ -50,11 +48,14 @@ class ImpostorsChecker:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(
+            """
             SELECT DISTINCT author_id FROM author_profiles
             WHERE author_id != ?
             LIMIT ?
-        """, (exclude_author, pool_size))
+        """,
+            (exclude_author, pool_size),
+        )
 
         impostors = [row[0] for row in cursor.fetchall()]
         conn.close()
@@ -90,7 +91,7 @@ class ImpostorsChecker:
         suspect_author_id: str,
         iterations: int = 100,
         mfw_size: int = 50,
-        impostor_count: int = 10
+        impostor_count: int = 10,
     ) -> dict[str, Any]:
         """
         Performs authorship verification using the Impostors Method.
@@ -115,16 +116,9 @@ class ImpostorsChecker:
         impostors = self._load_impostor_pool(suspect_author_id, impostor_count)
 
         if not impostors:
-            return {
-                "verified": False,
-                "confidence": 0.0,
-                "reason": "No impostor pool available"
-            }
+            return {"verified": False, "confidence": 0.0, "reason": "No impostor pool available"}
 
-        impostor_vocabs = {
-            imp_id: self._get_author_vocabulary(imp_id)
-            for imp_id in impostors
-        }
+        impostor_vocabs = {imp_id: self._get_author_vocabulary(imp_id) for imp_id in impostors}
 
         # 3. Build combined MFW vocabulary
         all_words = set(target_vocab.keys()) | set(suspect_vocab.keys())
@@ -168,7 +162,7 @@ class ImpostorsChecker:
             "iterations": iterations,
             "suspect_wins": suspect_wins,
             "impostor_count": len(impostors),
-            "verdict": "Verified" if verified else "External Author Likely"
+            "verdict": "Verified" if verified else "External Author Likely",
         }
 
         if verified:

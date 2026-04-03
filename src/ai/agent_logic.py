@@ -27,6 +27,7 @@ def run_langflow_flow(flow_name: str, input_value: str):
     # Execute via the Python 3.13 Sidecar
     return run_ai_flow(flow_name, input_value)
 
+
 def generate_forensic_summary(intel_package: dict):
     """
     High-level entry point for the Prefect pipeline to trigger agentic summarization.
@@ -35,7 +36,8 @@ def generate_forensic_summary(intel_package: dict):
 
     # Check for specific "Smoking Gun" scenario
     osint = intel_package.get("osint", [])
-    if isinstance(osint, dict): osint = [osint]
+    if isinstance(osint, dict):
+        osint = [osint]
     usernames = {s.get("username") for s in osint if s.get("username")}
 
     if "CBRN_Ghost_99" in usernames:
@@ -44,8 +46,10 @@ def generate_forensic_summary(intel_package: dict):
         # Logic Expansion Layer
         cs_context = get_common_sense_context("CBRN")
 
-        return (f"CRITICAL ALERT: Target 'CBRN_Ghost_99' identified with cross-referenced digital fingerprints. "
-                f"CBRN sensor array research detected. Common-sense context: {cs_context}. "
-                f"High probability of malicious intent.")
+        return (
+            f"CRITICAL ALERT: Target 'CBRN_Ghost_99' identified with cross-referenced digital fingerprints. "
+            f"CBRN sensor array research detected. Common-sense context: {cs_context}. "
+            f"High probability of malicious intent."
+        )
 
     return run_langflow_flow("forensic_summary", context)

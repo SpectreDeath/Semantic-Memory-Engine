@@ -41,6 +41,7 @@ logger = logging.getLogger(__name__)
 
 class POS(Enum):
     """Part-of-speech tags."""
+
     NOUN = "NN"
     VERB = "VB"
     ADJ = "JJ"
@@ -53,37 +54,41 @@ class POS(Enum):
 @dataclass
 class Token:
     """Analyzed token with linguistic features."""
+
     text: str
-    pos: str                    # Part-of-speech tag
-    lemma: str                  # Lemmatized form
-    stem: str                   # Stemmed form
-    is_stopword: bool          # Is common stopword
+    pos: str  # Part-of-speech tag
+    lemma: str  # Lemmatized form
+    stem: str  # Stemmed form
+    is_stopword: bool  # Is common stopword
     entity_type: str | None  # NER tag (PERSON, LOC, ORG, etc)
-    semantic_type: str | None # From semantic graph
+    semantic_type: str | None  # From semantic graph
 
 
 @dataclass
 class Phrase:
     """Identified phrase (noun phrase, verb phrase, etc)."""
+
     text: str
-    phrase_type: str          # NP, VP, etc
+    phrase_type: str  # NP, VP, etc
     tokens: list[Token]
-    head: str                 # Main word
-    modifiers: list[str]      # Modifying words
+    head: str  # Main word
+    modifiers: list[str]  # Modifying words
 
 
 @dataclass
 class NamedEntity:
     """Identified named entity."""
+
     text: str
-    entity_type: str          # PERSON, LOC, ORG, GPE, MONEY, DATE, etc
+    entity_type: str  # PERSON, LOC, ORG, GPE, MONEY, DATE, etc
     tokens: list[str]
-    position: tuple[int, int] # Start, end positions
+    position: tuple[int, int]  # Start, end positions
 
 
 @dataclass
 class NLPAnalysis:
     """Complete NLP analysis of text."""
+
     text: str
     sentences: list[str]
     tokens: list[Token]
@@ -98,9 +103,11 @@ class NLPAnalysis:
     @property
     def key_terms(self) -> list[str]:
         """Get key terms (non-stopword nouns and verbs)."""
-        return [token.text for token in self.tokens
-                if not token.is_stopword
-                and token.pos.startswith(('NN', 'VB'))]
+        return [
+            token.text
+            for token in self.tokens
+            if not token.is_stopword and token.pos.startswith(("NN", "VB"))
+        ]
 
     @property
     def entity_dict(self) -> dict[str, list[str]]:
@@ -202,7 +209,7 @@ class NLPPipeline:
                     stem=stem,
                     is_stopword=text_token.lower() in stopwords,
                     entity_type=None,  # Set by NER later
-                    semantic_type=semantic_type
+                    semantic_type=semantic_type,
                 )
                 tokens.append(token)
 
@@ -227,11 +234,13 @@ class NLPPipeline:
                 entities=entities,
                 phrases=phrases,
                 stopwords=stopwords,
-                vocabulary=vocabulary
+                vocabulary=vocabulary,
             )
 
-            logger.debug(f"Analysis complete: {len(tokens)} tokens, "
-                        f"{len(entities)} entities, {len(phrases)} phrases")
+            logger.debug(
+                f"Analysis complete: {len(tokens)} tokens, "
+                f"{len(entities)} entities, {len(phrases)} phrases"
+            )
 
             return analysis
 
@@ -261,8 +270,7 @@ class NLPPipeline:
             term_counts[normalized] = term_counts.get(normalized, 0) + 1
 
         # Filter and sort
-        result = [(term, count) for term, count in term_counts.items()
-                  if count >= min_freq]
+        result = [(term, count) for term, count in term_counts.items() if count >= min_freq]
         result.sort(key=lambda x: x[1], reverse=True)
 
         return result
@@ -297,8 +305,7 @@ class NLPPipeline:
         if not analysis:
             return text
 
-        return ' '.join(analysis.lemmas.get(token.text, token.text)
-                       for token in analysis.tokens)
+        return " ".join(analysis.lemmas.get(token.text, token.text) for token in analysis.tokens)
 
     def get_linguistic_complexity(self, text: str) -> dict[str, float]:
         """
@@ -322,14 +329,14 @@ class NLPPipeline:
         entity_density = len(analysis.entities) / max(1, len(analysis.sentences))
 
         return {
-            'stopword_ratio': stopword_ratio,
-            'vocabulary_richness': unique_words,
-            'avg_sentence_length': avg_sentence_length,
-            'entity_density': entity_density,
-            'total_tokens': total_words,
-            'unique_terms': len(analysis.vocabulary),
-            'entity_count': len(analysis.entities),
-            'phrase_count': len(analysis.phrases),
+            "stopword_ratio": stopword_ratio,
+            "vocabulary_richness": unique_words,
+            "avg_sentence_length": avg_sentence_length,
+            "entity_density": entity_density,
+            "total_tokens": total_words,
+            "unique_terms": len(analysis.vocabulary),
+            "entity_count": len(analysis.entities),
+            "phrase_count": len(analysis.phrases),
         }
 
     # Private helper methods
@@ -340,13 +347,13 @@ class NLPPipeline:
             # Map NLTK POS to WordNet POS
             from nltk.corpus import wordnet
 
-            if pos.startswith('VB'):
+            if pos.startswith("VB"):
                 wordnet_pos = wordnet.VERB
-            elif pos.startswith('NN'):
+            elif pos.startswith("NN"):
                 wordnet_pos = wordnet.NOUN
-            elif pos.startswith('JJ'):
+            elif pos.startswith("JJ"):
                 wordnet_pos = wordnet.ADJ
-            elif pos.startswith('RB'):
+            elif pos.startswith("RB"):
                 wordnet_pos = wordnet.ADV
             else:
                 wordnet_pos = None
@@ -372,16 +379,16 @@ class NLPPipeline:
 
                 # Extract entities
                 for subtree in ner_tree:
-                    if hasattr(subtree, 'label'):  # It's a chunk
+                    if hasattr(subtree, "label"):  # It's a chunk
                         entity_type = subtree.label()
-                        entity_text = ' '.join(token for token, _ in subtree.leaves())
+                        entity_text = " ".join(token for token, _ in subtree.leaves())
                         entity_tokens = [token for token, _ in subtree.leaves()]
 
                         entity = NamedEntity(
                             text=entity_text,
                             entity_type=entity_type,
                             tokens=entity_tokens,
-                            position=(0, len(entity_text))  # Simplified
+                            position=(0, len(entity_text)),  # Simplified
                         )
                         entities.append(entity)
         except Exception as e:
@@ -397,9 +404,9 @@ class NLPPipeline:
             tree = self.chunk_parser.parse(pos_tags)
 
             for subtree in tree:
-                if hasattr(subtree, 'label'):  # It's a chunk
+                if hasattr(subtree, "label"):  # It's a chunk
                     phrase_type = subtree.label()
-                    phrase_text = ' '.join(token for token, _ in subtree.leaves())
+                    phrase_text = " ".join(token for token, _ in subtree.leaves())
                     tokens_in_phrase = [token for token, _ in subtree.leaves()]
 
                     # Head is usually the last noun/verb
@@ -411,7 +418,7 @@ class NLPPipeline:
                         phrase_type=phrase_type,
                         tokens=[],  # Would populate with Token objects
                         head=head,
-                        modifiers=modifiers
+                        modifiers=modifiers,
                     )
                     phrases.append(phrase)
         except Exception as e:

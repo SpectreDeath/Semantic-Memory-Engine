@@ -142,9 +142,7 @@ class SignatureCompare:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def manhattan_distance(
-        live: dict[str, Any], reference: dict[str, Any]
-    ) -> float:
+    def manhattan_distance(live: dict[str, Any], reference: dict[str, Any]) -> float:
         """
         Compute Manhattan Distance between two rhetorical signatures.
 
@@ -208,22 +206,22 @@ class SignatureCompare:
             logger.warning("Reference corpus is empty after filtering")
             return []
 
-        logger.info(
-            f"Comparing live signature against {len(corpus_df)} reference(s)"
-        )
+        logger.info(f"Comparing live signature against {len(corpus_df)} reference(s)")
 
         # Compute Manhattan Distance for each row
         results = []
         for row in corpus_df.iter_rows(named=True):
             dist = self.manhattan_distance(live_signature, row)
-            results.append({
-                "source": row["source"],
-                "alliteration_index": row["alliteration_index"],
-                "parallelism_score": row["parallelism_score"],
-                "superlative_count": row["superlative_count"],
-                "created_at": row.get("created_at", ""),
-                "manhattan_distance": round(dist, 6),
-            })
+            results.append(
+                {
+                    "source": row["source"],
+                    "alliteration_index": row["alliteration_index"],
+                    "parallelism_score": row["parallelism_score"],
+                    "superlative_count": row["superlative_count"],
+                    "created_at": row.get("created_at", ""),
+                    "manhattan_distance": round(dist, 6),
+                }
+            )
 
         # Sort by distance ascending (closest first)
         results.sort(key=lambda r: r["manhattan_distance"])

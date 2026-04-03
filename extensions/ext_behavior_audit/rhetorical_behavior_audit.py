@@ -23,15 +23,15 @@ except ImportError as e:
 
 
 # Configure logging for the rhetorical behavior audit
-logger = logging.getLogger('behavior_audit.rhetorical_behavior_audit')
+logger = logging.getLogger("behavior_audit.rhetorical_behavior_audit")
 logger.setLevel(logging.INFO)
 
 # Create file handler for rhetorical behavior audit events
-behavior_handler = logging.FileHandler('rhetorical_behavior_audit_events.log')
+behavior_handler = logging.FileHandler("rhetorical_behavior_audit_events.log")
 behavior_handler.setLevel(logging.INFO)
 
 # Create formatter and add it to handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 behavior_handler.setFormatter(formatter)
 
 # Add handler to logger
@@ -41,6 +41,7 @@ logger.addHandler(behavior_handler)
 @dataclass
 class RhetoricalAnalysis:
     """Result of rhetorical behavior analysis."""
+
     sentiment_volatility: float
     type_token_ratio: float
     lexical_diversity_score: float
@@ -59,11 +60,11 @@ class RhetoricalBehaviorAuditor:
     def __init__(self):
         # Initialize NLTK resources
         try:
-            nltk.download('vader_lexicon', quiet=True)
-            nltk.download('punkt', quiet=True)
-            nltk.download('stopwords', quiet=True)
+            nltk.download("vader_lexicon", quiet=True)
+            nltk.download("punkt", quiet=True)
+            nltk.download("stopwords", quiet=True)
             self.sia = SentimentIntensityAnalyzer()
-            self.stop_words = set(stopwords.words('english'))
+            self.stop_words = set(stopwords.words("english"))
         except Exception as e:
             print(f"⚠️  Warning: Could not initialize NLTK resources: {e}")
             self.sia = None
@@ -71,28 +72,85 @@ class RhetoricalBehaviorAuditor:
 
         # Emphatic qualifiers that may indicate deceptive synthesis
         self.emphatic_qualifiers = {
-            'in all candor', 'to be perfectly honest', 'frankly speaking', 'truthfully',
-            'to tell the truth', 'honestly', 'in truth', 'to be completely frank',
-            'let me be clear', 'without exaggeration', 'to say the least', 'needless to say',
-            'obviously', 'clearly', 'undoubtedly', 'certainly', 'indeed', 'in fact',
-            'as a matter of fact', 'to be sure', 'truly', 'absolutely',
-            'definitely', 'surely', 'without question'
+            "in all candor",
+            "to be perfectly honest",
+            "frankly speaking",
+            "truthfully",
+            "to tell the truth",
+            "honestly",
+            "in truth",
+            "to be completely frank",
+            "let me be clear",
+            "without exaggeration",
+            "to say the least",
+            "needless to say",
+            "obviously",
+            "clearly",
+            "undoubtedly",
+            "certainly",
+            "indeed",
+            "in fact",
+            "as a matter of fact",
+            "to be sure",
+            "truly",
+            "absolutely",
+            "definitely",
+            "surely",
+            "without question",
         }
 
         # Non-contracted denials that may indicate deception
         self.non_contracted_denials = {
-            'i do not', 'i cannot', 'i will not', 'i would not', 'i could not', 'i should not',
-            'i am not', 'i was not', 'i were not', 'i have not', 'i had not', 'i might not', 'i must not',
-            'i shall not', 'i can not', 'i do not think',
-            'i do not believe', 'i do not know', 'i do not understand', 'i do not agree',
-            'i do not accept', 'i do not approve', 'i do not like', 'i do not want',
-            'i do not need', 'i do not care', 'i do not mind', 'i do not remember',
-            'i do not recall', 'i do not recognize', 'i do not acknowledge', 'i do not admit',
-            'i do not confess', 'i do not concede', 'i do not grant', 'i do not permit',
-            'i do not allow', 'i do not enable', 'i do not facilitate', 'i do not support',
-            'i do not endorse', 'i do not validate', 'i do not confirm',
-            'i do not verify', 'i do not authenticate', 'i do not certify', 'i do not guarantee',
-            'i do not promise', 'i do not assure', 'i do not warrant'
+            "i do not",
+            "i cannot",
+            "i will not",
+            "i would not",
+            "i could not",
+            "i should not",
+            "i am not",
+            "i was not",
+            "i were not",
+            "i have not",
+            "i had not",
+            "i might not",
+            "i must not",
+            "i shall not",
+            "i can not",
+            "i do not think",
+            "i do not believe",
+            "i do not know",
+            "i do not understand",
+            "i do not agree",
+            "i do not accept",
+            "i do not approve",
+            "i do not like",
+            "i do not want",
+            "i do not need",
+            "i do not care",
+            "i do not mind",
+            "i do not remember",
+            "i do not recall",
+            "i do not recognize",
+            "i do not acknowledge",
+            "i do not admit",
+            "i do not confess",
+            "i do not concede",
+            "i do not grant",
+            "i do not permit",
+            "i do not allow",
+            "i do not enable",
+            "i do not facilitate",
+            "i do not support",
+            "i do not endorse",
+            "i do not validate",
+            "i do not confirm",
+            "i do not verify",
+            "i do not authenticate",
+            "i do not certify",
+            "i do not guarantee",
+            "i do not promise",
+            "i do not assure",
+            "i do not warrant",
         }
 
     def analyze_sentiment_volatility(self, text: str) -> float:
@@ -115,7 +173,7 @@ class RhetoricalBehaviorAuditor:
         sentiment_scores = []
         for sentence in sentences:
             if sentence.strip():
-                score = self.sia.polarity_scores(sentence)['compound']
+                score = self.sia.polarity_scores(sentence)["compound"]
                 sentiment_scores.append(score)
 
         if len(sentiment_scores) < 2:
@@ -123,7 +181,9 @@ class RhetoricalBehaviorAuditor:
 
         # Calculate standard deviation of sentiment scores
         mean_score = sum(sentiment_scores) / len(sentiment_scores)
-        variance = sum((score - mean_score) ** 2 for score in sentiment_scores) / len(sentiment_scores)
+        variance = sum((score - mean_score) ** 2 for score in sentiment_scores) / len(
+            sentiment_scores
+        )
         volatility = math.sqrt(variance)
 
         # Normalize to 0-1 range (assuming max reasonable volatility is 2.0)
@@ -294,8 +354,12 @@ class RhetoricalBehaviorAuditor:
 
         # Step 7: Calculate confidence score
         confidence_score = self._calculate_confidence_score(
-            sentiment_volatility, lexical_diversity_score, emphatic_count,
-            denial_count, synthetic_repetitiveness_score, anomaly_detected
+            sentiment_volatility,
+            lexical_diversity_score,
+            emphatic_count,
+            denial_count,
+            synthetic_repetitiveness_score,
+            anomaly_detected,
         )
 
         # Step 8: Log results
@@ -314,13 +378,14 @@ class RhetoricalBehaviorAuditor:
             deceptive_indicators=emphatic_qualifiers + non_contracted_denials,
             anomaly_detected=anomaly_detected,
             confidence_score=confidence_score,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
         return analysis
 
-    def _detect_rhetorical_anomaly(self, lexical_diversity: float, emphatic_count: int,
-                                 synthetic_repetitiveness: float) -> bool:
+    def _detect_rhetorical_anomaly(
+        self, lexical_diversity: float, emphatic_count: int, synthetic_repetitiveness: float
+    ) -> bool:
         """
         Detect rhetorical anomaly based on analysis criteria.
 
@@ -333,14 +398,21 @@ class RhetoricalBehaviorAuditor:
         # Anomaly detected if:
         # (Low lexical diversity AND high emphatic qualifiers) OR
         # (Low lexical diversity AND high synthetic repetitiveness)
-        anomaly = (low_lexical_diversity and high_emphatic_qualifiers) or \
-                 (low_lexical_diversity and high_synthetic_repetitiveness)
+        anomaly = (low_lexical_diversity and high_emphatic_qualifiers) or (
+            low_lexical_diversity and high_synthetic_repetitiveness
+        )
 
         return anomaly
 
-    def _calculate_confidence_score(self, sentiment_volatility: float, lexical_diversity: float,
-                                  emphatic_count: int, denial_count: int,
-                                  synthetic_repetitiveness: float, anomaly_detected: bool) -> float:
+    def _calculate_confidence_score(
+        self,
+        sentiment_volatility: float,
+        lexical_diversity: float,
+        emphatic_count: int,
+        denial_count: int,
+        synthetic_repetitiveness: float,
+        anomaly_detected: bool,
+    ) -> float:
         """
         Calculate overall confidence score for rhetorical anomaly detection.
         """
@@ -387,19 +459,19 @@ def audit_rhetorical_behavior(text: str) -> dict[str, Any]:
     result = auditor.audit_rhetorical_behavior(text)
 
     return {
-        'sentiment_volatility': result.sentiment_volatility,
-        'type_token_ratio': result.type_token_ratio,
-        'lexical_diversity_score': result.lexical_diversity_score,
-        'emphatic_qualifiers_count': result.emphatic_qualifiers_count,
-        'non_contracted_denials_count': result.non_contracted_denials_count,
-        'synthetic_repetitiveness_score': result.synthetic_repetitiveness_score,
-        'deceptive_indicators': result.deceptive_indicators,
-        'anomaly_detected': result.anomaly_detected,
-        'confidence_score': round(result.confidence_score, 2),
-        'timestamp': result.timestamp.isoformat(),
-        'status': 'RHETORICAL_ANOMALY_DETECTED' if result.anomaly_detected else 'NO_ANOMALY_FOUND'
+        "sentiment_volatility": result.sentiment_volatility,
+        "type_token_ratio": result.type_token_ratio,
+        "lexical_diversity_score": result.lexical_diversity_score,
+        "emphatic_qualifiers_count": result.emphatic_qualifiers_count,
+        "non_contracted_denials_count": result.non_contracted_denials_count,
+        "synthetic_repetitiveness_score": result.synthetic_repetitiveness_score,
+        "deceptive_indicators": result.deceptive_indicators,
+        "anomaly_detected": result.anomaly_detected,
+        "confidence_score": round(result.confidence_score, 2),
+        "timestamp": result.timestamp.isoformat(),
+        "status": "RHETORICAL_ANOMALY_DETECTED" if result.anomaly_detected else "NO_ANOMALY_FOUND",
     }
 
 
 # Export the main function for use as a tool
-__all__ = ['RhetoricalAnalysis', 'RhetoricalBehaviorAuditor', 'audit_rhetorical_behavior']
+__all__ = ["RhetoricalAnalysis", "RhetoricalBehaviorAuditor", "audit_rhetorical_behavior"]

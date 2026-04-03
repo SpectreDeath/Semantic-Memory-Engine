@@ -15,12 +15,14 @@ Optional (for richer bridges like SmeCoreBridge):
 Import this module for type hints only. The gateway constructs and passes
 the actual implementation (SmeCoreBridge or DefaultExtensionContext).
 """
+
 from typing import Any, Protocol, runtime_checkable
 
 
 @runtime_checkable
 class NexusDB(Protocol):
     """Minimal DB interface: execute (writes) and query (reads)."""
+
     def execute(self, sql: str, params: tuple = ()) -> Any: ...
     def query(self, sql: str, params: tuple = ()) -> list[dict[str, Any]]: ...
 
@@ -32,6 +34,7 @@ class NexusAPI(Protocol):
     Extensions must not import gateway.hardware_security or gateway.nexus_db;
     use nexus_api.get_hsm() and nexus_api.nexus instead.
     """
+
     @property
     def nexus(self) -> NexusDB: ...
 

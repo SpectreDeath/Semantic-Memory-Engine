@@ -16,6 +16,7 @@ mcp = FastMCP("DataProcessor")
 LEXICON_DIR = os.path.normpath("D:/mcp_servers/lexicons")
 STORAGE_DIR = os.path.normpath("D:/mcp_servers/storage")
 
+
 class LexiconProcessor:
     """Processes and indexes lexicon files."""
 
@@ -25,24 +26,19 @@ class LexiconProcessor:
 
     def list_lexicons(self) -> dict[str, Any]:
         """Lists all available lexicon files."""
-        lexicons = {
-            'category_files': {},
-            'nfo_files': {},
-            'readme_files': {},
-            'total_files': 0
-        }
+        lexicons = {"category_files": {}, "nfo_files": {}, "readme_files": {}, "total_files": 0}
 
         for file in os.listdir(self.lexicon_dir):
             full_path = os.path.join(self.lexicon_dir, file)
             if os.path.isfile(full_path):
-                if file.endswith('.cat'):
-                    lexicons['category_files'][file] = os.path.getsize(full_path)
-                elif file.endswith('.nfo'):
-                    lexicons['nfo_files'][file] = os.path.getsize(full_path)
-                elif file.endswith('.txt'):
-                    lexicons['readme_files'][file] = os.path.getsize(full_path)
+                if file.endswith(".cat"):
+                    lexicons["category_files"][file] = os.path.getsize(full_path)
+                elif file.endswith(".nfo"):
+                    lexicons["nfo_files"][file] = os.path.getsize(full_path)
+                elif file.endswith(".txt"):
+                    lexicons["readme_files"][file] = os.path.getsize(full_path)
 
-                lexicons['total_files'] += 1
+                lexicons["total_files"] += 1
 
         return lexicons
 
@@ -52,32 +48,32 @@ class LexiconProcessor:
             file_path = os.path.join(self.lexicon_dir, filename)
 
             if not os.path.exists(file_path):
-                return {'error': f'File not found: {filename}'}
+                return {"error": f"File not found: {filename}"}
 
             words = []
-            with open(file_path, encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 for i, line in enumerate(f):
                     if i >= limit:
                         break
                     words.append(line.strip())
 
             return {
-                'lexicon': filename,
-                'words_loaded': len(words),
-                'limit': limit,
-                'words': words[:100],  # Return first 100 for preview
-                'status': 'loaded'
+                "lexicon": filename,
+                "words_loaded": len(words),
+                "limit": limit,
+                "words": words[:100],  # Return first 100 for preview
+                "status": "loaded",
             }
 
         except Exception as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     def build_index(self, filenames: list[str] | None = None) -> dict[str, Any]:
         """Builds a master index of all lexicons."""
         try:
             if filenames is None:
                 # Index all .cat files
-                filenames = [f for f in os.listdir(self.lexicon_dir) if f.endswith('.cat')]
+                filenames = [f for f in os.listdir(self.lexicon_dir) if f.endswith(".cat")]
 
             master_index = defaultdict(list)
             total_entries = 0
@@ -89,7 +85,7 @@ class LexiconProcessor:
                     continue
 
                 try:
-                    with open(file_path, encoding='utf-8', errors='ignore') as f:
+                    with open(file_path, encoding="utf-8", errors="ignore") as f:
                         for line in f:
                             word = line.strip().lower()
                             if word:
@@ -99,14 +95,14 @@ class LexiconProcessor:
                     continue
 
             return {
-                'indexed_files': len(filenames),
-                'total_entries': total_entries,
-                'files': dict(master_index),
-                'status': 'indexed'
+                "indexed_files": len(filenames),
+                "total_entries": total_entries,
+                "files": dict(master_index),
+                "status": "indexed",
             }
 
         except Exception as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
 
 
 class SignalAggregator:
@@ -116,7 +112,7 @@ class SignalAggregator:
     def aggregate_sentiment_signals(days: int = 30) -> dict[str, Any]:
         """Aggregates sentiment signals over time."""
         try:
-            compiled_signals_path = os.path.join(STORAGE_DIR, 'compiled_signals.json')
+            compiled_signals_path = os.path.join(STORAGE_DIR, "compiled_signals.json")
 
             if os.path.exists(compiled_signals_path):
                 with open(compiled_signals_path) as f:
@@ -126,60 +122,59 @@ class SignalAggregator:
 
             # Aggregate statistics
             aggregated = {
-                'total_signals': len(signals),
-                'signal_categories': defaultdict(int),
-                'high_intensity_signals': [],
-                'temporal_coverage': f'{days} days',
-                'aggregated_at': datetime.now().isoformat()
+                "total_signals": len(signals),
+                "signal_categories": defaultdict(int),
+                "high_intensity_signals": [],
+                "temporal_coverage": f"{days} days",
+                "aggregated_at": datetime.now().isoformat(),
             }
 
             # Categorize signals
             for signal_key, signal_val in signals.items():
                 if isinstance(signal_val, (int, float)):
-                    aggregated['signal_categories']['numeric'] += 1
+                    aggregated["signal_categories"]["numeric"] += 1
                     if abs(signal_val) > 2.0:
-                        aggregated['high_intensity_signals'].append({
-                            'signal': signal_key,
-                            'intensity': signal_val
-                        })
+                        aggregated["high_intensity_signals"].append(
+                            {"signal": signal_key, "intensity": signal_val}
+                        )
                 elif isinstance(signal_val, str):
-                    aggregated['signal_categories']['text'] += 1
+                    aggregated["signal_categories"]["text"] += 1
 
             return aggregated
 
         except Exception as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     @staticmethod
     def merge_multi_source_data(sources: list[str]) -> dict[str, Any]:
         """Merges data from multiple source files."""
         try:
             merged_data = {
-                'sources': sources,
-                'entries': [],
-                'merge_timestamp': datetime.now().isoformat(),
-                'total_entries': 0
+                "sources": sources,
+                "entries": [],
+                "merge_timestamp": datetime.now().isoformat(),
+                "total_entries": 0,
             }
 
             for source in sources:
                 source_path = os.path.join(STORAGE_DIR, source)
 
-                if os.path.exists(source_path) and source.endswith('.json'):
+                if os.path.exists(source_path) and source.endswith(".json"):
                     try:
                         with open(source_path) as f:
                             data = json.load(f)
                             if isinstance(data, dict):
-                                merged_data['entries'].append(data)
+                                merged_data["entries"].append(data)
                             elif isinstance(data, list):
-                                merged_data['entries'].extend(data)
-                            merged_data['total_entries'] += 1
+                                merged_data["entries"].extend(data)
+                            merged_data["total_entries"] += 1
                     except:
                         pass
 
             return merged_data
 
         except Exception as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
 
 
 class BatchCompressor:
@@ -190,14 +185,14 @@ class BatchCompressor:
         """Compresses multiple JSON files."""
         try:
             compressed_data = {
-                'input_files': len(json_files),
-                'compressed_entries': [],
-                'compression_stats': {
-                    'original_size': 0,
-                    'compressed_size': 0,
-                    'compression_ratio': 0.0
+                "input_files": len(json_files),
+                "compressed_entries": [],
+                "compression_stats": {
+                    "original_size": 0,
+                    "compressed_size": 0,
+                    "compression_ratio": 0.0,
                 },
-                'timestamp': datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
             for file in json_files:
@@ -218,36 +213,40 @@ class BatchCompressor:
 
                         compressed_size = len(json.dumps(compressed))
 
-                        compressed_data['compressed_entries'].append({
-                            'source': file,
-                            'original_size': original_size,
-                            'compressed_size': compressed_size,
-                            'ratio': original_size / (compressed_size + 1)
-                        })
+                        compressed_data["compressed_entries"].append(
+                            {
+                                "source": file,
+                                "original_size": original_size,
+                                "compressed_size": compressed_size,
+                                "ratio": original_size / (compressed_size + 1),
+                            }
+                        )
 
-                        compressed_data['compression_stats']['original_size'] += original_size
-                        compressed_data['compression_stats']['compressed_size'] += compressed_size
+                        compressed_data["compression_stats"]["original_size"] += original_size
+                        compressed_data["compression_stats"]["compressed_size"] += compressed_size
 
                     except Exception:
                         continue
 
             # Calculate overall ratio
-            total_original = compressed_data['compression_stats']['original_size']
-            total_compressed = compressed_data['compression_stats']['compressed_size']
+            total_original = compressed_data["compression_stats"]["original_size"]
+            total_compressed = compressed_data["compression_stats"]["compressed_size"]
             if total_compressed > 0:
-                compressed_data['compression_stats']['compression_ratio'] = total_original / total_compressed
+                compressed_data["compression_stats"]["compression_ratio"] = (
+                    total_original / total_compressed
+                )
 
             # Write output if specified
             if output_file:
                 output_path = os.path.join(STORAGE_DIR, output_file)
-                with open(output_path, 'w') as f:
+                with open(output_path, "w") as f:
                     json.dump(compressed_data, f, indent=2)
-                compressed_data['output_file'] = output_file
+                compressed_data["output_file"] = output_file
 
             return compressed_data
 
         except Exception as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
 
 
 @mcp.tool()
@@ -259,7 +258,7 @@ def list_available_lexicons() -> str:
         return json.dumps(result, indent=2)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -274,7 +273,7 @@ def load_lexicon_file(filename: str, limit: int = 1000) -> str:
         return json.dumps(result, indent=2)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -284,13 +283,13 @@ def build_lexicon_index(filenames: str = "") -> str:
     Filenames should be comma-separated or leave empty to index all .cat files.
     """
     try:
-        file_list = [f.strip() for f in filenames.split(',')] if filenames else None
+        file_list = [f.strip() for f in filenames.split(",")] if filenames else None
         processor = LexiconProcessor(LEXICON_DIR)
         result = processor.build_index(file_list)
         return json.dumps(result, indent=2)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -304,7 +303,7 @@ def aggregate_sentiment_signals(days: int = 30) -> str:
         return json.dumps(result, indent=2, default=str)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -319,7 +318,7 @@ def merge_multi_source_data(sources_json: str) -> str:
         return json.dumps(result, indent=2, default=str)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -335,7 +334,7 @@ def batch_semantic_compression(files_json: str, output_file: str = "") -> str:
         return json.dumps(result, indent=2)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 if __name__ == "__main__":

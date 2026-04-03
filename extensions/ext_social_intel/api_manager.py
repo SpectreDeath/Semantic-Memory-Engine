@@ -27,17 +27,21 @@ import aiohttp
 
 logger = logging.getLogger("SME.SocialIntelligence.APIManager")
 
+
 class PlatformType(Enum):
     """Supported social media platforms."""
+
     TWITTER = "twitter"
     REDDIT = "reddit"
     FACEBOOK = "facebook"
     YOUTUBE = "youtube"
     TIKTOK = "tiktok"
 
+
 @dataclass
 class APIConfig:
     """Configuration for a social media API."""
+
     platform: PlatformType
     api_key: str | None
     api_secret: str | None
@@ -49,9 +53,11 @@ class APIConfig:
     rate_window: int  # seconds
     enabled: bool = True
 
+
 @dataclass
 class RateLimiter:
     """Rate limiter for API requests."""
+
     platform: PlatformType
     max_requests: int
     window_seconds: int
@@ -68,8 +74,9 @@ class RateLimiter:
         now = time.time()
 
         # Remove old requests outside the window
-        self.requests = [req_time for req_time in self.requests
-                        if now - req_time < self.window_seconds]
+        self.requests = [
+            req_time for req_time in self.requests if now - req_time < self.window_seconds
+        ]
 
         # Check if we can make a request
         if len(self.requests) < self.max_requests:
@@ -85,6 +92,7 @@ class RateLimiter:
             return await self.acquire()
 
         return False
+
 
 class SocialMediaAPIManager:
     """
@@ -107,32 +115,32 @@ class SocialMediaAPIManager:
                 "base_url": "https://api.twitter.com/2",
                 "search": "/tweets/search/recent",
                 "user": "/users/by/username/",
-                "hashtag": "/tweets/search/recent"
+                "hashtag": "/tweets/search/recent",
             },
             PlatformType.REDDIT: {
                 "base_url": "https://oauth.reddit.com",
                 "search": "/search",
                 "subreddit": "/r/",
-                "user": "/user/"
+                "user": "/user/",
             },
             PlatformType.FACEBOOK: {
                 "base_url": "https://graph.facebook.com/v19.0",
                 "search": "/search",
                 "page": "/",
-                "post": "/"
+                "post": "/",
             },
             PlatformType.YOUTUBE: {
                 "base_url": "https://www.googleapis.com/youtube/v3",
                 "search": "/search",
                 "videos": "/videos",
-                "channels": "/channels"
+                "channels": "/channels",
             },
             PlatformType.TIKTOK: {
                 "base_url": "https://open-api.tiktok.com",
                 "search": "/search",
                 "user": "/user/",
-                "video": "/video/"
-            }
+                "video": "/video/",
+            },
         }
 
         logger.info("Social Media API Manager initialized")
@@ -178,8 +186,9 @@ class SocialMediaAPIManager:
         except Exception as e:
             logger.exception(f"Error during API manager shutdown: {e}")
 
-    async def get_hashtag_data(self, platform: PlatformType, hashtag: str,
-                             time_window: int = 24) -> dict:
+    async def get_hashtag_data(
+        self, platform: PlatformType, hashtag: str, time_window: int = 24
+    ) -> dict:
         """
         Get hashtag data from a specific platform.
 
@@ -218,8 +227,9 @@ class SocialMediaAPIManager:
             logger.exception(f"Error fetching hashtag data for {platform.value}: {e}")
             return {"error": str(e)}
 
-    async def get_topic_content(self, platform: PlatformType, topic: str,
-                              time_range: int = 48) -> dict:
+    async def get_topic_content(
+        self, platform: PlatformType, topic: str, time_range: int = 48
+    ) -> dict:
         """
         Get content related to a topic from a specific platform.
 
@@ -257,8 +267,9 @@ class SocialMediaAPIManager:
             logger.exception(f"Error fetching topic content for {platform.value}: {e}")
             return {"error": str(e)}
 
-    async def get_keyword_data(self, platform: PlatformType, keywords: list[str],
-                             time_window: int = 24) -> dict:
+    async def get_keyword_data(
+        self, platform: PlatformType, keywords: list[str], time_window: int = 24
+    ) -> dict:
         """
         Get data for multiple keywords from a platform.
 
@@ -296,8 +307,7 @@ class SocialMediaAPIManager:
             logger.exception(f"Error fetching keyword data for {platform.value}: {e}")
             return {"error": str(e)}
 
-    async def get_influencer_data(self, influencer_handle: str,
-                                time_window: int = 168) -> dict:
+    async def get_influencer_data(self, influencer_handle: str, time_window: int = 168) -> dict:
         """
         Get data for specific influencers across platforms.
 
@@ -330,7 +340,9 @@ class SocialMediaAPIManager:
                             platform, data, influencer_handle
                         )
                     else:
-                        results[platform.value] = {"error": f"HTTP {response.status}: {response.reason}"}
+                        results[platform.value] = {
+                            "error": f"HTTP {response.status}: {response.reason}"
+                        }
 
             except Exception as e:
                 logger.exception(f"Error fetching influencer data for {platform.value}: {e}")
@@ -394,7 +406,7 @@ class SocialMediaAPIManager:
                 client_secret=None,
                 rate_limit=300,  # 300 requests per 15 minutes
                 rate_window=900,
-                enabled=True
+                enabled=True,
             ),
             PlatformType.REDDIT: APIConfig(
                 platform=PlatformType.REDDIT,
@@ -406,7 +418,7 @@ class SocialMediaAPIManager:
                 client_secret=None,
                 rate_limit=60,  # 60 requests per minute
                 rate_window=60,
-                enabled=True
+                enabled=True,
             ),
             PlatformType.FACEBOOK: APIConfig(
                 platform=PlatformType.FACEBOOK,
@@ -418,7 +430,7 @@ class SocialMediaAPIManager:
                 client_secret=None,
                 rate_limit=200,  # 200 requests per hour
                 rate_window=3600,
-                enabled=True
+                enabled=True,
             ),
             PlatformType.YOUTUBE: APIConfig(
                 platform=PlatformType.YOUTUBE,
@@ -430,7 +442,7 @@ class SocialMediaAPIManager:
                 client_secret=None,
                 rate_limit=10000,  # 10,000 requests per day
                 rate_window=86400,
-                enabled=True
+                enabled=True,
             ),
             PlatformType.TIKTOK: APIConfig(
                 platform=PlatformType.TIKTOK,
@@ -442,8 +454,8 @@ class SocialMediaAPIManager:
                 client_secret=None,
                 rate_limit=1000,  # 1000 requests per hour
                 rate_window=3600,
-                enabled=True
-            )
+                enabled=True,
+            ),
         }
 
     def _get_default_headers(self, platform: PlatformType) -> dict[str, str]:
@@ -451,7 +463,7 @@ class SocialMediaAPIManager:
         base_headers = {
             "User-Agent": "SME-Social-Intelligence/1.0",
             "Accept": "application/json",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         config = self.platform_configs.get(platform)
@@ -484,8 +496,7 @@ class SocialMediaAPIManager:
         """Get headers for a specific request."""
         return self._get_default_headers(platform)
 
-    def _build_hashtag_url(self, platform: PlatformType, hashtag: str,
-                          time_window: int) -> str:
+    def _build_hashtag_url(self, platform: PlatformType, hashtag: str, time_window: int) -> str:
         """Build hashtag search URL for a platform."""
         base_url = self.api_endpoints[platform]["base_url"]
 
@@ -501,28 +512,18 @@ class SocialMediaAPIManager:
                 "max_results": 100,
                 "tweet.fields": "created_at,author_id,public_metrics,geo,lang",
                 "user.fields": "username,name,public_metrics,verified",
-                "expansions": "author_id,geo.place_id"
+                "expansions": "author_id,geo.place_id",
             }
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.REDDIT:
             # Reddit search
-            params = {
-                "q": f"#{hashtag}",
-                "type": "link",
-                "limit": 100,
-                "sort": "new",
-                "t": "all"
-            }
+            params = {"q": f"#{hashtag}", "type": "link", "limit": 100, "sort": "new", "t": "all"}
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.FACEBOOK:
             # Facebook search
-            params = {
-                "q": hashtag,
-                "type": "page",
-                "limit": 100
-            }
+            params = {"q": hashtag, "type": "page", "limit": 100}
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.YOUTUBE:
@@ -536,23 +537,18 @@ class SocialMediaAPIManager:
                 "type": "video",
                 "maxResults": 50,
                 "publishedAfter": start_time.isoformat() + "Z",
-                "publishedBefore": end_time.isoformat() + "Z"
+                "publishedBefore": end_time.isoformat() + "Z",
             }
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.TIKTOK:
             # TikTok search (would need proper API access)
-            params = {
-                "q": hashtag,
-                "type": "video",
-                "count": 50
-            }
+            params = {"q": hashtag, "type": "video", "count": 50}
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         return f"{base_url}/search?q={hashtag}"
 
-    def _build_topic_url(self, platform: PlatformType, topic: str,
-                        time_range: int) -> str:
+    def _build_topic_url(self, platform: PlatformType, topic: str, time_range: int) -> str:
         """Build topic search URL for a platform."""
         base_url = self.api_endpoints[platform]["base_url"]
 
@@ -567,26 +563,16 @@ class SocialMediaAPIManager:
                 "max_results": 100,
                 "tweet.fields": "created_at,author_id,public_metrics,geo,lang",
                 "user.fields": "username,name,public_metrics,verified",
-                "expansions": "author_id,geo.place_id"
+                "expansions": "author_id,geo.place_id",
             }
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.REDDIT:
-            params = {
-                "q": topic,
-                "type": "link",
-                "limit": 100,
-                "sort": "new",
-                "t": "all"
-            }
+            params = {"q": topic, "type": "link", "limit": 100, "sort": "new", "t": "all"}
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.FACEBOOK:
-            params = {
-                "q": topic,
-                "type": "page",
-                "limit": 100
-            }
+            params = {"q": topic, "type": "page", "limit": 100}
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.YOUTUBE:
@@ -599,22 +585,19 @@ class SocialMediaAPIManager:
                 "type": "video",
                 "maxResults": 50,
                 "publishedAfter": start_time.isoformat() + "Z",
-                "publishedBefore": end_time.isoformat() + "Z"
+                "publishedBefore": end_time.isoformat() + "Z",
             }
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.TIKTOK:
-            params = {
-                "q": topic,
-                "type": "video",
-                "count": 50
-            }
+            params = {"q": topic, "type": "video", "count": 50}
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         return f"{base_url}/search?q={topic}"
 
-    def _build_keyword_url(self, platform: PlatformType, keywords: list[str],
-                          time_window: int) -> str:
+    def _build_keyword_url(
+        self, platform: PlatformType, keywords: list[str], time_window: int
+    ) -> str:
         """Build keyword search URL for a platform."""
         # Combine keywords with OR operator
         query = " OR ".join(keywords)
@@ -634,11 +617,7 @@ class SocialMediaAPIManager:
             return f"{base_url}/{handle}"
 
         elif platform == PlatformType.YOUTUBE:
-            params = {
-                "part": "snippet,statistics",
-                "forUsername": handle,
-                "maxResults": 1
-            }
+            params = {"part": "snippet,statistics", "forUsername": handle, "maxResults": 1}
             return f"{base_url}/channels?{urlencode(params)}"
 
         elif platform == PlatformType.TIKTOK:
@@ -657,28 +636,18 @@ class SocialMediaAPIManager:
                 "max_results": 100,
                 "tweet.fields": "created_at,author_id,public_metrics,geo,lang",
                 "user.fields": "username,name,public_metrics,verified",
-                "expansions": "author_id,geo.place_id"
+                "expansions": "author_id,geo.place_id",
             }
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.REDDIT:
             # Reddit with location filter (if available)
-            params = {
-                "q": topic,
-                "type": "link",
-                "limit": 100,
-                "sort": "new",
-                "t": "all"
-            }
+            params = {"q": topic, "type": "link", "limit": 100, "sort": "new", "t": "all"}
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.FACEBOOK:
             # Facebook with location filter
-            params = {
-                "q": topic,
-                "type": "page",
-                "limit": 100
-            }
+            params = {"q": topic, "type": "page", "limit": 100}
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.YOUTUBE:
@@ -688,23 +657,18 @@ class SocialMediaAPIManager:
                 "q": topic,
                 "type": "video",
                 "maxResults": 50,
-                "relevanceLanguage": "en"
+                "relevanceLanguage": "en",
             }
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         elif platform == PlatformType.TIKTOK:
             # TikTok with location filter
-            params = {
-                "q": topic,
-                "type": "video",
-                "count": 50
-            }
+            params = {"q": topic, "type": "video", "count": 50}
             return f"{base_url}{self.api_endpoints[platform]['search']}?{urlencode(params)}"
 
         return f"{base_url}/search?q={topic}"
 
-    def _parse_hashtag_response(self, platform: PlatformType, data: dict,
-                              hashtag: str) -> dict:
+    def _parse_hashtag_response(self, platform: PlatformType, data: dict, hashtag: str) -> dict:
         """Parse hashtag response data for a platform."""
         if platform == PlatformType.TWITTER:
             tweets = data.get("data", [])
@@ -722,8 +686,10 @@ class SocialMediaAPIManager:
                         "author_id": tweet.get("author_id"),
                         "metrics": tweet.get("public_metrics", {}),
                         "location": tweet.get("geo", {}).get("coordinates", {}),
-                        "hashtags": [tag["tag"] for tag in tweet.get("entities", {}).get("hashtags", [])],
-                        "language": tweet.get("lang")
+                        "hashtags": [
+                            tag["tag"] for tag in tweet.get("entities", {}).get("hashtags", [])
+                        ],
+                        "language": tweet.get("lang"),
                     }
                     for tweet in tweets
                 ],
@@ -733,10 +699,10 @@ class SocialMediaAPIManager:
                         "username": user.get("username"),
                         "name": user.get("name"),
                         "verified": user.get("verified", False),
-                        "metrics": user.get("public_metrics", {})
+                        "metrics": user.get("public_metrics", {}),
                     }
                     for user in users
-                ]
+                ],
             }
 
         elif platform == PlatformType.REDDIT:
@@ -756,33 +722,28 @@ class SocialMediaAPIManager:
                         "score": post.get("data", {}).get("score"),
                         "num_comments": post.get("data", {}).get("num_comments"),
                         "subreddit": post.get("data", {}).get("subreddit"),
-                        "url": post.get("data", {}).get("url")
+                        "url": post.get("data", {}).get("url"),
                     }
                     for post in posts
-                ]
+                ],
             }
 
         # Default parsing for other platforms
-        return {
-            "hashtag": hashtag,
-            "raw_data": data,
-            "platform": platform.value
-        }
+        return {"hashtag": hashtag, "raw_data": data, "platform": platform.value}
 
-    def _parse_topic_response(self, platform: PlatformType, data: dict,
-                            topic: str) -> dict:
+    def _parse_topic_response(self, platform: PlatformType, data: dict, topic: str) -> dict:
         """Parse topic response data for a platform."""
         # Similar to hashtag parsing but for general topics
         return self._parse_hashtag_response(platform, data, topic)
 
-    def _parse_keyword_response(self, platform: PlatformType, data: dict,
-                              keywords: list[str]) -> dict:
+    def _parse_keyword_response(
+        self, platform: PlatformType, data: dict, keywords: list[str]
+    ) -> dict:
         """Parse keyword response data for a platform."""
         # Similar to hashtag parsing but for multiple keywords
         return self._parse_hashtag_response(platform, data, " ".join(keywords))
 
-    def _parse_influencer_response(self, platform: PlatformType, data: dict,
-                                 handle: str) -> dict:
+    def _parse_influencer_response(self, platform: PlatformType, data: dict, handle: str) -> dict:
         """Parse influencer response data for a platform."""
         if platform == PlatformType.TWITTER:
             user = data.get("data", {})
@@ -796,7 +757,7 @@ class SocialMediaAPIManager:
                 "metrics": user.get("public_metrics", {}),
                 "description": user.get("description"),
                 "created_at": user.get("created_at"),
-                "profile_image_url": user.get("profile_image_url")
+                "profile_image_url": user.get("profile_image_url"),
             }
 
         elif platform == PlatformType.REDDIT:
@@ -810,18 +771,15 @@ class SocialMediaAPIManager:
                 "link_karma": user_data.get("link_karma"),
                 "is_verified": user_data.get("is_verified", False),
                 "is_gold": user_data.get("is_gold", False),
-                "total_karma": user_data.get("total_karma")
+                "total_karma": user_data.get("total_karma"),
             }
 
         # Default parsing for other platforms
-        return {
-            "handle": handle,
-            "raw_data": data,
-            "platform": platform.value
-        }
+        return {"handle": handle, "raw_data": data, "platform": platform.value}
 
-    def _parse_geotagged_response(self, platform: PlatformType, data: dict,
-                                topic: str) -> list[dict]:
+    def _parse_geotagged_response(
+        self, platform: PlatformType, data: dict, topic: str
+    ) -> list[dict]:
         """Parse geotagged response data for a platform."""
         if platform == PlatformType.TWITTER:
             tweets = data.get("data", [])
@@ -836,7 +794,7 @@ class SocialMediaAPIManager:
                     "country": tweet.get("geo", {}).get("place", {}).get("country"),
                     "city": tweet.get("geo", {}).get("place", {}).get("name"),
                     "topic": topic,
-                    "platform": platform.value
+                    "platform": platform.value,
                 }
                 for tweet in tweets
                 if tweet.get("geo")

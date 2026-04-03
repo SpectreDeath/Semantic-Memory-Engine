@@ -18,6 +18,7 @@ DB_PATH = Path("data/conceptnet_cache.db")
 DB_LIMIT_MB = 500
 MAX_DB_SIZE = DB_LIMIT_MB * 1024 * 1024  # 500MB in bytes
 
+
 def init_db():
     """Initializes the SQLite database with WAL mode and schema."""
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
@@ -40,6 +41,7 @@ def init_db():
     conn.commit()
     conn.close()
 
+
 def purge_old_records():
     """Purges the oldest records if the database exceeds DB_LIMIT_MB."""
     if not DB_PATH.exists():
@@ -47,17 +49,22 @@ def purge_old_records():
 
     current_size = os.path.getsize(DB_PATH)
     if current_size > MAX_DB_SIZE:
-        logger.warning(f"Database size ({current_size} bytes) exceeds limit. Purging oldest records...")
+        logger.warning(
+            f"Database size ({current_size} bytes) exceeds limit. Purging oldest records..."
+        )
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
         # Delete 10% of the oldest records to create space
-        cursor.execute("DELETE FROM concepts WHERE id IN (SELECT id FROM concepts ORDER BY last_accessed ASC LIMIT (SELECT COUNT(*) / 10 FROM concepts))")
+        cursor.execute(
+            "DELETE FROM concepts WHERE id IN (SELECT id FROM concepts ORDER BY last_accessed ASC LIMIT (SELECT COUNT(*) / 10 FROM concepts))"
+        )
         conn.commit()
         conn.close()
         # Run VACUUM to reclaim space
         conn = sqlite3.connect(DB_PATH)
         conn.execute("VACUUM")
         conn.close()
+
 
 def get_concept_with_cache(term: str, limit: int = 5):
     """Checks cache first, then API, then updates cache."""
@@ -75,8 +82,10 @@ def get_concept_with_cache(term: str, limit: int = 5):
     if row:
         logger.info(f"Cache Hit: {term}")
         # Update last_accessed
-        cursor.execute("UPDATE concepts SET last_accessed = ? WHERE term = ?",
-                       (datetime.datetime.now().isoformat(), term))
+        cursor.execute(
+            "UPDATE concepts SET last_accessed = ? WHERE term = ?",
+            (datetime.datetime.now().isoformat(), term),
+        )
         conn.commit()
         conn.close()
         return json.loads(row[0])
@@ -94,8 +103,10 @@ def get_concept_with_cache(term: str, limit: int = 5):
         cursor = conn.cursor()
         now = datetime.datetime.now().isoformat()
         try:
-            cursor.execute("INSERT OR REPLACE INTO concepts (term, data, last_accessed, created_at) VALUES (?, ?, ?, ?)",
-                           (term, json.dumps(results), now, now))
+            cursor.execute(
+                "INSERT OR REPLACE INTO concepts (term, data, last_accessed, created_at) VALUES (?, ?, ?, ?)",
+                (term, json.dumps(results), now, now),
+            )
             conn.commit()
         except Exception as e:
             logger.exception(f"Failed to cache {term}: {e}")
@@ -103,6 +114,7 @@ def get_concept_with_cache(term: str, limit: int = 5):
             conn.close()
 
     return results
+
 
 def lookup_concept_api(term: str, limit: int = 5):
     """Core API lookup logic with weights and fallbacks."""
@@ -116,12 +128,7 @@ def lookup_concept_api(term: str, limit: int = 5):
         data = response.json()
 
         edges = data.get("edges", [])
-        results = {
-            "RelatedTo": [],
-            "UsedFor": [],
-            "HasContext": [],
-            "IsA": []
-        }
+        results = {"RelatedTo": [], "UsedFor": [], "HasContext": [], "IsA": []}
 
         # Store high-weight relations
         for edge in edges:
@@ -131,12 +138,12 @@ def lookup_concept_api(term: str, limit: int = 5):
 
             if rel in results and end_label.lower() != term.lower():
                 # We store a dict with label and weight for forensic integrity
-                if not any(item['label'] == end_label for item in results[rel]):
+                if not any(item["label"] == end_label for item in results[rel]):
                     results[rel].append({"label": end_label, "weight": weight})
 
         # Sort and limit by weight
         for rel in results:
-            results[rel] = sorted(results[rel], key=lambda x: x['weight'], reverse=True)[:limit]
+            results[rel] = sorted(results[rel], key=lambda x: x["weight"], reverse=True)[:limit]
 
         return results
 
@@ -145,17 +152,20 @@ def lookup_concept_api(term: str, limit: int = 5):
         # Fallback for stability (weights included)
         fallbacks = {
             "cbrn": {
-                "RelatedTo": [{"label": "toxic", "weight": 5.0}, {"label": "chemical", "weight": 4.5}],
+                "RelatedTo": [
+                    {"label": "toxic", "weight": 5.0},
+                    {"label": "chemical", "weight": 4.5},
+                ],
                 "UsedFor": [{"label": "threat", "weight": 3.0}],
                 "HasContext": [{"label": "security", "weight": 4.0}],
-                "IsA": [{"label": "danger", "weight": 5.0}]
+                "IsA": [{"label": "danger", "weight": 5.0}],
             },
             "sensor": {
                 "RelatedTo": [{"label": "detection", "weight": 6.0}],
                 "UsedFor": [{"label": "monitoring", "weight": 5.0}],
                 "HasContext": [{"label": "security", "weight": 4.5}],
-                "IsA": [{"label": "device", "weight": 5.0}]
-            }
+                "IsA": [{"label": "device", "weight": 5.0}],
+            },
         }
 
         lower_term = term.lower()
@@ -164,6 +174,7 @@ def lookup_concept_api(term: str, limit: int = 5):
             return fallbacks[lower_term]
 
         return {"error": str(e)}
+
 
 def format_concept_summary(results: dict):
     """Formats results into a summary, highlighting high-weight links."""
@@ -177,6 +188,7 @@ def format_concept_summary(results: dict):
             summary.append(f"{rel}: {', '.join(labels)}")
 
     return " | ".join(summary) if summary else "No associations found."
+
 
 if __name__ == "__main__":
     # Test cases

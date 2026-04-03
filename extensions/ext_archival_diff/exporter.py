@@ -12,20 +12,19 @@ logger = logging.getLogger("LawnmowerMan.ArchivalDiff.Exporter")
 SME_ARCHIVAL_CHANGE_DETECTED = Gauge(
     "sme_archival_change_detected",
     "Indicates if data scrubbing was detected (1) or not (0)",
-    ["url"]
+    ["url"],
 )
 
 SME_ARCHIVAL_SCRUB_EVENTS_TOTAL = Counter(
-    "sme_archival_scrub_events_total",
-    "Total number of detected archival scrubbing events",
-    ["url"]
+    "sme_archival_scrub_events_total", "Total number of detected archival scrubbing events", ["url"]
 )
 
 SME_ARCHIVAL_DELETED_PARAGRAPHS_TOTAL = Counter(
     "sme_archival_deleted_paragraphs_total",
     "Total number of paragraphs detected as scrubbed",
-    ["url"]
+    ["url"],
 )
+
 
 class SmeExporter:
     """
@@ -34,7 +33,9 @@ class SmeExporter:
     """
 
     def __init__(self, db_url: str | None = None):
-        self.db_url = db_url or os.environ.get("DATABASE_URL", "postgresql://sme_user:sme_password@localhost:5432/sme_nexus")
+        self.db_url = db_url or os.environ.get(
+            "DATABASE_URL", "postgresql://sme_user:sme_password@localhost:5432/sme_nexus"
+        )
         self.pool = None
         self._initialize_pool()
         self._initialize_schema()
@@ -114,8 +115,8 @@ class SmeExporter:
         Processes diff result and commits to PostgreSQL.
         Updates Prometheus metrics.
         """
-        target_url = metadata.get('url')
-        deleted_content = diff_result.get('deleted_content', [])
+        target_url = metadata.get("url")
+        deleted_content = diff_result.get("deleted_content", [])
 
         # Update metrics
         if deleted_content:
@@ -135,12 +136,15 @@ class SmeExporter:
         try:
             with conn.cursor() as cur:
                 # 1. Ensure SourceURLNode exists
-                cur.execute("""
+                cur.execute(
+                    """
                     INSERT INTO sme_source_url_nodes (url)
                     VALUES (%s)
                     ON CONFLICT (url) DO UPDATE SET last_checked = NOW()
                     RETURNING id;
-                """, (target_url,))
+                """,
+                    (target_url,),
+                )
                 source_id = cur.fetchone()[0]
 
                 # 2. Add ContentNodes and Relationships for each deleted paragraph
@@ -148,27 +152,33 @@ class SmeExporter:
                     content_hash = hashlib.sha1(paragraph.encode()).hexdigest()
 
                     # Insert ContentNode
-                    cur.execute("""
+                    cur.execute(
+                        """
                         INSERT INTO sme_content_nodes (content_hash, content_text, snapshot_timestamp, snapshot_url)
                         VALUES (%s, %s, %s, %s)
                         ON CONFLICT (content_hash) DO NOTHING
                         RETURNING id;
-                    """, (
-                        content_hash,
-                        paragraph,
-                        metadata['snapshot_old']['timestamp'],
-                        metadata['snapshot_old']['url']
-                    ))
+                    """,
+                        (
+                            content_hash,
+                            paragraph,
+                            metadata["snapshot_old"]["timestamp"],
+                            metadata["snapshot_old"]["url"],
+                        ),
+                    )
 
                     result = cur.fetchone()
                     if result:
                         content_id = result[0]
 
                         # Create SCRUBBED_FROM relationship
-                        cur.execute("""
+                        cur.execute(
+                            """
                             INSERT INTO sme_relationships (content_node_id, source_url_node_id, relationship_type)
                             VALUES (%s, %s, 'SCRUBBED_FROM');
-                        """, (content_id, source_id))
+                        """,
+                            (content_id, source_id),
+                        )
 
                 conn.commit()
                 logger.info(f"Committed {len(deleted_content)} scrubbed nodes for {target_url}")

@@ -14,12 +14,14 @@ def run_rss_bridge():
     logger.info("📡 Running RSS Bridge...")
 
     from src.gathering.rss_bridge import main as rss_main
+
     rss_main()
 
     # Sync to Supabase
     try:
         from src.database.supabase_client import sync_news_to_supabase
         from src.ui.dashboard import load_intel_data
+
         news = load_intel_data("data/raw/forensic_news.json")
         sync_news_to_supabase(news)
     except Exception as e:

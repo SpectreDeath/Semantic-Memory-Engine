@@ -7,6 +7,7 @@ from src.core.config import get_config
 
 logger = logging.getLogger("SentinelProvider")
 
+
 class SentinelProvider(SMEAIProvider):
     """
     Hardware-Aware AI Provider for the GTX 1660 Ti.
@@ -33,10 +34,7 @@ class SentinelProvider(SMEAIProvider):
             # n_gpu_layers=-1 attempts to put all on GPU
             # We'll start aggressive and let Sentinel throttle us if needed.
             self.model = Llama(
-                model_path=str(model_path),
-                n_gpu_layers=32,
-                n_ctx=4096,
-                verbose=False
+                model_path=str(model_path), n_gpu_layers=32, n_ctx=4096, verbose=False
             )
             logger.info(f"Sentinel (GGUF) initialized with {model_path.name}")
         except Exception as e:
@@ -49,12 +47,7 @@ class SentinelProvider(SMEAIProvider):
 
         # Simple completion for now, simulating tool-use
         prompt = f"### System: Forensic Assistant\n### Input: {input_data}\n### Response:"
-        output = self.model(
-            prompt,
-            max_tokens=512,
-            stop=["###"],
-            echo=False
-        )
+        output = self.model(prompt, max_tokens=512, stop=["###"], echo=False)
         return output["choices"][0]["text"].strip()
 
     def switch_lens(self, lens_name: str, scale: float = 1.0):
@@ -77,7 +70,9 @@ class SentinelProvider(SMEAIProvider):
             if hasattr(self.model, "set_lora"):
                 # Disable existing LoRA if any
                 if self.current_lora:
-                    old_path = os.path.join(self.config.get("hardware.lora_dir"), f"{self.current_lora}.bin")
+                    old_path = os.path.join(
+                        self.config.get("hardware.lora_dir"), f"{self.current_lora}.bin"
+                    )
                     self.model.set_lora(old_path, 0.0)
 
                 self.model.set_lora(lora_path, scale)
@@ -104,17 +99,19 @@ class SentinelProvider(SMEAIProvider):
         # Milestone 2 Optimization: Re-init with half GPU layers.
         try:
             model_path = self.config.get_path("hardware.base_model")
-            self.model = None # Release VRAM
+            self.model = None  # Release VRAM
             import torch
+
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
 
             from llama_cpp import Llama
+
             self.model = Llama(
                 model_path=str(model_path),
-                n_gpu_layers=10, # Reduced from 32
+                n_gpu_layers=10,  # Reduced from 32
                 n_ctx=4096,
-                verbose=False
+                verbose=False,
             )
             # Re-apply LoRA if active
             if self.current_lora:
@@ -127,5 +124,5 @@ class SentinelProvider(SMEAIProvider):
             "provider": "sentinel",
             "backend": "llama-cpp",
             "active_lens": self.current_lora,
-            "vram_strategy": "gguf-dynamic"
+            "vram_strategy": "gguf-dynamic",
         }

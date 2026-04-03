@@ -10,6 +10,7 @@ class TemporalAnalyzer:
     Analyzes temporal patterns in event logs.
     Optimized with __slots__ for minimal memory footprint.
     """
+
     __slots__ = ()
 
     def calculate_burstiness(self, timestamps: list[float] | np.ndarray) -> dict[str, Any]:
@@ -21,7 +22,11 @@ class TemporalAnalyzer:
         0 indicates a memory-less Poisson process.
         """
         if len(timestamps) < 2:
-            return {"burstiness_score": 0.0, "status": "Insufficient Data", "note": "Need at least 2 timestamps"}
+            return {
+                "burstiness_score": 0.0,
+                "status": "Insufficient Data",
+                "note": "Need at least 2 timestamps",
+            }
 
         try:
             # Sort timestamps to ensure sequence
@@ -33,7 +38,11 @@ class TemporalAnalyzer:
             # Avoid division by zero if all intervals are 0 (simultaneous events)
             mean_interval = np.mean(intervals)
             if mean_interval == 0:
-                return {"burstiness_score": 1.0, "status": "Success", "note": "All events simultaneous"}
+                return {
+                    "burstiness_score": 1.0,
+                    "status": "Success",
+                    "note": "All events simultaneous",
+                }
 
             std_interval = np.std(intervals)
 
@@ -48,10 +57,11 @@ class TemporalAnalyzer:
                 "mean_interval": round(float(mean_interval), 4),
                 "std_interval": round(float(std_interval), 4),
                 "event_count": len(timestamps),
-                "status": "Success"
+                "status": "Success",
             }
         except Exception as e:
             return {"error": str(e), "status": "Error"}
+
 
 def calculate_burstiness(timestamps: list[float]) -> dict[str, Any]:
     """Standalone wrapper for burstiness calculation."""

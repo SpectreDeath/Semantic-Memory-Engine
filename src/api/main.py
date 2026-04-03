@@ -27,12 +27,13 @@ app = FastAPI(
     version="2.0.0",
     docs_url="/api/docs",
     redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json"
+    openapi_url="/api/openapi.json",
 )
 
 # Initialize Rate Limiter
 limiter = RateLimiter(default_limit="100/minute")
 app.middleware("http")(limiter.middleware_factory)
+
 
 # Broadcaster for real-time diagnostics
 async def broadcast_diagnostics(websocket: WebSocket):
@@ -48,18 +49,21 @@ async def broadcast_diagnostics(websocket: WebSocket):
             latency_ms = round((time.perf_counter() - _t0) * 1000, 2)
 
             # Send payload
-            await websocket.send_json({
-                "type": "diagnostics",
-                "data": {
-                    "cpu": cpu_usage,
-                    "memory": mem_usage,
-                    "latency_ms": latency_ms,
-                    "timestamp": time.time()
+            await websocket.send_json(
+                {
+                    "type": "diagnostics",
+                    "data": {
+                        "cpu": cpu_usage,
+                        "memory": mem_usage,
+                        "latency_ms": latency_ms,
+                        "timestamp": time.time(),
+                    },
                 }
-            })
+            )
             await asyncio.sleep(2)
     except Exception as e:
         logger.debug(f"Broadcaster stopped: {e}")
+
 
 # Global Error Handler
 @app.exception_handler(Exception)
@@ -71,16 +75,17 @@ async def global_exception_handler(request: Request, exc: Exception):
         exc_info=True,
         error_id=error_id,
         path=request.url.path,
-        method=request.method
+        method=request.method,
     )
     return JSONResponse(
         status_code=500,
         content={
             "error": "Internal Server Error",
             "message": "An unexpected error occurred.",
-            "error_id": error_id
-        }
+            "error_id": error_id,
+        },
     )
+
 
 # Context Propagation & Tenancy Middleware
 @app.middleware("http")
@@ -95,12 +100,15 @@ async def add_logging_and_tenant_context(request: Request, call_next):
     token = TenantContext.set_tenant(tenant_id)
     try:
         with get_log_context(request_id=request_id, path=request.url.path, tenant_id=tenant_id):
-            logger.info(f"Incoming request: {request.method} {request.url.path} (Tenant: {tenant_id})")
+            logger.info(
+                f"Incoming request: {request.method} {request.url.path} (Tenant: {tenant_id})"
+            )
             response = await call_next(request)
             logger.info(f"Finished request: {response.status_code}")
             return response
     finally:
         TenantContext.reset(token)
+
 
 # Configure CORS for the frontend.
 # Origins are read from SME_CORS_ORIGINS (comma-separated).
@@ -119,6 +127,7 @@ app.add_middleware(
 # Include tool routes
 app.include_router(router, prefix="/api/v1")
 
+
 @app.websocket("/ws/diagnostics")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -127,6 +136,7 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         logger.info("Client disconnected from diagnostics socket")
 
+
 @app.get("/")
 async def root():
     """Health check and service info."""
@@ -134,8 +144,9 @@ async def root():
         "service": "SimpleMem Laboratory Control Room",
         "status": "online",
         "api_v1": "/api/v1",
-        "ws_diagnostics": "/ws/diagnostics"
+        "ws_diagnostics": "/ws/diagnostics",
     }
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

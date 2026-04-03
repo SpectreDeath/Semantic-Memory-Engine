@@ -19,7 +19,8 @@ st.set_page_config(
 )
 
 # --- Styling ---
-st.markdown("""
+st.markdown(
+    """
 <style>
     .stApp {
         background-color: #0e1117;
@@ -36,15 +37,19 @@ st.markdown("""
         background-color: #111827;
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # --- Configuration & Paths ---
 DB_PATH = os.path.abspath("data/storage/laboratory.db")
 PROVENANCE_DB = os.path.abspath("data/provenance.db")
 
+
 # --- Helpers ---
 def get_db_connection(path):
     return sqlite3.connect(path)
+
 
 def get_system_stats():
     cpu = psutil.cpu_percent()
@@ -53,11 +58,13 @@ def get_system_stats():
     vram = 0.0
     try:
         import torch
+
         if torch.cuda.is_available():
             vram = torch.cuda.memory_percent()
     except:
         pass
     return cpu, ram, vram
+
 
 def get_memory_metrics():
     try:
@@ -70,8 +77,9 @@ def get_memory_metrics():
         facts_count = 0
 
     # We'll mock the vector count for now as ChromaDB access is via API
-    vector_count = facts_count * 1.2 # Approximation for visualization
+    vector_count = facts_count * 1.2  # Approximation for visualization
     return facts_count, int(vector_count)
+
 
 # --- Sidebar: Hardware Telemetry ---
 with st.sidebar:
@@ -130,11 +138,14 @@ with tab1:
 
     try:
         conn = get_db_connection(DB_PATH)
-        feed_df = pd.read_sql_query("""
+        feed_df = pd.read_sql_query(
+            """
             SELECT timestamp, tool_name as Module, event_type as Event, target as Target, confidence as Confidence
             FROM forensic_events
             ORDER BY timestamp DESC LIMIT 20
-        """, conn)
+        """,
+            conn,
+        )
         conn.close()
 
         if not feed_df.empty:
@@ -149,19 +160,27 @@ with tab2:
 
     try:
         conn = get_db_connection(DB_PATH)
-        trend_df = pd.read_sql_query("""
+        trend_df = pd.read_sql_query(
+            """
             SELECT id, confidence as 'Certainty Quotient'
             FROM forensic_events
             ORDER BY id ASC LIMIT 50
-        """, conn)
+        """,
+            conn,
+        )
         conn.close()
 
         if not trend_df.empty:
-            chart = alt.Chart(trend_df).mark_line(point=True, color="#00ff9d").encode(
-                x='id',
-                y=alt.Y('Certainty Quotient', scale=alt.Scale(domain=[0, 1])),
-                tooltip=['id', 'Certainty Quotient']
-            ).interactive()
+            chart = (
+                alt.Chart(trend_df)
+                .mark_line(point=True, color="#00ff9d")
+                .encode(
+                    x="id",
+                    y=alt.Y("Certainty Quotient", scale=alt.Scale(domain=[0, 1])),
+                    tooltip=["id", "Certainty Quotient"],
+                )
+                .interactive()
+            )
             st.altair_chart(chart, use_container_width=True)
         else:
             st.info("Insufficient data for trend analysis.")
@@ -173,7 +192,9 @@ with tab3:
 
     try:
         conn = get_db_connection(PROVENANCE_DB)
-        provenance_df = pd.read_sql_query("SELECT source_id, reliability_tier, captured_at FROM source_provenance", conn)
+        provenance_df = pd.read_sql_query(
+            "SELECT source_id, reliability_tier, captured_at FROM source_provenance", conn
+        )
         conn.close()
         st.dataframe(provenance_df, use_container_width=True)
     except Exception as e:

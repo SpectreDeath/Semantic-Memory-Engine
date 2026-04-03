@@ -11,29 +11,40 @@ import os
 import sqlite3
 import uuid
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
-DB_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "data", "storage", "laboratory.db"))
+_DEFAULT_DB_PATH = str(
+    Path(__file__).resolve().parent.parent / "data" / "storage" / "laboratory.db"
+)
+DB_PATH = os.environ.get("SME_SESSION_DB_PATH", _DEFAULT_DB_PATH)
+MAX_HISTORY = int(os.environ.get("SME_SESSION_MAX_HISTORY", "50"))
+
 
 class Session:
     """Individual user/agent session."""
+
     def __init__(self, session_id: str):
         self.session_id = session_id
         self.created_at = datetime.now()
         self.last_accessed = datetime.now()
-        self.history: list[dict[str, Any]] = []  # Last 10 tool results
-        self.scratchpad: dict[str, Any] = {}     # Temporary facts/context
-        self.metadata: dict[str, Any] = {}       # Intent tracking, user info
+        self.history: list[
+            dict[str, Any]
+        ] = []  # Configurable via SME_SESSION_MAX_HISTORY (default 50)
+        self.scratchpad: dict[str, Any] = {}  # Temporary facts/context
+        self.metadata: dict[str, Any] = {}  # Intent tracking, user info
 
     def add_history(self, tool_name: str, result: Any):
         """Add record to history, maintaining max 10 entries."""
-        self.history.append({
-            "id": f"res_{len(self.history)}",
-            "timestamp": datetime.now().isoformat(),
-            "tool": tool_name,
-            "result": result
-        })
-        if len(self.history) > 10:
+        self.history.append(
+            {
+                "id": f"res_{len(self.history)}",
+                "timestamp": datetime.now().isoformat(),
+                "tool": tool_name,
+                "result": result,
+            }
+        )
+        if len(self.history) > MAX_HISTORY:
             self.history.pop(0)
         self.last_accessed = datetime.now()
 
@@ -51,19 +62,35 @@ class Session:
             if isinstance(result, dict):
                 event_type = result.get("status", result.get("event", "Analysis"))
                 # Try to find a target (author, entity, etc.)
-                target = result.get("target", result.get("subject", result.get("entity", result.get("claim", "General"))))
+                target = result.get(
+                    "target",
+                    result.get("subject", result.get("entity", result.get("claim", "General"))),
+                )
                 # Try to find confidence (match_likelihood, certainty_quotient, etc.)
-                confidence = result.get("certainty_quotient", result.get("match_likelihood", result.get("centrality", 1.0)))
+                confidence = result.get(
+                    "certainty_quotient",
+                    result.get("match_likelihood", result.get("centrality", 1.0)),
+                )
                 # Handle "High"/"Low" confidence strings
                 if isinstance(confidence, str):
                     confidence = 0.9 if confidence == "High" else 0.4
 
             conn = sqlite3.connect(DB_PATH)
             cursor = conn.cursor()
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO forensic_events (session_id, tool_name, event_type, target, confidence, metadata)
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''', (self.session_id, tool_name, event_type, str(target)[:100], float(confidence), json.dumps(result)))
+            """,
+                (
+                    self.session_id,
+                    tool_name,
+                    event_type,
+                    str(target)[:100],
+                    float(confidence),
+                    json.dumps(result),
+                ),
+            )
             conn.commit()
             conn.close()
         except Exception:
@@ -83,11 +110,13 @@ class Session:
             "last_accessed": self.last_accessed.isoformat(),
             "history_count": len(self.history),
             "scratchpad": self.scratchpad,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
+
 
 class SessionManager:
     """Manages multiple sessions."""
+
     def __init__(self):
         self._sessions: dict[str, Session] = {}
 
@@ -118,8 +147,10 @@ class SessionManager:
         for sid in to_delete:
             del self._sessions[sid]
 
+
 # Global session manager instance
 _manager = SessionManager()
+
 
 def get_session_manager() -> SessionManager:
     """Get global SessionManager singleton."""

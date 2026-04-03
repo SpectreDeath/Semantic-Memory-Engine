@@ -12,6 +12,7 @@ from src.core.config import Config
 
 logger = logging.getLogger(__name__)
 
+
 class ConceptResolver:
     """
     Common Sense Reasoning layer using ConceptNet.
@@ -20,7 +21,7 @@ class ConceptResolver:
 
     def __init__(self, cache_path: str | None = None):
         config = Config()
-        base_dir = config.get_path('storage.base_dir')
+        base_dir = config.get_path("storage.base_dir")
         self.cache_path = cache_path or str(base_dir / "storage" / "concept_cache.sqlite")
         self.api_base_url = "http://api.conceptnet.io/c/en"
         self._init_cache()
@@ -56,10 +57,13 @@ class ConceptResolver:
         """Saves relations to cache."""
         conn = sqlite3.connect(self.cache_path)
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             INSERT OR REPLACE INTO concept_cache (term, data, timestamp)
             VALUES (?, ?, CURRENT_TIMESTAMP)
-        """, (term.lower(), json.dumps(data)))
+        """,
+            (term.lower(), json.dumps(data)),
+        )
         conn.commit()
         conn.close()
 
@@ -83,17 +87,25 @@ class ConceptResolver:
 
             # Filter for core relations
             core_relations = []
-            interesting_rels = ['/r/IsA', '/r/UsedFor', '/r/PartOf', '/r/HasProperty', '/r/CapableOf']
+            interesting_rels = [
+                "/r/IsA",
+                "/r/UsedFor",
+                "/r/PartOf",
+                "/r/HasProperty",
+                "/r/CapableOf",
+            ]
 
-            for edge in raw_data.get('edges', []):
-                rel = edge.get('rel', {}).get('@id')
+            for edge in raw_data.get("edges", []):
+                rel = edge.get("rel", {}).get("@id")
                 if rel in interesting_rels:
-                    core_relations.append({
-                        'start': edge.get('start', {}).get('label'),
-                        'rel': rel.split('/')[-1],
-                        'end': edge.get('end', {}).get('label'),
-                        'weight': edge.get('weight', 1.0)
-                    })
+                    core_relations.append(
+                        {
+                            "start": edge.get("start", {}).get("label"),
+                            "rel": rel.split("/")[-1],
+                            "end": edge.get("end", {}).get("label"),
+                            "weight": edge.get("weight", 1.0),
+                        }
+                    )
 
             self._save_to_cache(term, core_relations)
             return core_relations
@@ -111,8 +123,8 @@ class ConceptResolver:
         expanded = {term.lower()}
 
         for rel in relations:
-            expanded.add(rel['start'].lower())
-            expanded.add(rel['end'].lower())
+            expanded.add(rel["start"].lower())
+            expanded.add(rel["end"].lower())
 
         return list(expanded)
 
@@ -128,18 +140,18 @@ class ConceptResolver:
         # Look for the specific relation in the fetched data
         # Mapping common English relation terms to ConceptNet IDs
         rel_map = {
-            'is a': 'IsA',
-            'used for': 'UsedFor',
-            'part of': 'PartOf',
-            'has': 'HasProperty',
-            'can': 'CapableOf'
+            "is a": "IsA",
+            "used for": "UsedFor",
+            "part of": "PartOf",
+            "has": "HasProperty",
+            "can": "CapableOf",
         }
 
         target_rel = rel_map.get(relation.lower(), relation)
 
         match = None
         for r in relations:
-            if r['rel'].lower() == target_rel.lower() and r['end'].lower() == obj:
+            if r["rel"].lower() == target_rel.lower() and r["end"].lower() == obj:
                 match = r
                 break
 
@@ -147,8 +159,8 @@ class ConceptResolver:
             return {
                 "veracity": "verified",
                 "score": 1.0,
-                "confidence": match['weight'],
-                "evidence": f"ConceptNet confirms: {subject} {relation} {obj}"
+                "confidence": match["weight"],
+                "evidence": f"ConceptNet confirms: {subject} {relation} {obj}",
             }
         else:
             # If no direct match, could be "unknown" or "contradiction"
@@ -157,5 +169,5 @@ class ConceptResolver:
                 "veracity": "unverified",
                 "score": 0.0,
                 "confidence": 0.5,
-                "evidence": f"No direct evidence found in ConceptNet for: {subject} {relation} {obj}"
+                "evidence": f"No direct evidence found in ConceptNet for: {subject} {relation} {obj}",
             }

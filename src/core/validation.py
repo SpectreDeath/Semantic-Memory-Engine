@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 try:
     from pydantic import BaseModel, ConfigDict, Field, field_validator
     from pydantic import ValidationError as PydanticValidationError
+
     PYDANTIC_AVAILABLE = True
 except ImportError:
     PYDANTIC_AVAILABLE = False
@@ -67,7 +68,6 @@ class ValidationError(ValueError):
 
 
 if PYDANTIC_AVAILABLE:
-
     T = TypeVar("T", bound=BaseModel)
 
     # ============================================================================
@@ -79,9 +79,7 @@ if PYDANTIC_AVAILABLE:
 
         text: str = Field(..., min_length=1, max_length=1000, description="Search query text")
         limit: int = Field(default=10, ge=1, le=100, description="Max results to return")
-        threshold: float = Field(
-            default=0.5, ge=0.0, le=1.0, description="Similarity threshold"
-        )
+        threshold: float = Field(default=0.5, ge=0.0, le=1.0, description="Similarity threshold")
         offset: int = Field(default=0, ge=0, description="Result offset for pagination")
 
         @field_validator("text")
@@ -154,9 +152,7 @@ if PYDANTIC_AVAILABLE:
             valid_types = {"sentiment", "entities", "summary", "keywords"}
             invalid = [t for t in v if t not in valid_types]
             if invalid:
-                raise ValueError(
-                    f"Invalid analysis types: {invalid}. Valid: {valid_types}"
-                )
+                raise ValueError(f"Invalid analysis types: {invalid}. Valid: {valid_types}")
             return v
 
         model_config = ConfigDict(
@@ -175,7 +171,9 @@ if PYDANTIC_AVAILABLE:
         enabled: bool = Field(default=True, description="Enable caching")
         backend: str = Field(default="lru", description="Cache backend (lru or redis)")
         max_size: int = Field(default=1000, ge=10, le=100000, description="Max cache entries")
-        default_ttl: int = Field(default=3600, ge=60, le=86400, description="Default TTL in seconds")
+        default_ttl: int = Field(
+            default=3600, ge=60, le=86400, description="Default TTL in seconds"
+        )
         redis_host: str | None = Field(default="localhost", description="Redis host")
         redis_port: int = Field(default=6379, ge=1, le=65535, description="Redis port")
 
@@ -201,11 +199,13 @@ if PYDANTIC_AVAILABLE:
         except PydanticValidationError as e:
             errors = []
             for error in e.errors():
-                errors.append({
-                    "field": ".".join(str(x) for x in error["loc"]),
-                    "message": error["msg"],
-                    "type": error["type"],
-                })
+                errors.append(
+                    {
+                        "field": ".".join(str(x) for x in error["loc"]),
+                        "message": error["msg"],
+                        "type": error["type"],
+                    }
+                )
 
             if strict:
                 raise ValidationError(
@@ -218,7 +218,9 @@ if PYDANTIC_AVAILABLE:
 else:
     # Fallback validation without Pydantic
 
-    def validate_input(data: Any, schema_class: type | None = None, strict: bool = False) -> dict | None:
+    def validate_input(
+        data: Any, schema_class: type | None = None, strict: bool = False
+    ) -> dict | None:
         """Fallback validation without Pydantic."""
         logger.warning("Pydantic not available, using basic validation")
         return data
@@ -239,28 +241,21 @@ class Validator:
 
     # Patterns for injection detection
     SQL_INJECTION_PATTERN = re.compile(
-        r"(\bUNION\b|\bSELECT\b|\bDROP\b|\bINSERT\b|\bDELETE\b|\bUPDATE\b|\b--\b)",
-        re.IGNORECASE
+        r"(\bUNION\b|\bSELECT\b|\bDROP\b|\bINSERT\b|\bDELETE\b|\bUPDATE\b|\b--\b)", re.IGNORECASE
     )
-    XSS_PATTERN = re.compile(
-        r"(<script|<iframe|javascript:|onerror=|onload=)",
-        re.IGNORECASE
-    )
+    XSS_PATTERN = re.compile(r"(<script|<iframe|javascript:|onerror=|onload=)", re.IGNORECASE)
 
     @staticmethod
-    def validate_text(text: str, max_length: int = MAX_TEXT_LENGTH,
-                     min_length: int = 1) -> str:
+    def validate_text(text: str, max_length: int = MAX_TEXT_LENGTH, min_length: int = 1) -> str:
         """Validate text input."""
         if not isinstance(text, str):
             raise ValidationError(f"Text must be string, got {type(text).__name__}")
 
         if len(text) < min_length:
-            raise ValidationError(
-                f"Text too short (min {min_length}, got {len(text)})")
+            raise ValidationError(f"Text too short (min {min_length}, got {len(text)})")
 
         if len(text) > max_length:
-            raise ValidationError(
-                f"Text too long (max {max_length}, got {len(text)})")
+            raise ValidationError(f"Text too long (max {max_length}, got {len(text)})")
 
         if not text.strip():
             raise ValidationError("Text cannot be empty or whitespace-only")
@@ -285,8 +280,9 @@ class Validator:
         return query
 
     @staticmethod
-    def validate_number(value: Any, min_val: float | None = None,
-                       max_val: float | None = None) -> float:
+    def validate_number(
+        value: Any, min_val: float | None = None, max_val: float | None = None
+    ) -> float:
         """Validate numeric input."""
         try:
             num = float(value)
@@ -302,15 +298,13 @@ class Validator:
         return num
 
     @staticmethod
-    def validate_batch(documents: list[str],
-                      max_size: int = MAX_BATCH_SIZE) -> list[str]:
+    def validate_batch(documents: list[str], max_size: int = MAX_BATCH_SIZE) -> list[str]:
         """Validate batch of documents."""
         if not isinstance(documents, list):
             raise ValidationError(f"Expected list, got {type(documents).__name__}")
 
         if len(documents) > max_size:
-            raise ValidationError(
-                f"Batch too large (max {max_size}, got {len(documents)})")
+            raise ValidationError(f"Batch too large (max {max_size}, got {len(documents)})")
 
         if len(documents) == 0:
             raise ValidationError("Batch cannot be empty")
@@ -329,13 +323,13 @@ class Validator:
     def sanitize_text(text: str) -> str:
         """Sanitize text by removing/escaping dangerous characters."""
         # Remove control characters
-        text = ''.join(c for c in text if ord(c) >= 32 or c.isspace())
+        text = "".join(c for c in text if ord(c) >= 32 or c.isspace())
 
         # Remove known injection patterns
-        text = re.sub(r'<script.*?</script>', '', text, flags=re.IGNORECASE | re.DOTALL)
-        text = re.sub(r'javascript:', '', text, flags=re.IGNORECASE)
-        text = re.sub(r'onerror=', '', text, flags=re.IGNORECASE)
-        text = re.sub(r'onload=', '', text, flags=re.IGNORECASE)
+        text = re.sub(r"<script.*?</script>", "", text, flags=re.IGNORECASE | re.DOTALL)
+        text = re.sub(r"javascript:", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"onerror=", "", text, flags=re.IGNORECASE)
+        text = re.sub(r"onload=", "", text, flags=re.IGNORECASE)
 
         return text.strip()
 
@@ -349,7 +343,8 @@ class Validator:
             if not isinstance(config[key], expected_type):
                 raise ValidationError(
                     f"Config key '{key}' should be {expected_type.__name__}, "
-                    f"got {type(config[key]).__name__}")
+                    f"got {type(config[key]).__name__}"
+                )
 
         logger.debug("Config validation passed")
         return config
@@ -357,7 +352,7 @@ class Validator:
     @staticmethod
     def validate_email(email: str) -> str:
         """Validate email format."""
-        pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(pattern, email):
             raise ValidationError(f"Invalid email format: {email}")
         return email

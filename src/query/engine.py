@@ -17,6 +17,7 @@ mcp = FastMCP("RetrievalQuery")
 
 DB_PATH = os.path.normpath("D:/mcp_servers/storage/laboratory.db")
 
+
 class SemanticSearchEngine:
     """Provides semantic search capabilities."""
 
@@ -42,12 +43,12 @@ class SemanticSearchEngine:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            cursor.execute('''
+            cursor.execute("""
                 SELECT source_file, timestamp, neg, neu, pos, compound
                 FROM sentiment_logs
                 ORDER BY timestamp DESC
                 LIMIT 100
-            ''')
+            """)
 
             results = cursor.fetchall()
             conn.close()
@@ -56,15 +57,22 @@ class SemanticSearchEngine:
             scored_results = []
             for row in results:
                 similarity = self._calculate_similarity(query, row[0])
-                scored_results.append({
-                    'source': row[0],
-                    'timestamp': row[1],
-                    'sentiment': {'neg': row[2], 'neu': row[3], 'pos': row[4], 'compound': row[5]},
-                    'similarity_score': similarity
-                })
+                scored_results.append(
+                    {
+                        "source": row[0],
+                        "timestamp": row[1],
+                        "sentiment": {
+                            "neg": row[2],
+                            "neu": row[3],
+                            "pos": row[4],
+                            "compound": row[5],
+                        },
+                        "similarity_score": similarity,
+                    }
+                )
 
             # Sort by similarity and return top k
-            scored_results.sort(key=lambda x: x['similarity_score'], reverse=True)
+            scored_results.sort(key=lambda x: x["similarity_score"], reverse=True)
             return scored_results[:top_k]
 
         except Exception:
@@ -76,36 +84,39 @@ class SemanticSearchEngine:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT source_file, timestamp, compound, COUNT(*) as mentions
                 FROM sentiment_logs
                 WHERE source_file LIKE ?
                 GROUP BY source_file
                 ORDER BY mentions DESC, timestamp DESC
-            ''', (f'%{entity_name}%',))
+            """,
+                (f"%{entity_name}%",),
+            )
 
             results = cursor.fetchall()
             conn.close()
 
             entity_profile = {
-                'entity': entity_name,
-                'total_mentions': sum(r[3] for r in results),
-                'unique_sources': len(results),
-                'mentions_by_source': [
+                "entity": entity_name,
+                "total_mentions": sum(r[3] for r in results),
+                "unique_sources": len(results),
+                "mentions_by_source": [
                     {
-                        'source': r[0],
-                        'timestamp': r[1],
-                        'sentiment_compound': r[2],
-                        'mention_count': r[3]
+                        "source": r[0],
+                        "timestamp": r[1],
+                        "sentiment_compound": r[2],
+                        "mention_count": r[3],
                     }
                     for r in results
-                ]
+                ],
             }
 
             return entity_profile
 
         except Exception as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
 
 
 class FactVerificationChecker:
@@ -119,43 +130,51 @@ class FactVerificationChecker:
             cursor = conn.cursor()
 
             # Extract sentiment value from claim (e.g., "compound > 0.5")
-            match = re.search(r'compound\s*([><]=?)\s*([-\d.]+)', claim, re.I)
+            match = re.search(r"compound\s*([><]=?)\s*([-\d.]+)", claim, re.I)
 
             if match:
                 operator = match.group(1)
                 threshold = float(match.group(2))
 
                 # Query database
-                if operator == '>':
-                    cursor.execute('SELECT COUNT(*) FROM sentiment_logs WHERE compound > ?', (threshold,))
-                elif operator == '<':
-                    cursor.execute('SELECT COUNT(*) FROM sentiment_logs WHERE compound < ?', (threshold,))
-                elif operator == '>=':
-                    cursor.execute('SELECT COUNT(*) FROM sentiment_logs WHERE compound >= ?', (threshold,))
-                elif operator == '<=':
-                    cursor.execute('SELECT COUNT(*) FROM sentiment_logs WHERE compound <= ?', (threshold,))
+                if operator == ">":
+                    cursor.execute(
+                        "SELECT COUNT(*) FROM sentiment_logs WHERE compound > ?", (threshold,)
+                    )
+                elif operator == "<":
+                    cursor.execute(
+                        "SELECT COUNT(*) FROM sentiment_logs WHERE compound < ?", (threshold,)
+                    )
+                elif operator == ">=":
+                    cursor.execute(
+                        "SELECT COUNT(*) FROM sentiment_logs WHERE compound >= ?", (threshold,)
+                    )
+                elif operator == "<=":
+                    cursor.execute(
+                        "SELECT COUNT(*) FROM sentiment_logs WHERE compound <= ?", (threshold,)
+                    )
 
                 count = cursor.fetchone()[0]
 
-                cursor.execute('SELECT COUNT(*) FROM sentiment_logs')
+                cursor.execute("SELECT COUNT(*) FROM sentiment_logs")
                 total = cursor.fetchone()[0]
 
                 conn.close()
 
                 return {
-                    'claim': claim,
-                    'verified': count > 0,
-                    'matching_records': count,
-                    'total_records': total,
-                    'percentage': round(100 * count / total, 2) if total > 0 else 0,
-                    'verification_confidence': 0.95 if count > 10 else 0.7 if count > 0 else 0.0
+                    "claim": claim,
+                    "verified": count > 0,
+                    "matching_records": count,
+                    "total_records": total,
+                    "percentage": round(100 * count / total, 2) if total > 0 else 0,
+                    "verification_confidence": 0.95 if count > 10 else 0.7 if count > 0 else 0.0,
                 }
 
             conn.close()
-            return {'claim': claim, 'error': 'Could not parse claim format'}
+            return {"claim": claim, "error": "Could not parse claim format"}
 
         except Exception as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
 
     @staticmethod
     def verify_entity_pattern(entity: str, pattern: str) -> dict[str, Any]:
@@ -165,46 +184,51 @@ class FactVerificationChecker:
             cursor = conn.cursor()
 
             # Get all records for entity
-            cursor.execute('''
+            cursor.execute(
+                """
                 SELECT compound, timestamp FROM sentiment_logs
                 WHERE source_file LIKE ?
                 ORDER BY timestamp DESC
-            ''', (f'%{entity}%',))
+            """,
+                (f"%{entity}%",),
+            )
 
             results = cursor.fetchall()
             conn.close()
 
             if not results:
-                return {'entity': entity, 'pattern': pattern, 'found': False}
+                return {"entity": entity, "pattern": pattern, "found": False}
 
             compounds = [r[0] for r in results]
 
             # Analyze patterns
             analysis = {
-                'entity': entity,
-                'pattern': pattern,
-                'records_analyzed': len(compounds),
-                'avg_sentiment': round(sum(compounds) / len(compounds), 4),
-                'max_sentiment': max(compounds),
-                'min_sentiment': min(compounds),
-                'volatility': round(max(compounds) - min(compounds), 4)
+                "entity": entity,
+                "pattern": pattern,
+                "records_analyzed": len(compounds),
+                "avg_sentiment": round(sum(compounds) / len(compounds), 4),
+                "max_sentiment": max(compounds),
+                "min_sentiment": min(compounds),
+                "volatility": round(max(compounds) - min(compounds), 4),
             }
 
             # Check pattern
-            if (pattern == 'consistently_negative' and all(c < -0.3 for c in compounds)) or (pattern == 'consistently_positive' and all(c > 0.3 for c in compounds)):
-                analysis['pattern_match'] = True
-                analysis['confidence'] = 0.95
-            elif pattern == 'volatile' and analysis['volatility'] > 1.5:
-                analysis['pattern_match'] = True
-                analysis['confidence'] = 0.85
+            if (pattern == "consistently_negative" and all(c < -0.3 for c in compounds)) or (
+                pattern == "consistently_positive" and all(c > 0.3 for c in compounds)
+            ):
+                analysis["pattern_match"] = True
+                analysis["confidence"] = 0.95
+            elif pattern == "volatile" and analysis["volatility"] > 1.5:
+                analysis["pattern_match"] = True
+                analysis["confidence"] = 0.85
             else:
-                analysis['pattern_match'] = False
-                analysis['confidence'] = 0.3
+                analysis["pattern_match"] = False
+                analysis["confidence"] = 0.3
 
             return analysis
 
         except Exception as e:
-            return {'error': str(e)}
+            return {"error": str(e)}
 
 
 class ContextWindowOptimizer:
@@ -217,19 +241,19 @@ class ContextWindowOptimizer:
         Estimates tokens using word count * 1.33 (conservative estimate).
         """
         optimization = {
-            'max_tokens': max_tokens,
-            'original_facts': len(facts),
-            'estimated_original_tokens': 0,
-            'selected_facts': [],
-            'estimated_final_tokens': 0,
-            'optimization_ratio': 0.0
+            "max_tokens": max_tokens,
+            "original_facts": len(facts),
+            "estimated_original_tokens": 0,
+            "selected_facts": [],
+            "estimated_final_tokens": 0,
+            "optimization_ratio": 0.0,
         }
 
         # Calculate token estimates
         for fact in facts:
             fact_text = json.dumps(fact)
             estimated_tokens = len(fact_text.split()) * 1.33
-            optimization['estimated_original_tokens'] += estimated_tokens
+            optimization["estimated_original_tokens"] += estimated_tokens
 
         # Select facts within budget
         token_budget = max_tokens
@@ -242,15 +266,15 @@ class ContextWindowOptimizer:
             if fact_tokens <= token_budget:
                 selected.append(fact)
                 token_budget -= fact_tokens
-                optimization['estimated_final_tokens'] += fact_tokens
+                optimization["estimated_final_tokens"] += fact_tokens
 
-        optimization['selected_facts'] = selected
-        optimization['facts_selected'] = len(selected)
+        optimization["selected_facts"] = selected
+        optimization["facts_selected"] = len(selected)
 
-        if optimization['estimated_original_tokens'] > 0:
-            optimization['optimization_ratio'] = round(
-                optimization['estimated_final_tokens'] / optimization['estimated_original_tokens'],
-                3
+        if optimization["estimated_original_tokens"] > 0:
+            optimization["optimization_ratio"] = round(
+                optimization["estimated_final_tokens"] / optimization["estimated_original_tokens"],
+                3,
             )
 
         return optimization
@@ -262,13 +286,13 @@ class ContextWindowOptimizer:
         estimated_tokens = words * 1.33
 
         return {
-            'text_length': len(text),
-            'word_count': words,
-            'estimated_tokens': round(estimated_tokens),
-            'token_estimation_method': 'word_count * 1.33',
-            'fits_in_4k_window': estimated_tokens < 4000,
-            'fits_in_8k_window': estimated_tokens < 8000,
-            'fits_in_16k_window': estimated_tokens < 16000,
+            "text_length": len(text),
+            "word_count": words,
+            "estimated_tokens": round(estimated_tokens),
+            "token_estimation_method": "word_count * 1.33",
+            "fits_in_4k_window": estimated_tokens < 4000,
+            "fits_in_8k_window": estimated_tokens < 8000,
+            "fits_in_16k_window": estimated_tokens < 16000,
         }
 
 
@@ -276,53 +300,55 @@ class QueryResponseBuilder:
     """Builds optimized query responses."""
 
     @staticmethod
-    def build_response(query: str, context_facts: list[dict[str, Any]], response_type: str = "analytical") -> dict[str, Any]:
+    def build_response(
+        query: str, context_facts: list[dict[str, Any]], response_type: str = "analytical"
+    ) -> dict[str, Any]:
         """Builds a response with optimized context."""
         response = {
-            'query': query,
-            'query_type': response_type,
-            'context_facts_count': len(context_facts),
-            'response_structure': [],
-            'recommendations': []
+            "query": query,
+            "query_type": response_type,
+            "context_facts_count": len(context_facts),
+            "response_structure": [],
+            "recommendations": [],
         }
 
         if response_type == "analytical":
-            response['response_structure'] = [
-                'fact_summary',
-                'pattern_analysis',
-                'sentiment_profile',
-                'recommendations'
+            response["response_structure"] = [
+                "fact_summary",
+                "pattern_analysis",
+                "sentiment_profile",
+                "recommendations",
             ]
-            response['recommendations'] = [
-                'Cross-reference with multiple sources',
-                'Verify temporal consistency',
-                'Check for contradictions'
+            response["recommendations"] = [
+                "Cross-reference with multiple sources",
+                "Verify temporal consistency",
+                "Check for contradictions",
             ]
 
         elif response_type == "rhetorical":
-            response['response_structure'] = [
-                'moral_foundation_analysis',
-                'rhetorical_devices_used',
-                'persuasion_techniques',
-                'counter_arguments'
+            response["response_structure"] = [
+                "moral_foundation_analysis",
+                "rhetorical_devices_used",
+                "persuasion_techniques",
+                "counter_arguments",
             ]
-            response['recommendations'] = [
-                'Analyze underlying moral frameworks',
-                'Identify emotional appeals',
-                'Look for logical fallacies'
+            response["recommendations"] = [
+                "Analyze underlying moral frameworks",
+                "Identify emotional appeals",
+                "Look for logical fallacies",
             ]
 
         elif response_type == "behavioral":
-            response['response_structure'] = [
-                'entity_profile',
-                'behavioral_patterns',
-                'sentiment_trends',
-                'anomalies'
+            response["response_structure"] = [
+                "entity_profile",
+                "behavioral_patterns",
+                "sentiment_trends",
+                "anomalies",
             ]
-            response['recommendations'] = [
-                'Track consistency over time',
-                'Identify behavior changes',
-                'Monitor for new patterns'
+            response["recommendations"] = [
+                "Track consistency over time",
+                "Identify behavior changes",
+                "Monitor for new patterns",
             ]
 
         return response
@@ -338,15 +364,19 @@ def semantic_search(query: str, top_k: int = 10) -> str:
         engine = SemanticSearchEngine(DB_PATH)
         results = engine.semantic_search(query, top_k)
 
-        return json.dumps({
-            'query': query,
-            'results_count': len(results),
-            'results': results,
-            'status': 'success'
-        }, indent=2, default=str)
+        return json.dumps(
+            {
+                "query": query,
+                "results_count": len(results),
+                "results": results,
+                "status": "success",
+            },
+            indent=2,
+            default=str,
+        )
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -361,7 +391,7 @@ def entity_search(entity_name: str) -> str:
         return json.dumps(result, indent=2, default=str)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -375,7 +405,7 @@ def verify_sentiment_claim(claim: str) -> str:
         return json.dumps(result, indent=2)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -389,7 +419,7 @@ def verify_entity_pattern(entity: str, pattern: str) -> str:
         return json.dumps(result, indent=2)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -407,7 +437,7 @@ def optimize_context_window(facts_json: str, max_tokens: int = 4000) -> str:
         return json.dumps(result, indent=2, default=str)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -421,7 +451,7 @@ def estimate_context_size(text: str) -> str:
         return json.dumps(result, indent=2)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 @mcp.tool()
@@ -439,7 +469,7 @@ def build_query_response(query: str, facts_json: str, response_type: str = "anal
         return json.dumps(result, indent=2, default=str)
 
     except Exception as e:
-        return json.dumps({'error': str(e)})
+        return json.dumps({"error": str(e)})
 
 
 if __name__ == "__main__":

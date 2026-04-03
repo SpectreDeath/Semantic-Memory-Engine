@@ -165,23 +165,17 @@ class DocumentProcessor:
                 original_len = len(markdown_text)
                 markdown_text = self._redact_entities(markdown_text)
                 logger.info(
-                    f"Redaction pass complete: "
-                    f"{original_len:,} → {len(markdown_text):,} chars"
+                    f"Redaction pass complete: {original_len:,} → {len(markdown_text):,} chars"
                 )
 
-            logger.info(
-                f"Conversion complete: {path.name} "
-                f"({len(markdown_text):,} chars)"
-            )
+            logger.info(f"Conversion complete: {path.name} ({len(markdown_text):,} chars)")
             return markdown_text
 
         except MemoryError:
             raise  # Re-raise OOM without wrapping
         except Exception as e:
             logger.exception(f"MarkItDown conversion failed for {path.name}: {e}")
-            raise RuntimeError(
-                f"Failed to convert '{path.name}': {e}"
-            ) from e
+            raise RuntimeError(f"Failed to convert '{path.name}': {e}") from e
 
     def supported_types(self) -> list[str]:
         """Return a sorted list of supported file extensions."""

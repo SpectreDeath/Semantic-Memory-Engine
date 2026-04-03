@@ -6,6 +6,7 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+
 class PyStylWrapper:
     """
     Lightweight, native Python stylometry fallback.
@@ -16,7 +17,7 @@ class PyStylWrapper:
     def __init__(self):
         """Initialize the lightweight wrapper."""
         # Pre-compile regex for speed
-        self._word_pattern = re.compile(r'\b\w+\b')
+        self._word_pattern = re.compile(r"\b\w+\b")
         logger.info("⚡ PyStylWrapper initialized")
 
     def _tokenize(self, text: str) -> list[str]:
@@ -68,7 +69,7 @@ class PyStylWrapper:
 
         if not tokens_a or not tokens_b:
             logger.warning("Empty text provided for comparison.")
-            return float('inf')
+            return float("inf")
 
         # 1. Build combined vocabulary for feature selection
         # We need the most frequent words in the *joint* corpus (or usually the larger corpus)

@@ -6,17 +6,19 @@ from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP("NetworkProbe")
 
+
 @mcp.tool()
 def check_latency(host: str = "8.8.8.8") -> str:
     """Measures the round-trip time to a specific host (ms)."""
     try:
         # ping3.ping returns time in seconds, we convert to ms
-        latency = ping3.ping(host, unit='ms')
+        latency = ping3.ping(host, unit="ms")
         if latency is None:
             return f"Latency Check: {host} is unreachable."
         return f"Latency to {host}: {latency:.2f} ms"
     except Exception as e:
         return f"Latency Error: {e!s}"
+
 
 @mcp.tool()
 def verify_connectivity(urls: list[str] | None = None) -> str:
@@ -34,6 +36,7 @@ def verify_connectivity(urls: list[str] | None = None) -> str:
             results.append(f"{url}: Offline ({type(e).__name__})")
 
     return "\n".join(results)
+
 
 @mcp.tool()
 def get_network_summary() -> str:
@@ -55,6 +58,7 @@ def get_network_summary() -> str:
         f"\n--- Connectivity ---\n"
         f"{connectivity}"
     )
+
 
 if __name__ == "__main__":
     mcp.run()

@@ -69,11 +69,7 @@ class CloudFetcher:
 
         # HTTP client with reasonable timeout
         self.client = httpx.AsyncClient(
-            timeout=30.0,
-            follow_redirects=True,
-            headers={
-                "User-Agent": "SME-CloudFetcher/1.0"
-            }
+            timeout=30.0, follow_redirects=True, headers={"User-Agent": "SME-CloudFetcher/1.0"}
         )
 
     def _detect_provider(self, url: str) -> str:
@@ -90,10 +86,7 @@ class CloudFetcher:
         return Path(self.cache_dir) / f"{url_hash}.cache"
 
     async def fetch(
-        self,
-        url: str,
-        use_cache: bool = True,
-        force_download: bool = False
+        self, url: str, use_cache: bool = True, force_download: bool = False
     ) -> dict[str, Any]:
         """
         Fetch content from a cloud storage URL.
@@ -117,7 +110,7 @@ class CloudFetcher:
                     "filename": cache_path.stem,
                     "mime_type": self._guess_mime_type(cache_path.name),
                     "provider": self._detect_provider(url),
-                    "cached": True
+                    "cached": True,
                 }
 
         # Detect provider and fetch
@@ -148,11 +141,7 @@ class CloudFetcher:
 
         except Exception as e:
             logger.exception(f"CloudFetcher: Failed to fetch {url}: {e}")
-            return {
-                "error": str(e),
-                "provider": provider,
-                "cached": False
-            }
+            return {"error": str(e), "provider": provider, "cached": False}
 
     async def _fetch_google_drive(self, url: str) -> dict[str, Any]:
         """Fetch from Google Drive shared link."""
@@ -174,7 +163,7 @@ class CloudFetcher:
         return {
             "content": response.content,
             "filename": self._extract_filename(response, url),
-            "mime_type": response.headers.get("content-type", "application/octet-stream")
+            "mime_type": response.headers.get("content-type", "application/octet-stream"),
         }
 
     async def _fetch_dropbox(self, url: str) -> dict[str, Any]:
@@ -193,7 +182,7 @@ class CloudFetcher:
         return {
             "content": response.content,
             "filename": self._extract_filename(response, url),
-            "mime_type": response.headers.get("content-type", "application/octet-stream")
+            "mime_type": response.headers.get("content-type", "application/octet-stream"),
         }
 
     async def _fetch_onedrive(self, url: str) -> dict[str, Any]:
@@ -206,7 +195,7 @@ class CloudFetcher:
         return {
             "content": response.content,
             "filename": self._extract_filename(response, url),
-            "mime_type": response.headers.get("content-type", "application/octet-stream")
+            "mime_type": response.headers.get("content-type", "application/octet-stream"),
         }
 
     async def _fetch_s3(self, url: str) -> dict[str, Any]:
@@ -217,7 +206,7 @@ class CloudFetcher:
         return {
             "content": response.content,
             "filename": self._extract_filename(response, url),
-            "mime_type": response.headers.get("content-type", "application/octet-stream")
+            "mime_type": response.headers.get("content-type", "application/octet-stream"),
         }
 
     async def _fetch_generic(self, url: str) -> dict[str, Any]:
@@ -228,7 +217,7 @@ class CloudFetcher:
         return {
             "content": response.content,
             "filename": self._extract_filename(response, url),
-            "mime_type": response.headers.get("content-type", "application/octet-stream")
+            "mime_type": response.headers.get("content-type", "application/octet-stream"),
         }
 
     def _extract_filename(self, response: httpx.Response, url: str) -> str:
@@ -281,6 +270,7 @@ import asyncio
 
 def fetch_sync(url: str, **kwargs) -> dict[str, Any]:
     """Synchronous wrapper for CloudFetcher.fetch()"""
+
     async def _fetch():
         fetcher = CloudFetcher()
         try:

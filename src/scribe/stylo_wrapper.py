@@ -6,6 +6,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class StyloWrapper:
     """
     Python wrapper for the R 'stylo' package.
@@ -24,11 +25,11 @@ class StyloWrapper:
             from rpy2.robjects.packages import importr, isinstalled
 
             # Check for R version
-            robjects.r['version']
+            robjects.r["version"]
             self.r_available = True
 
             # Check for stylo package
-            if isinstalled('stylo'):
+            if isinstalled("stylo"):
                 self.stylo_available = True
                 logger.info("✅ R and 'stylo' package detected.")
             else:
@@ -44,7 +45,7 @@ class StyloWrapper:
         return {
             "r_available": self.r_available,
             "stylo_available": self.stylo_available,
-            "ready": self.r_available and self.stylo_available
+            "ready": self.r_available and self.stylo_available,
         }
 
     def analyze_distance(self, target_text: str, corpus_folder: str) -> list[dict[str, Any]]:
@@ -59,7 +60,9 @@ class StyloWrapper:
             Ranked list of authors and their distance scores.
         """
         if not self.r_available or not self.stylo_available:
-            raise RuntimeError("R Stylo environment is not configured. Please install R, stylo, and rpy2.")
+            raise RuntimeError(
+                "R Stylo environment is not configured. Please install R, stylo, and rpy2."
+            )
 
         if not os.path.exists(corpus_folder):
             raise FileNotFoundError(f"Corpus folder not found: {corpus_folder}")
@@ -82,7 +85,8 @@ class StyloWrapper:
 
             try:
                 from rpy2.robjects.packages import importr
-                stylo_api = importr('stylo')
+
+                stylo_api = importr("stylo")
 
                 # Call stylo in batch mode
                 # working.directory is where stylo reads/writes its files
@@ -91,7 +95,7 @@ class StyloWrapper:
                     analysis_type="Delta",
                     working_directory=temp_dir,
                     display_on_screen=False,
-                    save_distance_table=True
+                    save_distance_table=True,
                 )
 
                 # Parse distance_table.txt
@@ -100,7 +104,9 @@ class StyloWrapper:
                 dist_file = os.path.join(temp_dir, "distance_table.txt")
                 if not os.path.exists(dist_file):
                     # Sometimes stylo puts things in a sub-folder based on analysis
-                    dist_file = os.path.join(temp_dir, "unknown_text_dist_table.txt") # Example variations
+                    dist_file = os.path.join(
+                        temp_dir, "unknown_text_dist_table.txt"
+                    )  # Example variations
 
                 results = self._parse_distances(temp_dir)
                 return results
@@ -116,4 +122,4 @@ class StyloWrapper:
         # Logic to read distance_table.txt or equivalent and return sorted results
         # For prototype, we verify if the file was created.
         logger.info(f"Parsing results in {temp_dir}")
-        return [{"author": "demo", "distance": 0.0}] # Placeholder for actual parsing logic
+        return [{"author": "demo", "distance": 0.0}]  # Placeholder for actual parsing logic

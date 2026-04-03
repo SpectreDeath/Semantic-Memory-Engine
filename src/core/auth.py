@@ -22,6 +22,7 @@ from pydantic import BaseModel
 # In production, these MUST be set or the application will refuse to start
 _SECRETS_CHECKED = False
 
+
 def _get_secret_key() -> str:
     """Get SECRET_KEY from environment or raise error."""
     global _SECRETS_CHECKED
@@ -29,6 +30,7 @@ def _get_secret_key() -> str:
     if not key:
         if not _SECRETS_CHECKED:
             import logging
+
             logging.getLogger(__name__).critical(
                 "SECRET_KEY environment variable not set! "
                 "Set SME_GATEWAY_SECRET in .env file. "
@@ -39,9 +41,11 @@ def _get_secret_key() -> str:
         return "INSECURE_DEFAULT_DO_NOT_USE_IN_PRODUCTION"
     return key
 
+
 def _get_admin_api_key() -> str | None:
     """Get ADMIN_API_KEY from environment."""
     return os.getenv("ADMIN_API_KEY")
+
 
 SECRET_KEY = _get_secret_key()
 ALGORITHM = "HS256"
@@ -52,14 +56,17 @@ ADMIN_API_KEY = _get_admin_api_key()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token", auto_error=False)
 api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
 
+
 class User(BaseModel):
     username: str
     roles: list[str] = ["user"]
     tenant_id: str = "default"
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     """Create a new JWT access token."""
@@ -72,9 +79,9 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 async def get_current_user(
-    token: str | None = Depends(oauth2_scheme),
-    api_key: str | None = Depends(api_key_header)
+    token: str | None = Depends(oauth2_scheme), api_key: str | None = Depends(api_key_header)
 ) -> User:
     """
     Validate credentials (JWT or API Key) and return current user.
@@ -103,10 +110,11 @@ async def get_current_user(
         return User(
             username=username,
             roles=payload.get("roles", ["user"]),
-            tenant_id=payload.get("tenant_id", "default")
+            tenant_id=payload.get("tenant_id", "default"),
         )
     except JWTError:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
+
 
 def check_admin(user: User = Depends(get_current_user)):
     """Check if user has admin privileges."""

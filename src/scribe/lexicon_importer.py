@@ -12,6 +12,7 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
+
 class LexiconImporter:
     """
     Production-ready Lexicon Importer for the Scribe Engine.
@@ -23,8 +24,9 @@ class LexiconImporter:
         if db_path is None:
             # Default to centrifuge_db.sqlite as per convention
             from src.core.config import Config
+
             config = Config()
-            base_dir = config.get('storage.base_dir', './data')
+            base_dir = config.get("storage.base_dir", "./data")
             self.db_path = os.path.join(base_dir, "storage", "centrifuge_db.sqlite")
         else:
             self.db_path = db_path
@@ -51,7 +53,9 @@ class LexiconImporter:
 
             # Index for fast lookup during forensic analysis
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_signal_word ON rhetorical_signals(word)")
-            cursor.execute("CREATE INDEX IF NOT EXISTS idx_signal_type ON rhetorical_signals(signal_type)")
+            cursor.execute(
+                "CREATE INDEX IF NOT EXISTS idx_signal_type ON rhetorical_signals(signal_type)"
+            )
 
             conn.commit()
             logger.info("✅ rhetorical_signals table initialized")
@@ -60,7 +64,7 @@ class LexiconImporter:
 
     def _stream_csv(self, file_path: str) -> Generator[dict[str, str], None, None]:
         """Read CSV file line-by-line to keep memory usage low."""
-        with open(file_path, encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             yield from reader
 
@@ -68,7 +72,7 @@ class LexiconImporter:
         """Read JSON file (assumes list of objects) iteratively."""
         # For very large JSONs, ijson would be better, but for now we use a generator
         # around the loaded data if it's a standard list.
-        with open(file_path, encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             data = json.load(f)
             if isinstance(data, list):
                 yield from data
@@ -80,7 +84,7 @@ class LexiconImporter:
         file_path: str,
         source_type: str,
         mapping_func: Callable[[dict[str, Any]], list[tuple[str, str, float]]],
-        batch_size: int = 1000
+        batch_size: int = 1000,
     ) -> dict[str, Any]:
         """
         Import signals from a file into CentrifugeDB using batch loading.
@@ -96,7 +100,7 @@ class LexiconImporter:
             raise FileNotFoundError(f"Lexicon file not found: {file_path}")
 
         ext = os.path.splitext(file_path)[1].lower()
-        streamer = self._stream_csv if ext == '.csv' else self._stream_json
+        streamer = self._stream_csv if ext == ".csv" else self._stream_json
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -111,19 +115,25 @@ class LexiconImporter:
                     batch.append((word, signal_type, weight, source_type))
 
                     if len(batch) >= batch_size:
-                        cursor.executemany("""
+                        cursor.executemany(
+                            """
                             INSERT INTO rhetorical_signals (word, signal_type, weight, source_type)
                             VALUES (?, ?, ?, ?)
-                        """, batch)
+                        """,
+                            batch,
+                        )
                         total_inserted += len(batch)
                         batch = []
 
             # Final remaining chunk
             if batch:
-                cursor.executemany("""
+                cursor.executemany(
+                    """
                     INSERT INTO rhetorical_signals (word, signal_type, weight, source_type)
                     VALUES (?, ?, ?, ?)
-                """, batch)
+                """,
+                    batch,
+                )
                 total_inserted += len(batch)
 
             conn.commit()
@@ -132,7 +142,7 @@ class LexiconImporter:
             return {
                 "status": "success",
                 "source_type": source_type,
-                "records_processed": total_inserted
+                "records_processed": total_inserted,
             }
 
         except Exception as e:
@@ -142,15 +152,20 @@ class LexiconImporter:
         finally:
             conn.close()
 
-    def import_lexicon_internal_entry(self, word: str, signal_type: str, weight: float, source_type: str):
+    def import_lexicon_internal_entry(
+        self, word: str, signal_type: str, weight: float, source_type: str
+    ):
         """Helper for internal tools to insert single signals without a file."""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         try:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO rhetorical_signals (word, signal_type, weight, source_type)
                 VALUES (?, ?, ?, ?)
-            """, (word, signal_type, weight, source_type))
+            """,
+                (word, signal_type, weight, source_type),
+            )
             conn.commit()
         except Exception as e:
             logger.exception(f"Error inserting internal lexicon entry: {e}")
@@ -182,8 +197,9 @@ class LexiconImporter:
         """
         # We need to find scribe_profiles.sqlite
         from src.core.config import Config
+
         config = Config()
-        base_dir = config.get('storage.base_dir', './data')
+        base_dir = config.get("storage.base_dir", "./data")
         scribe_db = os.path.join(base_dir, "storage", "scribe_profiles.sqlite")
 
         if not os.path.exists(scribe_db):
@@ -208,7 +224,7 @@ class LexiconImporter:
                 category = signal.replace("signal_", "").replace("_", " ").title()
                 data.append({"category": category, "count": weight})
 
-            return pd.DataFrame(data).sort_values(by='count', ascending=False)
+            return pd.DataFrame(data).sort_values(by="count", ascending=False)
 
         except Exception as e:
             logger.exception(f"Error fetching author summary: {e}")

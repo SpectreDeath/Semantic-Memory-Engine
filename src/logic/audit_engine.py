@@ -2,6 +2,7 @@
 HDF5-based drift analysis: compares claims against the knowledge core.
 Wired to CLI: sme drift --claims path/to.json or sme drift --inline '[{"subject":"A","predicate":"is","object":"B"}]'
 """
+
 import os
 
 import h5py
@@ -22,13 +23,13 @@ class AuditEngine:
         results = {"drift_score": 0.0, "anomalies": [], "verified": []}
 
         try:
-            with h5py.File(self.h5_path, 'r') as f:
+            with h5py.File(self.h5_path, "r") as f:
                 # Access the relationship group directly via HDF5 pointers
-                if 'relationships' in f:
-                    rel_group = f['relationships']
+                if "relationships" in f:
+                    rel_group = f["relationships"]
 
                     for claim in claims:
-                        subj, obj = claim['subject'], claim['object']
+                        subj, obj = claim["subject"], claim["object"]
                         # Check if this specific link exists in our local 'Common Sense' index
                         if subj in rel_group and obj in rel_group[subj]:
                             results["verified"].append(claim)

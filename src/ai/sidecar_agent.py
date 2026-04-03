@@ -50,6 +50,7 @@ LM_STUDIO_MODEL = os.getenv("LM_STUDIO_MODEL", "openai:local-model")
 # Pydantic Models
 # ---------------------------------------------------------------------------
 
+
 class RhetoricalSignature(BaseModel):
     """
     Validated output schema for rhetorical fingerprinting.
@@ -62,23 +63,24 @@ class RhetoricalSignature(BaseModel):
         superlative_count : int (≥ 0)
             Number of superlative adjectives and adverbs found.
     """
+
     alliteration_index: float = Field(
-        ge=0.0, le=1.0,
-        description="Ratio of alliterative phrase pairs to total phrase pairs (0.0–1.0)"
+        ge=0.0,
+        le=1.0,
+        description="Ratio of alliterative phrase pairs to total phrase pairs (0.0–1.0)",
     )
     parallelism_score: int = Field(
-        ge=0,
-        description="Count of syntactically parallel structures detected"
+        ge=0, description="Count of syntactically parallel structures detected"
     )
     superlative_count: int = Field(
-        ge=0,
-        description="Number of superlative adjectives and adverbs found"
+        ge=0, description="Number of superlative adjectives and adverbs found"
     )
 
 
 # ---------------------------------------------------------------------------
 # Retry Strategy
 # ---------------------------------------------------------------------------
+
 
 class RetryStrategy:
     """
@@ -131,10 +133,7 @@ class RetryStrategy:
                     )
                     await asyncio.sleep(delay)
                 else:
-                    logger.exception(
-                        f"All {self.max_retries} attempts exhausted. "
-                        f"Last error: {e}"
-                    )
+                    logger.exception(f"All {self.max_retries} attempts exhausted. Last error: {e}")
 
         raise last_exception  # type: ignore[misc]
 
@@ -168,6 +167,7 @@ Return ONLY valid JSON matching the required schema:
 # ForensicAgent
 # ---------------------------------------------------------------------------
 
+
 class ForensicAgent:
     """
     Production-ready wrapper around the Pydantic-AI Agent.
@@ -189,8 +189,7 @@ class ForensicAgent:
         )
         self._agent: Agent | None = None
         logger.info(
-            f"ForensicAgent initialized — retries={max_retries}, "
-            f"base_delay={base_delay_s}s"
+            f"ForensicAgent initialized — retries={max_retries}, base_delay={base_delay_s}s"
         )
 
     def _get_agent(self) -> Agent:
@@ -206,8 +205,7 @@ class ForensicAgent:
                 },
             )
             logger.info(
-                f"Pydantic-AI Agent built — model={LM_STUDIO_MODEL}, "
-                f"base_url={LM_STUDIO_BASE_URL}"
+                f"Pydantic-AI Agent built — model={LM_STUDIO_MODEL}, base_url={LM_STUDIO_BASE_URL}"
             )
         return self._agent
 
@@ -246,9 +244,7 @@ class ForensicAgent:
             "--- END EVIDENCE ---"
         )
 
-        logger.info(
-            f"Submitting Evidence ({len(markdown_text):,} chars) to ForensicAgent"
-        )
+        logger.info(f"Submitting Evidence ({len(markdown_text):,} chars) to ForensicAgent")
 
         signature = await self._retry.execute(self._run_agent, prompt)
 

@@ -8,6 +8,7 @@ class ReportGenerator:
     """
     Automates the generation of Digital Forensic Witness Statements.
     """
+
     def __init__(self, session_id: str, bridge: Any, epistemic_tool: Any):
         self.session_id = session_id
         self.bridge = bridge
@@ -64,12 +65,12 @@ Based on the **probabilistic linguistic match** and the **high-trust provenance*
         authorship_rows = ""
         scribe_res = scratchpad.get("Scribe_Pro_Result")
         if scribe_res:
-             probs = scribe_res.get("probabilities", {})
-             for target, prob in probs.items():
-                 # Probabilities are already multiplied by 100 in ScribePro or need it?
-                 # FastStylometry returns 0.0-1.0.
-                 percentage = round(prob * 100, 2)
-                 authorship_rows += f"| `Sample_Test` | `{target}` | `{percentage}%` | `faststylometry (Calibrated)` |\n"
+            probs = scribe_res.get("probabilities", {})
+            for target, prob in probs.items():
+                # Probabilities are already multiplied by 100 in ScribePro or need it?
+                # FastStylometry returns 0.0-1.0.
+                percentage = round(prob * 100, 2)
+                authorship_rows += f"| `Sample_Test` | `{target}` | `{percentage}%` | `faststylometry (Calibrated)` |\n"
         else:
             authorship_rows = "| N/A | N/A | N/A | N/A |\n"
 
@@ -85,11 +86,15 @@ Based on the **probabilistic linguistic match** and the **high-trust provenance*
         # 4. Epistemological Audit
         findings = scratchpad.get("Key_Findings", [])
         if not findings:
-            findings = [{"claim": "General investigation", "evidence_sources": [{"id": "System_Audit"}]}]
+            findings = [
+                {"claim": "General investigation", "evidence_sources": [{"id": "System_Audit"}]}
+            ]
 
         # We audit the primary claim
         main_claim = scratchpad.get("Primary_Claim", "Incident Investigation")
-        audit_res = self.epistemic_tool.evaluate_claim(main_claim, findings[0].get("evidence_sources", []))
+        audit_res = self.epistemic_tool.evaluate_claim(
+            main_claim, findings[0].get("evidence_sources", [])
+        )
 
         cq = audit_res.get("certainty_quotient", 0.0)
         bullets = ""
@@ -107,7 +112,7 @@ Based on the **probabilistic linguistic match** and the **high-trust provenance*
             influence_section=influence_section,
             cq=cq,
             reliability_bullets=bullets,
-            conclusion_status=status
+            conclusion_status=status,
         )
 
         # Save to file
@@ -115,9 +120,4 @@ Based on the **probabilistic linguistic match** and the **high-trust provenance*
         with open(report_path, "w") as f:
             f.write(report_md)
 
-        return {
-            "status": "Report Generated",
-            "path": report_path,
-            "cq": cq,
-            "conclusion": status
-        }
+        return {"status": "Report Generated", "path": report_path, "cq": cq, "conclusion": status}

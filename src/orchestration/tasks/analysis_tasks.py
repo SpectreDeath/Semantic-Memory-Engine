@@ -14,6 +14,7 @@ def run_forensic_summary(intel_package):
     logger.info("Generating Agentic Forensic Summary...")
     try:
         from src.ai.agent_logic import generate_forensic_summary
+
         summary = generate_forensic_summary(intel_package)
         logger.info("Summary Generated")
         return summary

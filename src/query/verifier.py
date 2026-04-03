@@ -22,9 +22,11 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # ============================================================================
 
+
 @dataclass
 class ExtractedClaim:
     """Factual claim extracted from text"""
+
     claim_text: str
     claim_type: str  # "factual", "opinion", "quote", "statistic"
     confidence: float  # How confident extraction was
@@ -36,6 +38,7 @@ class ExtractedClaim:
 @dataclass
 class VerificationResult:
     """Result of fact verification"""
+
     claim_text: str
     verified: bool
     confidence: float  # 0-100
@@ -49,6 +52,7 @@ class VerificationResult:
 @dataclass
 class AuthorConsistency:
     """Consistency analysis for an author"""
+
     author_id: str
     total_claims: int
     verified_claims: int
@@ -63,6 +67,7 @@ class AuthorConsistency:
 # ============================================================================
 # FACT VERIFIER ENGINE
 # ============================================================================
+
 
 class FactVerifier:
     """
@@ -82,18 +87,18 @@ class FactVerifier:
                 "climate_change_consensus": "97%_scientists",
                 "moon_landing": "1969",
                 "vaccination_safety": "established",
-                "gravity": "fundamental_force"
+                "gravity": "fundamental_force",
             },
             "disputed_facts": {
                 "5g_safety": ["safe", "potentially_harmful"],
                 "inflation_causes": ["supply_chain", "government_spending"],
-                "election_results": ["contested_in_some_jurisdictions"]
+                "election_results": ["contested_in_some_jurisdictions"],
             },
             "known_false": {
                 "flat_earth": "false",
                 "vaccines_cause_autism": "false",
-                "moon_landing_hoax": "false"
-            }
+                "moon_landing_hoax": "false",
+            },
         }
 
     # ========================================================================
@@ -115,7 +120,7 @@ class FactVerifier:
 
         try:
             claims = []
-            sentences = text.split('.')
+            sentences = text.split(".")
 
             for sentence in sentences:
                 sentence = sentence.strip()
@@ -143,7 +148,7 @@ class FactVerifier:
                     confidence=self._calculate_extraction_confidence(sentence),
                     subject=subject,
                     sentiment=sentiment,
-                    supporting_details=details
+                    supporting_details=details,
                 )
                 claims.append(claim)
 
@@ -158,7 +163,9 @@ class FactVerifier:
     # TOOL 2: VERIFY INDIVIDUAL CLAIMS
     # ========================================================================
 
-    def verify_claim(self, claim: ExtractedClaim, knowledge_sources: list[str] | None = None) -> VerificationResult:
+    def verify_claim(
+        self, claim: ExtractedClaim, knowledge_sources: list[str] | None = None
+    ) -> VerificationResult:
         """
         Verify a single factual claim.
 
@@ -201,7 +208,7 @@ class FactVerifier:
                 evidence=self._generate_evidence(claim, kb_status),
                 source_count=1,  # Placeholder
                 contradicting_sources=contradicting,
-                author_consistency=True  # Would check against previous claims
+                author_consistency=True,  # Would check against previous claims
             )
 
             logger.info(f"✅ Claim status: {status} ({confidence:.0f}%)")
@@ -217,7 +224,7 @@ class FactVerifier:
                 evidence=[],
                 source_count=0,
                 contradicting_sources=[],
-                author_consistency=False
+                author_consistency=False,
             )
 
     # ========================================================================
@@ -227,7 +234,7 @@ class FactVerifier:
     def analyze_author_consistency(
         self,
         author_id: str,
-        claim_history: list[tuple[str, str]]  # (claim_text, timestamp)
+        claim_history: list[tuple[str, str]],  # (claim_text, timestamp)
     ) -> AuthorConsistency:
         """
         Analyze whether author contradicts themselves over time.
@@ -252,7 +259,7 @@ class FactVerifier:
                     unverifiable_claims=0,
                     consistency_score=0,
                     reliability_rating="Unknown",
-                    contradiction_history=[]
+                    contradiction_history=[],
                 )
 
             # Extract claims from all texts
@@ -278,11 +285,15 @@ class FactVerifier:
                     verified_count += 1
                 elif result.status == "Contradicted":
                     contradicted_count += 1
-                    contradictions.append({
-                        "claim": claim.claim_text[:100],
-                        "timestamp": timestamp,
-                        "contradiction": result.contradicting_sources[0][1] if result.contradicting_sources else "Unknown"
-                    })
+                    contradictions.append(
+                        {
+                            "claim": claim.claim_text[:100],
+                            "timestamp": timestamp,
+                            "contradiction": result.contradicting_sources[0][1]
+                            if result.contradicting_sources
+                            else "Unknown",
+                        }
+                    )
                 elif result.status == "Disputed":
                     disputed_count += 1
                 else:
@@ -315,7 +326,7 @@ class FactVerifier:
                 unverifiable_claims=unverifiable_count,
                 consistency_score=consistency_score,
                 reliability_rating=reliability,
-                contradiction_history=contradictions
+                contradiction_history=contradictions,
             )
 
             logger.info(f"✅ Consistency analysis: {reliability} ({consistency_score:.0f}%)")
@@ -331,7 +342,7 @@ class FactVerifier:
 
     def detect_cross_source_contradictions(
         self,
-        sources: list[dict]  # [{author_id, text, source_url}, ...]
+        sources: list[dict],  # [{author_id, text, source_url}, ...]
     ) -> list[dict]:
         """
         Find contradictions between sources.
@@ -350,9 +361,9 @@ class FactVerifier:
             # Extract claims from all sources
             all_source_claims = {}
             for source in sources:
-                author_id = source['author_id']
-                text = source['text']
-                url = source.get('source_url', 'unknown')
+                author_id = source["author_id"]
+                text = source["text"]
+                url = source.get("source_url", "unknown")
 
                 claims = self.extract_claims(text, author_id)
                 all_source_claims[url] = claims
@@ -389,7 +400,7 @@ class FactVerifier:
                                 "source_2": neg_source,
                                 "claim_2": neg_claim.claim_text[:100],
                                 "severity": "High",  # Both make definitive claims
-                                "timestamp": datetime.utcnow().isoformat()
+                                "timestamp": datetime.utcnow().isoformat(),
                             }
                             contradictions.append(contradiction)
 
@@ -409,13 +420,16 @@ class FactVerifier:
         sentence = sentence.lower()
 
         # Factual claim indicators
-        if any(word in sentence for word in ['study', 'research', 'found', 'shows', 'proved', 'verified']):
+        if any(
+            word in sentence
+            for word in ["study", "research", "found", "shows", "proved", "verified"]
+        ):
             return "factual"
-        elif any(word in sentence for word in ['believe', 'think', 'feel', 'seem', 'appear']):
+        elif any(word in sentence for word in ["believe", "think", "feel", "seem", "appear"]):
             return "opinion"
-        elif sentence.startswith('"') or ' said ' in sentence:
+        elif sentence.startswith('"') or " said " in sentence:
             return "quote"
-        elif re.search(r'\d+%|\d+\s*(million|billion|thousand)', sentence):
+        elif re.search(r"\d+%|\d+\s*(million|billion|thousand)", sentence):
             return "statistic"
 
         return "none"
@@ -430,8 +444,8 @@ class FactVerifier:
 
     def _analyze_sentiment(self, sentence: str) -> str:
         """Simple sentiment analysis"""
-        positive = ['good', 'excellent', 'safe', 'effective', 'beneficial']
-        negative = ['bad', 'dangerous', 'ineffective', 'harmful', 'terrible']
+        positive = ["good", "excellent", "safe", "effective", "beneficial"]
+        negative = ["bad", "dangerous", "ineffective", "harmful", "terrible"]
 
         sentence_lower = sentence.lower()
 
@@ -450,7 +464,7 @@ class FactVerifier:
         details = []
 
         # Numbers/statistics
-        numbers = re.findall(r'\d+(?:%|\s*(?:million|billion|thousand))?', sentence)
+        numbers = re.findall(r"\d+(?:%|\s*(?:million|billion|thousand))?", sentence)
         details.extend(numbers[:3])
 
         # Quoted phrases
@@ -472,17 +486,17 @@ class FactVerifier:
         claim_lower = claim.claim_text.lower()
 
         # Check verified facts
-        for fact in self.knowledge_base['verified_facts']:
+        for fact in self.knowledge_base["verified_facts"]:
             if fact in claim_lower:
                 return ("Verified", 95)
 
         # Check known false claims
-        for false_claim in self.knowledge_base['known_false']:
+        for false_claim in self.knowledge_base["known_false"]:
             if false_claim in claim_lower:
                 return ("Contradicted", 95)
 
         # Check disputed
-        for disputed in self.knowledge_base['disputed_facts']:
+        for disputed in self.knowledge_base["disputed_facts"]:
             if disputed in claim_lower:
                 return ("Disputed", 60)
 
@@ -493,11 +507,11 @@ class FactVerifier:
         factors = 0
 
         # Specific dates = more verifiable
-        if re.search(r'\d{4}|\d{1,2}/\d{1,2}', claim.claim_text):
+        if re.search(r"\d{4}|\d{1,2}/\d{1,2}", claim.claim_text):
             factors += 20
 
         # Numbers = more verifiable
-        if re.search(r'\d+%|\d+\s*(?:million|billion)', claim.claim_text):
+        if re.search(r"\d+%|\d+\s*(?:million|billion)", claim.claim_text):
             factors += 20
 
         # Names of organizations/people = more verifiable
@@ -509,7 +523,10 @@ class FactVerifier:
             factors += 15
 
         # General claims = less verifiable
-        if any(word in claim.claim_text.lower() for word in ['always', 'never', 'everything', 'everyone']):
+        if any(
+            word in claim.claim_text.lower()
+            for word in ["always", "never", "everything", "everyone"]
+        ):
             factors -= 20
 
         return max(0, min(100, 40 + factors))
@@ -537,6 +554,7 @@ class FactVerifier:
 # MCP TOOL FUNCTIONS
 # ============================================================================
 
+
 def extract_claims_tool(text: str, author_id: str = "unknown") -> dict:
     """MCP Tool: Extract claims from text"""
     verifier = FactVerifier()
@@ -551,10 +569,10 @@ def extract_claims_tool(text: str, author_id: str = "unknown") -> dict:
                 "type": c.claim_type,
                 "confidence": round(c.confidence, 1),
                 "subject": c.subject,
-                "sentiment": c.sentiment
+                "sentiment": c.sentiment,
             }
             for c in claims
-        ]
+        ],
     }
 
 
@@ -566,27 +584,29 @@ def verify_claims_tool(text: str) -> dict:
     verified_results = []
     for claim in claims:
         result = verifier.verify_claim(claim)
-        verified_results.append({
-            "claim": claim.claim_text[:80],
-            "status": result.status,
-            "confidence": round(result.confidence, 1),
-            "verified": result.verified
-        })
+        verified_results.append(
+            {
+                "claim": claim.claim_text[:80],
+                "status": result.status,
+                "confidence": round(result.confidence, 1),
+                "verified": result.verified,
+            }
+        )
 
-    verified = sum(1 for r in verified_results if r['verified'])
+    verified = sum(1 for r in verified_results if r["verified"])
 
     return {
         "status": "success",
         "total_claims": len(claims),
         "verified": verified,
-        "results": verified_results
+        "results": verified_results,
     }
 
 
 if __name__ == "__main__":
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("✓ FACT VERIFIER DEMO")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
 
     print("✅ FACT VERIFIER READY")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")

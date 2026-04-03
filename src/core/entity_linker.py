@@ -25,6 +25,7 @@ try:
     import nltk
     from nltk import pos_tag, word_tokenize
     from nltk.ne_chunk import ne_chunk
+
     NLTK_AVAILABLE = True
 except ImportError:
     NLTK_AVAILABLE = False
@@ -34,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 class EntityType(Enum):
     """Named entity types."""
+
     PERSON = "PERSON"
     ORGANIZATION = "ORGANIZATION"
     LOCATION = "LOCATION"
@@ -52,6 +54,7 @@ class EntityType(Enum):
 
 class KnowledgeBase(Enum):
     """Supported knowledge bases."""
+
     WIKIPEDIA = "wikipedia"
     WIKIDATA = "wikidata"
     DBpedia = "dbpedia"
@@ -62,6 +65,7 @@ class KnowledgeBase(Enum):
 @dataclass
 class Entity:
     """Recognized and linked entity."""
+
     text: str
     entity_type: EntityType
     start_char: int
@@ -73,6 +77,7 @@ class Entity:
 @dataclass
 class LinkedEntity:
     """Entity linked to knowledge base."""
+
     entity: Entity
     kb_id: str  # Knowledge base identifier
     kb_type: KnowledgeBase
@@ -86,6 +91,7 @@ class LinkedEntity:
 @dataclass
 class EntityLink:
     """Relationship between two entities."""
+
     source: LinkedEntity
     target: LinkedEntity
     relation_type: str
@@ -95,6 +101,7 @@ class EntityLink:
 @dataclass
 class EntityLinkingResult:
     """Complete entity linking result."""
+
     text: str
     entities: list[Entity]
     linked_entities: list[LinkedEntity]
@@ -117,21 +124,21 @@ class EntityLinker:
     # Entity type mappings
     ENTITY_PROPERTIES = {
         EntityType.PERSON: {
-            'fields': ['birth_date', 'death_date', 'nationality', 'occupation', 'notable_for'],
-            'aliases': ['firstname', 'surname', 'fullname']
+            "fields": ["birth_date", "death_date", "nationality", "occupation", "notable_for"],
+            "aliases": ["firstname", "surname", "fullname"],
         },
         EntityType.ORGANIZATION: {
-            'fields': ['founded', 'headquarters', 'industry', 'revenue', 'employees'],
-            'aliases': ['company', 'corp', 'org', 'institution']
+            "fields": ["founded", "headquarters", "industry", "revenue", "employees"],
+            "aliases": ["company", "corp", "org", "institution"],
         },
         EntityType.LOCATION: {
-            'fields': ['coordinates', 'country', 'population', 'area', 'capital_of'],
-            'aliases': ['place', 'city', 'country', 'region']
+            "fields": ["coordinates", "country", "population", "area", "capital_of"],
+            "aliases": ["place", "city", "country", "region"],
         },
         EntityType.EVENT: {
-            'fields': ['date', 'location', 'participants', 'significance'],
-            'aliases': ['happening', 'occurrence']
-        }
+            "fields": ["date", "location", "participants", "significance"],
+            "aliases": ["happening", "occurrence"],
+        },
     }
 
     def __init__(self):
@@ -139,7 +146,9 @@ class EntityLinker:
         self.has_nltk = NLTK_AVAILABLE
         self.custom_kb = {}  # For custom knowledge base
 
-    def link_entities(self, text: str, kb_type: KnowledgeBase = KnowledgeBase.WIKIPEDIA) -> EntityLinkingResult:
+    def link_entities(
+        self, text: str, kb_type: KnowledgeBase = KnowledgeBase.WIKIPEDIA
+    ) -> EntityLinkingResult:
         """
         Recognize and link entities in text.
 
@@ -175,7 +184,7 @@ class EntityLinker:
             linked_entities=linked_entities,
             entity_links=entity_links,
             entity_graph=entity_graph,
-            summary=summary
+            summary=summary,
         )
 
     def disambiguate_entity(self, entity_text: str, context: str = "") -> list[LinkedEntity]:
@@ -211,14 +220,19 @@ class EntityLinker:
         self.custom_kb[entity_id] = entity_data
         logger.info(f"Updated custom KB with entity: {entity_id}")
 
-    def add_entity_links(self, source_entity: LinkedEntity, target_entity: LinkedEntity,
-                        relation_type: str, confidence: float = 0.8) -> EntityLink:
+    def add_entity_links(
+        self,
+        source_entity: LinkedEntity,
+        target_entity: LinkedEntity,
+        relation_type: str,
+        confidence: float = 0.8,
+    ) -> EntityLink:
         """Create explicit link between entities."""
         return EntityLink(
             source=source_entity,
             target=target_entity,
             relation_type=relation_type,
-            confidence=confidence
+            confidence=confidence,
         )
 
     def _recognize_entities(self, text: str) -> list[Entity]:
@@ -235,20 +249,22 @@ class EntityLinker:
             char_pos = 0
 
             for chunk in chunks:
-                if hasattr(chunk, 'label'):
+                if hasattr(chunk, "label"):
                     # Named entity
                     entity_text = " ".join([token for token, _ in chunk.leaves()])
                     entity_type = self._map_nltk_entity_type(chunk.label())
 
                     char_pos = text.find(entity_text, char_pos)
                     if char_pos >= 0:
-                        entities.append(Entity(
-                            text=entity_text,
-                            entity_type=entity_type,
-                            start_char=char_pos,
-                            end_char=char_pos + len(entity_text),
-                            confidence=0.9
-                        ))
+                        entities.append(
+                            Entity(
+                                text=entity_text,
+                                entity_type=entity_type,
+                                start_char=char_pos,
+                                end_char=char_pos + len(entity_text),
+                                confidence=0.9,
+                            )
+                        )
                         char_pos += len(entity_text)
 
             # Merge duplicate entities
@@ -286,7 +302,7 @@ class EntityLinker:
                 description=description,
                 aliases=[entity_text.lower(), entity_text.upper()],
                 properties=self._get_entity_properties(entity),
-                confidence=0.95
+                confidence=0.95,
             )
 
         # Fuzzy matching for common entities
@@ -300,7 +316,7 @@ class EntityLinker:
                 description=self._get_description(match),
                 aliases=[entity_text.lower(), match.lower()],
                 properties=self._get_entity_properties(entity),
-                confidence=similarity
+                confidence=similarity,
             )
 
         return None
@@ -315,11 +331,11 @@ class EntityLinker:
                 entity=entity,
                 kb_id=entity_text,
                 kb_type=KnowledgeBase.CUSTOM,
-                url=data.get('url'),
-                description=data.get('description'),
-                aliases=data.get('aliases', []),
-                properties=data.get('properties', {}),
-                confidence=0.9
+                url=data.get("url"),
+                description=data.get("description"),
+                aliases=data.get("aliases", []),
+                properties=data.get("properties", {}),
+                confidence=0.9,
             )
 
         return None
@@ -331,57 +347,65 @@ class EntityLinker:
         # Check custom KB
         if entity_text in self.custom_kb:
             data = self.custom_kb[entity_text]
-            candidates.append(LinkedEntity(
-                entity=Entity(entity_text, EntityType.OTHER, 0, len(entity_text)),
-                kb_id=entity_text,
-                kb_type=KnowledgeBase.CUSTOM,
-                url=data.get('url'),
-                description=data.get('description'),
-                aliases=data.get('aliases', []),
-                properties=data.get('properties', {}),
-                confidence=0.9
-            ))
+            candidates.append(
+                LinkedEntity(
+                    entity=Entity(entity_text, EntityType.OTHER, 0, len(entity_text)),
+                    kb_id=entity_text,
+                    kb_type=KnowledgeBase.CUSTOM,
+                    url=data.get("url"),
+                    description=data.get("description"),
+                    aliases=data.get("aliases", []),
+                    properties=data.get("properties", {}),
+                    confidence=0.9,
+                )
+            )
 
         # Check Wikipedia mappings (would be much larger)
         for wiki_entity, url in self.WIKI_URLS.items():
-            if entity_text.lower() in wiki_entity.lower() or wiki_entity.lower() in entity_text.lower():
-                candidates.append(LinkedEntity(
-                    entity=Entity(entity_text, EntityType.OTHER, 0, len(entity_text)),
-                    kb_id=wiki_entity.replace(" ", "_"),
-                    kb_type=KnowledgeBase.WIKIPEDIA,
-                    url=url,
-                    description=self._get_description(wiki_entity),
-                    aliases=[wiki_entity.lower(), entity_text.lower()],
-                    properties={},
-                    confidence=0.8
-                ))
+            if (
+                entity_text.lower() in wiki_entity.lower()
+                or wiki_entity.lower() in entity_text.lower()
+            ):
+                candidates.append(
+                    LinkedEntity(
+                        entity=Entity(entity_text, EntityType.OTHER, 0, len(entity_text)),
+                        kb_id=wiki_entity.replace(" ", "_"),
+                        kb_type=KnowledgeBase.WIKIPEDIA,
+                        url=url,
+                        description=self._get_description(wiki_entity),
+                        aliases=[wiki_entity.lower(), entity_text.lower()],
+                        properties={},
+                        confidence=0.8,
+                    )
+                )
 
         return candidates
 
-    def _extract_entity_relationships(self, linked_entities: list[LinkedEntity],
-                                     text: str) -> list[EntityLink]:
+    def _extract_entity_relationships(
+        self, linked_entities: list[LinkedEntity], text: str
+    ) -> list[EntityLink]:
         """Extract relationships between entities."""
         links = []
 
         # Simple co-occurrence based linking
         for i, entity1 in enumerate(linked_entities):
-            for entity2 in linked_entities[i+1:]:
+            for entity2 in linked_entities[i + 1 :]:
                 # Check if entities co-occur in sentences
                 if self._entities_cooccur(entity1.entity, entity2.entity, text):
                     # Infer relationship type
                     rel_type = self._infer_relationship(entity1, entity2)
 
-                    links.append(EntityLink(
-                        source=entity1,
-                        target=entity2,
-                        relation_type=rel_type,
-                        confidence=0.7
-                    ))
+                    links.append(
+                        EntityLink(
+                            source=entity1, target=entity2, relation_type=rel_type, confidence=0.7
+                        )
+                    )
 
         return links
 
-    def _build_entity_graph(self, linked_entities: list[LinkedEntity],
-                           entity_links: list[EntityLink]) -> dict[str, list[str]]:
+    def _build_entity_graph(
+        self, linked_entities: list[LinkedEntity], entity_links: list[EntityLink]
+    ) -> dict[str, list[str]]:
         """Build entity relationship graph."""
         graph = {}
 
@@ -413,15 +437,17 @@ class EntityLinker:
         import re
 
         # Capitalized sequences (potential proper nouns)
-        pattern = r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b'
+        pattern = r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b"
         for match in re.finditer(pattern, text):
-            entities.append(Entity(
-                text=match.group(),
-                entity_type=EntityType.OTHER,
-                start_char=match.start(),
-                end_char=match.end(),
-                confidence=0.5
-            ))
+            entities.append(
+                Entity(
+                    text=match.group(),
+                    entity_type=EntityType.OTHER,
+                    start_char=match.start(),
+                    end_char=match.end(),
+                    confidence=0.5,
+                )
+            )
 
         return entities
 
@@ -441,26 +467,28 @@ class EntityLinker:
     def _map_nltk_entity_type(self, nltk_type: str) -> EntityType:
         """Map NLTK entity types to our enum."""
         mapping = {
-            'PERSON': EntityType.PERSON,
-            'ORGANIZATION': EntityType.ORGANIZATION,
-            'GPE': EntityType.LOCATION,
-            'LOCATION': EntityType.LOCATION,
-            'FACILITY': EntityType.FACILITY,
-            'PRODUCT': EntityType.PRODUCT,
-            'EVENT': EntityType.EVENT,
-            'DATE': EntityType.DATE,
-            'TIME': EntityType.TIME,
-            'MONEY': EntityType.MONEY,
-            'PERCENT': EntityType.PERCENT,
-            'LAW': EntityType.LAW,
-            'LANGUAGE': EntityType.LANGUAGE,
+            "PERSON": EntityType.PERSON,
+            "ORGANIZATION": EntityType.ORGANIZATION,
+            "GPE": EntityType.LOCATION,
+            "LOCATION": EntityType.LOCATION,
+            "FACILITY": EntityType.FACILITY,
+            "PRODUCT": EntityType.PRODUCT,
+            "EVENT": EntityType.EVENT,
+            "DATE": EntityType.DATE,
+            "TIME": EntityType.TIME,
+            "MONEY": EntityType.MONEY,
+            "PERCENT": EntityType.PERCENT,
+            "LAW": EntityType.LAW,
+            "LANGUAGE": EntityType.LANGUAGE,
         }
         return mapping.get(nltk_type, EntityType.OTHER)
 
     def _calculate_context_similarity(self, candidate: LinkedEntity, context: str) -> float:
         """Calculate similarity between candidate and context."""
         context_words = set(context.lower().split())
-        desc_words = set((candidate.description or "").lower().split()) if candidate.description else set()
+        desc_words = (
+            set((candidate.description or "").lower().split()) if candidate.description else set()
+        )
 
         if not context_words or not desc_words:
             return candidate.confidence
@@ -472,18 +500,27 @@ class EntityLinker:
 
     def _entities_cooccur(self, entity1: Entity, entity2: Entity, text: str) -> bool:
         """Check if entities occur in same sentence."""
-        sentences = text.split('.')
+        sentences = text.split(".")
 
         return any(entity1.text in sentence and entity2.text in sentence for sentence in sentences)
 
     def _infer_relationship(self, entity1: LinkedEntity, entity2: LinkedEntity) -> str:
         """Infer relationship type between entities."""
         # Simple heuristics
-        if entity1.entity.entity_type == EntityType.PERSON and entity2.entity.entity_type == EntityType.ORGANIZATION:
+        if (
+            entity1.entity.entity_type == EntityType.PERSON
+            and entity2.entity.entity_type == EntityType.ORGANIZATION
+        ):
             return "works_for"
-        elif entity1.entity.entity_type == EntityType.PERSON and entity2.entity.entity_type == EntityType.LOCATION:
+        elif (
+            entity1.entity.entity_type == EntityType.PERSON
+            and entity2.entity.entity_type == EntityType.LOCATION
+        ):
             return "located_in"
-        elif entity1.entity.entity_type == EntityType.ORGANIZATION and entity2.entity.entity_type == EntityType.LOCATION:
+        elif (
+            entity1.entity.entity_type == EntityType.ORGANIZATION
+            and entity2.entity.entity_type == EntityType.LOCATION
+        ):
             return "headquartered_in"
         else:
             return "related_to"
@@ -523,7 +560,7 @@ class EntityLinker:
     def _get_entity_properties(self, entity: Entity) -> dict[str, str]:
         """Get properties for entity type."""
         type_props = self.ENTITY_PROPERTIES.get(entity.entity_type, {})
-        return dict.fromkeys(type_props.get('fields', []), "")
+        return dict.fromkeys(type_props.get("fields", []), "")
 
     def _create_generic_link(self, entity: Entity) -> LinkedEntity:
         """Create generic link for entity."""
@@ -535,16 +572,11 @@ class EntityLinker:
             description=None,
             aliases=[entity.text.lower()],
             properties=self._get_entity_properties(entity),
-            confidence=0.5
+            confidence=0.5,
         )
 
     def _create_empty_result(self, text: str) -> EntityLinkingResult:
         """Create empty result for empty text."""
         return EntityLinkingResult(
-            text=text,
-            entities=[],
-            linked_entities=[],
-            entity_links=[],
-            entity_graph={},
-            summary={}
+            text=text, entities=[], linked_entities=[], entity_links=[], entity_graph={}, summary={}
         )

@@ -132,8 +132,10 @@ class EventHandler:
             else:
                 self.callback(event)
         except Exception as e:
-            logger.error(f"Error in handler {self.name} processing event {event.type.value}: {e}",
-                        exc_info=True)
+            logger.error(
+                f"Error in handler {self.name} processing event {event.type.value}: {e}",
+                exc_info=True,
+            )
 
     def __repr__(self) -> str:
         """String representation of handler."""
@@ -171,7 +173,7 @@ class EventBus:
         event_type: EventType,
         handler: Callable,
         filter_criteria: dict[str, Any] | None = None,
-        name: str = ""
+        name: str = "",
     ) -> None:
         """Subscribe to events of a specific type.
 
@@ -239,18 +241,14 @@ class EventBus:
         while self._running:
             try:
                 # Get event with timeout to allow checking _running flag
-                event = await asyncio.wait_for(
-                    self._event_queue.get(),
-                    timeout=0.1
-                )
+                event = await asyncio.wait_for(self._event_queue.get(), timeout=0.1)
 
                 # Get type-specific handlers
                 handlers = self._subscribers.get(event.type, [])
 
                 # Get global handlers matching filter criteria
                 matching_global = [
-                    h for h, criteria in self._global_handlers
-                    if event.matches_filter(criteria)
+                    h for h, criteria in self._global_handlers if event.matches_filter(criteria)
                 ]
 
                 all_handlers = handlers + matching_global
@@ -318,7 +316,9 @@ class EventBus:
         """
         if event_type:
             return len(self._subscribers.get(event_type, []))
-        return sum(len(handlers) for handlers in self._subscribers.values()) + len(self._global_handlers)
+        return sum(len(handlers) for handlers in self._subscribers.values()) + len(
+            self._global_handlers
+        )
 
     def __repr__(self) -> str:
         """String representation of EventBus."""

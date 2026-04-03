@@ -50,7 +50,7 @@ def test_mcp_server():
     list_fn = mcp_server.list_available_tools
 
     # Get the actual callable function
-    if hasattr(verify_fn, 'fn'):
+    if hasattr(verify_fn, "fn"):
         verify_callable = verify_fn.fn
         stats_callable = stats_fn.fn
         list_callable = list_fn.fn
@@ -64,7 +64,7 @@ def test_mcp_server():
     print("\n--- verify_system() ---")
     result = json.loads(verify_callable())
     print(f"   Status: {result['status']}")
-    if result.get('telemetry'):
+    if result.get("telemetry"):
         print(f"   CPU: {result['telemetry'].get('cpu_percent', 'N/A')}%")
         print(f"   RAM: {result['telemetry'].get('memory_used_percent', 'N/A')}%")
 
@@ -100,6 +100,7 @@ def main():
     except Exception as e:
         print(f"\n❌ TEST FAILED: {e}")
         import traceback
+
         traceback.print_exc()
         return 1
 

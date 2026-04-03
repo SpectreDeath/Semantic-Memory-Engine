@@ -11,6 +11,7 @@ except ImportError:
     # Loaded as standalone module by ExtensionManager (no parent package)
     import sys
     from pathlib import Path
+
     _dir = Path(__file__).resolve().parent
     if str(_dir) not in sys.path:
         sys.path.insert(0, str(_dir))
@@ -18,6 +19,7 @@ except ImportError:
 from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.APB")
+
 
 class AdversarialPatternBreaker(BasePlugin):
     """
@@ -45,7 +47,7 @@ class AdversarialPatternBreaker(BasePlugin):
             "high_confidence_deception": "BOOLEAN",
             "analysis_data": "TEXT",
             "timestamp": "TEXT",
-            "source_id": "TEXT"
+            "source_id": "TEXT",
         }
         try:
             self.dal.create_table("nexus_adversarial_patterns", schema)
@@ -72,19 +74,21 @@ class AdversarialPatternBreaker(BasePlugin):
         # Log significant findings
         if camouflage_detected:
             confidence_level = "HIGH" if high_confidence_deception else "MODERATE"
-            logger.warning(f"[{self.plugin_id}] LINGUISTIC CAMOUFLAGE DETECTED - "
-                          f"Confidence: {deception_confidence:.2%} ({confidence_level})")
+            logger.warning(
+                f"[{self.plugin_id}] LINGUISTIC CAMOUFLAGE DETECTED - "
+                f"Confidence: {deception_confidence:.2%} ({confidence_level})"
+            )
 
         if high_confidence_deception:
-            logger.critical(f"[{self.plugin_id}] *** HIGH-CONFIDENCE DECEPTION DETECTED *** "
-                           f"Deception Confidence: {deception_confidence:.2%}")
+            logger.critical(
+                f"[{self.plugin_id}] *** HIGH-CONFIDENCE DECEPTION DETECTED *** "
+                f"Deception Confidence: {deception_confidence:.2%}"
+            )
 
         # Store result in database if significant
         if camouflage_detected:
             await self._store_adversarial_pattern(
-                raw_data,
-                camouflage_result,
-                metadata.get("source_id", "INGESTION_PIPELINE")
+                raw_data, camouflage_result, metadata.get("source_id", "INGESTION_PIPELINE")
             )
 
         # Return analysis results
@@ -95,8 +99,8 @@ class AdversarialPatternBreaker(BasePlugin):
                 "deception_confidence": deception_confidence,
                 "high_confidence_deception": high_confidence_deception,
                 "verdict": camouflage_result.get("verdict", "UNKNOWN"),
-                "analysis": camouflage_result.get("analysis", {})
-            }
+                "analysis": camouflage_result.get("analysis", {}),
+            },
         }
 
     def get_tools(self) -> list:
@@ -109,11 +113,18 @@ class AdversarialPatternBreaker(BasePlugin):
         try:
             result = self.anomaly_detector.detect_linguistic_camouflage(text)
             # Re-format to match requested output style if needed, but keeping the core analysis
-            return json.dumps({
-                "burstiness_score": result["analysis"]["burstiness_smoothing"].get("burstiness_score", 0),
-                "lexical_uniformity": result["analysis"]["pattern_uniformity"].get("type_token_ratio", 0),
-                "verdict": result.get("verdict", "HUMAN_SIGNATURE")
-            }, indent=2)
+            return json.dumps(
+                {
+                    "burstiness_score": result["analysis"]["burstiness_smoothing"].get(
+                        "burstiness_score", 0
+                    ),
+                    "lexical_uniformity": result["analysis"]["pattern_uniformity"].get(
+                        "type_token_ratio", 0
+                    ),
+                    "verdict": result.get("verdict", "HUMAN_SIGNATURE"),
+                },
+                indent=2,
+            )
         except Exception as e:
             return json.dumps({"error": f"Pattern Breaker analysis failed: {e!s}"})
 
@@ -126,29 +137,33 @@ class AdversarialPatternBreaker(BasePlugin):
             total_patterns = self.dal.get_count("nexus_adversarial_patterns")
 
             # Count high confidence deceptions
-            high_confidence_count = self.dal.get_count("nexus_adversarial_patterns", {"high_confidence_deception": 1})
+            high_confidence_count = self.dal.get_count(
+                "nexus_adversarial_patterns", {"high_confidence_deception": 1}
+            )
 
             # Get recent patterns
             recent_patterns = self.dal.get_recent(
                 "nexus_adversarial_patterns",
                 ["text_hash", "deception_confidence", "high_confidence_deception", "timestamp"],
                 "timestamp",
-                10
+                10,
             )
 
             stats = {
                 "total_patterns_detected": total_patterns,
                 "high_confidence_deceptions": high_confidence_count,
-                "deception_rate": round((high_confidence_count / total_patterns * 100) if total_patterns > 0 else 0, 2),
+                "deception_rate": round(
+                    (high_confidence_count / total_patterns * 100) if total_patterns > 0 else 0, 2
+                ),
                 "recent_patterns": [
                     {
                         "hash": pattern["text_hash"][:8] + "...",
                         "confidence": pattern["deception_confidence"],
                         "high_confidence": bool(pattern["high_confidence_deception"]),
-                        "timestamp": pattern["timestamp"]
+                        "timestamp": pattern["timestamp"],
                     }
                     for pattern in recent_patterns
-                ]
+                ],
             }
 
             return json.dumps(stats, indent=2)
@@ -176,19 +191,21 @@ class AdversarialPatternBreaker(BasePlugin):
                 "text_a": {
                     "camouflage_detected": result_a.get("camouflage_detected", False),
                     "deception_confidence": confidence_a,
-                    "high_confidence_deception": result_a.get("high_confidence_deception", False)
+                    "high_confidence_deception": result_a.get("high_confidence_deception", False),
                 },
                 "text_b": {
                     "camouflage_detected": result_b.get("camouflage_detected", False),
                     "deception_confidence": confidence_b,
-                    "high_confidence_deception": result_b.get("high_confidence_deception", False)
+                    "high_confidence_deception": result_b.get("high_confidence_deception", False),
                 },
                 "comparison": {
                     "confidence_difference": round(abs(confidence_a - confidence_b), 4),
-                    "both_camouflaged": result_a.get("camouflage_detected", False) and result_b.get("camouflage_detected", False),
-                    "both_high_confidence": result_a.get("high_confidence_deception", False) and result_b.get("high_confidence_deception", False),
-                    "similarity_score": self._calculate_pattern_similarity(analysis_a, analysis_b)
-                }
+                    "both_camouflaged": result_a.get("camouflage_detected", False)
+                    and result_b.get("camouflage_detected", False),
+                    "both_high_confidence": result_a.get("high_confidence_deception", False)
+                    and result_b.get("high_confidence_deception", False),
+                    "similarity_score": self._calculate_pattern_similarity(analysis_a, analysis_b),
+                },
             }
 
             return json.dumps(comparison, indent=2)
@@ -196,7 +213,9 @@ class AdversarialPatternBreaker(BasePlugin):
         except Exception as e:
             return json.dumps({"error": f"Text pattern comparison failed: {e!s}"})
 
-    async def _store_adversarial_pattern(self, text: str, analysis_result: dict[str, Any], source_id: str):
+    async def _store_adversarial_pattern(
+        self, text: str, analysis_result: dict[str, Any], source_id: str
+    ):
         """
         Store adversarial pattern detection result in the database.
         """
@@ -209,20 +228,26 @@ class AdversarialPatternBreaker(BasePlugin):
                 "text_sample": text[:5000],
                 "camouflage_detected": analysis_result.get("camouflage_detected", False),
                 "deception_confidence": analysis_result.get("deception_confidence", 0.0),
-                "high_confidence_deception": analysis_result.get("high_confidence_deception", False),
+                "high_confidence_deception": analysis_result.get(
+                    "high_confidence_deception", False
+                ),
                 "analysis_data": json.dumps(analysis_result.get("analysis", {})),
                 "timestamp": timestamp,
-                "source_id": source_id
+                "source_id": source_id,
             }
 
             self.dal.insert_record("nexus_adversarial_patterns", data)
 
-            logger.info(f"[{self.plugin_id}] Stored adversarial pattern: {text_hash[:8]}... (Confidence: {analysis_result.get('deception_confidence', 0):.2%})")
+            logger.info(
+                f"[{self.plugin_id}] Stored adversarial pattern: {text_hash[:8]}... (Confidence: {analysis_result.get('deception_confidence', 0):.2%})"
+            )
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Failed to store adversarial pattern: {e}")
 
-    def _calculate_pattern_similarity(self, analysis_a: dict[str, Any], analysis_b: dict[str, Any]) -> float:
+    def _calculate_pattern_similarity(
+        self, analysis_a: dict[str, Any], analysis_b: dict[str, Any]
+    ) -> float:
         """
         Calculate similarity score between two pattern analyses.
         """

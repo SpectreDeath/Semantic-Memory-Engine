@@ -10,6 +10,7 @@ class EntropyMapper:
     Analyzes spatial entropy across byte-streams.
     Optimized with __slots__.
     """
+
     __slots__ = ()
 
     def calculate_shannon_entropy(self, data: np.ndarray) -> float:
@@ -20,12 +21,18 @@ class EntropyMapper:
         probs = counts / len(data)
         return -np.sum(probs * np.log2(probs))
 
-    def map_stream_entropy(self, stream: bytes | list[int] | np.ndarray, window_size: int = 256, step_size: int = 64) -> dict[str, Any]:
+    def map_stream_entropy(
+        self, stream: bytes | list[int] | np.ndarray, window_size: int = 256, step_size: int = 64
+    ) -> dict[str, Any]:
         """
         Implements a Sliding Window Shannon Entropy across a byte-stream.
         Returns an array of entropy scores representing different sections of the stream.
         """
-        data = np.frombuffer(stream, dtype=np.uint8) if isinstance(stream, bytes) else np.asarray(stream, dtype=np.uint8)
+        data = (
+            np.frombuffer(stream, dtype=np.uint8)
+            if isinstance(stream, bytes)
+            else np.asarray(stream, dtype=np.uint8)
+        )
         n = len(data)
 
         if n < window_size:
@@ -34,12 +41,12 @@ class EntropyMapper:
                 "entropy_map": [float(self.calculate_shannon_entropy(data))],
                 "window_size": window_size,
                 "step_size": step_size,
-                "status": "Single Window (Stream < Window)"
+                "status": "Single Window (Stream < Window)",
             }
 
         entropy_scores = []
         for i in range(0, n - window_size + 1, step_size):
-            window = data[i:i + window_size]
+            window = data[i : i + window_size]
             entropy_scores.append(float(self.calculate_shannon_entropy(window)))
 
         return {
@@ -48,8 +55,9 @@ class EntropyMapper:
             "step_size": step_size,
             "mean_entropy": round(float(np.mean(entropy_scores)), 4),
             "max_entropy": round(float(np.max(entropy_scores)), 4),
-            "status": "Success"
+            "status": "Success",
         }
+
 
 def map_stream_entropy(stream: bytes | list[int], window_size: int = 256) -> dict[str, Any]:
     """Standalone wrapper for sliding window entropy mapping."""

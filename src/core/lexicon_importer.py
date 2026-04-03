@@ -6,6 +6,7 @@ import re
 LEXICON_BASE = "D:/mcp_servers/lexicons"
 OUTPUT_PATH = "D:/mcp_servers/storage/compiled_signals.json"
 
+
 def ingest_professional_lexicons():
     compiled_data = {}
     print("🚀 Laboratory Ingestion Started...")
@@ -17,12 +18,12 @@ def ingest_professional_lexicons():
     if os.path.exists(mfd_path):
         print(f"🔍 Found WMODEL file: {os.path.basename(mfd_path)}")
         try:
-            with open(mfd_path, encoding='utf-8', errors='ignore') as f:
+            with open(mfd_path, encoding="utf-8", errors="ignore") as f:
                 content = f.read()
 
                 # Regex logic: Finds words in ALL CAPS followed by (1)
                 # Example: VERMIN (1), INFESTATION (1)
-                matches = re.findall(r'([A-Z0-9\']+)\s+\(1\)', content)
+                matches = re.findall(r"([A-Z0-9\']+)\s+\(1\)", content)
 
                 for word in matches:
                     # Normalize to lowercase for the analysis engine
@@ -40,12 +41,12 @@ def ingest_professional_lexicons():
     if os.path.exists(eml_folder):
         # Basic check for any text-based file in the EML folder
         for file in os.listdir(eml_folder):
-            if file.endswith(('.csv', '.txt')):
+            if file.endswith((".csv", ".txt")):
                 print(f"🔍 Found EML file: {file}")
-                with open(os.path.join(eml_folder, file), errors='ignore') as f:
+                with open(os.path.join(eml_folder, file), errors="ignore") as f:
                     for line in f:
                         # Simple split to grab words from the first column
-                        parts = line.strip().split(',')
+                        parts = line.strip().split(",")
                         if parts:
                             word = parts[0].strip().lower()
                             if word and word not in compiled_data:
@@ -53,10 +54,11 @@ def ingest_professional_lexicons():
 
     # 3. SAVE TO SECURED STORAGE
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
-    with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
+    with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(compiled_data, f, indent=4)
 
     return len(compiled_data)
+
 
 if __name__ == "__main__":
     total_signals = ingest_professional_lexicons()

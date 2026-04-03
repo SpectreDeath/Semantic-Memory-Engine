@@ -25,6 +25,7 @@ from enum import Enum
 try:
     from nltk.corpus import stopwords
     from nltk.tokenize import word_tokenize
+
     NLTK_AVAILABLE = True
 except ImportError:
     NLTK_AVAILABLE = False
@@ -34,6 +35,7 @@ logger = logging.getLogger(__name__)
 
 class ClusteringAlgorithm(Enum):
     """Clustering algorithms."""
+
     KMEANS = "kmeans"
     HIERARCHICAL = "hierarchical"
     DENSITY_BASED = "density_based"
@@ -42,6 +44,7 @@ class ClusteringAlgorithm(Enum):
 @dataclass
 class DocumentVector:
     """TF-IDF vector representation of document."""
+
     doc_id: str
     text: str
     tokens: list[str]
@@ -52,6 +55,7 @@ class DocumentVector:
 @dataclass
 class ClusterMember:
     """Document in a cluster."""
+
     doc_id: str
     text: str
     similarity: float  # To cluster center
@@ -60,6 +64,7 @@ class ClusterMember:
 @dataclass
 class Cluster:
     """Document cluster."""
+
     cluster_id: int
     members: list[ClusterMember]
     top_terms: list[tuple[str, float]]  # Word -> weight
@@ -72,6 +77,7 @@ class Cluster:
 @dataclass
 class ClusteringResult:
     """Complete clustering result."""
+
     num_clusters: int
     algorithm: ClusteringAlgorithm
     clusters: list[Cluster]
@@ -88,14 +94,18 @@ class DocumentClusterer:
         self.has_nltk = NLTK_AVAILABLE
         if self.has_nltk:
             try:
-                self.stop_words = set(stopwords.words('english'))
+                self.stop_words = set(stopwords.words("english"))
             except:
                 self.stop_words = self._get_basic_stopwords()
         else:
             self.stop_words = self._get_basic_stopwords()
 
-    def cluster(self, documents: list[str], num_clusters: int | None = None,
-               algorithm: ClusteringAlgorithm = ClusteringAlgorithm.KMEANS) -> ClusteringResult:
+    def cluster(
+        self,
+        documents: list[str],
+        num_clusters: int | None = None,
+        algorithm: ClusteringAlgorithm = ClusteringAlgorithm.KMEANS,
+    ) -> ClusteringResult:
         """
         Cluster documents into groups.
 
@@ -144,11 +154,12 @@ class DocumentClusterer:
             clusters=clusters,
             silhouette_score=silhouette,
             topic_labels=topic_labels,
-            document_assignments=doc_assignments
+            document_assignments=doc_assignments,
         )
 
-    def get_similar_documents(self, target_doc: str, documents: list[str],
-                             top_n: int = 5) -> list[tuple[str, float]]:
+    def get_similar_documents(
+        self, target_doc: str, documents: list[str], top_n: int = 5
+    ) -> list[tuple[str, float]]:
         """Find documents similar to target."""
         target_vector = self._vectorize_document(target_doc)
         similarities = []
@@ -184,11 +195,11 @@ class DocumentClusterer:
                 centroid=dict(cluster1.centroid),
                 size=cluster1.size,
                 cohesion=cluster1.cohesion,
-                separation=cluster1.separation
+                separation=cluster1.separation,
             )
 
             # Find clusters to merge
-            for j, cluster2 in enumerate(clusters[i+1:], start=i+1):
+            for j, cluster2 in enumerate(clusters[i + 1 :], start=i + 1):
                 if j in used:
                     continue
 
@@ -242,17 +253,19 @@ class DocumentClusterer:
                 tfidf = tf_val * idf_val
 
                 vector[term] = tfidf
-                magnitude += tfidf ** 2
+                magnitude += tfidf**2
 
             magnitude = math.sqrt(magnitude)
 
-            vectors.append(DocumentVector(
-                doc_id=str(doc_id),
-                text=documents[doc_id],
-                tokens=tokens,
-                vector=vector,
-                magnitude=max(magnitude, 0.0001)
-            ))
+            vectors.append(
+                DocumentVector(
+                    doc_id=str(doc_id),
+                    text=documents[doc_id],
+                    tokens=tokens,
+                    vector=vector,
+                    magnitude=max(magnitude, 0.0001),
+                )
+            )
 
         return vectors
 
@@ -269,11 +282,11 @@ class DocumentClusterer:
 
         return vector
 
-    def _kmeans_cluster(self, doc_vectors: list[DocumentVector],
-                       k: int) -> list[Cluster]:
+    def _kmeans_cluster(self, doc_vectors: list[DocumentVector], k: int) -> list[Cluster]:
         """K-Means clustering algorithm."""
         # Initialize centroids randomly
         import random
+
         centroid_indices = random.sample(range(len(doc_vectors)), k)
         centroids = [doc_vectors[i].vector for i in centroid_indices]
 
@@ -287,7 +300,7 @@ class DocumentClusterer:
             new_assignments = []
             for vec in doc_vectors:
                 best_centroid = 0
-                best_distance = float('inf')
+                best_distance = float("inf")
 
                 for c_idx, centroid in enumerate(centroids):
                     distance = self._vector_distance(vec.vector, centroid)
@@ -306,8 +319,11 @@ class DocumentClusterer:
             # Update centroids
             new_centroids = []
             for c_idx in range(k):
-                cluster_vectors = [doc_vectors[i].vector for i in range(len(doc_vectors))
-                                 if assignments[i] == c_idx]
+                cluster_vectors = [
+                    doc_vectors[i].vector
+                    for i in range(len(doc_vectors))
+                    if assignments[i] == c_idx
+                ]
 
                 if cluster_vectors:
                     centroid = self._average_vectors(cluster_vectors)
@@ -326,28 +342,32 @@ class DocumentClusterer:
             for doc_idx, assignment in enumerate(assignments):
                 if assignment == c_idx:
                     doc_vec = doc_vectors[doc_idx]
-                    members.append(ClusterMember(
-                        doc_id=doc_vec.doc_id,
-                        text=doc_vec.text,
-                        similarity=1.0 - self._vector_distance(doc_vec.vector, centroids[c_idx])
-                    ))
+                    members.append(
+                        ClusterMember(
+                            doc_id=doc_vec.doc_id,
+                            text=doc_vec.text,
+                            similarity=1.0
+                            - self._vector_distance(doc_vec.vector, centroids[c_idx]),
+                        )
+                    )
 
             top_terms = self._extract_top_terms(centroids[c_idx], 10)
 
-            clusters.append(Cluster(
-                cluster_id=c_idx,
-                members=members,
-                top_terms=top_terms,
-                centroid=centroids[c_idx],
-                size=len(members),
-                cohesion=0.0,
-                separation=0.0
-            ))
+            clusters.append(
+                Cluster(
+                    cluster_id=c_idx,
+                    members=members,
+                    top_terms=top_terms,
+                    centroid=centroids[c_idx],
+                    size=len(members),
+                    cohesion=0.0,
+                    separation=0.0,
+                )
+            )
 
         return clusters
 
-    def _hierarchical_cluster(self, doc_vectors: list[DocumentVector],
-                             k: int) -> list[Cluster]:
+    def _hierarchical_cluster(self, doc_vectors: list[DocumentVector], k: int) -> list[Cluster]:
         """Simplified hierarchical clustering."""
         # Start with each document as its own cluster
         clusters = [[doc_vec] for doc_vec in doc_vectors]
@@ -356,7 +376,7 @@ class DocumentClusterer:
         while len(clusters) > k:
             # Find most similar pair
             best_i, best_j = 0, 1
-            best_distance = float('inf')
+            best_distance = float("inf")
 
             for i in range(len(clusters)):
                 for j in range(i + 1, len(clusters)):
@@ -376,15 +396,17 @@ class DocumentClusterer:
             members = [ClusterMember(d.doc_id, d.text, 0.8) for d in cluster_docs]
             top_terms = self._extract_top_terms(centroid, 10)
 
-            result_clusters.append(Cluster(
-                cluster_id=c_idx,
-                members=members,
-                top_terms=top_terms,
-                centroid=centroid,
-                size=len(members),
-                cohesion=0.0,
-                separation=0.0
-            ))
+            result_clusters.append(
+                Cluster(
+                    cluster_id=c_idx,
+                    members=members,
+                    top_terms=top_terms,
+                    centroid=centroid,
+                    size=len(members),
+                    cohesion=0.0,
+                    separation=0.0,
+                )
+            )
 
         return result_clusters
 
@@ -404,8 +426,9 @@ class DocumentClusterer:
             similarities = [m.similarity for m in cluster.members]
             cluster.cohesion = sum(similarities) / len(similarities) if similarities else 0.0
 
-    def _calculate_silhouette_score(self, clusters: list[Cluster],
-                                   doc_vectors: list[DocumentVector]) -> float:
+    def _calculate_silhouette_score(
+        self, clusters: list[Cluster], doc_vectors: list[DocumentVector]
+    ) -> float:
         """Calculate silhouette score for clustering quality."""
         if len(clusters) < 2:
             return 1.0
@@ -422,7 +445,7 @@ class DocumentClusterer:
                 a = 1.0 - member.similarity
 
                 # Inter-cluster distance (to nearest other cluster)
-                b = float('inf')
+                b = float("inf")
                 for other_cluster in clusters:
                     if other_cluster.cluster_id == cluster.cluster_id:
                         continue
@@ -432,7 +455,7 @@ class DocumentClusterer:
                             distance = 1.0 - other_member.similarity
                             b = min(b, distance)
 
-                if b == float('inf'):
+                if b == float("inf"):
                     b = a
 
                 # Silhouette coefficient
@@ -459,8 +482,9 @@ class DocumentClusterer:
 
     def _cosine_similarity(self, vec1: dict[str, float], vec2: dict[str, float]) -> float:
         """Calculate cosine similarity between vectors."""
-        dot_product = sum(vec1.get(term, 0) * vec2.get(term, 0)
-                         for term in set(vec1.keys()) | set(vec2.keys()))
+        dot_product = sum(
+            vec1.get(term, 0) * vec2.get(term, 0) for term in set(vec1.keys()) | set(vec2.keys())
+        )
 
         mag1 = math.sqrt(sum(v**2 for v in vec1.values())) or 1.0
         mag2 = math.sqrt(sum(v**2 for v in vec2.values())) or 1.0
@@ -474,7 +498,7 @@ class DocumentClusterer:
 
         for term in all_terms:
             diff = vec1.get(term, 0) - vec2.get(term, 0)
-            distance += diff ** 2
+            distance += diff**2
 
         return math.sqrt(distance)
 
@@ -499,8 +523,9 @@ class DocumentClusterer:
         vectors = [dv.vector for dv in doc_vectors]
         return self._average_vectors(vectors)
 
-    def _cluster_distance(self, cluster1: list[DocumentVector],
-                         cluster2: list[DocumentVector]) -> float:
+    def _cluster_distance(
+        self, cluster1: list[DocumentVector], cluster2: list[DocumentVector]
+    ) -> float:
         """Calculate distance between two clusters."""
         centroid1 = self._calculate_centroid(cluster1)
         centroid2 = self._calculate_centroid(cluster2)
@@ -524,20 +549,65 @@ class DocumentClusterer:
                 pass
 
         import re
-        return re.findall(r'\b\w+\b', text.lower())
+
+        return re.findall(r"\b\w+\b", text.lower())
 
     def _get_basic_stopwords(self) -> set:
         """Get basic stopwords."""
         return {
-            'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-            'of', 'with', 'by', 'from', 'as', 'is', 'was', 'are', 'were', 'be',
-            'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should',
-            'could', 'may', 'might', 'can', 'this', 'that', 'these', 'those',
-            'i', 'you', 'he', 'she', 'it', 'we', 'they', 'what', 'which', 'who'
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "from",
+            "as",
+            "is",
+            "was",
+            "are",
+            "were",
+            "be",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "should",
+            "could",
+            "may",
+            "might",
+            "can",
+            "this",
+            "that",
+            "these",
+            "those",
+            "i",
+            "you",
+            "he",
+            "she",
+            "it",
+            "we",
+            "they",
+            "what",
+            "which",
+            "who",
         }
 
-    def _create_single_cluster_result(self, documents: list[str],
-                                     algorithm: ClusteringAlgorithm) -> ClusteringResult:
+    def _create_single_cluster_result(
+        self, documents: list[str], algorithm: ClusteringAlgorithm
+    ) -> ClusteringResult:
         """Create result for single cluster."""
         " ".join(documents)
         doc_vecs = self._vectorize_documents(documents)
@@ -553,7 +623,7 @@ class DocumentClusterer:
             centroid=centroid,
             size=len(members),
             cohesion=1.0,
-            separation=0.0
+            separation=0.0,
         )
 
         return ClusteringResult(
@@ -562,5 +632,5 @@ class DocumentClusterer:
             clusters=[cluster],
             silhouette_score=0.0,
             topic_labels={0: "All Documents"},
-            document_assignments={v.doc_id: 0 for v in doc_vecs}
+            document_assignments={v.doc_id: 0 for v in doc_vecs},
         )

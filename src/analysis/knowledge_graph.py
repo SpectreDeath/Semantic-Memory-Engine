@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class GraphNode:
     """A node in the knowledge graph."""
+
     id: str
     label: str
     type: str
@@ -36,6 +37,7 @@ class GraphNode:
 @dataclass
 class GraphEdge:
     """An edge in the knowledge graph."""
+
     source: str
     target: str
     relation: str
@@ -84,7 +86,7 @@ class KnowledgeGraph:
                     id=node_id,
                     label=linked.entity.text,
                     type=linked.entity.entity_type.value,
-                    properties=linked.properties
+                    properties=linked.properties,
                 )
             else:
                 self.nodes[node_id].weight += 0.5  # Increase weight on co-occurrence
@@ -96,33 +98,41 @@ class KnowledgeGraph:
                 target=link.target.kb_id,
                 relation=link.relation_type,
                 confidence=link.confidence,
-                metadata={"context": context_id}
+                metadata={"context": context_id},
             )
 
         # Semantic enrichment
         if self.semantic_graph.is_available():
             self._enrich_semantically(result.linked_entities)
 
-    def add_edge(self, source: str, target: str, relation: str,
-                 confidence: float = 1.0, metadata: dict[str, Any] | None = None):
+    def add_edge(
+        self,
+        source: str,
+        target: str,
+        relation: str,
+        confidence: float = 1.0,
+        metadata: dict[str, Any] | None = None,
+    ):
         """Add a directed edge to the graph if it doesn't already exist."""
         # Avoid duplicate edges with same relation
         for edge in self.edges:
             if edge.source == source and edge.target == target and edge.relation == relation:
                 return
 
-        self.edges.append(GraphEdge(
-            source=source,
-            target=target,
-            relation=relation,
-            confidence=confidence,
-            metadata=metadata or {}
-        ))
+        self.edges.append(
+            GraphEdge(
+                source=source,
+                target=target,
+                relation=relation,
+                confidence=confidence,
+                metadata=metadata or {},
+            )
+        )
 
     def _enrich_semantically(self, linked_entities: list[LinkedEntity]):
         """Enrich the graph by finding semantic relations between entity concepts."""
         for i, ent1 in enumerate(linked_entities):
-            for ent2 in linked_entities[i+1:]:
+            for ent2 in linked_entities[i + 1 :]:
                 # Check for WordNet similarity
                 similarity = self.semantic_graph.calculate_semantic_similarity(
                     ent1.entity.text, ent2.entity.text
@@ -134,7 +144,7 @@ class KnowledgeGraph:
                         target=ent2.kb_id,
                         relation="semantically_similar",
                         confidence=similarity,
-                        metadata={"source": "wordnet"}
+                        metadata={"source": "wordnet"},
                     )
 
     def to_mermaid(self, direction: str = "LR") -> str:
@@ -163,7 +173,7 @@ class KnowledgeGraph:
         """Export graph as JSON (D3 format)."""
         data = {
             "nodes": [asdict(n) for n in self.nodes.values()],
-            "links": [asdict(e) for e in self.edges]
+            "links": [asdict(e) for e in self.edges],
         }
         return json.dumps(data, indent=2)
 
@@ -173,7 +183,7 @@ class KnowledgeGraph:
             "node_count": len(self.nodes),
             "edge_count": len(self.edges),
             "node_types": self._get_type_distribution(),
-            "central_entities": self._get_central_entities()
+            "central_entities": self._get_central_entities(),
         }
 
     def _get_type_distribution(self) -> dict[str, int]:

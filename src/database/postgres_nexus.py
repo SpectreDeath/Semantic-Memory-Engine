@@ -28,8 +28,7 @@ logger = logging.getLogger("lawnmower.nexus.postgres")
 
 # Connection string from environment
 POSTGRES_CONNECTION_STRING = os.environ.get(
-    "POSTGRES_CONNECTION_STRING",
-    os.environ.get("DATABASE_URL", "")
+    "POSTGRES_CONNECTION_STRING", os.environ.get("DATABASE_URL", "")
 )
 
 
@@ -45,7 +44,7 @@ class PostgresNexus:
         self,
         connection_string: str | None = None,
         min_connections: int = 1,
-        max_connections: int = 10
+        max_connections: int = 10,
     ):
         self.connection_string = connection_string or POSTGRES_CONNECTION_STRING
 
@@ -57,9 +56,7 @@ class PostgresNexus:
 
         # Initialize connection pool
         self.pool = pool.ThreadedConnectionPool(
-            min_connections,
-            max_connections,
-            self.connection_string
+            min_connections, max_connections, self.connection_string
         )
         logger.info("PostgreSQL Nexus: Connection pool initialized")
 
@@ -187,7 +184,7 @@ class PostgresNexus:
                 return {
                     "backend": "PostgreSQL",
                     "version": version[0] if version else "unknown",
-                    "tables": [dict(t) for t in tables]
+                    "tables": [dict(t) for t in tables],
                 }
         except Exception as e:
             return {"backend": "PostgreSQL", "error": str(e)}
@@ -201,9 +198,7 @@ _nexus_lock = threading.Lock()
 
 
 def get_postgres_nexus(
-    connection_string: str | None = None,
-    min_connections: int = 1,
-    max_connections: int = 10
+    connection_string: str | None = None, min_connections: int = 1, max_connections: int = 10
 ) -> PostgresNexus:
     """
     Get the PostgreSQL Nexus singleton.
@@ -219,11 +214,7 @@ def get_postgres_nexus(
     global _nexus
     with _nexus_lock:
         if _nexus is None:
-            _nexus = PostgresNexus(
-                connection_string,
-                min_connections,
-                max_connections
-            )
+            _nexus = PostgresNexus(connection_string, min_connections, max_connections)
     return _nexus
 
 
@@ -253,4 +244,5 @@ def get_nexus(use_postgres: bool | None = None) -> Any:
 
     # Fall back to SQLite
     from gateway.nexus_db import get_nexus as get_sqlite_nexus
+
     return get_sqlite_nexus()

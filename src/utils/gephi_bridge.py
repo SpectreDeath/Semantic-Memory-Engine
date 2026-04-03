@@ -29,6 +29,7 @@ import requests
 # Optional: gephistreamer for Gephi visualization (not on PyPI)
 try:
     from gephistreamer import GephiREST, Streamer, graph
+
     GEPHISTREAMER_AVAILABLE = True
 except ImportError:
     GEPHISTREAMER_AVAILABLE = False
@@ -42,11 +43,11 @@ MAX_NODES = 2000
 def read_active_persona():
     """Read current persona from active_persona.json."""
     try:
-        with open('active_persona.json') as f:
+        with open("active_persona.json") as f:
             return json.load(f)
     except FileNotFoundError:
         try:
-            with open('../active_persona.json') as f:
+            with open("../active_persona.json") as f:
                 return json.load(f)
         except FileNotFoundError:
             return {"persona": "Unknown", "specialty": "Unknown", "timestamp": ""}
@@ -69,11 +70,13 @@ def connect_to_gephi(workspace="workspace0"):
         # print(f"Gephi connection failed: {e} - using mock mode")
         return None, False
 
+
 class GephiBatcher:
     """
     Batches Gephi streaming operations to avoid memory spikes.
     Chunks nodes and edges into groups of 100.
     """
+
     def __init__(self, streamer, batch_size=100):
         self.streamer = streamer
         self.batch_size = batch_size
@@ -120,24 +123,26 @@ class GephiBatcher:
 def get_file_metadata():
     """Extract metadata for all Python and key files in project."""
     files = []
-    patterns = ['*.py', '*.md', '*.json', '*.csv', '*.txt']
+    patterns = ["*.py", "*.md", "*.json", "*.csv", "*.txt"]
 
     for pattern in patterns:
-        for file_path in glob.glob(f'**/{pattern}', recursive=True):
+        for file_path in glob.glob(f"**/{pattern}", recursive=True):
             if os.path.getsize(file_path) > 0:  # Skip empty files
                 try:
-                    with open(file_path, encoding='utf-8', errors='ignore') as f:
+                    with open(file_path, encoding="utf-8", errors="ignore") as f:
                         lines = len(f.readlines())
                 except:
                     lines = 0
 
-                files.append({
-                    'path': file_path,
-                    'name': Path(file_path).name,
-                    'ext': Path(file_path).suffix,
-                    'lines': lines,
-                    'dir': str(Path(file_path).parent)
-                })
+                files.append(
+                    {
+                        "path": file_path,
+                        "name": Path(file_path).name,
+                        "ext": Path(file_path).suffix,
+                        "lines": lines,
+                        "dir": str(Path(file_path).parent),
+                    }
+                )
 
     return files
 
@@ -146,10 +151,10 @@ def get_outlier_data():
     """Read outlier data from audit_results.csv."""
     outliers = {}
     try:
-        df = pd.read_csv('data/results/audit_results.csv')
+        df = pd.read_csv("data/results/audit_results.csv")
         for _, row in df.iterrows():
-            filename = row.get('filename', row.get('file', 'unknown'))
-            outliers[filename] = row.get('is_outlier', False)
+            filename = row.get("filename", row.get("file", "unknown"))
+            outliers[filename] = row.get("is_outlier", False)
     except FileNotFoundError:
         pass
     return outliers
@@ -180,27 +185,27 @@ def stream_project_mode(workspace="workspace0"):
             print(f"Reached maximum node limit of {MAX_NODES}")
             break
 
-        node_id = file_info['path']
+        node_id = file_info["path"]
         node = graph.Node(
             node_id,
-            label=file_info['name'],
+            label=file_info["name"],
             attributes={
-                'persona': persona_data['persona'],
-                'specialty': persona_data['specialty'],
-                'extension': file_info['ext'],
-                'lines': file_info['lines'],
-                'directory': file_info['dir'],
-                'mode': 'project'
-            }
+                "persona": persona_data["persona"],
+                "specialty": persona_data["specialty"],
+                "extension": file_info["ext"],
+                "lines": file_info["lines"],
+                "directory": file_info["dir"],
+                "mode": "project",
+            },
         )
 
         # Set visual properties
-        if file_info['name'] in outliers and outliers[file_info['name']]:
+        if file_info["name"] in outliers and outliers[file_info["name"]]:
             node.r, node.g, node.b = 1.0, 0.0, 0.0
         else:
             node.r, node.g, node.b = 0.0, 1.0, 0.0
 
-        node.size = max(10, min(100, file_info['lines'] // 10))
+        node.size = max(10, min(100, file_info["lines"] // 10))
 
         batcher.add_node(node)
         nodes_added += 1
@@ -213,10 +218,10 @@ def stream_project_mode(workspace="workspace0"):
     edges_added = 0
     dir_groups = {}
     for file_info in files:
-        dir_path = file_info['dir']
+        dir_path = file_info["dir"]
         if dir_path not in dir_groups:
             dir_groups[dir_path] = []
-        dir_groups[dir_path].append(file_info['path'])
+        dir_groups[dir_path].append(file_info["path"])
 
     for dir_path, file_list in dir_groups.items():
         if len(file_list) > 1:
@@ -248,7 +253,7 @@ def stream_trust_mode(workspace="workspace0"):
     batcher = GephiBatcher(gephi_streamer if connected else None)
 
     try:
-        df = pd.read_csv('data/results/trust_scores_results.csv')
+        df = pd.read_csv("data/results/trust_scores_results.csv")
         print(f"Loaded {len(df)} trust scores.")
 
         nodes_added = 0
@@ -256,13 +261,13 @@ def stream_trust_mode(workspace="workspace0"):
             if nodes_added >= MAX_NODES:
                 break
 
-            node_id = row['node_id']
-            trust_score = float(row['trust_score'])
+            node_id = row["node_id"]
+            trust_score = float(row["trust_score"])
 
             node = graph.Node(
                 node_id,
                 label=f"{node_id} (Trust: {trust_score:.2f})",
-                attributes={'trust_score': trust_score, 'mode': 'trust'}
+                attributes={"trust_score": trust_score, "mode": "trust"},
             )
 
             node.size = 20 + (trust_score * 50)
@@ -301,7 +306,7 @@ def stream_knowledge_mode(workspace="workspace0"):
 
     conn = None
     try:
-        conn = sqlite3.connect('data/knowledge_core.sqlite')
+        conn = sqlite3.connect("data/knowledge_core.sqlite")
         cursor = conn.cursor()
 
         cursor.execute("SELECT id, label FROM concepts LIMIT 1000")
@@ -317,7 +322,7 @@ def stream_knowledge_mode(workspace="workspace0"):
             node = graph.Node(
                 f"concept_{concept_id}",
                 label=label,
-                attributes={'concept_id': concept_id, 'mode': 'knowledge'}
+                attributes={"concept_id": concept_id, "mode": "knowledge"},
             )
             node.size = 30
             node.r, node.g, node.b = 0.5, 0.5, 1.0
@@ -328,7 +333,9 @@ def stream_knowledge_mode(workspace="workspace0"):
 
         batcher.flush_nodes()
 
-        cursor.execute("SELECT source_concept_id, target_concept_id, weight, relationship_type FROM assertions WHERE weight > 0.5")
+        cursor.execute(
+            "SELECT source_concept_id, target_concept_id, weight, relationship_type FROM assertions WHERE weight > 0.5"
+        )
         assertions = cursor.fetchall()
         print(f"Loaded {len(assertions)} assertions.")
 
@@ -337,8 +344,16 @@ def stream_knowledge_mode(workspace="workspace0"):
             if edges_added >= MAX_NODES:
                 break
             if source_id in concept_ids and target_id in concept_ids:
-                edge = graph.Edge(f"assertion_{source_id}_{target_id}", f"concept_{source_id}", f"concept_{target_id}",
-                               attributes={'weight': weight, 'relationship_type': rel_type, 'mode': 'knowledge'})
+                edge = graph.Edge(
+                    f"assertion_{source_id}_{target_id}",
+                    f"concept_{source_id}",
+                    f"concept_{target_id}",
+                    attributes={
+                        "weight": weight,
+                        "relationship_type": rel_type,
+                        "mode": "knowledge",
+                    },
+                )
                 edge.weight = weight
                 batcher.add_edge(edge)
                 edges_added += 1
@@ -371,7 +386,7 @@ def stream_synthetic_mode(workspace="workspace0"):
 
     try:
         # Read synthetic audit data
-        df = pd.read_csv('data/results/synthetic_audit_results.csv')
+        df = pd.read_csv("data/results/synthetic_audit_results.csv")
         print(f"Loaded {len(df)} synthetic audit records.")
 
         nodes_added = 0
@@ -385,24 +400,24 @@ def stream_synthetic_mode(workspace="workspace0"):
                 print(f"Reached maximum node limit of {MAX_NODES}")
                 break
 
-            signature_id = row['signature_id']
-            pattern_type = row['pattern_type']
-            confidence_score = float(row['confidence_score'])
+            signature_id = row["signature_id"]
+            pattern_type = row["pattern_type"]
+            confidence_score = float(row["confidence_score"])
             # Handle both string and boolean values for vaulted field
-            vaulted_str = str(row['vaulted']).lower()
-            vaulted = vaulted_str in {'true', '1'}
+            vaulted_str = str(row["vaulted"]).lower()
+            vaulted = vaulted_str in {"true", "1"}
 
             # Create node with appropriate color
             node = graph.Node(
                 signature_id,
                 label=f"{signature_id}\n{pattern_type}\nConf: {confidence_score:.2f}",
                 attributes={
-                    'pattern_type': pattern_type,
-                    'confidence_score': confidence_score,
-                    'vaulted': vaulted,
-                    'mode': 'synthetic',
-                    'node_type': 'signature'
-                }
+                    "pattern_type": pattern_type,
+                    "confidence_score": confidence_score,
+                    "vaulted": vaulted,
+                    "mode": "synthetic",
+                    "node_type": "signature",
+                },
             )
 
             node.size = 20 + (confidence_score * 60)
@@ -421,8 +436,8 @@ def stream_synthetic_mode(workspace="workspace0"):
         # Create edges between related patterns (same type)
         pattern_groups = {}
         for _, row in df.iterrows():
-            pattern_type = row['pattern_type']
-            signature_id = row['signature_id']
+            pattern_type = row["pattern_type"]
+            signature_id = row["signature_id"]
 
             if pattern_type not in pattern_groups:
                 pattern_groups[pattern_type] = []
@@ -436,7 +451,12 @@ def stream_synthetic_mode(workspace="workspace0"):
                             print(f"Reached maximum edge limit of {MAX_NODES}")
                             break
                         if signatures[i] in created_nodes and signatures[j] in created_nodes:
-                            edge = graph.Edge(f"{signatures[i]}-{signatures[j]}", signatures[i], signatures[j], attributes={'mode': 'synthetic'})
+                            edge = graph.Edge(
+                                f"{signatures[i]}-{signatures[j]}",
+                                signatures[i],
+                                signatures[j],
+                                attributes={"mode": "synthetic"},
+                            )
                             batcher.add_edge(edge)
                             edges_added += 1
 
@@ -470,46 +490,42 @@ def stream_archival_data(url, snapshots, divergences, workspace="workspace0"):
 
     # 2. Add snapshots as temporal nodes
     for snap in snapshots:
-        ts = snap['timestamp']
+        ts = snap["timestamp"]
         node = graph.Node(
             ts,
             label=f"Snapshot: {snap['human_date']}",
-            attributes={
-                'timestamp': ts,
-                'digest': snap['digest'],
-                'mode': 'archival'
-            }
+            attributes={"timestamp": ts, "digest": snap["digest"], "mode": "archival"},
         )
         node.size = 30
 
         # Color based on whether it's part of a divergence
-        is_divergent = any(d['post_change']['timestamp'] == ts for d in divergences)
+        is_divergent = any(d["post_change"]["timestamp"] == ts for d in divergences)
         if is_divergent:
-            node.r, node.g, node.b = 1.0, 0.0, 0.0 # Red for divergent
+            node.r, node.g, node.b = 1.0, 0.0, 0.0  # Red for divergent
         else:
-            node.r, node.g, node.b = 0.0, 1.0, 0.0 # Green for stable
+            node.r, node.g, node.b = 0.0, 1.0, 0.0  # Green for stable
 
         batcher.add_node(node)
         nodes_added += 1
 
         # Link to main URL
-        edge = graph.Edge(f"{url}-{ts}", url, ts, attributes={'mode': 'archival'})
+        edge = graph.Edge(f"{url}-{ts}", url, ts, attributes={"mode": "archival"})
         batcher.add_edge(edge)
 
     # 3. Add drift edges between divergent snapshots
     for d in divergences:
         e_id = f"drift-{d['pre_change']['timestamp']}-{d['post_change']['timestamp']}"
-        drift_score = d.get('semantic_drift', 0.0)
+        drift_score = d.get("semantic_drift", 0.0)
         edge = graph.Edge(
             e_id,
-            d['pre_change']['timestamp'],
-            d['post_change']['timestamp'],
+            d["pre_change"]["timestamp"],
+            d["post_change"]["timestamp"],
             label=f"Drift: {drift_score:.2%}",
             attributes={
-                'semantic_drift': drift_score,
-                'mode': 'archival',
-                'relationship': 'temporal_divergence'
-            }
+                "semantic_drift": drift_score,
+                "mode": "archival",
+                "relationship": "temporal_divergence",
+            },
         )
         batcher.add_edge(edge)
 
@@ -529,25 +545,20 @@ Examples:
   python gephi_bridge.py --mode knowledge
   python gephi_bridge.py --mode synthetic
   python gephi_bridge.py --mode trust --workspace workspace1
-        """
+        """,
     )
 
     parser.add_argument(
-        '--mode',
-        choices=['project', 'trust', 'knowledge', 'synthetic', 'archival'],
-        default='project',
-        help='Forensic mode to run (default: project)'
+        "--mode",
+        choices=["project", "trust", "knowledge", "synthetic", "archival"],
+        default="project",
+        help="Forensic mode to run (default: project)",
     )
 
-    parser.add_argument(
-        '--url',
-        help='Target URL for archival mode'
-    )
+    parser.add_argument("--url", help="Target URL for archival mode")
 
     parser.add_argument(
-        '--workspace',
-        default='workspace0',
-        help='Target Gephi workspace (default: workspace0)'
+        "--workspace", default="workspace0", help="Target Gephi workspace (default: workspace0)"
     )
 
     args = parser.parse_args()
@@ -559,15 +570,15 @@ Examples:
     print("-" * 50)
 
     # Route to appropriate mode handler
-    if args.mode == 'project':
+    if args.mode == "project":
         stream_project_mode(args.workspace)
-    elif args.mode == 'trust':
+    elif args.mode == "trust":
         stream_trust_mode(args.workspace)
-    elif args.mode == 'knowledge':
+    elif args.mode == "knowledge":
         stream_knowledge_mode(args.workspace)
-    elif args.mode == 'synthetic':
+    elif args.mode == "synthetic":
         stream_synthetic_mode(args.workspace)
-    elif args.mode == 'archival':
+    elif args.mode == "archival":
         if not args.url:
             print("Error: --url is required for archival mode")
             sys.exit(1)
@@ -575,6 +586,7 @@ Examples:
         # But since we're mostly using this as a library, we'll keep it simple
         print("Archival mode via CLI: Please use the integration script or provide --url")
         from src.extensions.ext_archival_diff.scout import WaybackScout
+
         scout = WaybackScout()
         history = asyncio.run(scout.get_snapshot_history(args.url))
         divergences = scout.identify_divergent_points(history)

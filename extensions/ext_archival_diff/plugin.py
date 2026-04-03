@@ -21,6 +21,7 @@ from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.ArchivalDiff")
 
+
 class ArchivalDiffExtension(BasePlugin):
     """
     SME Extension: Detect Data Scrubbing via Wayback Machine Comparison.
@@ -57,23 +58,27 @@ class ArchivalDiffExtension(BasePlugin):
             old_snap, new_snap = self.scout.find_divergent_snapshots(target_url)
 
             if not old_snap or not new_snap:
-                return json.dumps({
-                    "status": "inconclusive",
-                    "reason": "Insufficient snapshot history or no divergent content found in archive index."
-                })
+                return json.dumps(
+                    {
+                        "status": "inconclusive",
+                        "reason": "Insufficient snapshot history or no divergent content found in archive index.",
+                    }
+                )
 
             # 2. Fetch content
-            old_url = self.scout.build_wayback_url(old_snap['timestamp'], target_url)
-            new_url = self.scout.build_wayback_url(new_snap['timestamp'], target_url)
+            old_url = self.scout.build_wayback_url(old_snap["timestamp"], target_url)
+            new_url = self.scout.build_wayback_url(new_snap["timestamp"], target_url)
 
             old_html = self.scout.get_snapshot_content(old_url)
             new_html = self.scout.get_snapshot_content(new_url)
 
             if not old_html or not new_html:
-                return json.dumps({
-                    "status": "error",
-                    "reason": "Failed to retrieve snapshot content from Wayback Machine."
-                })
+                return json.dumps(
+                    {
+                        "status": "error",
+                        "reason": "Failed to retrieve snapshot content from Wayback Machine.",
+                    }
+                )
 
             # 3. Analyze diff
             diff_result = self.analyst.semantic_diff(old_html, new_html)
@@ -82,15 +87,15 @@ class ArchivalDiffExtension(BasePlugin):
             metadata = {
                 "url": target_url,
                 "snapshot_old": {
-                    "timestamp": old_snap['timestamp'],
+                    "timestamp": old_snap["timestamp"],
                     "url": old_url,
-                    "digest": old_snap['digest']
+                    "digest": old_snap["digest"],
                 },
                 "snapshot_new": {
-                    "timestamp": new_snap['timestamp'],
+                    "timestamp": new_snap["timestamp"],
                     "url": new_url,
-                    "digest": new_snap['digest']
-                }
+                    "digest": new_snap["digest"],
+                },
             }
 
             self.exporter.export_diff(diff_result, metadata)
@@ -99,11 +104,11 @@ class ArchivalDiffExtension(BasePlugin):
             report = {
                 "status": "complete",
                 "url": target_url,
-                "scrubbing_detected": len(diff_result['deleted_content']) > 0,
-                "added_count": diff_result['summary']['total_added'],
-                "deleted_count": diff_result['summary']['total_deleted'],
-                "evidence": diff_result['deleted_content'][:3], # Sample evidence
-                "metadata": metadata
+                "scrubbing_detected": len(diff_result["deleted_content"]) > 0,
+                "added_count": diff_result["summary"]["total_added"],
+                "deleted_count": diff_result["summary"]["total_deleted"],
+                "evidence": diff_result["deleted_content"][:3],  # Sample evidence
+                "metadata": metadata,
             }
 
             return json.dumps(report, indent=2)
@@ -117,6 +122,7 @@ class ArchivalDiffExtension(BasePlugin):
         Optional: Automatically scan on a schedule or ingestion if URL is present.
         """
         pass
+
 
 def register_extension(manifest: dict[str, Any], nexus_api: Any):
     return ArchivalDiffExtension(manifest, nexus_api)

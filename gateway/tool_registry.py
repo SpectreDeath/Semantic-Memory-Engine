@@ -49,6 +49,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ToolDefinition:
     """Metadata for an MCP-exposed tool."""
+
     name: str
     description: str
     factory_method: str | None
@@ -62,13 +63,15 @@ class ToolDefinition:
 # NOTE: Must be declared AFTER ToolDefinition to avoid NameError at import time.
 EXTENSION_TOOLS: list[ToolDefinition] = []
 
+
 class ScribeAuthorshipTool:
     """
     Custom Scribe Authorship tool using Burrows' Delta logic.
     """
+
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'forensics'
+        self.category = "forensics"
 
     def analyze_authorship(self, text_sample: str, suspect_vector_id: str | None = None):
         """
@@ -93,7 +96,7 @@ class ScribeAuthorshipTool:
                 return {
                     "status": "Baseline Fingerprint Generated",
                     "fingerprint": fingerprint,
-                    "warning": f"Suspect vector '{suspect_vector_id}' not found in scratchpad."
+                    "warning": f"Suspect vector '{suspect_vector_id}' not found in scratchpad.",
                 }
 
             # If suspect_data is a dict (fingerprint), calculate distance
@@ -105,7 +108,7 @@ class ScribeAuthorshipTool:
                     "status": "Analysis Complete",
                     "match_confidence": confidence,
                     "delta_score": round(delta, 4),
-                    "features_detected": list(fingerprint.keys())[:5]
+                    "features_detected": list(fingerprint.keys())[:5],
                 }
             else:
                 return {"error": f"Invalid data format for suspect vector '{suspect_vector_id}'"}
@@ -115,16 +118,19 @@ class ScribeAuthorshipTool:
     def _calculate_delta(self, f1, f2):
         # Manhattan distance implementation for Burrows' Delta
         words = set(f1.keys()) | set(f2.keys())
-        if not words: return 1.0
+        if not words:
+            return 1.0
         return sum(abs(f1.get(w, 0) - f2.get(w, 0)) for w in words) / len(words)
+
 
 class ScribeProTool:
     """
     Advanced forensic matching using faststylometry.
     """
+
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'forensics'
+        self.category = "forensics"
 
     def analyze_authorship_pro(self, text: str, comparison_id: str = "Suspect_Alpha_Vector"):
         """
@@ -161,7 +167,7 @@ class ScribeProTool:
             return {
                 "error": "Insufficient baselines found in scratchpad for Scribe Pro calibration.",
                 "found_count": baselines_found,
-                "hint": "Ensure at least two 'Baseline_...' samples with their corresponding 'Text_Baseline_...' entries are stored."
+                "hint": "Ensure at least two 'Baseline_...' samples with their corresponding 'Text_Baseline_...' entries are stored.",
             }
 
         # 2. Tokenize, Calibrate and Predict
@@ -194,7 +200,7 @@ class ScribeProTool:
                 "status": "Probabilistic Analysis Complete",
                 "probabilities": final_probs,
                 "match_likelihood": "High" if max(final_probs.values(), default=0) > 0.8 else "Low",
-                "baselines_used": baselines_found
+                "baselines_used": baselines_found,
             }
         except Exception as e:
             logger.exception(f"Scribe Pro error: {e}")
@@ -203,16 +209,18 @@ class ScribeProTool:
                 "status": "Probabilistic Calibration Failed (Falling back to Delta)",
                 "error": str(e),
                 "baselines_found": baselines_found,
-                "hint": "Try adding more diverse baseline samples to improve Logistic Regression stability."
+                "hint": "Try adding more diverse baseline samples to improve Logistic Regression stability.",
             }
+
 
 class InfluenceTool:
     """
     Graph Centrality tool for finding 'Key Influencers' in the knowledge graph.
     """
+
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'graph'
+        self.category = "graph"
 
     def get_influence_score(self, entity_name: str):
         """
@@ -247,7 +255,7 @@ class InfluenceTool:
                 "ego_graph_size": G.number_of_nodes(),
                 "relationships_count": G.number_of_edges(),
                 "centrality_metric": "PageRank",
-                "neighbors": list(G.neighbors(entity_name))[:5]
+                "neighbors": list(G.neighbors(entity_name))[:5],
             }
         except Exception as e:
             logger.exception(f"Influence Tool error: {e}")
@@ -270,130 +278,128 @@ class ToolRegistry:
             description="Check system health: CPU, RAM, database status, and data integrity",
             factory_method="create_system_monitor",
             category="diagnostics",
-            parameters={}
+            parameters={},
         ),
         "semantic_search": ToolDefinition(
             name="semantic_search",
             description="Search the knowledge base using semantic vector similarity",
             factory_method="create_search_engine",
             category="query",
-            parameters={"query": "str", "limit": "int"}
+            parameters={"query": "str", "limit": "int"},
         ),
         "query_knowledge": ToolDefinition(
             name="query_knowledge",
             description="Query the knowledge graph for related concepts",
             factory_method="create_scout",
             category="query",
-            parameters={"concept": "str"}
+            parameters={"concept": "str"},
         ),
         "save_memory": ToolDefinition(
             name="save_memory",
             description="Persist a new fact or insight to the knowledge base",
             factory_method="create_synapse",
             category="memory",
-            parameters={"fact": "str", "source": "str"}
+            parameters={"fact": "str", "source": "str"},
         ),
         "get_memory_stats": ToolDefinition(
             name="get_memory_stats",
             description="Get statistics about stored knowledge: facts, vectors, entries",
             factory_method="create_centrifuge",
             category="diagnostics",
-            parameters={}
+            parameters={},
         ),
-
         # ===== TIER 2: Forensic Tools (Sprint 2) =====
         "analyze_authorship": ToolDefinition(
             name="analyze_authorship",
             description="Extract linguistic fingerprint for authorship attribution",
             factory_method="create_scribe",
             category="forensics",
-            parameters={"text": "str", "author_id": "str"}
+            parameters={"text": "str", "author_id": "str"},
         ),
         "analyze_sentiment": ToolDefinition(
             name="analyze_sentiment",
             description="Detect emotions, sarcasm, and sentiment in text",
             factory_method="create_sentiment_analyzer",
             category="analysis",
-            parameters={"text": "str"}
+            parameters={"text": "str"},
         ),
         "link_entities": ToolDefinition(
             name="link_entities",
             description="Extract and link entities to knowledge bases",
             factory_method="create_entity_linker",
             category="analysis",
-            parameters={"text": "str"}
+            parameters={"text": "str"},
         ),
         "summarize_text": ToolDefinition(
             name="summarize_text",
             description="Summarize text using extractive, abstractive, or query-focused modes",
             factory_method="create_text_summarizer",
             category="analysis",
-            parameters={"text": "str", "mode": "str", "max_sentences": "int"}
+            parameters={"text": "str", "mode": "str", "max_sentences": "int"},
         ),
-
         # ===== TIER 3: Advanced Tools (Sprint 3) =====
         "cluster_documents": ToolDefinition(
             name="cluster_documents",
             description="Cluster documents by semantic similarity",
             factory_method="create_document_clusterer",
             category="analysis",
-            parameters={"documents": "list", "algorithm": "str"}
+            parameters={"documents": "list", "algorithm": "str"},
         ),
         "build_knowledge_graph": ToolDefinition(
             name="build_knowledge_graph",
             description="Build semantic graph from concepts and relationships",
             factory_method="create_semantic_graph",
             category="graph",
-            parameters={"concepts": "list"}
+            parameters={"concepts": "list"},
         ),
         "verify_facts": ToolDefinition(
             name="verify_facts",
             description="Verify claims against the knowledge base",
             factory_method="create_fact_verifier",
             category="forensics",
-            parameters={"claim": "str"}
+            parameters={"claim": "str"},
         ),
         "analyze_nlp": ToolDefinition(
             name="analyze_nlp",
             description="Deep NLP analysis: dependencies, coreference, semantic roles",
             factory_method="create_nlp_pipeline",
             category="analysis",
-            parameters={"text": "str"}
+            parameters={"text": "str"},
         ),
         "detect_networks": ToolDefinition(
             name="detect_networks",
             description="Detect coordinated sockpuppet networks",
             factory_method="create_network_generator",
             category="forensics",
-            parameters={"authors": "list"}
+            parameters={"authors": "list"},
         ),
         "resolve_concept": ToolDefinition(
             name="resolve_concept",
             description="Map ambiguous terms to specific knowledge graph nodes",
             factory_method="create_concept_resolver",
             category="query",
-            parameters={"term": "str"}
+            parameters={"term": "str"},
         ),
         "generate_intelligence_report": ToolDefinition(
             name="generate_intelligence_report",
             description="Aggregate findings into a structured forensic report",
             factory_method="create_intelligence_reports",
             category="analysis",
-            parameters={"subject": "str", "findings": "list"}
+            parameters={"subject": "str", "findings": "list"},
         ),
         "discover_overlap": ToolDefinition(
             name="discover_overlap",
             description="Find shared rhetorical signals between different authors",
             factory_method="create_overlap_discovery",
             category="forensics",
-            parameters={"author_ids": "list"}
+            parameters={"author_ids": "list"},
         ),
         "analyze_rolling_delta": ToolDefinition(
             name="analyze_rolling_delta",
             description="Temporal stylometric analysis of writing style evolution",
             factory_method="create_rolling_delta",
             category="forensics",
-            parameters={"text": "str", "window_size": "int"}
+            parameters={"text": "str", "window_size": "int"},
         ),
         "analyze_authorship_pro": ToolDefinition(
             name="analyze_authorship_pro",
@@ -401,91 +407,91 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"text": "str", "comparison_id": "str"},
-            is_manual=True
+            is_manual=True,
         ),
         "deep_analyze": ToolDefinition(
             name="deep_analyze",
             description="Comprehensive forensic analysis combining multiple tools",
             factory_method=None,
             category="forensics",
-            parameters={"text": "str"}
+            parameters={"text": "str"},
         ),
         "cross_author_comparison": ToolDefinition(
             name="cross_author_comparison",
             description="Compare multiple authors/texts to find commonalities",
             factory_method=None,
             category="forensics",
-            parameters={"texts": "list"}
+            parameters={"texts": "list"},
         ),
         "process_batch": ToolDefinition(
             name="process_batch",
             description="Execute a tool against multiple inputs in a single batch",
             factory_method=None,
             category="utility",
-            parameters={"tool_name": "str", "inputs": "list"}
+            parameters={"tool_name": "str", "inputs": "list"},
         ),
         "get_session_info": ToolDefinition(
             name="get_session_info",
             description="Get detailed information about a session",
             factory_method=None,
             category="session",
-            parameters={"session_id": "str"}
+            parameters={"session_id": "str"},
         ),
         "update_scratchpad": ToolDefinition(
             name="update_scratchpad",
             description="Store temporary facts or context in the session scratchpad",
             factory_method=None,
             category="session",
-            parameters={"key": "str", "value": "any"}
+            parameters={"key": "str", "value": "any"},
         ),
         "list_available_tools": ToolDefinition(
             name="list_available_tools",
             description="List all available MCP tools exposed by the gateway",
             factory_method=None,
             category="utility",
-            parameters={}
+            parameters={},
         ),
         "login": ToolDefinition(
             name="login",
             description="Authenticate with the gateway and receive a JWT token",
             factory_method=None,
             category="auth",
-            parameters={"username": "str", "password": "str"}
+            parameters={"username": "str", "password": "str"},
         ),
         "check_health": ToolDefinition(
             name="check_health",
             description="Combined health check for the gateway and dependencies",
             factory_method=None,
             category="utility",
-            parameters={}
+            parameters={},
         ),
         "get_system_latency": ToolDefinition(
             name="get_system_latency",
             description="Measure internal tool call latency and system response",
             factory_method=None,
             category="utility",
-            parameters={}
+            parameters={},
         ),
         "entity_extractor": ToolDefinition(
             name="entity_extractor",
             description="Advanced entity cross-referencing against the 10GB ConceptNet knowledge graph.",
             factory_method="create_concept_resolver",
             category="query",
-            parameters={"text": "str"}
+            parameters={"text": "str"},
         ),
         "harvest_suspect_baseline": ToolDefinition(
             name="harvest_suspect_baseline",
             description="Recursively harvest text from a path and create a stylometric suspect profile",
             factory_method=None,
             category="forensics",
-            parameters={"path": "str", "suspect_id": "str"}
+            parameters={"path": "str", "suspect_id": "str"},
         ),
         "get_influence_score": ToolDefinition(
             name="get_influence_score",
             description="Calculate graph centrality for an entity to find 'Key Influencers'.",
             factory_method=None,
             category="graph",
-            parameters={"entity_name": "str"}
+            parameters={"entity_name": "str"},
         ),
         "calculate_cosine_similarity": ToolDefinition(
             name="calculate_cosine_similarity",
@@ -493,7 +499,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"freq_dict_1": "dict", "freq_dict_2": "dict"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_typo_distance": ToolDefinition(
             name="calculate_typo_definition",
@@ -501,7 +507,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"word1": "str", "word2": "str"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_set_overlap": ToolDefinition(
             name="calculate_set_overlap",
@@ -509,7 +515,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"tokens1": "list", "tokens2": "list"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_tfidf": ToolDefinition(
             name="calculate_tfidf",
@@ -517,7 +523,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"tokenized_docs": "list"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_kl_divergence": ToolDefinition(
             name="calculate_kl_divergence",
@@ -525,7 +531,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"p": "list", "q": "list"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_phonetic_hash": ToolDefinition(
             name="calculate_phonetic_hash",
@@ -533,7 +539,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"word": "str"},
-            is_manual=True
+            is_manual=True,
         ),
         "audit_benford_distribution": ToolDefinition(
             name="audit_benford_distribution",
@@ -541,7 +547,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"data": "list"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_simhash": ToolDefinition(
             name="calculate_simhash",
@@ -549,7 +555,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"tokens": "list", "hash_size": "int"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_entropy_divergence": ToolDefinition(
             name="calculate_entropy_divergence",
@@ -557,7 +563,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"p": "list", "q": "list"},
-            is_manual=True
+            is_manual=True,
         ),
         "verify_file_signature": ToolDefinition(
             name="verify_file_signature",
@@ -565,7 +571,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"file_path": "str"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_structural_complexity": ToolDefinition(
             name="calculate_structural_complexity",
@@ -573,7 +579,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"file_path": "str"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_burstiness": ToolDefinition(
             name="calculate_burstiness",
@@ -581,7 +587,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"timestamps": "list"},
-            is_manual=True
+            is_manual=True,
         ),
         "validate_luhn_checksum": ToolDefinition(
             name="validate_luhn_checksum",
@@ -589,7 +595,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"numeric_string": "str"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_node_path": ToolDefinition(
             name="calculate_node_path",
@@ -597,7 +603,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"graph": "dict", "start_node": "str", "end_node": "str"},
-            is_manual=True
+            is_manual=True,
         ),
         "identify_central_hubs": ToolDefinition(
             name="identify_central_hubs",
@@ -605,7 +611,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"adjacency_matrix": "list", "node_labels": "list"},
-            is_manual=True
+            is_manual=True,
         ),
         "calculate_sequence_similarity": ToolDefinition(
             name="calculate_sequence_similarity",
@@ -613,7 +619,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"seq1": "list", "seq2": "list"},
-            is_manual=True
+            is_manual=True,
         ),
         "detect_event_periodicity": ToolDefinition(
             name="detect_event_periodicity",
@@ -621,7 +627,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"data": "list"},
-            is_manual=True
+            is_manual=True,
         ),
         "map_stream_entropy": ToolDefinition(
             name="map_stream_entropy",
@@ -629,7 +635,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"stream": "list", "window_size": "int"},
-            is_manual=True
+            is_manual=True,
         ),
         "analyze_obfuscation_score": ToolDefinition(
             name="analyze_obfuscation_score",
@@ -637,7 +643,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"content": "str"},
-            is_manual=True
+            is_manual=True,
         ),
         "ingest_forensic_target": ToolDefinition(
             name="ingest_forensic_target",
@@ -645,7 +651,7 @@ class ToolRegistry:
             factory_method=None,
             category="bridge",
             parameters={"url": "str"},
-            is_manual=True
+            is_manual=True,
         ),
         "get_forensic_report": ToolDefinition(
             name="get_forensic_report",
@@ -653,7 +659,7 @@ class ToolRegistry:
             factory_method=None,
             category="forensics",
             parameters={"target_text": "str"},
-            is_manual=True
+            is_manual=True,
         ),
     }
 
@@ -666,6 +672,7 @@ class ToolRegistry:
         if self._factory is None:
             try:
                 from src.core.factory import ToolFactory
+
                 self._factory = ToolFactory
                 logger.info("ToolFactory loaded successfully")
             except ImportError as e:
@@ -694,7 +701,9 @@ class ToolRegistry:
 
             if definition.is_manual:
                 # Manual tools must have been injected via add_tool
-                logger.error(f"Manual tool {tool_name} not found in instances. Did you call add_tool?")
+                logger.error(
+                    f"Manual tool {tool_name} not found in instances. Did you call add_tool?"
+                )
                 return None
 
             factory = self._get_factory()
@@ -755,39 +764,49 @@ class ToolRegistry:
         """Returns a mapping of tool names to their instances or definitions."""
         # For the manifest architect script, we provide the definition
         # as the 'instance' if not yet instantiated, or the live instance.
-        return {name: self._tool_instances.get(name, self.TOOL_DEFINITIONS.get(name))
-                for name in self.TOOL_DEFINITIONS}
+        return {
+            name: self._tool_instances.get(name, self.TOOL_DEFINITIONS.get(name))
+            for name in self.TOOL_DEFINITIONS
+        }
 
-    def add_tool(self, name: str, instance: Any, description: str = "", parameters: dict | None = None, handler: Callable | None = None):
+    def add_tool(
+        self,
+        name: str,
+        instance: Any,
+        description: str = "",
+        parameters: dict | None = None,
+        handler: Callable | None = None,
+    ):
         """
         Manually register a tool instance or handler.
         """
         self._tool_instances[name] = instance
         self.TOOL_DEFINITIONS[name] = ToolDefinition(
             name=name,
-            description=description or getattr(instance, '__doc__', "Manual tool"),
+            description=description or getattr(instance, "__doc__", "Manual tool"),
             factory_method=None,
-            category=getattr(instance, 'category', 'general'),
+            category=getattr(instance, "category", "general"),
             parameters=parameters or {},
             handler=handler or (instance if callable(instance) else None),
-            is_manual=True
+            is_manual=True,
         )
         logger.info(f"Manually registered tool: {name}")
-
-
 
 
 class ForensicMathTool:
     """
     Exposes high-performance vectorized forensic math algorithms.
     """
-    __slots__ = ('category', 'core')
+
+    __slots__ = ("category", "core")
 
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'forensics'
+        self.category = "forensics"
 
-    def calculate_cosine_similarity(self, freq_dict_1: dict[str, float], freq_dict_2: dict[str, float]) -> dict[str, Any]:
+    def calculate_cosine_similarity(
+        self, freq_dict_1: dict[str, float], freq_dict_2: dict[str, float]
+    ) -> dict[str, Any]:
         """
         Compare two text vectors using vectorized cosine similarity.
         """
@@ -797,7 +816,7 @@ class ForensicMathTool:
             return {
                 "cosine_similarity": round(similarity, 4),
                 "vector_dimensions": len(v1),
-                "status": "Success"
+                "status": "Success",
             }
         except Exception as e:
             return {"error": str(e), "status": "Error"}
@@ -813,7 +832,7 @@ class ForensicMathTool:
             return {
                 "levenshtein_distance": distance,
                 "likely_typo": likely_typo,
-                "status": "Success"
+                "status": "Success",
             }
         except Exception as e:
             return {"error": str(e), "status": "Error"}
@@ -827,7 +846,7 @@ class ForensicMathTool:
             return {
                 "jaccard_index": round(overlap, 4),
                 "shared_token_count": len(set(tokens1) & set(tokens2)),
-                "status": "Success"
+                "status": "Success",
             }
         except Exception as e:
             return {"error": str(e), "status": "Error"}
@@ -839,7 +858,7 @@ class ForensicMathTool:
             return {
                 "tfidf_matrix": tfidf_matrix.tolist(),
                 "vocabulary": vocabulary,
-                "status": "Success"
+                "status": "Success",
             }
         except Exception as e:
             return {"error": str(e), "status": "Error"}
@@ -899,11 +918,12 @@ class ForensicFilesTool:
     """
     Exposes structural and integrity tools for files.
     """
-    __slots__ = ('category', 'core')
+
+    __slots__ = ("category", "core")
 
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'forensics'
+        self.category = "forensics"
 
     def verify_file_signature(self, file_path: str) -> dict[str, Any]:
         """Verify file integrity by checking magic numbers."""
@@ -924,11 +944,12 @@ class ForensicBehaviorTool:
     """
     Exposes behavioral and leakage analysis tools.
     """
-    __slots__ = ('category', 'core')
+
+    __slots__ = ("category", "core")
 
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'forensics'
+        self.category = "forensics"
 
     def calculate_burstiness(self, timestamps: list[float]) -> dict[str, Any]:
         """Calculate temporal burstiness score."""
@@ -949,20 +970,25 @@ class ForensicGraphTool:
     """
     Exposes graph pathfinding and centrality tools.
     """
-    __slots__ = ('category', 'core')
+
+    __slots__ = ("category", "core")
 
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'forensics'
+        self.category = "forensics"
 
-    def calculate_node_path(self, graph: dict[str, list[tuple[str, float]]], start_node: str, end_node: str) -> dict[str, Any]:
+    def calculate_node_path(
+        self, graph: dict[str, list[tuple[str, float]]], start_node: str, end_node: str
+    ) -> dict[str, Any]:
         """Find the shortest path between nodes."""
         try:
             return forensic_graph.calculate_node_path(graph, start_node, end_node)
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
-    def identify_central_hubs(self, adjacency_matrix: list[list[float]], node_labels: list[str]) -> dict[str, Any]:
+    def identify_central_hubs(
+        self, adjacency_matrix: list[list[float]], node_labels: list[str]
+    ) -> dict[str, Any]:
         """Identify influential hubs via Eigenvector Centrality."""
         try:
             return forensic_graph.identify_central_hubs(adjacency_matrix, node_labels)
@@ -977,7 +1003,7 @@ class ForensicGraphTool:
                 "entity": entity_name,
                 "neighborhood": triples,
                 "count": len(triples),
-                "status": "Success"
+                "status": "Success",
             }
         except Exception as e:
             return {"error": str(e), "status": "Error"}
@@ -986,13 +1012,10 @@ class ForensicGraphTool:
         """Identify missing conceptual relationships in semantic memory."""
         try:
             from src.core.factory import ToolFactory
+
             sm = ToolFactory.create_semantic_db()
             gaps = sm.detect_knowledge_gaps(central_concept)
-            return {
-                "concept": central_concept,
-                "gaps": gaps,
-                "status": "Success"
-            }
+            return {"concept": central_concept, "gaps": gaps, "status": "Success"}
         except Exception as e:
             return {"error": str(e), "status": "Error"}
 
@@ -1001,11 +1024,12 @@ class ForensicSignalTool:
     """
     Exposes signal sequence and frequency analysis tools.
     """
-    __slots__ = ('category', 'core')
+
+    __slots__ = ("category", "core")
 
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'forensics'
+        self.category = "forensics"
 
     def calculate_sequence_similarity(self, seq1: list[float], seq2: list[float]) -> dict[str, Any]:
         """Find similarity between time-series sequences."""
@@ -1026,11 +1050,12 @@ class ForensicEntropyTool:
     """
     Exposes byte-level entropy mapping and obfuscation detection tools.
     """
-    __slots__ = ('category', 'core')
+
+    __slots__ = ("category", "core")
 
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'forensics'
+        self.category = "forensics"
 
     def map_stream_entropy(self, stream: list[int], window_size: int = 256) -> dict[str, Any]:
         """Map Shannon entropy across a byte-stream."""
@@ -1051,11 +1076,12 @@ class ForensicCrawlerTool:
     """
     Bridges automated crawling with SME forensic analysis.
     """
-    __slots__ = ('category', 'core')
+
+    __slots__ = ("category", "core")
 
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'bridge'
+        self.category = "bridge"
 
     async def ingest_forensic_target(self, url: str) -> dict[str, Any]:
         """Automated ingestion and fingerprinting."""
@@ -1069,11 +1095,12 @@ class ForensicScorerTool:
     """
     Exposes high-level forensic scoring and visualization tools.
     """
-    __slots__ = ('category', 'core')
+
+    __slots__ = ("category", "core")
 
     def __init__(self, core_bridge):
         self.core = core_bridge
-        self.category = 'forensics'
+        self.category = "forensics"
 
     def get_forensic_report(self, target_text: str) -> dict[str, Any]:
         """Generate a structured visualization report."""

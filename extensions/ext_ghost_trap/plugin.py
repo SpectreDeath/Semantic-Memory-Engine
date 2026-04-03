@@ -38,14 +38,16 @@ class GhostTrapPlugin:
     def __init__(self):
         self.name = "Ghost Trap Extension"
         self.version = "1.0.0"
-        self.description = "Monitors for potential self-replication events and unauthorized file creation"
+        self.description = (
+            "Monitors for potential self-replication events and unauthorized file creation"
+        )
 
         # Plugin configuration
         self.config = {
-            'size_threshold_mb': 100,
-            'recursive_scan': True,
-            'detailed_reports': True,
-            'monitoring_enabled': True
+            "size_threshold_mb": 100,
+            "recursive_scan": True,
+            "detailed_reports": True,
+            "monitoring_enabled": True,
         }
 
         # State tracking
@@ -58,7 +60,7 @@ class GhostTrapPlugin:
             print(f"Description: {self.description}")
 
             # Initialize monitoring if enabled
-            if self.config.get('monitoring_enabled', True):
+            if self.config.get("monitoring_enabled", True):
                 ghost_monitor.start_monitoring()
                 print("✅ Persistence monitoring activated")
 
@@ -90,11 +92,11 @@ class GhostTrapPlugin:
     def get_status(self) -> dict[str, Any]:
         """Get current plugin status."""
         return {
-            'name': self.name,
-            'version': self.version,
-            'is_active': self.is_active,
-            'monitoring_status': get_monitoring_status(),
-            'config': self.config
+            "name": self.name,
+            "version": self.version,
+            "is_active": self.is_active,
+            "monitoring_status": get_monitoring_status(),
+            "config": self.config,
         }
 
     def configure(self, **kwargs) -> bool:
@@ -114,16 +116,17 @@ class GhostTrapPlugin:
 
     def get_tools(self) -> dict[str, Callable]:
         """Get available tools provided by this plugin."""
-        return {
-            'scan_for_ghosts': self._create_scan_tool()
-        }
+        return {"scan_for_ghosts": self._create_scan_tool()}
 
     def _create_scan_tool(self) -> Callable:
         """Create the scan_for_ghosts tool with current configuration."""
-        def scan_tool(project_root: str | None = None,
-                     size_threshold_mb: int | None = None,
-                     recursive: bool | None = None,
-                     detailed_report: bool | None = None) -> dict[str, Any]:
+
+        def scan_tool(
+            project_root: str | None = None,
+            size_threshold_mb: int | None = None,
+            recursive: bool | None = None,
+            detailed_report: bool | None = None,
+        ) -> dict[str, Any]:
             """
             Scan for ghost files in the project.
 
@@ -138,10 +141,12 @@ class GhostTrapPlugin:
             """
             # Use configuration defaults if not provided
             scan_config = {
-                'project_root': project_root or os.getcwd(),
-                'size_threshold_mb': size_threshold_mb or self.config['size_threshold_mb'],
-                'recursive': recursive if recursive is not None else self.config['recursive_scan'],
-                'detailed_report': detailed_report if detailed_report is not None else self.config['detailed_reports']
+                "project_root": project_root or os.getcwd(),
+                "size_threshold_mb": size_threshold_mb or self.config["size_threshold_mb"],
+                "recursive": recursive if recursive is not None else self.config["recursive_scan"],
+                "detailed_report": detailed_report
+                if detailed_report is not None
+                else self.config["detailed_reports"],
             }
 
             print(f"🔍 Ghost Trap: Starting scan with config: {scan_config}")
@@ -151,51 +156,49 @@ class GhostTrapPlugin:
 
     def get_hooks(self) -> dict[str, Callable]:
         """Get available hooks provided by this plugin."""
-        return {
-            'governor_task_execution': hook_governor_task_execution
-        }
+        return {"governor_task_execution": hook_governor_task_execution}
 
     def get_events(self) -> list[str]:
         """Get list of events this plugin can handle."""
         return [
-            'task_execution_started',
-            'task_execution_completed',
-            'file_created',
-            'ghost_detected'
+            "task_execution_started",
+            "task_execution_completed",
+            "file_created",
+            "ghost_detected",
         ]
 
     def handle_event(self, event_name: str, **kwargs) -> Any:
         """Handle plugin-specific events."""
-        if event_name == 'task_execution_started':
-            if self.config.get('monitoring_enabled', True):
+        if event_name == "task_execution_started":
+            if self.config.get("monitoring_enabled", True):
                 ghost_monitor.start_monitoring()
-                return {'monitoring_started': True}
+                return {"monitoring_started": True}
 
-        elif event_name == 'task_execution_completed':
-            if self.config.get('monitoring_enabled', True):
+        elif event_name == "task_execution_completed":
+            if self.config.get("monitoring_enabled", True):
                 ghost_monitor.stop_monitoring()
-                return {'monitoring_stopped': True}
+                return {"monitoring_stopped": True}
 
-        elif event_name == 'file_created':
-            file_path = kwargs.get('file_path', '')
+        elif event_name == "file_created":
+            file_path = kwargs.get("file_path", "")
             if file_path and self._is_suspicious_file(file_path):
                 print(f"⚠️  Suspicious file created: {file_path}")
-                return {'suspicious_file_detected': True}
+                return {"suspicious_file_detected": True}
 
-        elif event_name == 'ghost_detected':
+        elif event_name == "ghost_detected":
             # Handle when a ghost file is detected
-            ghost_info = kwargs.get('ghost_info', {})
+            ghost_info = kwargs.get("ghost_info", {})
             print(f"👻 Ghost detected: {ghost_info}")
-            return {'ghost_handled': True}
+            return {"ghost_handled": True}
 
-        return {'event_handled': False}
+        return {"event_handled": False}
 
     def _is_suspicious_file(self, file_path: str) -> bool:
         """Check if a newly created file is suspicious."""
         path = Path(file_path)
 
         # Check if it's a target extension
-        if path.suffix.lower() not in {'.bin', '.json'}:
+        if path.suffix.lower() not in {".bin", ".json"}:
             return False
 
         # Check if it's in a hidden directory
@@ -205,7 +208,7 @@ class GhostTrapPlugin:
         # Check file size if it exists
         try:
             size_mb = path.stat().st_size / (1024 * 1024)
-            if size_mb > self.config['size_threshold_mb']:
+            if size_mb > self.config["size_threshold_mb"]:
                 return True
         except OSError:
             pass
@@ -228,4 +231,4 @@ def register_extension(manifest: dict, nexus_api: Any) -> GhostTrapPlugin:
 
 
 # Export for use by the extension system
-__all__ = ['GhostTrapPlugin', 'get_plugin', 'ghost_trap_plugin', 'register_extension']
+__all__ = ["GhostTrapPlugin", "get_plugin", "ghost_trap_plugin", "register_extension"]

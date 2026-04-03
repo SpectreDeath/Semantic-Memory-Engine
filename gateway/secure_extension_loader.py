@@ -31,12 +31,12 @@ import warnings
 from typing import Any, Optional
 
 from gateway.extension_manager import (
-    ExtensionManager,
-    SecurityError,
-    ImportBlocker,
-    MANIFEST_SCHEMA,
-    FORBIDDEN_IMPORTS,
     FORBIDDEN_BUILTINS,
+    FORBIDDEN_IMPORTS,
+    MANIFEST_SCHEMA,
+    ExtensionManager,
+    ImportBlocker,
+    SecurityError,
 )
 
 logger = logging.getLogger("lawnmower.secure_loader")

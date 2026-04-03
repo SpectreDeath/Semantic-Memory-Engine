@@ -47,15 +47,39 @@ def register(
 
         if not raw_entities:
             stopwords = {
-                "the", "a", "an", "is", "are", "was", "were", "in", "on", "at",
-                "to", "of", "and", "or", "but", "for", "with", "that", "this",
-                "it", "he", "she", "they", "we", "i", "my", "your", "our",
+                "the",
+                "a",
+                "an",
+                "is",
+                "are",
+                "was",
+                "were",
+                "in",
+                "on",
+                "at",
+                "to",
+                "of",
+                "and",
+                "or",
+                "but",
+                "for",
+                "with",
+                "that",
+                "this",
+                "it",
+                "he",
+                "she",
+                "they",
+                "we",
+                "i",
+                "my",
+                "your",
+                "our",
             }
             tokens = text.translate(str.maketrans("", "", string.punctuation)).split()
-            candidate_names = list({
-                t for t in tokens
-                if len(t) > 3 and t[0].isupper() and t.lower() not in stopwords
-            })
+            candidate_names = list(
+                {t for t in tokens if len(t) > 3 and t[0].isupper() and t.lower() not in stopwords}
+            )
             raw_entities = [
                 {
                     "entity_name": name,
@@ -89,11 +113,13 @@ def register(
         logger.info(f"analyze_sentiment called: text_len={len(text)}")
 
         if len(text) < 10:
-            return json.dumps({
-                "error": "Text too short for sentiment analysis",
-                "minimum_chars": 10,
-                "provided_chars": len(text),
-            })
+            return json.dumps(
+                {
+                    "error": "Text too short for sentiment analysis",
+                    "minimum_chars": 10,
+                    "provided_chars": len(text),
+                }
+            )
 
         try:
             tool = registry.get_tool("analyze_sentiment")
@@ -137,11 +163,13 @@ def register(
         logger.info(f"link_entities called: text_len={len(text)} kb={knowledge_base}")
 
         if len(text) < 20:
-            return json.dumps({
-                "error": "Text too short for entity extraction",
-                "minimum_chars": 20,
-                "provided_chars": len(text),
-            })
+            return json.dumps(
+                {
+                    "error": "Text too short for entity extraction",
+                    "minimum_chars": 20,
+                    "provided_chars": len(text),
+                }
+            )
 
         try:
             tool = registry.get_tool("link_entities")
@@ -190,11 +218,13 @@ def register(
         logger.info(f"summarize_text called: text_len={len(text)} mode={mode} ratio={ratio}")
 
         if len(text) < 100:
-            return json.dumps({
-                "error": "Text too short for summarization",
-                "minimum_chars": 100,
-                "provided_chars": len(text),
-            })
+            return json.dumps(
+                {
+                    "error": "Text too short for summarization",
+                    "minimum_chars": 100,
+                    "provided_chars": len(text),
+                }
+            )
 
         ratio = max(0.1, min(0.9, ratio))
 

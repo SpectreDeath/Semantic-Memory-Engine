@@ -27,9 +27,11 @@ import numpy as np
 
 logger = logging.getLogger("SME.SocialIntelligence.CampaignDetector")
 
+
 @dataclass
 class BotPattern:
     """Detected bot pattern."""
+
     pattern_type: str
     confidence: float
     indicators: list[str]
@@ -37,9 +39,11 @@ class BotPattern:
     posting_frequency: dict[str, int]
     content_similarity: float
 
+
 @dataclass
 class AmplificationNetwork:
     """Detected amplification network."""
+
     network_id: str
     source_accounts: list[str]
     amplification_accounts: list[str]
@@ -48,9 +52,11 @@ class AmplificationNetwork:
     network_structure: dict[str, list[str]]
     coordination_score: float
 
+
 @dataclass
 class CoordinationPattern:
     """Detected coordination pattern."""
+
     pattern_id: str
     platforms_involved: list[str]
     keywords: list[str]
@@ -60,14 +66,17 @@ class CoordinationPattern:
     coordination_score: float
     detected_at: datetime
 
+
 @dataclass
 class RiskAssessment:
     """Risk assessment for detected coordination."""
+
     risk_level: str  # "LOW", "MEDIUM", "HIGH", "CRITICAL"
     risk_score: float
     risk_factors: list[dict[str, Any]]
     impact_assessment: dict[str, Any]
     recommendations: list[str]
+
 
 class CampaignDetector:
     """
@@ -88,35 +97,35 @@ class CampaignDetector:
         return {
             "posting_frequency": {
                 "threshold": 10,  # posts per hour
-                "window": 3600    # 1 hour in seconds
+                "window": 3600,  # 1 hour in seconds
             },
             "content_similarity": {
                 "threshold": 0.8,  # 80% similarity
-                "min_posts": 5
+                "min_posts": 5,
             },
             "account_age": {
                 "threshold": 30,  # days
-                "min_activity": 100
+                "min_activity": 100,
             },
             "engagement_ratio": {
                 "likes_to_posts": 0.1,  # Very low engagement
-                "retweets_to_posts": 0.05
+                "retweets_to_posts": 0.05,
             },
             "posting_time": {
                 "uniform_distribution": 0.8,  # Posts at same time
-                "sleep_hours": [0, 1, 2, 3, 4, 5]  # Posts during sleep hours
-            }
+                "sleep_hours": [0, 1, 2, 3, 4, 5],  # Posts during sleep hours
+            },
         }
 
     def _initialize_coordination_thresholds(self) -> dict[str, float]:
         """Initialize coordination detection thresholds."""
         return {
-            "time_correlation": 0.7,      # 70% time correlation
-            "content_similarity": 0.6,    # 60% content similarity
-            "account_overlap": 0.3,       # 30% account overlap
-            "keyword_correlation": 0.8,   # 80% keyword correlation
+            "time_correlation": 0.7,  # 70% time correlation
+            "content_similarity": 0.6,  # 60% content similarity
+            "account_overlap": 0.3,  # 30% account overlap
+            "keyword_correlation": 0.8,  # 80% keyword correlation
             "amplification_factor": 5.0,  # 5x normal amplification
-            "coordination_score": 0.7     # 70% overall coordination
+            "coordination_score": 0.7,  # 70% overall coordination
         }
 
     def _initialize_amplification_patterns(self) -> dict[str, Any]:
@@ -125,39 +134,38 @@ class CampaignDetector:
             "echo_chamber": {
                 "min_accounts": 10,
                 "interaction_threshold": 0.8,
-                "content_repetition": 0.7
+                "content_repetition": 0.7,
             },
             "astroturfing": {
                 "organic_appearance": 0.3,
                 "sudden_activity": 0.8,
-                "coordinated_timing": 0.7
+                "coordinated_timing": 0.7,
             },
             "viral_amplification": {
                 "exponential_growth": 2.0,
                 "short_duration": 3600,  # 1 hour
-                "high_engagement": 0.9
-            }
+                "high_engagement": 0.9,
+            },
         }
 
     def _initialize_temporal_analyzer(self) -> dict[str, Any]:
         """Initialize temporal pattern analysis."""
         return {
             "burst_detection": {
-                "window_size": 300,    # 5 minutes
-                "threshold_multiplier": 3.0
+                "window_size": 300,  # 5 minutes
+                "threshold_multiplier": 3.0,
             },
             "synchronization": {
                 "time_tolerance": 60,  # 1 minute
-                "min_correlated_posts": 5
+                "min_correlated_posts": 5,
             },
             "campaign_duration": {
                 "min_duration": 3600,  # 1 hour
-                "max_duration": 86400  # 24 hours
-            }
+                "max_duration": 86400,  # 24 hours
+            },
         }
 
-    async def analyze_coordination_patterns(self, campaign_data: dict,
-                                          keywords: list[str]) -> dict:
+    async def analyze_coordination_patterns(self, campaign_data: dict, keywords: list[str]) -> dict:
         """
         Analyze coordination patterns across platforms.
 
@@ -194,7 +202,7 @@ class CampaignDetector:
                 "cross_platform_analysis": cross_platform_analysis,
                 "risk_assessment": risk_assessment,
                 "detected_campaigns": self._identify_campaigns(coordination_results),
-                "analysis_timestamp": datetime.now().isoformat()
+                "analysis_timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
@@ -204,7 +212,7 @@ class CampaignDetector:
                 "coordination_results": [],
                 "cross_platform_analysis": {},
                 "risk_assessment": {},
-                "detected_campaigns": []
+                "detected_campaigns": [],
             }
 
     async def analyze_bot_patterns(self, platform_data: dict) -> dict:
@@ -234,10 +242,14 @@ class CampaignDetector:
             account_analysis = self._analyze_account_behavior(posts, users)
 
             # Calculate overall bot score
-            bot_score = self._calculate_bot_score(posting_analysis, content_analysis, account_analysis)
+            bot_score = self._calculate_bot_score(
+                posting_analysis, content_analysis, account_analysis
+            )
 
             # Identify bot patterns
-            bot_patterns = self._identify_bot_patterns(posting_analysis, content_analysis, account_analysis)
+            bot_patterns = self._identify_bot_patterns(
+                posting_analysis, content_analysis, account_analysis
+            )
 
             # Identify suspicious accounts
             suspicious_accounts = self._identify_suspicious_accounts(account_analysis)
@@ -249,8 +261,8 @@ class CampaignDetector:
                 "detailed_analysis": {
                     "posting_analysis": posting_analysis,
                     "content_analysis": content_analysis,
-                    "account_analysis": account_analysis
-                }
+                    "account_analysis": account_analysis,
+                },
             }
 
         except Exception as e:
@@ -259,7 +271,7 @@ class CampaignDetector:
                 "error": str(e),
                 "bot_score": 0.0,
                 "bot_patterns": [],
-                "suspicious_accounts": []
+                "suspicious_accounts": [],
             }
 
     async def analyze_amplification_network(self, platform_data: dict) -> dict:
@@ -280,16 +292,14 @@ class CampaignDetector:
                     "amplification_networks": [],
                     "amplification_score": 0.0,
                     "source_accounts": [],
-                    "target_content": []
+                    "target_content": [],
                 }
 
             # Build interaction graph
             interaction_graph = self._build_interaction_graph(posts)
 
             # Identify amplification patterns
-            amplification_patterns = self._identify_amplification_patterns(
-                posts, interaction_graph
-            )
+            amplification_patterns = self._identify_amplification_patterns(posts, interaction_graph)
 
             # Calculate amplification score
             amplification_score = self._calculate_amplification_score(amplification_patterns)
@@ -303,7 +313,7 @@ class CampaignDetector:
                 "amplification_score": amplification_score,
                 "source_accounts": source_accounts,
                 "target_content": target_content,
-                "interaction_graph": interaction_graph
+                "interaction_graph": interaction_graph,
             }
 
         except Exception as e:
@@ -313,7 +323,7 @@ class CampaignDetector:
                 "amplification_networks": [],
                 "amplification_score": 0.0,
                 "source_accounts": [],
-                "target_content": []
+                "target_content": [],
             }
 
     async def analyze_influence_metrics(self, handle: str, platform_data: dict) -> dict:
@@ -354,7 +364,9 @@ class CampaignDetector:
                 "posting_metrics": posting_metrics,
                 "engagement_metrics": engagement_metrics,
                 "network_influence": network_influence,
-                "influence_type": self._classify_influence_type(influence_score, engagement_metrics)
+                "influence_type": self._classify_influence_type(
+                    influence_score, engagement_metrics
+                ),
             }
 
         except Exception as e:
@@ -366,11 +378,10 @@ class CampaignDetector:
                 "posting_metrics": {},
                 "engagement_metrics": {},
                 "network_influence": {},
-                "influence_type": "unknown"
+                "influence_type": "unknown",
             }
 
-    async def analyze_cross_platform_influence(self, handle: str,
-                                             platform_data: dict) -> dict:
+    async def analyze_cross_platform_influence(self, handle: str, platform_data: dict) -> dict:
         """
         Analyze cross-platform influence patterns.
 
@@ -398,7 +409,7 @@ class CampaignDetector:
                     "handle": handle,
                     "cross_platform_score": 0.0,
                     "platform_scores": {},
-                    "influence_consistency": 0.0
+                    "influence_consistency": 0.0,
                 }
 
             # Calculate cross-platform metrics
@@ -410,7 +421,7 @@ class CampaignDetector:
                 "cross_platform_score": cross_platform_score,
                 "platform_scores": platform_scores,
                 "influence_consistency": influence_consistency,
-                "platform_diversity": len(platform_scores)
+                "platform_diversity": len(platform_scores),
             }
 
         except Exception as e:
@@ -420,12 +431,12 @@ class CampaignDetector:
                 "handle": handle,
                 "cross_platform_score": 0.0,
                 "platform_scores": {},
-                "influence_consistency": 0.0
+                "influence_consistency": 0.0,
             }
 
-    async def analyze_geographic_patterns(self, platform: str,
-                                        geo_content: list[dict],
-                                        topic: str) -> dict:
+    async def analyze_geographic_patterns(
+        self, platform: str, geo_content: list[dict], topic: str
+    ) -> dict:
         """
         Analyze geographic patterns in geotagged content.
 
@@ -444,7 +455,7 @@ class CampaignDetector:
                     "topic": topic,
                     "geographic_distribution": {},
                     "anomaly_detection": {},
-                    "coordination_indicators": {}
+                    "coordination_indicators": {},
                 }
 
             # Analyze geographic distribution
@@ -461,7 +472,7 @@ class CampaignDetector:
                 "topic": topic,
                 "geographic_distribution": geo_distribution,
                 "anomaly_detection": anomaly_detection,
-                "coordination_indicators": coordination_indicators
+                "coordination_indicators": coordination_indicators,
             }
 
         except Exception as e:
@@ -472,7 +483,7 @@ class CampaignDetector:
                 "topic": topic,
                 "geographic_distribution": {},
                 "anomaly_detection": {},
-                "coordination_indicators": {}
+                "coordination_indicators": {},
             }
 
     async def generate_geographic_heatmap(self, geolocation_data: dict) -> dict:
@@ -496,7 +507,7 @@ class CampaignDetector:
             return {
                 "heatmap_data": heatmap_data,
                 "global_heatmap": self._generate_global_heatmap(heatmap_data),
-                "anomaly_regions": self._identify_anomaly_regions(heatmap_data)
+                "anomaly_regions": self._identify_anomaly_regions(heatmap_data),
             }
 
         except Exception as e:
@@ -505,14 +516,14 @@ class CampaignDetector:
                 "error": str(e),
                 "heatmap_data": {},
                 "global_heatmap": {},
-                "anomaly_regions": []
+                "anomaly_regions": [],
             }
 
     # Private helper methods
 
-    async def _analyze_platform_coordination(self, platform: str,
-                                           platform_data: dict,
-                                           keywords: list[str]) -> dict:
+    async def _analyze_platform_coordination(
+        self, platform: str, platform_data: dict, keywords: list[str]
+    ) -> dict:
         """Analyze coordination patterns for a specific platform."""
         posts = platform_data.get("posts", [])
 
@@ -523,7 +534,7 @@ class CampaignDetector:
                 "time_correlation": 0.0,
                 "content_similarity": 0.0,
                 "keyword_correlation": 0.0,
-                "account_overlap": 0.0
+                "account_overlap": 0.0,
             }
 
         # Analyze time correlation
@@ -550,11 +561,12 @@ class CampaignDetector:
             "content_similarity": content_similarity,
             "keyword_correlation": keyword_correlation,
             "account_overlap": account_overlap,
-            "posts_analyzed": len(posts)
+            "posts_analyzed": len(posts),
         }
 
-    async def _analyze_cross_platform_coordination(self, campaign_data: dict,
-                                                 coordination_results: list[dict]) -> dict:
+    async def _analyze_cross_platform_coordination(
+        self, campaign_data: dict, coordination_results: list[dict]
+    ) -> dict:
         """Analyze cross-platform coordination patterns."""
         platforms = list(campaign_data.keys())
 
@@ -563,11 +575,13 @@ class CampaignDetector:
                 "cross_platform_correlation": 0.0,
                 "amplification_factor": 1.0,
                 "synchronization_score": 0.0,
-                "multi_platform_campaigns": []
+                "multi_platform_campaigns": [],
             }
 
         # Calculate cross-platform correlation
-        cross_platform_correlation = self._calculate_cross_platform_correlation(coordination_results)
+        cross_platform_correlation = self._calculate_cross_platform_correlation(
+            coordination_results
+        )
 
         # Calculate amplification factor
         amplification_factor = self._calculate_amplification_factor(coordination_results)
@@ -583,14 +597,17 @@ class CampaignDetector:
             "amplification_factor": amplification_factor,
             "synchronization_score": synchronization_score,
             "multi_platform_campaigns": multi_platform_campaigns,
-            "platforms_involved": platforms
+            "platforms_involved": platforms,
         }
 
-    async def _assess_coordination_risk(self, coordination_results: list[dict],
-                                      cross_platform_analysis: dict) -> RiskAssessment:
+    async def _assess_coordination_risk(
+        self, coordination_results: list[dict], cross_platform_analysis: dict
+    ) -> RiskAssessment:
         """Assess risk level of detected coordination."""
         # Calculate overall risk score
-        coordination_scores = [result.get("coordination_score", 0.0) for result in coordination_results]
+        coordination_scores = [
+            result.get("coordination_score", 0.0) for result in coordination_results
+        ]
         cross_platform_score = cross_platform_analysis.get("cross_platform_correlation", 0.0)
 
         overall_risk_score = (np.mean(coordination_scores) + cross_platform_score) / 2
@@ -616,7 +633,7 @@ class CampaignDetector:
             risk_score=overall_risk_score,
             risk_factors=risk_factors,
             impact_assessment={},
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
     def _analyze_posting_patterns(self, posts: list[dict]) -> dict:
@@ -633,12 +650,14 @@ class CampaignDetector:
         for user_id, user_post_list in user_posts.items():
             # Calculate posting frequency
             if len(user_post_list) > 1:
-                timestamps = [post.get("created_at") for post in user_post_list if post.get("created_at")]
+                timestamps = [
+                    post.get("created_at") for post in user_post_list if post.get("created_at")
+                ]
                 if len(timestamps) > 1:
                     time_diffs = []
                     for i in range(1, len(timestamps)):
                         try:
-                            time_diff = abs((timestamps[i] - timestamps[i-1]).total_seconds())
+                            time_diff = abs((timestamps[i] - timestamps[i - 1]).total_seconds())
                             time_diffs.append(time_diff)
                         except:
                             pass
@@ -660,7 +679,7 @@ class CampaignDetector:
                 "total_posts": len(user_post_list),
                 "posting_frequency": posting_frequency,
                 "uniform_times": uniform_times,
-                "time_variance": np.var(time_diffs) if 'time_diffs' in locals() else 0
+                "time_variance": np.var(time_diffs) if "time_diffs" in locals() else 0,
             }
 
         return analysis
@@ -680,14 +699,13 @@ class CampaignDetector:
                     similarity = self._calculate_text_similarity(text1, text2)
 
                     if similarity > self.bot_detection_rules["content_similarity"]["threshold"]:
-                        similar_posts.append({
-                            "post_id": post2.get("id"),
-                            "similarity": similarity
-                        })
+                        similar_posts.append({"post_id": post2.get("id"), "similarity": similarity})
 
             content_similarities[post1.get("id")] = {
                 "similar_posts": similar_posts,
-                "max_similarity": max([s["similarity"] for s in similar_posts]) if similar_posts else 0.0
+                "max_similarity": max([s["similarity"] for s in similar_posts])
+                if similar_posts
+                else 0.0,
             }
 
         return content_similarities
@@ -720,30 +738,39 @@ class CampaignDetector:
                     "engagement_ratio": engagement_ratio,
                     "account_age": account_age,
                     "followers_count": followers,
-                    "verified": user_data.get("verified", False)
+                    "verified": user_data.get("verified", False),
                 }
 
         return account_analysis
 
-    def _calculate_bot_score(self, posting_analysis: dict,
-                           content_analysis: dict,
-                           account_analysis: dict) -> float:
+    def _calculate_bot_score(
+        self, posting_analysis: dict, content_analysis: dict, account_analysis: dict
+    ) -> float:
         """Calculate overall bot score."""
         bot_indicators = []
 
         # Check posting frequency
         for analysis in posting_analysis.values():
-            if analysis["posting_frequency"] > self.bot_detection_rules["posting_frequency"]["threshold"]:
+            if (
+                analysis["posting_frequency"]
+                > self.bot_detection_rules["posting_frequency"]["threshold"]
+            ):
                 bot_indicators.append(0.8)
 
         # Check content similarity
         for analysis in content_analysis.values():
-            if analysis["max_similarity"] > self.bot_detection_rules["content_similarity"]["threshold"]:
+            if (
+                analysis["max_similarity"]
+                > self.bot_detection_rules["content_similarity"]["threshold"]
+            ):
                 bot_indicators.append(0.7)
 
         # Check account behavior
         for analysis in account_analysis.values():
-            if analysis["engagement_ratio"] < self.bot_detection_rules["engagement_ratio"]["likes_to_posts"]:
+            if (
+                analysis["engagement_ratio"]
+                < self.bot_detection_rules["engagement_ratio"]["likes_to_posts"]
+            ):
                 bot_indicators.append(0.6)
 
             if analysis["account_age"] < self.bot_detection_rules["account_age"]["threshold"]:
@@ -751,43 +778,54 @@ class CampaignDetector:
 
         return np.mean(bot_indicators) if bot_indicators else 0.0
 
-    def _identify_bot_patterns(self, posting_analysis: dict,
-                             content_analysis: dict,
-                             account_analysis: dict) -> list[BotPattern]:
+    def _identify_bot_patterns(
+        self, posting_analysis: dict, content_analysis: dict, account_analysis: dict
+    ) -> list[BotPattern]:
         """Identify specific bot patterns."""
         patterns = []
 
         # High frequency posting pattern
         high_freq_users = [
-            user_id for user_id, analysis in posting_analysis.items()
-            if analysis["posting_frequency"] > self.bot_detection_rules["posting_frequency"]["threshold"]
+            user_id
+            for user_id, analysis in posting_analysis.items()
+            if analysis["posting_frequency"]
+            > self.bot_detection_rules["posting_frequency"]["threshold"]
         ]
 
         if high_freq_users:
-            patterns.append(BotPattern(
-                pattern_type="high_frequency_posting",
-                confidence=0.8,
-                indicators=["rapid_posting", "uniform_intervals"],
-                affected_accounts=high_freq_users,
-                posting_frequency={user: posting_analysis[user]["posting_frequency"] for user in high_freq_users},
-                content_similarity=0.0
-            ))
+            patterns.append(
+                BotPattern(
+                    pattern_type="high_frequency_posting",
+                    confidence=0.8,
+                    indicators=["rapid_posting", "uniform_intervals"],
+                    affected_accounts=high_freq_users,
+                    posting_frequency={
+                        user: posting_analysis[user]["posting_frequency"]
+                        for user in high_freq_users
+                    },
+                    content_similarity=0.0,
+                )
+            )
 
         # Content copying pattern
         similar_content = [
-            post_id for post_id, analysis in content_analysis.items()
-            if analysis["max_similarity"] > self.bot_detection_rules["content_similarity"]["threshold"]
+            post_id
+            for post_id, analysis in content_analysis.items()
+            if analysis["max_similarity"]
+            > self.bot_detection_rules["content_similarity"]["threshold"]
         ]
 
         if similar_content:
-            patterns.append(BotPattern(
-                pattern_type="content_copying",
-                confidence=0.7,
-                indicators=["identical_content", "high_similarity"],
-                affected_accounts=[],
-                posting_frequency={},
-                content_similarity=0.8
-            ))
+            patterns.append(
+                BotPattern(
+                    pattern_type="content_copying",
+                    confidence=0.7,
+                    indicators=["identical_content", "high_similarity"],
+                    affected_accounts=[],
+                    posting_frequency={},
+                    content_similarity=0.8,
+                )
+            )
 
         return patterns
 
@@ -825,8 +863,9 @@ class CampaignDetector:
 
         return dict(graph)
 
-    def _identify_amplification_patterns(self, posts: list[dict],
-                                       interaction_graph: dict[str, list[str]]) -> list[AmplificationNetwork]:
+    def _identify_amplification_patterns(
+        self, posts: list[dict], interaction_graph: dict[str, list[str]]
+    ) -> list[AmplificationNetwork]:
         """Identify amplification patterns in the interaction graph."""
         patterns = []
 
@@ -834,22 +873,27 @@ class CampaignDetector:
             if len(amplifiers) >= self.amplification_patterns["echo_chamber"]["min_accounts"]:
                 amplification_factor = len(amplifiers)
 
-                patterns.append(AmplificationNetwork(
-                    network_id=f"network_{source}",
-                    source_accounts=[source],
-                    amplification_accounts=amplifiers,
-                    target_content=[],
-                    amplification_factor=amplification_factor,
-                    network_structure=interaction_graph,
-                    coordination_score=amplification_factor / 10.0
-                ))
+                patterns.append(
+                    AmplificationNetwork(
+                        network_id=f"network_{source}",
+                        source_accounts=[source],
+                        amplification_accounts=amplifiers,
+                        target_content=[],
+                        amplification_factor=amplification_factor,
+                        network_structure=interaction_graph,
+                        coordination_score=amplification_factor / 10.0,
+                    )
+                )
 
         return patterns
 
-    def _calculate_coordination_score(self, time_correlation: float,
-                                    content_similarity: float,
-                                    keyword_correlation: float,
-                                    account_overlap: float) -> float:
+    def _calculate_coordination_score(
+        self,
+        time_correlation: float,
+        content_similarity: float,
+        keyword_correlation: float,
+        account_overlap: float,
+    ) -> float:
         """Calculate overall coordination score."""
         weights = [0.3, 0.3, 0.2, 0.2]  # Time, content, keyword, account weights
         scores = [time_correlation, content_similarity, keyword_correlation, account_overlap]
@@ -861,36 +905,46 @@ class CampaignDetector:
         campaigns = []
 
         for result in coordination_results:
-            if result.get("coordination_score", 0) > self.coordination_thresholds["coordination_score"]:
-                campaigns.append({
-                    "platform": result["platform"],
-                    "coordination_score": result["coordination_score"],
-                    "time_correlation": result["time_correlation"],
-                    "content_similarity": result["content_similarity"]
-                })
+            if (
+                result.get("coordination_score", 0)
+                > self.coordination_thresholds["coordination_score"]
+            ):
+                campaigns.append(
+                    {
+                        "platform": result["platform"],
+                        "coordination_score": result["coordination_score"],
+                        "time_correlation": result["time_correlation"],
+                        "content_similarity": result["content_similarity"],
+                    }
+                )
 
         return campaigns
 
-    def _identify_risk_factors(self, coordination_results: list[dict],
-                             cross_platform_analysis: dict) -> list[dict]:
+    def _identify_risk_factors(
+        self, coordination_results: list[dict], cross_platform_analysis: dict
+    ) -> list[dict]:
         """Identify specific risk factors."""
         risk_factors = []
 
         for result in coordination_results:
             if result.get("coordination_score", 0) > 0.7:
-                risk_factors.append({
-                    "factor": "high_coordination",
-                    "platform": result["platform"],
-                    "score": result["coordination_score"],
-                    "weight": 0.3
-                })
+                risk_factors.append(
+                    {
+                        "factor": "high_coordination",
+                        "platform": result["platform"],
+                        "score": result["coordination_score"],
+                        "weight": 0.3,
+                    }
+                )
 
         if cross_platform_analysis.get("amplification_factor", 1.0) > 5.0:
-            risk_factors.append({
-                "factor": "cross_platform_amplification",
-                "amplification_factor": cross_platform_analysis["amplification_factor"],
-                "weight": 0.4
-            })
+            risk_factors.append(
+                {
+                    "factor": "cross_platform_amplification",
+                    "amplification_factor": cross_platform_analysis["amplification_factor"],
+                    "weight": 0.4,
+                }
+            )
 
         return risk_factors
 
@@ -899,15 +953,29 @@ class CampaignDetector:
         base_recommendations = [
             "Monitor the identified accounts and content closely",
             "Implement additional verification for high-risk accounts",
-            "Consider platform-specific countermeasures"
+            "Consider platform-specific countermeasures",
         ]
 
         if risk_level == "CRITICAL":
-            return [*base_recommendations, "Escalate to senior management immediately", "Coordinate with platform moderators", "Prepare emergency response protocols"]
+            return [
+                *base_recommendations,
+                "Escalate to senior management immediately",
+                "Coordinate with platform moderators",
+                "Prepare emergency response protocols",
+            ]
         elif risk_level == "HIGH":
-            return [*base_recommendations, "Increase monitoring frequency", "Engage with community to counter misinformation", "Prepare public communication strategy"]
+            return [
+                *base_recommendations,
+                "Increase monitoring frequency",
+                "Engage with community to counter misinformation",
+                "Prepare public communication strategy",
+            ]
         elif risk_level == "MEDIUM":
-            return [*base_recommendations, "Continue monitoring for escalation", "Document patterns for future reference"]
+            return [
+                *base_recommendations,
+                "Continue monitoring for escalation",
+                "Document patterns for future reference",
+            ]
         else:
             return base_recommendations
 
@@ -936,7 +1004,7 @@ class CampaignDetector:
                 anomalies[location] = {
                     "count": count,
                     "percentage": percentage,
-                    "anomaly_type": "concentration"
+                    "anomaly_type": "concentration",
                 }
 
         return anomalies
@@ -956,18 +1024,14 @@ class CampaignDetector:
             if len(posts) > 10:  # High volume from single location
                 indicators[location] = {
                     "post_count": len(posts),
-                    "indicator_type": "high_volume_location"
+                    "indicator_type": "high_volume_location",
                 }
 
         return indicators
 
     def _generate_platform_heatmap(self, geo_data: dict) -> dict:
         """Generate heatmap data for a specific platform."""
-        return {
-            "data": geo_data,
-            "type": "geographic_heatmap",
-            "platform_specific": True
-        }
+        return {"data": geo_data, "type": "geographic_heatmap", "platform_specific": True}
 
     def _generate_global_heatmap(self, heatmap_data: dict) -> dict:
         """Generate global heatmap combining all platforms."""
@@ -980,7 +1044,7 @@ class CampaignDetector:
         return {
             "data": dict(global_data),
             "type": "global_heatmap",
-            "platforms_combined": list(heatmap_data.keys())
+            "platforms_combined": list(heatmap_data.keys()),
         }
 
     def _identify_anomaly_regions(self, heatmap_data: dict) -> list[str]:
@@ -1023,7 +1087,7 @@ class CampaignDetector:
         time_diffs = []
         for i in range(1, len(timestamps)):
             try:
-                diff = abs((timestamps[i] - timestamps[i-1]).total_seconds())
+                diff = abs((timestamps[i] - timestamps[i - 1]).total_seconds())
                 time_diffs.append(diff)
             except:
                 pass
@@ -1057,8 +1121,9 @@ class CampaignDetector:
 
         return burst_count / total_minutes if total_minutes > 0 else 0.0
 
-    def _analyze_content_similarity_coordination(self, posts: list[dict],
-                                               keywords: list[str]) -> float:
+    def _analyze_content_similarity_coordination(
+        self, posts: list[dict], keywords: list[str]
+    ) -> float:
         """Analyze content similarity for coordination detection."""
         keyword_posts = []
         for post in posts:
@@ -1079,8 +1144,7 @@ class CampaignDetector:
 
         return np.mean(similarities) if similarities else 0.0
 
-    def _analyze_keyword_correlation(self, posts: list[dict],
-                                   keywords: list[str]) -> float:
+    def _analyze_keyword_correlation(self, posts: list[dict], keywords: list[str]) -> float:
         """Analyze keyword correlation in posts."""
         keyword_usage = defaultdict(int)
 
@@ -1150,17 +1214,20 @@ class CampaignDetector:
         campaigns = []
 
         high_coordination = [
-            result for result in coordination_results
-            if result.get("coordination_score", 0.0) > 0.7
+            result for result in coordination_results if result.get("coordination_score", 0.0) > 0.7
         ]
 
         if len(high_coordination) >= 2:
-            campaigns.append({
-                "campaign_id": "multi_platform_1",
-                "platforms": [result["platform"] for result in high_coordination],
-                "coordination_score": np.mean([result["coordination_score"] for result in high_coordination]),
-                "start_time": datetime.now().isoformat()
-            })
+            campaigns.append(
+                {
+                    "campaign_id": "multi_platform_1",
+                    "platforms": [result["platform"] for result in high_coordination],
+                    "coordination_score": np.mean(
+                        [result["coordination_score"] for result in high_coordination]
+                    ),
+                    "start_time": datetime.now().isoformat(),
+                }
+            )
 
         return campaigns
 
@@ -1170,9 +1237,13 @@ class CampaignDetector:
 
         return {
             "total_posts": len(user_posts),
-            "avg_engagement": np.mean([post.get("metrics", {}).get("like_count", 0) for post in user_posts]) if user_posts else 0,
+            "avg_engagement": np.mean(
+                [post.get("metrics", {}).get("like_count", 0) for post in user_posts]
+            )
+            if user_posts
+            else 0,
             "post_frequency": len(user_posts) / 7,  # Posts per week (simplified)
-            "content_diversity": self._calculate_content_diversity(user_posts)
+            "content_diversity": self._calculate_content_diversity(user_posts),
         }
 
     def _analyze_engagement_metrics(self, posts: list[dict], handle: str) -> dict:
@@ -1188,7 +1259,7 @@ class CampaignDetector:
             "avg_engagement": np.mean(engagements) if engagements else 0,
             "engagement_rate": (np.mean(engagements) / 1000) if engagements else 0,  # Simplified
             "reach_estimate": sum(engagements) * 10 if engagements else 0,  # Simplified
-            "viral_posts": sum(1 for e in engagements if e > 1000)
+            "viral_posts": sum(1 for e in engagements if e > 1000),
         }
 
     def _analyze_network_influence(self, posts: list[dict], handle: str) -> dict:
@@ -1208,21 +1279,22 @@ class CampaignDetector:
             "mention_count": mentions,
             "retweet_count": retweets,
             "influence_network_size": mentions + retweets,
-            "network_diversity": len({post.get("author_id") for post in posts if f"@{handle}" in post.get("text", "")})
+            "network_diversity": len(
+                {post.get("author_id") for post in posts if f"@{handle}" in post.get("text", "")}
+            ),
         }
 
-    def _calculate_influence_score(self, posting_metrics: dict,
-                                 engagement_metrics: dict,
-                                 network_influence: dict) -> float:
+    def _calculate_influence_score(
+        self, posting_metrics: dict, engagement_metrics: dict, network_influence: dict
+    ) -> float:
         """Calculate overall influence score."""
         posting_score = min(posting_metrics["post_frequency"] / 10, 1.0)
         engagement_score = min(engagement_metrics["engagement_rate"], 1.0)
         network_score = min(network_influence["influence_network_size"] / 100, 1.0)
 
-        return (posting_score * 0.3 + engagement_score * 0.5 + network_score * 0.2)
+        return posting_score * 0.3 + engagement_score * 0.5 + network_score * 0.2
 
-    def _classify_influence_type(self, influence_score: float,
-                               engagement_metrics: dict) -> str:
+    def _classify_influence_type(self, influence_score: float, engagement_metrics: dict) -> str:
         """Classify type of influence."""
         if influence_score > 0.8:
             return "mega_influencer"

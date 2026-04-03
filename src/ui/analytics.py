@@ -9,11 +9,13 @@ def analyze_sentiment(text):
     blob = TextBlob(text)
     return blob.sentiment.polarity, blob.sentiment.subjectivity
 
+
 def detect_sentiment_drift(current_scores, historical_avg):
     """Detect significant shifts in sentiment polarity."""
     if not historical_avg:
         return 0.0
     return abs(current_scores - historical_avg)
+
 
 def batch_analyze_news(news_list):
     """Analyze sentiment for a list of news articles."""
@@ -21,10 +23,12 @@ def batch_analyze_news(news_list):
     for news in news_list:
         text = f"{news.get('title', '')} {news.get('summary', '')}"
         polarity, subjectivity = analyze_sentiment(text)
-        results.append({
-            "title": news.get("title"),
-            "polarity": polarity,
-            "subjectivity": subjectivity,
-            "published": news.get("published")
-        })
+        results.append(
+            {
+                "title": news.get("title"),
+                "polarity": polarity,
+                "subjectivity": subjectivity,
+                "published": news.get("published"),
+            }
+        )
     return pd.DataFrame(results)

@@ -27,15 +27,11 @@ logger = logging.getLogger("lawnmower.shared")
 
 class AuthorshipProRequest(BaseModel):
     text: str = Field(..., min_length=50, description="The forensic sample to analyze.")
-    comparison_id: str = Field(
-        "Suspect_Alpha_Vector", description="The ID of the baseline vector."
-    )
+    comparison_id: str = Field("Suspect_Alpha_Vector", description="The ID of the baseline vector.")
 
 
 class InfluenceRequest(BaseModel):
-    entity_name: str = Field(
-        ..., description="The name of the entity to analyze for centrality."
-    )
+    entity_name: str = Field(..., description="The name of the entity to analyze for centrality.")
 
 
 class JustifyRequest(BaseModel):
@@ -78,8 +74,7 @@ def serialize_result(obj: Any) -> Any:
         return None
     if isinstance(obj, dict):
         return {
-            (k.value if isinstance(k, Enum) else k): serialize_result(v)
-            for k, v in obj.items()
+            (k.value if isinstance(k, Enum) else k): serialize_result(v) for k, v in obj.items()
         }
     if isinstance(obj, list):
         return [serialize_result(item) for item in obj]

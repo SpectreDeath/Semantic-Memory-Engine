@@ -12,10 +12,11 @@ Module Structure:
 """
 
 from gateway.tools.diagnostics import DIAGNOSTIC_TOOLS
-from gateway.tools.query import QUERY_TOOLS
 from gateway.tools.memory import MEMORY_TOOLS
+from gateway.tools.query import QUERY_TOOLS
 
-__all__ = ['DIAGNOSTIC_TOOLS', 'QUERY_TOOLS', 'MEMORY_TOOLS']
+__all__ = ["DIAGNOSTIC_TOOLS", "MEMORY_TOOLS", "QUERY_TOOLS"]
+
 
 def get_all_tools() -> dict:
     """Get all registered tools from all modules."""

@@ -11,7 +11,7 @@ def load_intel_data(file_path):
     if not path.exists():
         return []
     try:
-        with open(path, encoding='utf-8') as f:
+        with open(path, encoding="utf-8") as f:
             return json.load(f)
     except:
         return []

@@ -23,10 +23,10 @@ class ManifestManager:
         hash_md5 = hashlib.md5()
         size = os.path.getsize(filepath)
         with open(filepath, "rb") as f:
-            if size > 10_000_000: # If > 10MB, use 'Forensic Sampling'
-                hash_md5.update(f.read(1024 * 1024)) # First MB
+            if size > 10_000_000:  # If > 10MB, use 'Forensic Sampling'
+                hash_md5.update(f.read(1024 * 1024))  # First MB
                 f.seek(-1024 * 1024, os.SEEK_END)
-                hash_md5.update(f.read(1024 * 1024)) # Last MB
+                hash_md5.update(f.read(1024 * 1024))  # Last MB
             else:
                 for chunk in iter(lambda: f.read(4096), b""):
                     hash_md5.update(chunk)
@@ -42,7 +42,7 @@ class ManifestManager:
     def update_source(self, filepath):
         self.data["sources"][filepath] = {
             "hash": self.get_file_hash(filepath),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
-        with open(self.path, 'w') as f:
+        with open(self.path, "w") as f:
             json.dump(self.data, f, indent=4)

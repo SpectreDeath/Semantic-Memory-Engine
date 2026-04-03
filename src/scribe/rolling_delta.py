@@ -7,6 +7,7 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+
 class RollingDelta:
     """
     Performs sliding-window stylometric analysis (Rolling Delta).
@@ -16,13 +17,16 @@ class RollingDelta:
     def __init__(self):
         """Initialize with access to PyStyl."""
         from src.core.factory import ToolFactory
+
         try:
             self.pystyl = ToolFactory.create_pystyl_wrapper()
         except Exception as e:
             logger.exception(f"RollingDelta failed to load PyStyl: {e}")
             self.pystyl = None
 
-    def generate_windows(self, text: str, window_size: int = 5000, step: int = 500) -> Generator[tuple[int, str], None, None]:
+    def generate_windows(
+        self, text: str, window_size: int = 5000, step: int = 500
+    ) -> Generator[tuple[int, str], None, None]:
         """
         Yields text segments based on token count windowing.
         Generator implementation keeps memory footprint low.
@@ -37,11 +41,13 @@ class RollingDelta:
         """
         # Simple whitespace splitting fits the requested lightweight profile
         # Use regex to be consistent with PyStyl behavior finding "words"
-        tokens = re.findall(r'\b\w+\b', text)
+        tokens = re.findall(r"\b\w+\b", text)
         total_tokens = len(tokens)
 
         if total_tokens < window_size:
-            logger.warning(f"Text length ({total_tokens}) shorter than window size ({window_size}). Returning single window.")
+            logger.warning(
+                f"Text length ({total_tokens}) shorter than window size ({window_size}). Returning single window."
+            )
             yield (0, text)
             return
 
@@ -53,7 +59,9 @@ class RollingDelta:
             yield (current_idx, " ".join(window_tokens))
             current_idx += step
 
-    def analyze_rolling_delta(self, target_text: str, candidates: dict[str, str], window_size: int = 5000, step: int = 500) -> dict[str, Any]:
+    def analyze_rolling_delta(
+        self, target_text: str, candidates: dict[str, str], window_size: int = 5000, step: int = 500
+    ) -> dict[str, Any]:
         """
         Analyzes the target text in windows against candidate profiles.
 
@@ -72,11 +80,7 @@ class RollingDelta:
         if not candidates:
             return {"error": "No candidates provided"}
 
-        results = {
-            "series": {author: [] for author in candidates},
-            "windows": [],
-            "volatility": {}
-        }
+        results = {"series": {author: [] for author in candidates}, "windows": [], "volatility": {}}
 
         # Cache candidate vectors calculation could be optimized inside PyStyl,
         # but for now we call compare_texts directly which recalculates.
@@ -86,7 +90,7 @@ class RollingDelta:
 
         for start_idx, window_text in self.generate_windows(target_text, window_size, step):
             f"{start_idx}-{start_idx + window_size}"
-            results["windows"].append(start_idx) # Use integer index for x-axis charting
+            results["windows"].append(start_idx)  # Use integer index for x-axis charting
 
             for author, ref_text in candidates.items():
                 # Using Chi-squared as a proxy for Delta distance in this lightweight version

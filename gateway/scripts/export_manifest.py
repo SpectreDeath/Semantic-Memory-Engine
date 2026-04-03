@@ -36,7 +36,13 @@ def generate_markdown_manifest(output_file="d:/SME/gateway/User_Guide.md"):
             func = getattr(tool_item, tool_name, None)
             if not func:
                 # Try common method names
-                for method_name in ['run', 'analyze', 'evaluate_claim', 'get_influence_score', 'analyze_authorship']:
+                for method_name in [
+                    "run",
+                    "analyze",
+                    "evaluate_claim",
+                    "get_influence_score",
+                    "analyze_authorship",
+                ]:
                     if hasattr(tool_item, method_name):
                         func = getattr(tool_item, method_name)
                         break
@@ -50,7 +56,8 @@ def generate_markdown_manifest(output_file="d:/SME/gateway/User_Guide.md"):
                     sig = inspect.signature(func)
                     params_list = []
                     for p in sig.parameters:
-                        if p in ["self", "session_id"]: continue
+                        if p in ["self", "session_id"]:
+                            continue
                         params_list.append(f"`{p}`")
                     params = ", ".join(params_list)
                 except (ValueError, TypeError):
@@ -71,6 +78,7 @@ def generate_markdown_manifest(output_file="d:/SME/gateway/User_Guide.md"):
         f.write(manifest)
 
     print(f"✅ Success! {len(rows)} tools exported to {output_file}")
+
 
 if __name__ == "__main__":
     generate_markdown_manifest()

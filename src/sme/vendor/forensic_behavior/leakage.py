@@ -6,6 +6,7 @@ class LeakageAuditor:
     Detects potential PII / credential leakage using fast validation logic.
     Optimized with __slots__.
     """
+
     __slots__ = ()
 
     def validate_luhn_checksum(self, numeric_string: str) -> dict[str, Any]:
@@ -29,16 +30,17 @@ class LeakageAuditor:
                 digits[i] = doubled
 
             total_sum = sum(digits)
-            is_valid = (total_sum % 10 == 0)
+            is_valid = total_sum % 10 == 0
 
             return {
                 "is_valid": is_valid,
                 "digit_count": len(clean_str),
                 "check_digit": int(clean_str[-1]),
-                "status": "Success"
+                "status": "Success",
             }
         except Exception as e:
             return {"error": str(e), "status": "Error"}
+
 
 def validate_luhn_checksum(numeric_string: str) -> dict[str, Any]:
     """Standalone wrapper for Luhn validation."""

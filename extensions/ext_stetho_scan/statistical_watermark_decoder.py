@@ -16,15 +16,15 @@ from datetime import datetime
 from typing import Any
 
 # Configure logging for the watermark decoder
-logger = logging.getLogger('stetho_scan.statistical_watermark_decoder')
+logger = logging.getLogger("stetho_scan.statistical_watermark_decoder")
 logger.setLevel(logging.INFO)
 
 # Create file handler for watermark detection events
-watermark_handler = logging.FileHandler('watermark_detection_events.log')
+watermark_handler = logging.FileHandler("watermark_detection_events.log")
 watermark_handler.setLevel(logging.INFO)
 
 # Create formatter and add it to handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 watermark_handler.setFormatter(formatter)
 
 # Add handler to logger
@@ -34,6 +34,7 @@ logger.addHandler(watermark_handler)
 @dataclass
 class WatermarkDetection:
     """Result of watermark detection analysis."""
+
     has_invisible_markers: bool
     z_score_analysis: dict[str, float]
     provider_signature: str | None
@@ -49,59 +50,79 @@ class StatisticalWatermarkDecoder:
         # Invisible Unicode markers commonly used in watermarking
         self.invisible_markers = {
             # Zero-width characters
-            '\u200B': 'ZERO WIDTH SPACE',
-            '\u200C': 'ZERO WIDTH NON-JOINER',
-            '\u200D': 'ZERO WIDTH JOINER',
-            '\u200E': 'LEFT-TO-RIGHT MARK',
-            '\u200F': 'RIGHT-TO-LEFT MARK',
-            '\u202A': 'LEFT-TO-RIGHT EMBEDDING',
-            '\u202B': 'RIGHT-TO-LEFT EMBEDDING',
-            '\u202C': 'POP DIRECTIONAL FORMATTING',
-            '\u202D': 'LEFT-TO-RIGHT OVERRIDE',
-            '\u202E': 'RIGHT-TO-LEFT OVERRIDE',
-            '\u2060': 'WORD JOINER',
-            '\u2061': 'FUNCTION APPLICATION',
-            '\u2062': 'INVISIBLE TIMES',
-            '\u2063': 'INVISIBLE SEPARATOR',
-            '\uFEFF': 'ZERO WIDTH NO-BREAK SPACE (BOM)',
-
+            "\u200b": "ZERO WIDTH SPACE",
+            "\u200c": "ZERO WIDTH NON-JOINER",
+            "\u200d": "ZERO WIDTH JOINER",
+            "\u200e": "LEFT-TO-RIGHT MARK",
+            "\u200f": "RIGHT-TO-LEFT MARK",
+            "\u202a": "LEFT-TO-RIGHT EMBEDDING",
+            "\u202b": "RIGHT-TO-LEFT EMBEDDING",
+            "\u202c": "POP DIRECTIONAL FORMATTING",
+            "\u202d": "LEFT-TO-RIGHT OVERRIDE",
+            "\u202e": "RIGHT-TO-LEFT OVERRIDE",
+            "\u2060": "WORD JOINER",
+            "\u2061": "FUNCTION APPLICATION",
+            "\u2062": "INVISIBLE TIMES",
+            "\u2063": "INVISIBLE SEPARATOR",
+            "\ufeff": "ZERO WIDTH NO-BREAK SPACE (BOM)",
             # Other potentially invisible characters
-            '\u034F': 'COMBINING GRAPHEME JOINER',
-            '\u061C': 'ARABIC LETTER MARK',
-            '\u180E': 'MONGOLIAN VOWEL SEPARATOR',
+            "\u034f": "COMBINING GRAPHEME JOINER",
+            "\u061c": "ARABIC LETTER MARK",
+            "\u180e": "MONGOLIAN VOWEL SEPARATOR",
         }
 
         # Known provider signatures based on statistical patterns
         self.provider_signatures = {
-            'OPENAI': {
-                'common_tokens': ['the', 'of', 'and', 'to', 'a', 'in', 'is', 'it'],
-                'expected_distribution': [0.05, 0.04, 0.035, 0.03, 0.025, 0.02, 0.015, 0.01],
-                'z_score_threshold': 2.5
+            "OPENAI": {
+                "common_tokens": ["the", "of", "and", "to", "a", "in", "is", "it"],
+                "expected_distribution": [0.05, 0.04, 0.035, 0.03, 0.025, 0.02, 0.015, 0.01],
+                "z_score_threshold": 2.5,
             },
-            'GOOGLE': {
-                'common_tokens': ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'is'],
-                'expected_distribution': [0.048, 0.042, 0.038, 0.032, 0.028, 0.022, 0.018, 0.014],
-                'z_score_threshold': 2.2
+            "GOOGLE": {
+                "common_tokens": ["the", "of", "and", "to", "a", "in", "for", "is"],
+                "expected_distribution": [0.048, 0.042, 0.038, 0.032, 0.028, 0.022, 0.018, 0.014],
+                "z_score_threshold": 2.2,
             },
-            'ANTHROPIC': {
-                'common_tokens': ['the', 'of', 'and', 'to', 'a', 'in', 'that', 'is'],
-                'expected_distribution': [0.052, 0.045, 0.032, 0.035, 0.026, 0.024, 0.016, 0.013],
-                'z_score_threshold': 2.8
+            "ANTHROPIC": {
+                "common_tokens": ["the", "of", "and", "to", "a", "in", "that", "is"],
+                "expected_distribution": [0.052, 0.045, 0.032, 0.035, 0.026, 0.024, 0.016, 0.013],
+                "z_score_threshold": 2.8,
             },
-            'META': {
-                'common_tokens': ['the', 'of', 'and', 'to', 'a', 'in', 'is', 'for'],
-                'expected_distribution': [0.046, 0.041, 0.036, 0.033, 0.027, 0.023, 0.017, 0.019],
-                'z_score_threshold': 2.0
-            }
+            "META": {
+                "common_tokens": ["the", "of", "and", "to", "a", "in", "is", "for"],
+                "expected_distribution": [0.046, 0.041, 0.036, 0.033, 0.027, 0.023, 0.017, 0.019],
+                "z_score_threshold": 2.0,
+            },
         }
 
         # Character frequency analysis for additional watermark detection
         self.english_letter_freq = {
-            'e': 12.70, 't': 9.06, 'a': 8.17, 'o': 7.51, 'i': 6.97, 'n': 6.75,
-            's': 6.33, 'h': 6.09, 'r': 5.99, 'd': 4.25, 'l': 4.03, 'c': 2.78,
-            'u': 2.76, 'm': 2.41, 'w': 2.36, 'f': 2.23, 'g': 2.02, 'y': 1.97,
-            'p': 1.93, 'b': 1.29, 'v': 0.98, 'k': 0.77, 'j': 0.15, 'x': 0.15,
-            'q': 0.10, 'z': 0.07
+            "e": 12.70,
+            "t": 9.06,
+            "a": 8.17,
+            "o": 7.51,
+            "i": 6.97,
+            "n": 6.75,
+            "s": 6.33,
+            "h": 6.09,
+            "r": 5.99,
+            "d": 4.25,
+            "l": 4.03,
+            "c": 2.78,
+            "u": 2.76,
+            "m": 2.41,
+            "w": 2.36,
+            "f": 2.23,
+            "g": 2.02,
+            "y": 1.97,
+            "p": 1.93,
+            "b": 1.29,
+            "v": 0.98,
+            "k": 0.77,
+            "j": 0.15,
+            "x": 0.15,
+            "q": 0.10,
+            "z": 0.07,
         }
 
     def detect_invisible_markers(self, text: str) -> list[str]:
@@ -134,7 +155,7 @@ class StatisticalWatermarkDecoder:
             List of tokens.
         """
         # Remove punctuation and convert to lowercase
-        text = re.sub(r'[^\w\s]', ' ', text.lower())
+        text = re.sub(r"[^\w\s]", " ", text.lower())
 
         # Split into tokens and filter out empty strings
         tokens = [token.strip() for token in text.split() if token.strip()]
@@ -159,11 +180,10 @@ class StatisticalWatermarkDecoder:
         total_tokens = len(tokens)
 
         # Calculate frequency distribution
-        token_frequencies = {token: count / total_tokens
-                           for token, count in token_counts.items()}
+        token_frequencies = {token: count / total_tokens for token, count in token_counts.items()}
 
         # Calculate mean and standard deviation for common tokens
-        common_tokens = ['the', 'of', 'and', 'to', 'a', 'in', 'is', 'it', 'for', 'that']
+        common_tokens = ["the", "of", "and", "to", "a", "in", "is", "it", "for", "that"]
         observed_freqs = [token_frequencies.get(token, 0) for token in common_tokens]
 
         if len(observed_freqs) < 2:
@@ -193,16 +213,16 @@ class StatisticalWatermarkDecoder:
             Provider name if signature detected, None otherwise.
         """
         best_match = None
-        best_score = float('inf')
+        best_score = float("inf")
 
         for provider, signature in self.provider_signatures.items():
             # Calculate match score based on Z-Score patterns
             match_score = 0
-            common_tokens = signature['common_tokens']
+            common_tokens = signature["common_tokens"]
 
             for _i, token in enumerate(common_tokens):
                 if token in z_scores:
-                    expected_z = signature['z_score_threshold']
+                    expected_z = signature["z_score_threshold"]
                     actual_z = abs(z_scores[token])
 
                     # Calculate difference from expected pattern
@@ -282,10 +302,7 @@ class StatisticalWatermarkDecoder:
 
         # Step 5: Calculate confidence score
         confidence_score = self._calculate_confidence_score(
-            has_invisible_markers,
-            z_scores,
-            provider_signature,
-            char_deviations
+            has_invisible_markers, z_scores, provider_signature, char_deviations
         )
 
         # Step 6: Log results
@@ -300,13 +317,18 @@ class StatisticalWatermarkDecoder:
             provider_signature=provider_signature,
             confidence_score=confidence_score,
             detected_markers=detected_markers,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
         return detection
 
-    def _calculate_confidence_score(self, has_markers: bool, z_scores: dict[str, float],
-                                  provider: str | None, char_deviations: dict[str, float]) -> float:
+    def _calculate_confidence_score(
+        self,
+        has_markers: bool,
+        z_scores: dict[str, float],
+        provider: str | None,
+        char_deviations: dict[str, float],
+    ) -> float:
         """
         Calculate overall confidence score for watermark detection.
 
@@ -354,15 +376,15 @@ def detect_watermark_pulse(text: str) -> dict[str, Any]:
     result = decoder.detect_watermark_pulse(text)
 
     return {
-        'has_invisible_markers': result.has_invisible_markers,
-        'z_score_analysis': result.z_score_analysis,
-        'provider_signature': result.provider_signature,
-        'confidence_score': round(result.confidence_score, 2),
-        'detected_markers': [repr(marker) for marker in result.detected_markers],
-        'timestamp': result.timestamp.isoformat(),
-        'status': 'WATERMARK_DETECTED' if result.provider_signature else 'NO_WATERMARK_FOUND'
+        "has_invisible_markers": result.has_invisible_markers,
+        "z_score_analysis": result.z_score_analysis,
+        "provider_signature": result.provider_signature,
+        "confidence_score": round(result.confidence_score, 2),
+        "detected_markers": [repr(marker) for marker in result.detected_markers],
+        "timestamp": result.timestamp.isoformat(),
+        "status": "WATERMARK_DETECTED" if result.provider_signature else "NO_WATERMARK_FOUND",
     }
 
 
 # Export the main function for use as a tool
-__all__ = ['StatisticalWatermarkDecoder', 'WatermarkDetection', 'detect_watermark_pulse']
+__all__ = ["StatisticalWatermarkDecoder", "WatermarkDetection", "detect_watermark_pulse"]

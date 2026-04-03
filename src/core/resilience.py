@@ -46,13 +46,15 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 class CircuitState(StrEnum):
     """Circuit breaker states."""
-    CLOSED = "closed"          # Normal operation
-    OPEN = "open"              # Failing, reject requests
-    HALF_OPEN = "half_open"    # Testing recovery
+
+    CLOSED = "closed"  # Normal operation
+    OPEN = "open"  # Failing, reject requests
+    HALF_OPEN = "half_open"  # Testing recovery
 
 
 class CircuitBreakerError(Exception):
     """Raised when circuit is open."""
+
     pass
 
 
@@ -64,8 +66,13 @@ class CircuitBreaker:
     the circuit when they exceed thresholds.
     """
 
-    def __init__(self, name: str, failure_threshold: float = 0.5,
-                 recovery_timeout: int = 60, expected_exception: type = Exception):
+    def __init__(
+        self,
+        name: str,
+        failure_threshold: float = 0.5,
+        recovery_timeout: int = 60,
+        expected_exception: type = Exception,
+    ):
         """
         Initialize circuit breaker.
 
@@ -124,7 +131,8 @@ class CircuitBreaker:
             if time_since_failure > self.recovery_timeout:
                 logger.info(
                     f"Circuit '{self.name}' OPEN → HALF_OPEN "
-                    f"(timeout {self.recovery_timeout}s elapsed)")
+                    f"(timeout {self.recovery_timeout}s elapsed)"
+                )
                 self.state = CircuitState.HALF_OPEN
                 self.success_count = 0
                 self.failure_count = 0
@@ -132,20 +140,17 @@ class CircuitBreaker:
             else:
                 remaining = self.recovery_timeout - int(time_since_failure)
                 raise CircuitBreakerError(
-                    f"Circuit '{self.name}' is OPEN. "
-                    f"Recovery in {remaining}s")
+                    f"Circuit '{self.name}' is OPEN. Recovery in {remaining}s"
+                )
 
         elif self.state == CircuitState.HALF_OPEN:
             # In half-open, try limited requests
             if self.failure_count > 0:
                 # Failed during recovery
-                logger.error(
-                    f"Circuit '{self.name}' HALF_OPEN → OPEN "
-                    f"(recovery failed)")
+                logger.error(f"Circuit '{self.name}' HALF_OPEN → OPEN (recovery failed)")
                 self.state = CircuitState.OPEN
                 self.last_failure_time = datetime.now()
-                raise CircuitBreakerError(
-                    f"Circuit '{self.name}' re-opened after recovery attempt")
+                raise CircuitBreakerError(f"Circuit '{self.name}' re-opened after recovery attempt")
 
     def _on_success(self) -> None:
         """Handle successful call."""
@@ -171,8 +176,8 @@ class CircuitBreaker:
             if failure_rate >= self.failure_threshold:
                 if self.state != CircuitState.OPEN:
                     logger.error(
-                        f"Circuit '{self.name}' CLOSED → OPEN "
-                        f"(failure rate: {failure_rate:.2%})")
+                        f"Circuit '{self.name}' CLOSED → OPEN (failure rate: {failure_rate:.2%})"
+                    )
                     self.state = CircuitState.OPEN
                     self.last_state_change = datetime.now()
 
@@ -197,22 +202,26 @@ class CircuitBreaker:
         time_in_state = (datetime.now() - self.last_state_change).total_seconds()
 
         return {
-            'name': self.name,
-            'state': self.state.value,
-            'failures': self.failure_count,
-            'successes': self.success_count,
-            'total': total,
-            'failure_rate_percent': f"{failure_rate:.1f}%",
-            'time_in_state_seconds': int(time_in_state),
-            'last_state_change': self.last_state_change.isoformat(),
-            'last_failure': (self.last_failure_time.isoformat()
-                           if self.last_failure_time else None)
+            "name": self.name,
+            "state": self.state.value,
+            "failures": self.failure_count,
+            "successes": self.success_count,
+            "total": total,
+            "failure_rate_percent": f"{failure_rate:.1f}%",
+            "time_in_state_seconds": int(time_in_state),
+            "last_state_change": self.last_state_change.isoformat(),
+            "last_failure": (
+                self.last_failure_time.isoformat() if self.last_failure_time else None
+            ),
         }
+
     def __call__(self, func: F) -> F:
         """Use circuit breaker as decorator."""
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             return self.call(func, *args, **kwargs)
+
         return wrapper
 
 
@@ -245,6 +254,7 @@ def retry_with_backoff(
         def unreliable_operation():
             return result
     """
+
     def decorator(func: F) -> F:
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
@@ -263,7 +273,7 @@ def retry_with_backoff(
 
                         # Add jitter
                         if jitter:
-                            delay *= (0.5 + random.random())
+                            delay *= 0.5 + random.random()
 
                         logger.warning(
                             f"{func.__name__} attempt {attempt}/{max_attempts} failed: {e}. "
@@ -295,6 +305,7 @@ def retry_with_backoff(
 
 class TimeoutError(Exception):
     """Raised when operation times out."""
+
     pass
 
 
@@ -326,9 +337,7 @@ class TimeoutManager:
 
             elapsed = time.time() - self.start_time
             if elapsed > self.timeout_seconds:
-                raise TimeoutError(
-                    f"Operation timeout: {elapsed:.2f}s > {self.timeout_seconds}s"
-                )
+                raise TimeoutError(f"Operation timeout: {elapsed:.2f}s > {self.timeout_seconds}s")
 
     def remaining(self) -> float:
         """Get remaining time in seconds."""
@@ -375,6 +384,7 @@ class BulkheadIsolation:
 
     def __call__(self, func: F) -> F:
         """Use as decorator."""
+
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             if not self.acquire():

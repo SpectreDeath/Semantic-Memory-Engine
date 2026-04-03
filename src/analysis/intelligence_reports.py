@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class IntelligenceReport:
     """A synthesized intelligence briefing."""
+
     timestamp: str
     title: str
     summary: str
@@ -50,7 +51,9 @@ class IntelligenceReports:
 
         logger.info("IntelligenceReports engine initialized")
 
-    def generate_briefing(self, text: str, title: str = "Intelligence Briefing") -> IntelligenceReport:
+    def generate_briefing(
+        self, text: str, title: str = "Intelligence Briefing"
+    ) -> IntelligenceReport:
         """
         Generate a comprehensive intelligence report from a single text source.
 
@@ -81,16 +84,18 @@ class IntelligenceReports:
             sentiment_overview={
                 "polarity": sentiment_obj.polarity.value,
                 "score": sentiment_obj.polarity_score,
-                "dominant_emotion": sentiment_obj.dominant_emotion.value if sentiment_obj.dominant_emotion else "neutral",
-                "intensity": sentiment_obj.intensity
+                "dominant_emotion": sentiment_obj.dominant_emotion.value
+                if sentiment_obj.dominant_emotion
+                else "neutral",
+                "intensity": sentiment_obj.intensity,
             },
             dominant_themes=summary_obj.keywords[:5],
             confidence_score=(summary_obj.score + sentiment_obj.confidence) / 2,
             metadata={
                 "source_length": len(text),
                 "is_sarcastic": sentiment_obj.is_sarcastic,
-                "is_mixed": sentiment_obj.is_mixed
-            }
+                "is_mixed": sentiment_obj.is_mixed,
+            },
         )
 
     def _extract_key_points(self, summary: Summary, sentiment: SentimentAnalysis) -> list[str]:
@@ -100,10 +105,14 @@ class IntelligenceReports:
 
         # Add high-intensity emotion points if they exist
         if sentiment.intensity > 0.6 and sentiment.dominant_emotion:
-            points.append(f"High emotional intensity detected: Strong expressions of {sentiment.dominant_emotion.value}.")
+            points.append(
+                f"High emotional intensity detected: Strong expressions of {sentiment.dominant_emotion.value}."
+            )
 
         if sentiment.is_sarcastic:
-            points.append("Ambiguity Alert: Potential sarcasm or double-meaning detected in the source.")
+            points.append(
+                "Ambiguity Alert: Potential sarcasm or double-meaning detected in the source."
+            )
 
         return points
 
@@ -133,7 +142,7 @@ class IntelligenceReports:
             sentiment_overview={},
             dominant_themes=[],
             confidence_score=0.0,
-            metadata={}
+            metadata={},
         )
 
     def to_markdown(self, report: IntelligenceReport) -> str:
@@ -150,13 +159,15 @@ class IntelligenceReports:
         for point in report.key_points:
             md.append(f"- {point}")
 
-        md.extend([
-            "",
-            "## Emotional & Semantic Metadata",
-            f"- **Tone:** {report.sentiment_overview.get('polarity', 'Unknown')}",
-            f"- **Dominant Emotion:** {report.sentiment_overview.get('dominant_emotion', 'None')}",
-            f"- **Core Themes:** {', '.join(report.dominant_themes)}",
-            f"- **Analytical Confidence:** {report.confidence_score:.1%}"
-        ])
+        md.extend(
+            [
+                "",
+                "## Emotional & Semantic Metadata",
+                f"- **Tone:** {report.sentiment_overview.get('polarity', 'Unknown')}",
+                f"- **Dominant Emotion:** {report.sentiment_overview.get('dominant_emotion', 'None')}",
+                f"- **Core Themes:** {', '.join(report.dominant_themes)}",
+                f"- **Analytical Confidence:** {report.confidence_score:.1%}",
+            ]
+        )
 
         return "\n".join(md)

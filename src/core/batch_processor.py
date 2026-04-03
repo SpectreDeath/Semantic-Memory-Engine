@@ -19,6 +19,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class BatchJob:
     """Represents a batch processing job."""
 
@@ -32,6 +33,7 @@ class BatchJob:
         self.created_at = datetime.now()
         self.completed_at = datetime | None
         self.progress = 0.0
+
 
 class BatchProcessor:
     """Manager for asynchronous batch jobs."""
@@ -73,7 +75,9 @@ class BatchProcessor:
 
         job.status = "completed"
         job.completed_at = datetime.now()
-        logger.info(f"Batch job {job_id} completed with {len(job.results)} successes and {len(job.errors)} errors")
+        logger.info(
+            f"Batch job {job_id} completed with {len(job.results)} successes and {len(job.errors)} errors"
+        )
 
     def get_job_status(self, job_id: str) -> dict[str, Any] | None:
         """Get the status and progress of a job."""
@@ -89,7 +93,7 @@ class BatchProcessor:
             "success_count": len(job.results),
             "error_count": len(job.errors),
             "created_at": job.created_at.isoformat(),
-            "completed_at": job.completed_at.isoformat() if job.completed_at else None
+            "completed_at": job.completed_at.isoformat() if job.completed_at else None,
         }
 
     def get_job_results(self, job_id: str) -> dict[str, Any] | None:
@@ -98,13 +102,12 @@ class BatchProcessor:
         if not job or job.status != "completed":
             return None
 
-        return {
-            "results": job.results,
-            "errors": job.errors
-        }
+        return {"results": job.results, "errors": job.errors}
+
 
 # Global processor instance
 _processor = BatchProcessor()
+
 
 def get_batch_processor() -> BatchProcessor:
     return _processor

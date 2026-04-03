@@ -27,81 +27,45 @@ logger = logging.getLogger(__name__)
 
 # ==================== Request Models ====================
 
+
 class AnalysisRequest(BaseModel):
     """Request model for text analysis."""
 
-    text: str = Field(
-        ...,
-        min_length=1,
-        max_length=10000,
-        description="Text to analyze"
-    )
-    include_sentiment: bool = Field(
-        default=True,
-        description="Include sentiment analysis"
-    )
-    include_summary: bool = Field(
-        default=False,
-        description="Include text summary"
-    )
-    include_entities: bool = Field(
-        default=False,
-        description="Include entity linking"
-    )
+    text: str = Field(..., min_length=1, max_length=10000, description="Text to analyze")
+    include_sentiment: bool = Field(default=True, description="Include sentiment analysis")
+    include_summary: bool = Field(default=False, description="Include text summary")
+    include_entities: bool = Field(default=False, description="Include entity linking")
     summary_ratio: float = Field(
-        default=0.3,
-        ge=0.1,
-        le=0.9,
-        description="Summary compression ratio (0.1-0.9)"
+        default=0.3, ge=0.1, le=0.9, description="Summary compression ratio (0.1-0.9)"
     )
 
-    @field_validator('text')
+    @field_validator("text")
     @classmethod
     def text_not_empty(cls, v):
         if not v.strip():
-            raise ValueError('Text cannot be empty or whitespace-only')
+            raise ValueError("Text cannot be empty or whitespace-only")
         return v
 
 
 class SearchRequest(BaseModel):
     """Request model for semantic search."""
 
-    query: str = Field(
-        ...,
-        min_length=1,
-        max_length=500,
-        description="Search query"
-    )
-    limit: int = Field(
-        default=10,
-        ge=1,
-        le=100,
-        description="Maximum number of results"
-    )
-    include_score: bool = Field(
-        default=True,
-        description="Include similarity scores"
-    )
+    query: str = Field(..., min_length=1, max_length=500, description="Search query")
+    limit: int = Field(default=10, ge=1, le=100, description="Maximum number of results")
+    include_score: bool = Field(default=True, description="Include similarity scores")
 
 
 class ClusteringRequest(BaseModel):
     """Request model for document clustering."""
 
     documents: list[str] = Field(
-        ...,
-        min_length=2,
-        max_length=1000,
-        description="Documents to cluster"
+        ..., min_length=2, max_length=1000, description="Documents to cluster"
     )
     num_clusters: int | None = Field(
-        default=None,
-        ge=2,
-        le=100,
-        description="Number of clusters (auto if None)"
+        default=None, ge=2, le=100, description="Number of clusters (auto if None)"
     )
     algorithm: str = Field(
-        default="kmeans",
-        description="Clustering algorithm: kmeans, hierarchical, dbscan"
+        default="kmeans", description="Clustering algorithm: kmeans, hierarchical, dbscan"
     )
 
 
@@ -109,41 +73,25 @@ class BatchAnalysisRequest(BaseModel):
     """Request model for batch analysis."""
 
     documents: list[str] = Field(
-        ...,
-        min_length=1,
-        max_length=1000,
-        description="Documents to analyze"
+        ..., min_length=1, max_length=1000, description="Documents to analyze"
     )
-    analysis_type: str = Field(
-        default="sentiment",
-        description="Type of analysis"
-    )
+    analysis_type: str = Field(default="sentiment", description="Type of analysis")
 
 
 # ==================== Response Models ====================
 
+
 class SentimentResult(BaseModel):
     """Sentiment analysis result."""
 
-    polarity: float = Field(
-        ...,
-        ge=-1.0,
-        le=1.0,
-        description="Sentiment polarity (-1.0 to 1.0)"
-    )
-    confidence: float = Field(
-        ...,
-        ge=0.0,
-        le=1.0,
-        description="Confidence score (0.0 to 1.0)"
-    )
+    polarity: float = Field(..., ge=-1.0, le=1.0, description="Sentiment polarity (-1.0 to 1.0)")
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Confidence score (0.0 to 1.0)")
     label: str = Field(
         ...,
-        description="Sentiment label: very_negative, negative, neutral, positive, very_positive"
+        description="Sentiment label: very_negative, negative, neutral, positive, very_positive",
     )
     emotions: dict[str, float] | None = Field(
-        default=None,
-        description="Detected emotions with scores"
+        default=None, description="Detected emotions with scores"
     )
 
 
@@ -152,17 +100,9 @@ class SummaryResult(BaseModel):
 
     original_length: int = Field(..., description="Original text length")
     summary_length: int = Field(..., description="Summary length")
-    compression_ratio: float = Field(
-        ...,
-        ge=0.0,
-        le=1.0,
-        description="Compression ratio (0.0-1.0)"
-    )
+    compression_ratio: float = Field(..., ge=0.0, le=1.0, description="Compression ratio (0.0-1.0)")
     summary: str = Field(..., description="Summarized text")
-    keywords: list[str] = Field(
-        default_factory=list,
-        description="Key terms from summary"
-    )
+    keywords: list[str] = Field(default_factory=list, description="Key terms from summary")
 
 
 class Entity(BaseModel):
@@ -170,12 +110,7 @@ class Entity(BaseModel):
 
     text: str = Field(..., description="Entity text")
     entity_type: str = Field(..., description="Entity type")
-    confidence: float = Field(
-        ...,
-        ge=0.0,
-        le=1.0,
-        description="Recognition confidence"
-    )
+    confidence: float = Field(..., ge=0.0, le=1.0, description="Recognition confidence")
     start: int = Field(..., ge=0, description="Start position in text")
     end: int = Field(..., ge=0, description="End position in text")
 
@@ -185,33 +120,17 @@ class EntityResult(BaseModel):
 
     entities: list[Entity] = Field(default_factory=list, description="Detected entities")
     count: int = Field(..., description="Total entity count")
-    types: dict[str, int] = Field(
-        default_factory=dict,
-        description="Entity type counts"
-    )
+    types: dict[str, int] = Field(default_factory=dict, description="Entity type counts")
 
 
 class AnalysisResponse(BaseModel):
     """Complete analysis response."""
 
     text_preview: str = Field(..., max_length=200, description="Text preview")
-    sentiment: SentimentResult | None = Field(
-        default=None,
-        description="Sentiment analysis result"
-    )
-    summary: SummaryResult | None = Field(
-        default=None,
-        description="Summary result"
-    )
-    entities: EntityResult | None = Field(
-        default=None,
-        description="Entity linking result"
-    )
-    processing_time_ms: float = Field(
-        ...,
-        ge=0,
-        description="Processing time in milliseconds"
-    )
+    sentiment: SentimentResult | None = Field(default=None, description="Sentiment analysis result")
+    summary: SummaryResult | None = Field(default=None, description="Summary result")
+    entities: EntityResult | None = Field(default=None, description="Entity linking result")
+    processing_time_ms: float = Field(..., ge=0, description="Processing time in milliseconds")
 
 
 class SearchResult(BaseModel):
@@ -219,32 +138,17 @@ class SearchResult(BaseModel):
 
     id: str = Field(..., description="Document ID")
     text: str = Field(..., description="Document text preview")
-    score: float = Field(
-        ...,
-        ge=0.0,
-        le=1.0,
-        description="Similarity score"
-    )
-    metadata: dict[str, Any] | None = Field(
-        default=None,
-        description="Additional metadata"
-    )
+    score: float = Field(..., ge=0.0, le=1.0, description="Similarity score")
+    metadata: dict[str, Any] | None = Field(default=None, description="Additional metadata")
 
 
 class SearchResponse(BaseModel):
     """Search response."""
 
     query: str = Field(..., description="Search query")
-    results: list[SearchResult] = Field(
-        default_factory=list,
-        description="Search results"
-    )
+    results: list[SearchResult] = Field(default_factory=list, description="Search results")
     total: int = Field(..., ge=0, description="Total results found")
-    processing_time_ms: float = Field(
-        ...,
-        ge=0,
-        description="Query processing time"
-    )
+    processing_time_ms: float = Field(..., ge=0, description="Query processing time")
 
 
 class ClusterInfo(BaseModel):
@@ -253,40 +157,23 @@ class ClusterInfo(BaseModel):
     cluster_id: int = Field(..., ge=0, description="Cluster identifier")
     size: int = Field(..., ge=1, description="Number of documents in cluster")
     label: str | None = Field(None, description="Cluster label/topic")
-    silhouette_score: float | None = Field(
-        None,
-        ge=-1.0,
-        le=1.0,
-        description="Silhouette score"
-    )
+    silhouette_score: float | None = Field(None, ge=-1.0, le=1.0, description="Silhouette score")
 
 
 class ClusteringResponse(BaseModel):
     """Document clustering response."""
 
     num_clusters: int = Field(..., ge=2, description="Number of clusters")
-    clusters: list[ClusterInfo] = Field(
-        default_factory=list,
-        description="Cluster information"
-    )
-    assignments: list[int] = Field(
-        default_factory=list,
-        description="Document cluster assignments"
-    )
+    clusters: list[ClusterInfo] = Field(default_factory=list, description="Cluster information")
+    assignments: list[int] = Field(default_factory=list, description="Document cluster assignments")
     silhouette_avg: float | None = Field(
-        None,
-        ge=-1.0,
-        le=1.0,
-        description="Average silhouette score"
+        None, ge=-1.0, le=1.0, description="Average silhouette score"
     )
-    processing_time_ms: float = Field(
-        ...,
-        ge=0,
-        description="Processing time"
-    )
+    processing_time_ms: float = Field(..., ge=0, description="Processing time")
 
 
 # ==================== Error Models ====================
+
 
 class ErrorResponse(BaseModel):
     """Error response model."""
@@ -294,13 +181,11 @@ class ErrorResponse(BaseModel):
     error: str = Field(..., description="Error type")
     message: str = Field(..., description="Error message")
     status_code: int = Field(..., ge=400, le=599, description="HTTP status code")
-    request_id: str | None = Field(
-        None,
-        description="Request ID for tracking"
-    )
+    request_id: str | None = Field(None, description="Request ID for tracking")
 
 
 # ==================== Health & Status Models ====================
+
 
 class HealthResponse(BaseModel):
     """Health check response."""
@@ -309,8 +194,7 @@ class HealthResponse(BaseModel):
     version: str = Field(..., description="API version")
     timestamp: str = Field(..., description="Response timestamp")
     components: dict[str, str] = Field(
-        default_factory=dict,
-        description="Status of individual components"
+        default_factory=dict, description="Status of individual components"
     )
 
 
@@ -320,16 +204,8 @@ class StatsResponse(BaseModel):
     uptime_seconds: int = Field(..., ge=0, description="Uptime in seconds")
     requests_total: int = Field(..., ge=0, description="Total requests processed")
     requests_per_second: float = Field(..., ge=0, description="Current RPS")
-    error_rate_percent: float = Field(
-        ...,
-        ge=0.0,
-        le=100.0,
-        description="Error rate percentage"
-    )
+    error_rate_percent: float = Field(..., ge=0.0, le=100.0, description="Error rate percentage")
     avg_response_time_ms: float = Field(..., ge=0, description="Average response time")
     cache_hit_rate_percent: float | None = Field(
-        None,
-        ge=0.0,
-        le=100.0,
-        description="Cache hit rate"
+        None, ge=0.0, le=100.0, description="Cache hit rate"
     )

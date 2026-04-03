@@ -24,6 +24,7 @@ logger = logging.getLogger("lawnmower.governor")
 # Try to import GPU monitoring - gracefully fallback if unavailable
 try:
     import pynvml
+
     NVML_AVAILABLE = True
 except ImportError:
     NVML_AVAILABLE = False
@@ -31,6 +32,7 @@ except ImportError:
 
 try:
     import psutil
+
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
@@ -40,6 +42,7 @@ except ImportError:
 @dataclass
 class SystemSnapshot:
     """A point-in-time snapshot of system resources."""
+
     timestamp: float = field(default_factory=time.time)
     cpu_percent: float = 0.0
     cpu_count: int = 0
@@ -120,8 +123,16 @@ class Governor:
             disk_io = psutil.disk_io_counters()
             if self._last_disk_io and self._last_check_time:
                 time_delta = time.time() - self._last_check_time
-                snap.disk_read_mb = (disk_io.read_bytes - self._last_disk_io.read_bytes) / (1024 * 1024) / time_delta
-                snap.disk_write_mb = (disk_io.write_bytes - self._last_disk_io.write_bytes) / (1024 * 1024) / time_delta
+                snap.disk_read_mb = (
+                    (disk_io.read_bytes - self._last_disk_io.read_bytes)
+                    / (1024 * 1024)
+                    / time_delta
+                )
+                snap.disk_write_mb = (
+                    (disk_io.write_bytes - self._last_disk_io.write_bytes)
+                    / (1024 * 1024)
+                    / time_delta
+                )
             self._last_disk_io = disk_io
             self._last_check_time = time.time()
         except Exception as e:
@@ -168,18 +179,15 @@ class Governor:
 
         return {
             "governor": "active",
-            "cpu": {
-                "percent": round(snap.cpu_percent, 1),
-                "count": snap.cpu_count
-            },
+            "cpu": {"percent": round(snap.cpu_percent, 1), "count": snap.cpu_count},
             "ram": {
                 "total_mb": round(snap.ram_total_mb, 0),
                 "used_mb": round(snap.ram_used_mb, 0),
-                "percent": round(snap.ram_percent, 1)
+                "percent": round(snap.ram_percent, 1),
             },
             "disk": {
                 "read_mb_s": round(snap.disk_read_mb, 2),
-                "write_mb_s": round(snap.disk_write_mb, 2)
+                "write_mb_s": round(snap.disk_write_mb, 2),
             },
             "gpu": {
                 "available": snap.gpu_available,
@@ -187,15 +195,14 @@ class Governor:
                 "memory_total_mb": round(snap.gpu_memory_total_mb, 0),
                 "memory_used_mb": round(snap.gpu_memory_used_mb, 0),
                 "utilization_percent": round(snap.gpu_utilization, 1),
-                "temperature_c": round(snap.gpu_temperature, 0) if snap.gpu_temperature > 0 else None
-            }
+                "temperature_c": round(snap.gpu_temperature, 0)
+                if snap.gpu_temperature > 0
+                else None,
+            },
         }
 
     def check_limits(
-        self,
-        cpu_threshold: float = 80.0,
-        ram_threshold: float = 80.0,
-        gpu_threshold: float = 90.0
+        self, cpu_threshold: float = 80.0, ram_threshold: float = 80.0, gpu_threshold: float = 90.0
     ) -> dict[str, bool]:
         """
         Check if any resource exceeds threshold.
@@ -207,7 +214,7 @@ class Governor:
         return {
             "cpu": snap.cpu_percent >= cpu_threshold,
             "ram": snap.ram_percent >= ram_threshold,
-            "gpu": snap.gpu_utilization >= gpu_threshold if snap.gpu_available else False
+            "gpu": snap.gpu_utilization >= gpu_threshold if snap.gpu_available else False,
         }
 
     def get_history(self, limit: int = 10) -> list[SystemSnapshot]:

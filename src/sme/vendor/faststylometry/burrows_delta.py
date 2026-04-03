@@ -1,4 +1,4 @@
-'''
+"""
 MIT License
 
 Copyright (c) 2023 Fast Data Science Ltd (https://fastdatascience.com)
@@ -25,7 +25,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-'''
+"""
 
 import operator
 import re
@@ -37,7 +37,9 @@ import pandas as pd
 from .corpus import Corpus
 
 
-def get_top_tokens(corpus: Corpus, vocab_size: int, words_to_exclude: set, tok_match_pattern: str) -> list:
+def get_top_tokens(
+    corpus: Corpus, vocab_size: int, words_to_exclude: set, tok_match_pattern: str
+) -> list:
     """
     Identify the n highest ranking tokens in the corpus.
 
@@ -46,7 +48,7 @@ def get_top_tokens(corpus: Corpus, vocab_size: int, words_to_exclude: set, tok_m
     :return: A list of the n most common tokens in the corpus.
     """
 
-    assert (len(corpus.tokens) > 0)  # you should have tokenised the corpus.
+    assert len(corpus.tokens) > 0  # you should have tokenised the corpus.
 
     token_freqs = Counter()
     for token_seq in corpus.tokens:
@@ -60,8 +62,12 @@ def get_top_tokens(corpus: Corpus, vocab_size: int, words_to_exclude: set, tok_m
             if not re_alpha.match(tok):
                 del token_freqs[tok]
 
-    corpus.top_tokens = [tok for tok, freq in
-                         sorted(token_freqs.items(), key=operator.itemgetter(1), reverse=True)[:vocab_size]]
+    corpus.top_tokens = [
+        tok
+        for tok, freq in sorted(token_freqs.items(), key=operator.itemgetter(1), reverse=True)[
+            :vocab_size
+        ]
+    ]
     corpus.top_tokens_set = set(corpus.top_tokens)
 
     return corpus.top_tokens
@@ -90,7 +96,6 @@ def get_token_counts(corpus: Corpus):
     total_token_counts = np.asarray([len(tokens) for tokens in corpus.tokens])
 
     for idx in range(len(corpus.authors)):
-
         this_work_token_counts = Counter()
         for tok in corpus.tokens[idx]:
             if tok in corpus.top_tokens_set:
@@ -101,7 +106,9 @@ def get_token_counts(corpus: Corpus):
 
     corpus.token_counts = token_counts
     corpus.total_token_counts = total_token_counts
-    corpus.author_book_combinations = [a + " - " + b for a, b in zip(corpus.authors, corpus.books, strict=False)]
+    corpus.author_book_combinations = [
+        a + " - " + b for a, b in zip(corpus.authors, corpus.books, strict=False)
+    ]
 
     ## OLD LOGIC
     # corpus.df_token_counts = pd.DataFrame(token_counts, columns=corpus.top_tokens)
@@ -121,11 +128,17 @@ def get_token_counts_by_author(corpus: Corpus):
     :param corpus:  The corpus to run the operation on and store the result in.
     """
     corpus.all_unique_authors = sorted(set(corpus.authors))
-    corpus.author_to_author_id = {author: idx for idx, author in enumerate(corpus.all_unique_authors)}
+    corpus.author_to_author_id = {
+        author: idx for idx, author in enumerate(corpus.all_unique_authors)
+    }
     corpus.author_ids = [corpus.author_to_author_id[author_name] for author_name in corpus.authors]
 
     corpus.token_counts_by_author = np.stack(
-        [np.bincount(corpus.author_ids, corpus.token_counts[:, i]) for i in range(len(corpus.top_tokens))])
+        [
+            np.bincount(corpus.author_ids, corpus.token_counts[:, i])
+            for i in range(len(corpus.top_tokens))
+        ]
+    )
     corpus.total_token_counts_by_author = np.bincount(corpus.author_ids, corpus.total_token_counts)
 
     # OLD LOGIC
@@ -139,11 +152,19 @@ def get_token_counts_by_author_and_book(corpus: Corpus):
     :param corpus:  The corpus to run the operation on and store the result in.
     """
     corpus.all_unique_authors = sorted(set(corpus.author_book_combinations))
-    corpus.author_to_author_id = {author: idx for idx, author in enumerate(corpus.all_unique_authors)}
-    corpus.author_ids = [corpus.author_to_author_id[author_name] for author_name in corpus.author_book_combinations]
+    corpus.author_to_author_id = {
+        author: idx for idx, author in enumerate(corpus.all_unique_authors)
+    }
+    corpus.author_ids = [
+        corpus.author_to_author_id[author_name] for author_name in corpus.author_book_combinations
+    ]
 
     corpus.token_counts_by_author = np.stack(
-        [np.bincount(corpus.author_ids, corpus.token_counts[:, i]) for i in range(len(corpus.top_tokens))])
+        [
+            np.bincount(corpus.author_ids, corpus.token_counts[:, i])
+            for i in range(len(corpus.top_tokens))
+        ]
+    )
     corpus.total_token_counts_by_author = np.bincount(corpus.author_ids, corpus.total_token_counts)
 
     # OLD LOGIC
@@ -171,8 +192,9 @@ def get_author_z_scores(test_corpus: Corpus, train_corpus: Corpus = None) -> pd.
         train_corpus = test_corpus
     test_corpus.author_z_scores = np.zeros(test_corpus.token_proportions.shape)
     for i in range(test_corpus.author_z_scores.shape[0]):
-        test_corpus.author_z_scores[i, :] = (test_corpus.token_proportions[i, :] - train_corpus.token_proportions[
-            i].mean()) / train_corpus.token_proportions[i].std(ddof=1)
+        test_corpus.author_z_scores[i, :] = (
+            test_corpus.token_proportions[i, :] - train_corpus.token_proportions[i].mean()
+        ) / train_corpus.token_proportions[i].std(ddof=1)
 
     return test_corpus.author_z_scores
 
@@ -185,17 +207,25 @@ def calculate_difference_from_train_corpus(test_corpus, train_corpus=None):
     """
     test_corpus.difference_matrices = [None] * len(test_corpus.all_unique_authors)
     for test_author_id in range(len(test_corpus.all_unique_authors)):
-        test_corpus.difference_matrices[test_author_id] = np.zeros(train_corpus.author_z_scores.shape)
+        test_corpus.difference_matrices[test_author_id] = np.zeros(
+            train_corpus.author_z_scores.shape
+        )
         for col in range(train_corpus.author_z_scores.shape[1]):
-            test_corpus.difference_matrices[test_author_id][:, col] = train_corpus.author_z_scores[:,
-                                                                      col] - test_corpus.author_z_scores[:,
-                                                                             test_author_id]
+            test_corpus.difference_matrices[test_author_id][:, col] = (
+                train_corpus.author_z_scores[:, col]
+                - test_corpus.author_z_scores[:, test_author_id]
+            )
 
     test_corpus.difference_matrix = np.stack(test_corpus.difference_matrices)
 
 
-def calculate_burrows_delta(train_corpus: Corpus, test_corpus: Corpus, vocab_size: int = 50, words_to_exclude: set | None = None,
-                            tok_match_pattern: str = r'^[a-z][a-z]+$') -> pd.DataFrame:
+def calculate_burrows_delta(
+    train_corpus: Corpus,
+    test_corpus: Corpus,
+    vocab_size: int = 50,
+    words_to_exclude: set | None = None,
+    tok_match_pattern: str = r"^[a-z][a-z]+$",
+) -> pd.DataFrame:
     """
     Calculate the Burrows' Delta statistic for the test corpus vs every author's subcorpus in the training corpus.
     :param train_corpus: A corpus of known authors, which we will use as a benchmark to compare to the test corpus by an unknown author.
@@ -221,6 +251,8 @@ def calculate_burrows_delta(train_corpus: Corpus, test_corpus: Corpus, vocab_siz
 
     deltas = np.mean(np.abs(test_corpus.difference_matrix), axis=1).T
 
-    df_delta = pd.DataFrame(deltas, columns=test_corpus.all_unique_authors, index=train_corpus.all_unique_authors)
+    df_delta = pd.DataFrame(
+        deltas, columns=test_corpus.all_unique_authors, index=train_corpus.all_unique_authors
+    )
 
     return df_delta

@@ -70,137 +70,164 @@ def register(
 
     # --- Register in ToolRegistry for safe_tool_call look-ups ---
     registry.add_tool(
-        "analyze_authorship", scribe_tool,
+        "analyze_authorship",
+        scribe_tool,
         description="Performs stylometric fingerprinting using Burrows' Delta logic.",
         parameters={"text": "str", "suspect_vector_id": "str"},
     )
     registry.add_tool(
-        "analyze_authorship_pro", scribe_pro_tool,
+        "analyze_authorship_pro",
+        scribe_pro_tool,
         description="Advanced probabilistic forensic matching using faststylometry.",
         parameters=AuthorshipProRequest.model_json_schema(),
     )
     registry.add_tool(
-        "get_influence_score", influence_tool,
+        "get_influence_score",
+        influence_tool,
         description="Calculate graph centrality for an entity in the knowledge graph.",
         parameters=InfluenceRequest.model_json_schema(),
     )
     registry.add_tool(
-        "justify_claim", epistemic_tool,
+        "justify_claim",
+        epistemic_tool,
         description="Audit a forensic lead using Epistemic Reliabilism and source provenance.",
         parameters=JustifyRequest.model_json_schema(),
     )
     registry.add_tool(
-        "calculate_cosine_similarity", math_tool,
+        "calculate_cosine_similarity",
+        math_tool,
         description="Vectorized cosine similarity comparison of two frequency dictionaries.",
         parameters={"freq_dict_1": "dict", "freq_dict_2": "dict"},
     )
     registry.add_tool(
-        "calculate_typo_distance", math_tool,
+        "calculate_typo_distance",
+        math_tool,
         description="Identify fuzzy word matches using optimized Levenshtein distance.",
         parameters={"word1": "str", "word2": "str"},
     )
     registry.add_tool(
-        "calculate_set_overlap", math_tool,
+        "calculate_set_overlap",
+        math_tool,
         description="Calculate Jaccard Similarity (Set Overlap) between token lists.",
         parameters={"tokens1": "list", "tokens2": "list"},
     )
     registry.add_tool(
-        "calculate_tfidf", math_tool,
+        "calculate_tfidf",
+        math_tool,
         description="Calculate term significance (TF-IDF) across a corpus of documents.",
         parameters={"tokenized_docs": "list"},
     )
     registry.add_tool(
-        "calculate_kl_divergence", math_tool,
+        "calculate_kl_divergence",
+        math_tool,
         description="Measure relative entropy (KL Divergence) between two distributions.",
         parameters={"p": "list", "q": "list"},
     )
     registry.add_tool(
-        "calculate_phonetic_hash", math_tool,
+        "calculate_phonetic_hash",
+        math_tool,
         description="Phonetic hashing using Double Metaphone for alias discovery.",
         parameters={"word": "str"},
     )
     registry.add_tool(
-        "audit_benford_distribution", math_tool,
+        "audit_benford_distribution",
+        math_tool,
         description="Fraud detection using Benford's Law distribution analysis.",
         parameters={"data": "list"},
     )
     registry.add_tool(
-        "calculate_simhash", math_tool,
+        "calculate_simhash",
+        math_tool,
         description="Locality Sensitive Hashing (SimHash) for near-duplicate detection.",
         parameters={"tokens": "list", "hash_size": "int"},
     )
     registry.add_tool(
-        "calculate_entropy_divergence", math_tool,
+        "calculate_entropy_divergence",
+        math_tool,
         description="Measure relative entropy (Data Drift) between two distributions.",
         parameters={"p": "list", "q": "list"},
     )
     registry.add_tool(
-        "get_ego_triples", graph_tool,
+        "get_ego_triples",
+        graph_tool,
         description="Live WordNet-based discovery of an entity's semantic neighborhood.",
         parameters={"entity_name": "str"},
     )
     registry.add_tool(
-        "detect_knowledge_gaps", graph_tool,
+        "detect_knowledge_gaps",
+        graph_tool,
         description="Identify missing conceptual relationships in the semantic memory.",
         parameters={"central_concept": "str"},
     )
     registry.add_tool(
-        "verify_file_signature", files_tool,
+        "verify_file_signature",
+        files_tool,
         description="Verify file integrity by checking magic numbers.",
         parameters={"file_path": "str"},
     )
     registry.add_tool(
-        "calculate_structural_complexity", files_tool,
+        "calculate_structural_complexity",
+        files_tool,
         description="Calculate compression ratio as a proxy for structural entropy.",
         parameters={"file_path": "str"},
     )
     registry.add_tool(
-        "calculate_burstiness", behavior_tool,
+        "calculate_burstiness",
+        behavior_tool,
         description="Calculate temporal burstiness score from a list of timestamps.",
         parameters={"timestamps": "list"},
     )
     registry.add_tool(
-        "validate_luhn_checksum", behavior_tool,
+        "validate_luhn_checksum",
+        behavior_tool,
         description="Detect PII leakage (Cards/SSNs) using Luhn algorithm validation.",
         parameters={"numeric_string": "str"},
     )
     registry.add_tool(
-        "calculate_node_path", graph_tool,
+        "calculate_node_path",
+        graph_tool,
         description="Find the shortest path between nodes in a relationship graph.",
         parameters={"graph": "dict", "start_node": "str", "end_node": "str"},
     )
     registry.add_tool(
-        "identify_central_hubs", graph_tool,
+        "identify_central_hubs",
+        graph_tool,
         description="Identify influential nodes using Eigenvector Centrality.",
         parameters={"adjacency_matrix": "list", "node_labels": "list"},
     )
     registry.add_tool(
-        "calculate_sequence_similarity", signal_tool,
+        "calculate_sequence_similarity",
+        signal_tool,
         description="Find similarity between time-series sequences using DTW.",
         parameters={"seq1": "list", "seq2": "list"},
     )
     registry.add_tool(
-        "detect_event_periodicity", signal_tool,
+        "detect_event_periodicity",
+        signal_tool,
         description="Identify dominant periodicities in numerical event logs using DFT.",
         parameters={"data": "list"},
     )
     registry.add_tool(
-        "map_stream_entropy", entropy_tool,
+        "map_stream_entropy",
+        entropy_tool,
         description="Map Shannon entropy across a byte-stream using a sliding window.",
         parameters={"stream": "list", "window_size": "int"},
     )
     registry.add_tool(
-        "analyze_obfuscation_score", entropy_tool,
+        "analyze_obfuscation_score",
+        entropy_tool,
         description="Detect obfuscated scripts using Hamming Weight and Compression complexity.",
         parameters={"content": "str"},
     )
     registry.add_tool(
-        "ingest_forensic_target", crawler_tool,
+        "ingest_forensic_target",
+        crawler_tool,
         description="Fetch a URL, extract clean prose, and generate stylometric fingerprints.",
         parameters={"url": "str"},
     )
     registry.add_tool(
-        "get_forensic_report", scorer_tool,
+        "get_forensic_report",
+        scorer_tool,
         description="Generate a high-fidelity forensic credibility report with visualization data.",
         parameters={"target_text": "str"},
     )
@@ -231,9 +258,7 @@ def register(
         return json.dumps(result, indent=2)
 
     @mcp.tool()
-    def analyze_authorship_pro(
-        request: AuthorshipProRequest, session_id: str | None = None
-    ) -> str:
+    def analyze_authorship_pro(request: AuthorshipProRequest, session_id: str | None = None) -> str:
         """Advanced probabilistic forensic matching using faststylometry."""
         if isinstance(request, dict):
             request = AuthorshipProRequest(**request)
@@ -245,9 +270,7 @@ def register(
         return json.dumps(result, indent=2)
 
     @mcp.tool()
-    def get_influence_score(
-        request: InfluenceRequest, session_id: str | None = None
-    ) -> str:
+    def get_influence_score(request: InfluenceRequest, session_id: str | None = None) -> str:
         """Calculate graph centrality for an entity in the knowledge graph."""
         if isinstance(request, dict):
             request = InfluenceRequest(**request)
@@ -259,9 +282,7 @@ def register(
         return json.dumps(result, indent=2)
 
     @mcp.tool()
-    def justify_claim(
-        request: JustifyRequest, session_id: str | None = None
-    ) -> str:
+    def justify_claim(request: JustifyRequest, session_id: str | None = None) -> str:
         """Perform an Epistemological Audit of a forensic claim."""
         if isinstance(request, dict):
             request = JustifyRequest(**request)
@@ -288,9 +309,7 @@ def register(
         return json.dumps(result, indent=2)
 
     @mcp.tool()
-    def autonomous_audit(
-        request: AutonomousAuditRequest, session_id: str | None = None
-    ) -> str:
+    def autonomous_audit(request: AutonomousAuditRequest, session_id: str | None = None) -> str:
         """Run an end-to-end automated forensic investigation."""
         logger.info(f"autonomous_audit called for case: {request.case_id}")
         sme_core.session_id = session_id
@@ -318,9 +337,7 @@ def register(
         return json.dumps(math_tool.calculate_cosine_similarity(freq_dict_1, freq_dict_2), indent=2)
 
     @mcp.tool()
-    def calculate_typo_distance(
-        word1: str, word2: str, session_id: str | None = None
-    ) -> str:
+    def calculate_typo_distance(word1: str, word2: str, session_id: str | None = None) -> str:
         """Identify fuzzy word matches using optimized Levenshtein distance."""
         math_tool.core.session_id = session_id
         return json.dumps(math_tool.calculate_typo_distance(word1, word2), indent=2)
@@ -334,9 +351,7 @@ def register(
         return json.dumps(math_tool.calculate_set_overlap(tokens1, tokens2), indent=2)
 
     @mcp.tool()
-    def calculate_tfidf(
-        tokenized_docs: list[list[str]], session_id: str | None = None
-    ) -> str:
+    def calculate_tfidf(tokenized_docs: list[list[str]], session_id: str | None = None) -> str:
         """Calculate term significance (TF-IDF) across a corpus of documents."""
         math_tool.core.session_id = session_id
         return json.dumps(math_tool.calculate_tfidf(tokenized_docs), indent=2)
@@ -356,9 +371,7 @@ def register(
         return json.dumps(math_tool.calculate_phonetic_hash(word), indent=2)
 
     @mcp.tool()
-    def audit_benford_distribution(
-        data: list[float], session_id: str | None = None
-    ) -> str:
+    def audit_benford_distribution(data: list[float], session_id: str | None = None) -> str:
         """Fraud detection using Benford's Law distribution analysis."""
         math_tool.core.session_id = session_id
         return json.dumps(math_tool.audit_benford_distribution(data), indent=2)
@@ -388,9 +401,7 @@ def register(
         return json.dumps(files_tool.verify_file_signature(file_path), indent=2)
 
     @mcp.tool()
-    def calculate_structural_complexity(
-        file_path: str, session_id: str | None = None
-    ) -> str:
+    def calculate_structural_complexity(file_path: str, session_id: str | None = None) -> str:
         """Calculate compression ratio as structural entropy proxy."""
         files_tool.core.session_id = session_id
         return json.dumps(files_tool.calculate_structural_complexity(file_path), indent=2)
@@ -398,17 +409,13 @@ def register(
     # --- Behavior tools ---
 
     @mcp.tool()
-    def calculate_burstiness(
-        timestamps: list[float], session_id: str | None = None
-    ) -> str:
+    def calculate_burstiness(timestamps: list[float], session_id: str | None = None) -> str:
         """Calculate temporal burstiness score."""
         behavior_tool.core.session_id = session_id
         return json.dumps(behavior_tool.calculate_burstiness(timestamps), indent=2)
 
     @mcp.tool()
-    def validate_luhn_checksum(
-        numeric_string: str, session_id: str | None = None
-    ) -> str:
+    def validate_luhn_checksum(numeric_string: str, session_id: str | None = None) -> str:
         """Validate numeric leakage via Luhn algorithm."""
         behavior_tool.core.session_id = session_id
         return json.dumps(behavior_tool.validate_luhn_checksum(numeric_string), indent=2)
@@ -447,9 +454,7 @@ def register(
         return json.dumps(signal_tool.calculate_sequence_similarity(seq1, seq2), indent=2)
 
     @mcp.tool()
-    def detect_event_periodicity(
-        data: list[float], session_id: str | None = None
-    ) -> str:
+    def detect_event_periodicity(data: list[float], session_id: str | None = None) -> str:
         """Identify dominant periodicities via DFT."""
         signal_tool.core.session_id = session_id
         return json.dumps(signal_tool.detect_event_periodicity(data), indent=2)
@@ -465,9 +470,7 @@ def register(
         return json.dumps(entropy_tool.map_stream_entropy(stream, window_size), indent=2)
 
     @mcp.tool()
-    def analyze_obfuscation_score(
-        content: str, session_id: str | None = None
-    ) -> str:
+    def analyze_obfuscation_score(content: str, session_id: str | None = None) -> str:
         """Detect obfuscated scripts using Hamming Weight and Compression complexity."""
         entropy_tool.core.session_id = session_id
         return json.dumps(entropy_tool.analyze_obfuscation_score(content), indent=2)

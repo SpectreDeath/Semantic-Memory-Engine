@@ -9,6 +9,7 @@ class StructuralComplexityTool:
     High ratio = Repetitive/Structured (text, logs).
     Low ratio = High Entropy (encrypted, compressed, or packed payloads).
     """
+
     __slots__ = ()
 
     def calculate(self, file_path: str) -> dict[str, Any]:
@@ -23,7 +24,7 @@ class StructuralComplexityTool:
 
             # For very large files, we sample the first 1MB to keep memory low
             sample_size = min(file_size, 1024 * 1024)
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 data = f.read(sample_size)
 
             compressed_data = zlib.compress(data)
@@ -39,10 +40,11 @@ class StructuralComplexityTool:
                 "original_sample_size": len(data),
                 "compressed_sample_size": comp_size,
                 "is_high_entropy": ratio > 0.85,
-                "status": "Success"
+                "status": "Success",
             }
         except Exception as e:
             return {"error": str(e), "status": "Error"}
+
 
 def calculate_structural_complexity(file_path: str) -> dict[str, Any]:
     """Standalone wrapper for structural complexity calculation."""

@@ -23,21 +23,25 @@ import numpy as np
 
 logger = logging.getLogger("SME.SocialIntelligence.SentimentAnalyzer")
 
+
 @dataclass
 class SentimentResult:
     """Result of sentiment analysis."""
+
     text: str
     sentiment_score: float  # -1.0 to 1.0 (negative to positive)
-    sentiment_label: str    # "negative", "neutral", "positive"
-    confidence: float       # 0.0 to 1.0
+    sentiment_label: str  # "negative", "neutral", "positive"
+    confidence: float  # 0.0 to 1.0
     language: str
     bias_indicators: list[str]
     entities: list[str]
     keywords: list[str]
 
+
 @dataclass
 class SentimentTrend:
     """Sentiment trend over time."""
+
     platform: str
     topic: str
     time_points: list[datetime]
@@ -46,14 +50,17 @@ class SentimentTrend:
     trend_direction: str  # "increasing", "decreasing", "stable"
     volatility: float
 
+
 @dataclass
 class SentimentCorrelation:
     """Cross-platform sentiment correlation."""
+
     platforms: list[str]
     correlation_matrix: dict[str, dict[str, float]]
     average_correlation: float
     outlier_platforms: list[str]
     correlation_strength: str  # "strong", "moderate", "weak"
+
 
 class SentimentAnalyzer:
     """
@@ -76,21 +83,52 @@ class SentimentAnalyzer:
         """Load bias detection lexicon."""
         return {
             "political_bias": [
-                "left-wing", "right-wing", "conservative", "liberal", "progressive",
-                "reactionary", "establishment", "mainstream", "alternative"
+                "left-wing",
+                "right-wing",
+                "conservative",
+                "liberal",
+                "progressive",
+                "reactionary",
+                "establishment",
+                "mainstream",
+                "alternative",
             ],
             "emotional_manipulation": [
-                "fear", "anger", "hate", "panic", "outrage", "indignation",
-                "disgust", "contempt", "loathing", "terror", "anxiety"
+                "fear",
+                "anger",
+                "hate",
+                "panic",
+                "outrage",
+                "indignation",
+                "disgust",
+                "contempt",
+                "loathing",
+                "terror",
+                "anxiety",
             ],
             "conspiracy_indicators": [
-                "they", "them", "the elite", "the establishment", "mainstream media",
-                "big pharma", "deep state", "globalists", "illuminati"
+                "they",
+                "them",
+                "the elite",
+                "the establishment",
+                "mainstream media",
+                "big pharma",
+                "deep state",
+                "globalists",
+                "illuminati",
             ],
             "absolutist_language": [
-                "always", "never", "everyone", "nobody", "completely", "totally",
-                "absolutely", "definitely", "certainly", "undoubtedly"
-            ]
+                "always",
+                "never",
+                "everyone",
+                "nobody",
+                "completely",
+                "totally",
+                "absolutely",
+                "definitely",
+                "certainly",
+                "undoubtedly",
+            ],
         }
 
     def _load_sentiment_lexicon(self) -> dict[str, float]:
@@ -99,20 +137,50 @@ class SentimentAnalyzer:
         # For now, we'll use a basic implementation
         return {
             # Positive words
-            "good": 0.5, "great": 0.8, "excellent": 0.9, "amazing": 0.8,
-            "wonderful": 0.7, "fantastic": 0.8, "love": 0.6, "like": 0.4,
-            "happy": 0.6, "joy": 0.7, "pleased": 0.5, "satisfied": 0.6,
-            "success": 0.7, "win": 0.6, "victory": 0.7, "triumph": 0.8,
-
+            "good": 0.5,
+            "great": 0.8,
+            "excellent": 0.9,
+            "amazing": 0.8,
+            "wonderful": 0.7,
+            "fantastic": 0.8,
+            "love": 0.6,
+            "like": 0.4,
+            "happy": 0.6,
+            "joy": 0.7,
+            "pleased": 0.5,
+            "satisfied": 0.6,
+            "success": 0.7,
+            "win": 0.6,
+            "victory": 0.7,
+            "triumph": 0.8,
             # Negative words
-            "bad": -0.5, "terrible": -0.8, "awful": -0.9, "horrible": -0.8,
-            "hate": -0.6, "dislike": -0.4, "angry": -0.6, "mad": -0.5,
-            "sad": -0.6, "depressed": -0.7, "unhappy": -0.5, "disappointed": -0.6,
-            "failure": -0.7, "lose": -0.6, "defeat": -0.7, "tragedy": -0.8,
-
+            "bad": -0.5,
+            "terrible": -0.8,
+            "awful": -0.9,
+            "horrible": -0.8,
+            "hate": -0.6,
+            "dislike": -0.4,
+            "angry": -0.6,
+            "mad": -0.5,
+            "sad": -0.6,
+            "depressed": -0.7,
+            "unhappy": -0.5,
+            "disappointed": -0.6,
+            "failure": -0.7,
+            "lose": -0.6,
+            "defeat": -0.7,
+            "tragedy": -0.8,
             # Neutral words (would be filtered out)
-            "the": 0.0, "and": 0.0, "or": 0.0, "but": 0.0, "is": 0.0,
-            "are": 0.0, "was": 0.0, "were": 0.0, "be": 0.0, "been": 0.0
+            "the": 0.0,
+            "and": 0.0,
+            "or": 0.0,
+            "but": 0.0,
+            "is": 0.0,
+            "are": 0.0,
+            "was": 0.0,
+            "were": 0.0,
+            "be": 0.0,
+            "been": 0.0,
         }
 
     def _initialize_entity_extractor(self):
@@ -120,32 +188,32 @@ class SentimentAnalyzer:
         # This would typically use a more sophisticated NER model
         # For now, we'll use regex patterns
         return {
-            "person": re.compile(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b'),
-            "organization": re.compile(r'\b(?:[A-Z][a-z]*\s*)+(?:Inc|Corp|Ltd|LLC|Co)\b'),
-            "location": re.compile(r'\b(?:[A-Z][a-z]+(?:\s+[A-Z][a-z]*)*)\b'),
-            "hashtag": re.compile(r'#\w+'),
-            "mention": re.compile(r'@\w+')
+            "person": re.compile(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b"),
+            "organization": re.compile(r"\b(?:[A-Z][a-z]*\s*)+(?:Inc|Corp|Ltd|LLC|Co)\b"),
+            "location": re.compile(r"\b(?:[A-Z][a-z]+(?:\s+[A-Z][a-z]*)*)\b"),
+            "hashtag": re.compile(r"#\w+"),
+            "mention": re.compile(r"@\w+"),
         }
 
     def _compile_bias_patterns(self) -> dict[str, re.Pattern]:
         """Compile regex patterns for bias detection."""
         return {
             "emotional_manipulation": re.compile(
-                r'\b(' + '|'.join(self.bias_lexicon["emotional_manipulation"]) + r')\b',
-                re.IGNORECASE
+                r"\b(" + "|".join(self.bias_lexicon["emotional_manipulation"]) + r")\b",
+                re.IGNORECASE,
             ),
             "conspiracy_indicators": re.compile(
-                r'\b(' + '|'.join(self.bias_lexicon["conspiracy_indicators"]) + r')\b',
-                re.IGNORECASE
+                r"\b(" + "|".join(self.bias_lexicon["conspiracy_indicators"]) + r")\b",
+                re.IGNORECASE,
             ),
             "absolutist_language": re.compile(
-                r'\b(' + '|'.join(self.bias_lexicon["absolutist_language"]) + r')\b',
-                re.IGNORECASE
-            )
+                r"\b(" + "|".join(self.bias_lexicon["absolutist_language"]) + r")\b", re.IGNORECASE
+            ),
         }
 
-    async def analyze_platform_sentiment(self, platform: str, content_data: dict,
-                                       topic: str) -> dict:
+    async def analyze_platform_sentiment(
+        self, platform: str, content_data: dict, topic: str
+    ) -> dict:
         """
         Analyze sentiment for content from a specific platform.
 
@@ -163,11 +231,7 @@ class SentimentAnalyzer:
             texts = [post.get("text", "") for post in posts]
 
             if not texts:
-                return {
-                    "platform": platform,
-                    "topic": topic,
-                    "error": "No content to analyze"
-                }
+                return {"platform": platform, "topic": topic, "error": "No content to analyze"}
 
             # Analyze each post
             sentiment_results = []
@@ -183,11 +247,7 @@ class SentimentAnalyzer:
 
         except Exception as e:
             logger.exception(f"Error analyzing platform sentiment for {platform}: {e}")
-            return {
-                "platform": platform,
-                "topic": topic,
-                "error": str(e)
-            }
+            return {"platform": platform, "topic": topic, "error": str(e)}
 
     async def analyze_content_sentiment(self, content: list[dict]) -> dict:
         """
@@ -213,7 +273,7 @@ class SentimentAnalyzer:
                     "average_sentiment": 0.0,
                     "sentiment_distribution": {"positive": 0, "neutral": 0, "negative": 0},
                     "confidence": 0.0,
-                    "total_analyzed": 0
+                    "total_analyzed": 0,
                 }
 
             # Calculate statistics
@@ -234,20 +294,22 @@ class SentimentAnalyzer:
                 "sentiment_distribution": {
                     "positive": positive_count,
                     "neutral": neutral_count,
-                    "negative": negative_count
+                    "negative": negative_count,
                 },
                 "confidence": average_confidence,
                 "total_analyzed": len(sentiment_results),
                 "details": [
                     {
-                        "text": result.text[:100] + "..." if len(result.text) > 100 else result.text,
+                        "text": result.text[:100] + "..."
+                        if len(result.text) > 100
+                        else result.text,
                         "sentiment_score": result.sentiment_score,
                         "sentiment_label": result.sentiment_label,
                         "confidence": result.confidence,
-                        "bias_indicators": result.bias_indicators
+                        "bias_indicators": result.bias_indicators,
                     }
                     for result in sentiment_results[:10]  # Limit to first 10 for summary
-                ]
+                ],
             }
 
         except Exception as e:
@@ -257,11 +319,12 @@ class SentimentAnalyzer:
                 "average_sentiment": 0.0,
                 "sentiment_distribution": {"positive": 0, "neutral": 0, "negative": 0},
                 "confidence": 0.0,
-                "total_analyzed": 0
+                "total_analyzed": 0,
             }
 
-    async def calculate_sentiment_correlation(self, platform1_data: dict,
-                                            platform2_data: dict) -> float:
+    async def calculate_sentiment_correlation(
+        self, platform1_data: dict, platform2_data: dict
+    ) -> float:
         """
         Calculate sentiment correlation between two platforms.
 
@@ -328,7 +391,7 @@ class SentimentAnalyzer:
                 timestamp = post.get("created_at", datetime.now())
                 if isinstance(timestamp, str):
                     try:
-                        timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                        timestamp = datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
                     except:
                         timestamp = datetime.now()
 
@@ -359,7 +422,7 @@ class SentimentAnalyzer:
                     "trend_direction": "stable",
                     "volatility": 0.0,
                     "correlation_with_volume": 0.0,
-                    "significant_changes": []
+                    "significant_changes": [],
                 }
 
             # Calculate trend direction
@@ -385,7 +448,7 @@ class SentimentAnalyzer:
                 "trend_direction": trend_direction,
                 "volatility": volatility,
                 "correlation_with_volume": volume_correlation,
-                "significant_changes": significant_changes
+                "significant_changes": significant_changes,
             }
 
         except Exception as e:
@@ -395,7 +458,7 @@ class SentimentAnalyzer:
                 "trend_direction": "stable",
                 "volatility": 0.0,
                 "correlation_with_volume": 0.0,
-                "significant_changes": []
+                "significant_changes": [],
             }
 
     # Private helper methods
@@ -440,7 +503,7 @@ class SentimentAnalyzer:
                 language=language,
                 bias_indicators=bias_indicators,
                 entities=entities,
-                keywords=keywords
+                keywords=keywords,
             )
 
         except Exception as e:
@@ -453,20 +516,24 @@ class SentimentAnalyzer:
                 language="unknown",
                 bias_indicators=[],
                 entities=[],
-                keywords=[]
+                keywords=[],
             )
 
     def _clean_text(self, text: str) -> str:
         """Clean and normalize text for analysis."""
         # Remove URLs
-        text = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', text)
+        text = re.sub(
+            r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+",
+            "",
+            text,
+        )
 
         # Remove mentions and hashtags (keep the text)
-        text = re.sub(r'@\w+', '', text)
-        text = re.sub(r'#\w+', '', text)
+        text = re.sub(r"@\w+", "", text)
+        text = re.sub(r"#\w+", "", text)
 
         # Remove extra whitespace
-        text = ' '.join(text.split())
+        text = " ".join(text.split())
 
         return text.lower()
 
@@ -474,7 +541,7 @@ class SentimentAnalyzer:
         """Detect language of text (simplified)."""
         # This would typically use a language detection library
         # For now, return 'en' as default
-        return 'en'
+        return "en"
 
     def _calculate_sentiment_score(self, text: str) -> float:
         """Calculate sentiment score using lexicon."""
@@ -484,7 +551,7 @@ class SentimentAnalyzer:
 
         for word in words:
             # Remove punctuation
-            clean_word = re.sub(r'[^\w]', '', word)
+            clean_word = re.sub(r"[^\w]", "", word)
             if clean_word in self.sentiment_lexicon:
                 total_score += self.sentiment_lexicon[clean_word]
                 word_count += 1
@@ -501,7 +568,9 @@ class SentimentAnalyzer:
     def _calculate_confidence(self, text: str, sentiment_score: float) -> float:
         """Calculate confidence in sentiment analysis."""
         words = text.split()
-        lexicon_matches = sum(1 for word in words if re.sub(r'[^\w]', '', word) in self.sentiment_lexicon)
+        lexicon_matches = sum(
+            1 for word in words if re.sub(r"[^\w]", "", word) in self.sentiment_lexicon
+        )
 
         if len(words) == 0:
             return 0.0
@@ -510,7 +579,7 @@ class SentimentAnalyzer:
         confidence = min(1.0, lexicon_matches / len(words))
 
         # Adjust based on sentiment score magnitude
-        confidence *= (0.5 + abs(sentiment_score) * 0.5)
+        confidence *= 0.5 + abs(sentiment_score) * 0.5
 
         return confidence
 
@@ -540,7 +609,25 @@ class SentimentAnalyzer:
         words = text.split()
 
         # Filter out common words
-        stop_words = {'the', 'and', 'or', 'but', 'is', 'are', 'was', 'were', 'be', 'been', 'to', 'of', 'in', 'for', 'on', 'with', 'by'}
+        stop_words = {
+            "the",
+            "and",
+            "or",
+            "but",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "to",
+            "of",
+            "in",
+            "for",
+            "on",
+            "with",
+            "by",
+        }
         keywords = [word for word in words if word not in stop_words and len(word) > 3]
 
         # Get unique keywords
@@ -552,15 +639,12 @@ class SentimentAnalyzer:
 
         return [word for word, freq in keyword_freq[:10]]  # Return top 10
 
-    def _aggregate_sentiment_results(self, results: list[SentimentResult],
-                                   platform: str, topic: str) -> dict:
+    def _aggregate_sentiment_results(
+        self, results: list[SentimentResult], platform: str, topic: str
+    ) -> dict:
         """Aggregate sentiment analysis results."""
         if not results:
-            return {
-                "platform": platform,
-                "topic": topic,
-                "error": "No results to aggregate"
-            }
+            return {"platform": platform, "topic": topic, "error": "No results to aggregate"}
 
         scores = [result.sentiment_score for result in results]
         confidences = [result.confidence for result in results]
@@ -577,7 +661,7 @@ class SentimentAnalyzer:
             "average_confidence": float(np.mean(confidences)),
             "bias_indicators": self._aggregate_bias_indicators(results),
             "top_entities": self._aggregate_entities(results),
-            "top_keywords": self._aggregate_keywords(results)
+            "top_keywords": self._aggregate_keywords(results),
         }
 
     def _aggregate_bias_indicators(self, results: list[SentimentResult]) -> dict[str, int]:
@@ -649,8 +733,9 @@ class SentimentAnalyzer:
         else:
             return "stable"
 
-    def _identify_significant_changes(self, scores: list[float],
-                                    time_points: list[datetime]) -> list[dict]:
+    def _identify_significant_changes(
+        self, scores: list[float], time_points: list[datetime]
+    ) -> list[dict]:
         """Identify significant changes in sentiment."""
         significant_changes = []
 
@@ -661,14 +746,16 @@ class SentimentAnalyzer:
         threshold = 0.3  # 30% change threshold
 
         for i in range(1, len(scores)):
-            change = scores[i] - scores[i-1]
+            change = scores[i] - scores[i - 1]
             if abs(change) > threshold:
-                significant_changes.append({
-                    "time": time_points[i],
-                    "change": change,
-                    "from": scores[i-1],
-                    "to": scores[i],
-                    "direction": "increase" if change > 0 else "decrease"
-                })
+                significant_changes.append(
+                    {
+                        "time": time_points[i],
+                        "change": change,
+                        "from": scores[i - 1],
+                        "to": scores[i],
+                        "direction": "increase" if change > 0 else "decrease",
+                    }
+                )
 
         return significant_changes

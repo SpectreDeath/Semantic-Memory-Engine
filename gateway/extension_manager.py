@@ -20,9 +20,10 @@ import json
 import logging
 import os
 import sys
-from jsonschema import validate, ValidationError
 from pathlib import Path
 from typing import Any, ClassVar, Optional
+
+from jsonschema import ValidationError, validate
 
 logger = logging.getLogger("lawnmower.extension_manager")
 
@@ -39,85 +40,95 @@ MANIFEST_SCHEMA = {
             "pattern": "^[a-z][a-z0-9_-]+$",
             "minLength": 3,
             "maxLength": 64,
-            "description": "Unique plugin identifier (lowercase, alphanumeric, hyphens)"
+            "description": "Unique plugin identifier (lowercase, alphanumeric, hyphens)",
         },
-        "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 128
-        },
+        "name": {"type": "string", "minLength": 1, "maxLength": 128},
         "version": {
             "type": "string",
             "pattern": "^\\d+\\.\\d+\\.\\d+$",
-            "description": "Semantic version (e.g., 1.0.0)"
+            "description": "Semantic version (e.g., 1.0.0)",
         },
-        "description": {
-            "type": "string",
-            "minLength": 10,
-            "maxLength": 1024
-        },
+        "description": {"type": "string", "minLength": 10, "maxLength": 1024},
         "entry_point": {
             "type": "string",
             "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*\\.py$",
             "default": "plugin.py",
-            "description": "Python file that contains register_extension()"
+            "description": "Python file that contains register_extension()",
         },
-        "author": {
-            "type": "string",
-            "maxLength": 256
-        },
-        "category": {
-            "type": "string",
-            "maxLength": 64
-        },
-        "dependencies": {
-            "type": "array",
-            "items": {"type": "string"},
-            "maxItems": 20
-        },
+        "author": {"type": "string", "maxLength": 256},
+        "category": {"type": "string", "maxLength": 64},
+        "dependencies": {"type": "array", "items": {"type": "string"}, "maxItems": 20},
         "permissions": {
             "type": "object",
             "properties": {
                 "network_access": {"type": "boolean", "default": False},
                 "filesystem_read": {"type": "boolean", "default": True},
                 "filesystem_write": {"type": "boolean", "default": False},
-                "subprocess": {"type": "boolean", "default": False}
+                "subprocess": {"type": "boolean", "default": False},
             },
-            "additionalProperties": False
+            "additionalProperties": False,
         },
         "tags": {
             "type": "array",
             "items": {"type": "string", "pattern": "^[a-z_-]+$"},
-            "maxItems": 10
-        }
+            "maxItems": 10,
+        },
     },
-    "additionalProperties": False
+    "additionalProperties": False,
 }
 
 # =============================================================================
 # Security Constants - Import blocking and sandbox enforcement
 # =============================================================================
-FORBIDDEN_IMPORTS: frozenset[str] = frozenset({
-    # System access - can be used to escape sandbox
-    "os", "sys", "ctypes", "subprocess", "shutil",
-    # Network - potential data exfiltration
-    "socket", "http", "urllib", "requests", "aiohttp",
-    # Execution - can spawn processes
-    "multiprocessing", "threading", "concurrent",
-    # Introspection (can be abused)
-    "inspect", "traceback", "pdb",
-    # Cryptography (potentially harmful)
-    "cryptography.hazmat",
-})
+FORBIDDEN_IMPORTS: frozenset[str] = frozenset(
+    {
+        # System access - can be used to escape sandbox
+        "os",
+        "sys",
+        "ctypes",
+        "subprocess",
+        "shutil",
+        # Network - potential data exfiltration
+        "socket",
+        "http",
+        "urllib",
+        "requests",
+        "aiohttp",
+        # Execution - can spawn processes
+        "multiprocessing",
+        "threading",
+        "concurrent",
+        # Introspection (can be abused)
+        "inspect",
+        "traceback",
+        "pdb",
+        # Cryptography (potentially harmful)
+        "cryptography.hazmat",
+    }
+)
 
-FORBIDDEN_BUILTINS: frozenset[str] = frozenset({
-    "open", "eval", "exec", "compile", "__import__",
-    "globals", "locals", "vars", "dir",
-})
+FORBIDDEN_BUILTINS: frozenset[str] = frozenset(
+    {
+        "open",
+        "eval",
+        "exec",
+        "compile",
+        "__import__",
+        "globals",
+        "locals",
+        "vars",
+        "dir",
+        "marshal",
+        "pickle",
+        "subprocess",
+        "pty",
+    }
+)
 
 
 class SecurityError(Exception):
     """Raised when a security violation is detected during extension loading."""
+
     pass
 
 
@@ -129,7 +140,7 @@ class ImportBlocker(importlib.abc.MetaPathFinder):
     by intercepting import statements and raising ImportError.
     """
 
-    _instance: ClassVar[Optional[ImportBlocker]] = None
+    _instance: ClassVar[ImportBlocker | None] = None
 
     def __init__(self, strict: bool = True):
         self.strict = strict
@@ -153,12 +164,7 @@ class ImportBlocker(importlib.abc.MetaPathFinder):
             self._installed = False
             logger.debug("ImportBlocker uninstalled")
 
-    def find_spec(
-        self,
-        fullname: str,
-        path,
-        target=None
-    ):
+    def find_spec(self, fullname: str, path, target=None):
         """Check if import should be blocked."""
         # Check direct match
         if fullname in self._blocked:
@@ -175,8 +181,6 @@ class ImportBlocker(importlib.abc.MetaPathFinder):
                     f"submodule of restricted module '{blocked}'"
                 )
 
-        return None
-
 
 class DefaultExtensionContext:
     """
@@ -191,11 +195,13 @@ class DefaultExtensionContext:
     def nexus(self):
         if self._nexus is None:
             from gateway.nexus_db import get_nexus
+
             self._nexus = get_nexus()
         return self._nexus
 
     def get_hsm(self):
         from gateway.hardware_security import get_hsm
+
         return get_hsm()
 
 
@@ -222,12 +228,7 @@ class ExtensionManager:
     See docs/EXTENSION_CONTRACT.md for full contract.
     """
 
-    def __init__(
-        self,
-        nexus_api: Any,
-        extensions_dir: str | None = None,
-        strict_mode: bool = True
-    ):
+    def __init__(self, nexus_api: Any, extensions_dir: str | None = None, strict_mode: bool = True):
         self.extensions_dir = self._resolve_secure_extensions_dir(extensions_dir)
         self.nexus_api = nexus_api if nexus_api is not None else DefaultExtensionContext()
         self.strict_mode = strict_mode
@@ -253,9 +254,7 @@ class ExtensionManager:
 
         # Prevent directory traversal - extensions must be within project
         if not resolved.startswith(project_root):
-            raise SecurityError(
-                f"Extensions directory must be within project root: {resolved}"
-            )
+            raise SecurityError(f"Extensions directory must be within project root: {resolved}")
 
         # Prevent symlinks (potential sandbox bypass)
         if os.path.islink(resolved):
@@ -333,7 +332,7 @@ class ExtensionManager:
                     self._failed_extensions.pop(item, None)
 
             except SecurityError as e:
-                logger.error(f"Security validation failed for {item}: {e}")
+                logger.exception(f"Security validation failed for {item}: {e}")
                 self._failed_extensions[item] = self._failed_extensions.get(item, 0) + 1
             except Exception as e:
                 logger.exception(f"Failed to load plugin from {plugin_path}: {e}")
@@ -341,10 +340,10 @@ class ExtensionManager:
 
         logger.info(f"ExtensionManager: Loaded {loaded_count} extensions securely")
 
-    def _validate_manifest(self, manifest_path: str) -> Optional[dict]:
+    def _validate_manifest(self, manifest_path: str) -> dict | None:
         """Validate manifest.json against strict schema."""
         try:
-            with open(manifest_path, "r", encoding="utf-8") as f:
+            with open(manifest_path, encoding="utf-8") as f:
                 manifest = json.load(f)
         except json.JSONDecodeError as e:
             raise SecurityError(f"Invalid JSON in manifest: {e}")
@@ -401,6 +400,7 @@ class ExtensionManager:
 
             # Validate BasePlugin contract
             from src.core.plugin_base import BasePlugin
+
             if not isinstance(plugin_instance, BasePlugin):
                 logger.warning(
                     f"Plugin {plugin_id} does not inherit from BasePlugin. "
@@ -418,11 +418,13 @@ class ExtensionManager:
             self.extensions[plugin_id] = {
                 "manifest": manifest,
                 "instance": plugin_instance,
-                "content_hash": content_hash
+                "content_hash": content_hash,
             }
             self._extension_hashes[plugin_id] = content_hash
 
-            logger.info(f"Loaded plugin: {plugin_id} v{manifest.get('version', '0.1')} (hash:{content_hash})")
+            logger.info(
+                f"Loaded plugin: {plugin_id} v{manifest.get('version', '0.1')} (hash:{content_hash})"
+            )
             return True
 
         except SecurityError:
@@ -444,8 +446,7 @@ class ExtensionManager:
 
         # Remove dangerous builtins
         for builtin_name in FORBIDDEN_BUILTINS:
-            if builtin_name in safe_builtins:
-                del safe_builtins[builtin_name]
+            safe_builtins.pop(builtin_name, None)
 
         return safe_builtins
 

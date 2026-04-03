@@ -38,9 +38,10 @@ os.makedirs(LOG_DIR, exist_ok=True)
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[logging.FileHandler(LOG_FILE, encoding="utf-8")]
+    handlers=[logging.FileHandler(LOG_FILE, encoding="utf-8")],
 )
 logger = logging.getLogger("Sentinel")
+
 
 def _emit(level: str, used: int, action: str | None = None):
     """Output JSON for telemetry consumption."""
@@ -48,13 +49,15 @@ def _emit(level: str, used: int, action: str | None = None):
         "ts": datetime.now(UTC).isoformat(),
         "level": level,
         "vram_used_mb": used,
-        "action": action
+        "action": action,
     }
     print(json.dumps(record), flush=True)
+
 
 def _get_vram():
     try:
         import pynvml
+
         pynvml.nvmlInit()
         handle = pynvml.nvmlDeviceGetHandleByIndex(0)
         mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
@@ -65,6 +68,7 @@ def _get_vram():
         logger.exception(f"NVML Error: {e}")
         return -1
 
+
 def _signal_offload():
     """Notify sidecar to move layers to System RAM."""
     logger.warning("VRAM high. Signaling Sidecar to OFFLOAD layers to System RAM.")
@@ -73,6 +77,7 @@ def _signal_offload():
             client.post(f"{SIDECAR_URL}/sentinel/offload", json={"vram_pressure": "high"})
     except Exception as e:
         logger.exception(f"Failed to signal sidecar: {e}")
+
 
 def _kill_sidecar():
     logger.critical("CRITICAL VRAM. Terminating sidecar.")
@@ -86,6 +91,7 @@ def _kill_sidecar():
                 os.kill(pid, signal.SIGTERM)
     except Exception as e:
         logger.exception(f"Kill failed: {e}")
+
 
 def main():
     logger.info("Sentinel Monitor v2.2.0 active.")
@@ -112,6 +118,7 @@ def main():
             _emit("INFO", used)
 
         time.sleep(POLL_INTERVAL_S)
+
 
 if __name__ == "__main__":
     main()

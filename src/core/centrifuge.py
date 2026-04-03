@@ -8,10 +8,12 @@ from src.core.utils import get_path
 
 mcp = FastMCP("Centrifuge")
 
+
 # Database path
 def get_current_db_path():
-    base_path = get_path('storage', 'db_path')
+    base_path = get_path("storage", "db_path")
     return get_tenant_db_path(base_path)
+
 
 def init_db():
     """Initializes the database schema."""
@@ -19,7 +21,7 @@ def init_db():
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    cursor.execute('''
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS sentiment_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -29,9 +31,9 @@ def init_db():
             pos REAL,
             compound REAL
         )
-    ''')
+    """)
 
-    cursor.execute('''
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS atomic_facts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             node_id TEXT UNIQUE,
@@ -39,9 +41,9 @@ def init_db():
             source_type TEXT DEFAULT 'AIFdb',
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    """)
 
-    cursor.execute('''
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS logical_links (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             source_node_id TEXT,
@@ -52,9 +54,9 @@ def init_db():
             FOREIGN KEY(source_node_id) REFERENCES atomic_facts(node_id),
             FOREIGN KEY(target_node_id) REFERENCES atomic_facts(node_id)
         )
-    ''')
+    """)
 
-    cursor.execute('''
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS source_provenance (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             source_id TEXT UNIQUE,
@@ -62,9 +64,10 @@ def init_db():
             trust_score REAL,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-    ''')
+    """)
     conn.commit()
     conn.close()
+
 
 @mcp.tool()
 def archive_sentiment(source_file: str, neg: float, neu: float, pos: float, compound: float) -> str:
@@ -73,15 +76,19 @@ def archive_sentiment(source_file: str, neg: float, neu: float, pos: float, comp
         db_path = get_current_db_path()
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        cursor.execute('''
+        cursor.execute(
+            """
             INSERT INTO sentiment_logs (source_file, neg, neu, pos, compound)
             VALUES (?, ?, ?, ?, ?)
-        ''', (source_file, neg, neu, pos, compound))
+        """,
+            (source_file, neg, neu, pos, compound),
+        )
         conn.commit()
         conn.close()
         return f"Archived: {source_file} (Compound: {compound})"
     except Exception as e:
         return f"Archive Error: {e!s}"
+
 
 @mcp.tool()
 def get_sentiment_trends(days: int = 7) -> str:
@@ -90,11 +97,14 @@ def get_sentiment_trends(days: int = 7) -> str:
         db_path = get_current_db_path()
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT timestamp, compound FROM sentiment_logs
             WHERE timestamp >= datetime('now', ?)
             ORDER BY timestamp ASC
-        ''', (f'-{days} days',))
+        """,
+            (f"-{days} days",),
+        )
         results = cursor.fetchall()
         conn.close()
 
@@ -105,6 +115,7 @@ def get_sentiment_trends(days: int = 7) -> str:
         return "\n".join(trend_summary)
     except Exception as e:
         return f"Query Error: {e!s}"
+
 
 if __name__ == "__main__":
     init_db()

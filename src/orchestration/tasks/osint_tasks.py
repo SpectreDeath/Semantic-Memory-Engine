@@ -14,6 +14,7 @@ def run_osint_scan(username):
     logger.info(f"🕵️ Scanning footprint for: {username}")
 
     from src.gathering.osint_toolkit import footprint_username, save_to_json
+
     results = footprint_username(username)
     save_to_json(results)
     return results

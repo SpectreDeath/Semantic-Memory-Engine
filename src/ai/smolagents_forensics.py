@@ -17,6 +17,7 @@ from smolagents import tools as tools_mod
 # Custom SME Tools for Smolagents
 # ============================================================================
 
+
 @tools_mod.tool
 def analyze_stylometry(text: str) -> str:
     """
@@ -32,12 +33,14 @@ def analyze_stylometry(text: str) -> str:
     words = text.split()
     unique_words = set(words)
 
-    return json.dumps({
-        "word_count": len(words),
-        "unique_words": len(unique_words),
-        "lexical_diversity": len(unique_words) / len(words) if words else 0,
-        "avg_word_length": sum(len(w) for w in words) / len(words) if words else 0,
-    })
+    return json.dumps(
+        {
+            "word_count": len(words),
+            "unique_words": len(unique_words),
+            "lexical_diversity": len(unique_words) / len(words) if words else 0,
+            "avg_word_length": sum(len(w) for w in words) / len(words) if words else 0,
+        }
+    )
 
 
 @tools_mod.tool
@@ -57,11 +60,13 @@ def check_source_trust(url: str) -> str:
     base_domain = url.split("/")[2] if "/" in url else url
     trust_level = "high" if any(ind in base_domain for ind in trust_indicators) else "medium"
 
-    return json.dumps({
-        "url": url,
-        "trust_level": trust_level,
-        "domain": base_domain,
-    })
+    return json.dumps(
+        {
+            "url": url,
+            "trust_level": trust_level,
+            "domain": base_domain,
+        }
+    )
 
 
 @tools_mod.tool
@@ -76,12 +81,14 @@ def extract_entities(text: str) -> str:
         JSON string with extracted entities
     """
     # Find potential entities (capitalized words)
-    entities = re.findall(r'\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b', text)
+    entities = re.findall(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b", text)
 
-    return json.dumps({
-        "entities": list(set(entities)),
-        "count": len(set(entities)),
-    })
+    return json.dumps(
+        {
+            "entities": list(set(entities)),
+            "count": len(set(entities)),
+        }
+    )
 
 
 @tools_mod.tool
@@ -114,11 +121,19 @@ def calculate_risk_score(indicators: list[str]) -> str:
                 detected.append(level)
                 break
 
-    return json.dumps({
-        "risk_score": score,
-        "risk_level": "critical" if score > 75 else "high" if score > 50 else "medium" if score > 25 else "low",
-        "indicators_detected": detected,
-    })
+    return json.dumps(
+        {
+            "risk_score": score,
+            "risk_level": "critical"
+            if score > 75
+            else "high"
+            if score > 50
+            else "medium"
+            if score > 25
+            else "low",
+            "indicators_detected": detected,
+        }
+    )
 
 
 # ============================================================================
@@ -157,6 +172,7 @@ code_agent = smolagents.CodeAgent(
 # ============================================================================
 # SME Integration Functions
 # ============================================================================
+
 
 def run_forensic_investigation(query: str) -> str:
     """
@@ -212,4 +228,6 @@ if __name__ == "__main__":
     # print(result)
 
     print("Smolagents forensic agent configured.")
-    print("Tools available: analyze_stylometry, check_source_trust, extract_entities, calculate_risk_score")
+    print(
+        "Tools available: analyze_stylometry, check_source_trust, extract_entities, calculate_risk_score"
+    )

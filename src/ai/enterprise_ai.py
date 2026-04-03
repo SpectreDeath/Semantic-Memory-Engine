@@ -23,18 +23,22 @@ from sklearn.preprocessing import StandardScaler
 
 logger = logging.getLogger("SME.EnterpriseAI")
 
+
 @dataclass
 class PerformanceMetric:
     """Represents a performance metric for AI analysis."""
+
     timestamp: datetime
     extension_id: str
     metric_type: str
     value: float
     context: dict[str, Any]
 
+
 @dataclass
 class AnomalyDetectionResult:
     """Result of anomaly detection analysis."""
+
     extension_id: str
     anomaly_score: float
     is_anomaly: bool
@@ -42,15 +46,18 @@ class AnomalyDetectionResult:
     recommended_action: str
     confidence: float
 
+
 @dataclass
 class ExtensionRecommendation:
     """AI-powered extension recommendation."""
+
     extension_id: str
     reason: str
     priority: str  # HIGH, MEDIUM, LOW
     confidence: float
     expected_impact: dict[str, Any]
     dependencies: list[str]
+
 
 class EnterpriseAIManager:
     """
@@ -118,8 +125,9 @@ class EnterpriseAIManager:
                 logger.exception(f"Error in AI background loop: {e}")
                 time.sleep(60)  # Wait 1 minute before retrying
 
-    def collect_performance_metrics(self, extension_id: str, metrics: dict[str, float],
-                                  context: dict[str, Any] | None = None):
+    def collect_performance_metrics(
+        self, extension_id: str, metrics: dict[str, float], context: dict[str, Any] | None = None
+    ):
         """Collect performance metrics for AI analysis."""
         context = context or {}
 
@@ -129,7 +137,7 @@ class EnterpriseAIManager:
                 extension_id=extension_id,
                 metric_type=metric_type,
                 value=value,
-                context=context
+                context=context,
             )
             self.metrics_history.append(metric)
 
@@ -150,13 +158,15 @@ class EnterpriseAIManager:
             extensions = []
 
             for metric in self.metrics_history[-1000:]:  # Last 1000 metrics
-                features.append([
-                    metric.value,
-                    metric.timestamp.hour,
-                    metric.timestamp.weekday(),
-                    hash(metric.extension_id) % 1000,
-                    hash(metric.metric_type) % 1000
-                ])
+                features.append(
+                    [
+                        metric.value,
+                        metric.timestamp.hour,
+                        metric.timestamp.weekday(),
+                        hash(metric.extension_id) % 1000,
+                        hash(metric.metric_type) % 1000,
+                    ]
+                )
                 extensions.append(metric.extension_id)
 
             if not features:
@@ -174,7 +184,9 @@ class EnterpriseAIManager:
                 predictions = self.anomaly_detector.predict(scaled_features)
 
                 # Process anomalies
-                for i, (score, is_anomaly) in enumerate(zip(anomaly_scores, predictions, strict=False)):
+                for i, (score, is_anomaly) in enumerate(
+                    zip(anomaly_scores, predictions, strict=False)
+                ):
                     if is_anomaly == -1:  # Anomaly detected
                         extension_id = extensions[i]
                         anomaly_result = self._analyze_anomaly(extension_id, score, features[i])
@@ -183,7 +195,9 @@ class EnterpriseAIManager:
         except Exception as e:
             logger.exception(f"Error in anomaly detection: {e}")
 
-    def _analyze_anomaly(self, extension_id: str, score: float, features: list[float]) -> AnomalyDetectionResult:
+    def _analyze_anomaly(
+        self, extension_id: str, score: float, features: list[float]
+    ) -> AnomalyDetectionResult:
         """Analyze detected anomaly and determine type and action."""
         # Determine anomaly type based on features
         anomaly_type = "PERFORMANCE_DEGRADATION"
@@ -206,13 +220,15 @@ class EnterpriseAIManager:
             is_anomaly=True,
             anomaly_type=anomaly_type,
             recommended_action=recommended_action,
-            confidence=confidence
+            confidence=confidence,
         )
 
     def _handle_anomaly(self, anomaly: AnomalyDetectionResult):
         """Handle detected anomaly with appropriate action."""
-        logger.warning(f"Anomaly detected: {anomaly.extension_id} - {anomaly.anomaly_type} "
-                      f"(confidence: {anomaly.confidence:.2f})")
+        logger.warning(
+            f"Anomaly detected: {anomaly.extension_id} - {anomaly.anomaly_type} "
+            f"(confidence: {anomaly.confidence:.2f})"
+        )
 
         # Trigger alert
         self._trigger_anomaly_alert(anomaly)
@@ -228,7 +244,7 @@ class EnterpriseAIManager:
             "anomaly_type": anomaly.anomaly_type,
             "confidence": anomaly.confidence,
             "recommended_action": anomaly.recommended_action,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
 
         # Send to alert system (could be webhook, email, etc.)
@@ -294,99 +310,103 @@ class EnterpriseAIManager:
 
         # Generate recommendations based on analysis
         for ext_id, perf_data in performance_analysis.items():
-            if perf_data['avg_response_time'] > 1.0:
-                recommendations.append(ExtensionRecommendation(
-                    extension_id=ext_id,
-                    reason="High response time detected",
-                    priority="HIGH",
-                    confidence=0.8,
-                    expected_impact={"response_time_improvement": "30-50%"},
-                    dependencies=[]
-                ))
+            if perf_data["avg_response_time"] > 1.0:
+                recommendations.append(
+                    ExtensionRecommendation(
+                        extension_id=ext_id,
+                        reason="High response time detected",
+                        priority="HIGH",
+                        confidence=0.8,
+                        expected_impact={"response_time_improvement": "30-50%"},
+                        dependencies=[],
+                    )
+                )
 
-            if perf_data['error_rate'] > 0.05:
-                recommendations.append(ExtensionRecommendation(
-                    extension_id=ext_id,
-                    reason="High error rate detected",
-                    priority="HIGH",
-                    confidence=0.9,
-                    expected_impact={"error_reduction": "60-80%"},
-                    dependencies=[]
-                ))
+            if perf_data["error_rate"] > 0.05:
+                recommendations.append(
+                    ExtensionRecommendation(
+                        extension_id=ext_id,
+                        reason="High error rate detected",
+                        priority="HIGH",
+                        confidence=0.9,
+                        expected_impact={"error_reduction": "60-80%"},
+                        dependencies=[],
+                    )
+                )
 
         # Add usage-based recommendations
         for ext_id, usage_data in usage_analysis.items():
-            if usage_data['utilization'] < 0.1:
-                recommendations.append(ExtensionRecommendation(
-                    extension_id=ext_id,
-                    reason="Low utilization detected",
-                    priority="MEDIUM",
-                    confidence=0.7,
-                    expected_impact={"resource_savings": "40-60%"},
-                    dependencies=[]
-                ))
+            if usage_data["utilization"] < 0.1:
+                recommendations.append(
+                    ExtensionRecommendation(
+                        extension_id=ext_id,
+                        reason="Low utilization detected",
+                        priority="MEDIUM",
+                        confidence=0.7,
+                        expected_impact={"resource_savings": "40-60%"},
+                        dependencies=[],
+                    )
+                )
 
         return recommendations
 
     def _analyze_performance_patterns(self) -> dict[str, dict[str, float]]:
         """Analyze performance patterns across extensions."""
-        performance_data = defaultdict(lambda: {
-            'avg_response_time': 0.0,
-            'error_rate': 0.0,
-            'throughput': 0.0,
-            'count': 0
-        })
+        performance_data = defaultdict(
+            lambda: {"avg_response_time": 0.0, "error_rate": 0.0, "throughput": 0.0, "count": 0}
+        )
 
         # Analyze recent metrics
-        recent_metrics = [m for m in self.metrics_history
-                         if m.timestamp > datetime.now() - timedelta(hours=1)]
+        recent_metrics = [
+            m for m in self.metrics_history if m.timestamp > datetime.now() - timedelta(hours=1)
+        ]
 
         for metric in recent_metrics:
             ext_data = performance_data[metric.extension_id]
-            ext_data['count'] += 1
+            ext_data["count"] += 1
 
-            if metric.metric_type == 'response_time':
-                ext_data['avg_response_time'] += metric.value
-            elif metric.metric_type == 'error_rate':
-                ext_data['error_rate'] += metric.value
-            elif metric.metric_type == 'throughput':
-                ext_data['throughput'] += metric.value
+            if metric.metric_type == "response_time":
+                ext_data["avg_response_time"] += metric.value
+            elif metric.metric_type == "error_rate":
+                ext_data["error_rate"] += metric.value
+            elif metric.metric_type == "throughput":
+                ext_data["throughput"] += metric.value
 
         # Calculate averages
         for data in performance_data.values():
-            if data['count'] > 0:
-                data['avg_response_time'] /= data['count']
-                data['error_rate'] /= data['count']
-                data['throughput'] /= data['count']
+            if data["count"] > 0:
+                data["avg_response_time"] /= data["count"]
+                data["error_rate"] /= data["count"]
+                data["throughput"] /= data["count"]
 
         return dict(performance_data)
 
     def _analyze_usage_patterns(self) -> dict[str, dict[str, float]]:
         """Analyze usage patterns across extensions."""
-        usage_data = defaultdict(lambda: {
-            'utilization': 0.0,
-            'peak_usage': 0.0,
-            'avg_usage': 0.0,
-            'count': 0
-        })
+        usage_data = defaultdict(
+            lambda: {"utilization": 0.0, "peak_usage": 0.0, "avg_usage": 0.0, "count": 0}
+        )
 
         # Analyze recent usage metrics
-        usage_metrics = [m for m in self.metrics_history
-                        if m.metric_type in ['cpu_usage', 'memory_usage', 'disk_usage']
-                        and m.timestamp > datetime.now() - timedelta(hours=1)]
+        usage_metrics = [
+            m
+            for m in self.metrics_history
+            if m.metric_type in ["cpu_usage", "memory_usage", "disk_usage"]
+            and m.timestamp > datetime.now() - timedelta(hours=1)
+        ]
 
         for metric in usage_metrics:
             ext_data = usage_data[metric.extension_id]
-            ext_data['count'] += 1
-            ext_data['utilization'] += metric.value
+            ext_data["count"] += 1
+            ext_data["utilization"] += metric.value
 
-            ext_data['peak_usage'] = max(ext_data['peak_usage'], metric.value)
+            ext_data["peak_usage"] = max(ext_data["peak_usage"], metric.value)
 
         # Calculate averages
         for data in usage_data.values():
-            if data['count'] > 0:
-                data['utilization'] /= data['count']
-                data['avg_usage'] = data['utilization']
+            if data["count"] > 0:
+                data["utilization"] /= data["count"]
+                data["avg_usage"] = data["utilization"]
 
         return dict(usage_data)
 
@@ -407,7 +427,9 @@ class EnterpriseAIManager:
 
     def _apply_optimization(self, recommendation: ExtensionRecommendation):
         """Apply a specific optimization recommendation."""
-        logger.info(f"Applying optimization for {recommendation.extension_id}: {recommendation.reason}")
+        logger.info(
+            f"Applying optimization for {recommendation.extension_id}: {recommendation.reason}"
+        )
 
         # Implementation would integrate with extension manager
         # to apply specific optimizations
@@ -440,8 +462,7 @@ class EnterpriseAIManager:
         security_issues = []
 
         # Analyze access patterns
-        access_metrics = [m for m in self.metrics_history
-                         if m.metric_type == 'access_count']
+        access_metrics = [m for m in self.metrics_history if m.metric_type == "access_count"]
 
         # Detect unusual access patterns
         if len(access_metrics) > 100:
@@ -452,36 +473,44 @@ class EnterpriseAIManager:
             # Flag unusual access patterns
             for metric in access_metrics[-50:]:  # Last 50 access metrics
                 if metric.value > avg_access + (3 * std_access):
-                    security_issues.append({
-                        'type': 'UNUSUAL_ACCESS_PATTERN',
-                        'extension_id': metric.extension_id,
-                        'severity': 'HIGH',
-                        'value': metric.value,
-                        'threshold': avg_access + (3 * std_access)
-                    })
+                    security_issues.append(
+                        {
+                            "type": "UNUSUAL_ACCESS_PATTERN",
+                            "extension_id": metric.extension_id,
+                            "severity": "HIGH",
+                            "value": metric.value,
+                            "threshold": avg_access + (3 * std_access),
+                        }
+                    )
 
         return security_issues
 
-    def _generate_security_recommendations(self, security_issues: list[dict[str, Any]]) -> list[ExtensionRecommendation]:
+    def _generate_security_recommendations(
+        self, security_issues: list[dict[str, Any]]
+    ) -> list[ExtensionRecommendation]:
         """Generate security recommendations based on detected issues."""
         recommendations = []
 
         for issue in security_issues:
-            if issue['type'] == 'UNUSUAL_ACCESS_PATTERN':
-                recommendations.append(ExtensionRecommendation(
-                    extension_id=issue['extension_id'],
-                    reason=f"Unusual access pattern detected: {issue['value']:.2f} > {issue['threshold']:.2f}",
-                    priority="HIGH",
-                    confidence=0.9,
-                    expected_impact={"security_improvement": "HIGH"},
-                    dependencies=[]
-                ))
+            if issue["type"] == "UNUSUAL_ACCESS_PATTERN":
+                recommendations.append(
+                    ExtensionRecommendation(
+                        extension_id=issue["extension_id"],
+                        reason=f"Unusual access pattern detected: {issue['value']:.2f} > {issue['threshold']:.2f}",
+                        priority="HIGH",
+                        confidence=0.9,
+                        expected_impact={"security_improvement": "HIGH"},
+                        dependencies=[],
+                    )
+                )
 
         return recommendations
 
     def _apply_security_fix(self, recommendation: ExtensionRecommendation):
         """Apply a security fix recommendation."""
-        logger.warning(f"Applying security fix for {recommendation.extension_id}: {recommendation.reason}")
+        logger.warning(
+            f"Applying security fix for {recommendation.extension_id}: {recommendation.reason}"
+        )
 
         # Implementation would integrate with security systems
         # to apply specific security fixes
@@ -514,7 +543,7 @@ class EnterpriseAIManager:
             "anomaly_detection_status": "ACTIVE" if self.is_trained else "TRAINING",
             "recommendations_count": len(self.get_recommendations()),
             "last_optimization": datetime.now().isoformat(),
-            "performance_trends": self._calculate_performance_trends()
+            "performance_trends": self._calculate_performance_trends(),
         }
         return insights
 
@@ -524,8 +553,7 @@ class EnterpriseAIManager:
             return {"status": "INSUFFICIENT_DATA"}
 
         # Calculate trends for key metrics
-        response_times = [m.value for m in self.metrics_history
-                         if m.metric_type == 'response_time']
+        response_times = [m.value for m in self.metrics_history if m.metric_type == "response_time"]
 
         if response_times:
             avg_response_time = np.mean(response_times)
@@ -536,7 +564,7 @@ class EnterpriseAIManager:
         return {
             "response_time_trend": response_time_trend,
             "avg_response_time": avg_response_time if response_times else 0.0,
-            "data_points_analyzed": len(self.metrics_history)
+            "data_points_analyzed": len(self.metrics_history),
         }
 
     def add_optimization_strategy(self, strategy_name: str, strategy_func: Callable):
@@ -557,7 +585,7 @@ class EnterpriseAIManager:
             "recommendations_count": len(self.recommendations_cache),
             "optimization_strategies": list(self.optimization_strategies.keys()),
             "security_policies": list(self.security_policies.keys()),
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
 

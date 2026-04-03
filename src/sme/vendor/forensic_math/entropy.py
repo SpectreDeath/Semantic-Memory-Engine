@@ -32,6 +32,7 @@ def calculate_entropy_divergence(p: list[float] | np.ndarray, q: list[float] | n
     # KL Divergence formula: Sum( P(i) * log(P(i) / Q(i)) )
     return float(np.sum(p * np.log(p / q)))
 
+
 def calculate_shannon_entropy(p: list[float] | np.ndarray) -> float:
     """
     Calculates the Shannon Entropy of a distribution.

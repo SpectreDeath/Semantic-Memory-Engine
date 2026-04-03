@@ -11,6 +11,7 @@ from src.core.redactor import Redactor
 
 logger = logging.getLogger(__name__)
 
+
 class FederationGate:
     """
     Final security layer before data leaves the local node.

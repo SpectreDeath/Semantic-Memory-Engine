@@ -34,6 +34,7 @@ from urllib.parse import urlparse
 try:
     from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig
     from crawl4ai.content_filter_strategy import PruningContentFilter
+
     CRAWL4AI_AVAILABLE = True
 except ImportError:
     CRAWL4AI_AVAILABLE = False
@@ -78,16 +79,13 @@ class HarvesterSpider:
         # PruningContentFilter removes non-essential elements
         # threshold=0.45: Keep content with >45% semantic density
         # min_word_count=50: Discard sections with <50 words
-        self.content_filter = PruningContentFilter(
-            threshold=0.45,
-            min_word_count=50
-        )
+        self.content_filter = PruningContentFilter(threshold=0.45, min_word_count=50)
 
         # Crawler configuration for optimal compression
         self.run_config = CrawlerRunConfig(
             content_filter=self.content_filter,
             word_count_threshold=100,  # Skip pages with <100 words
-            cache_mode="BYPASS"  # Always fresh (don't rely on browser cache)
+            cache_mode="BYPASS",  # Always fresh (don't rely on browser cache)
         )
 
         logger.info("🕸️ HarvesterSpider initialized (Crawl4AI + PruningContentFilter)")
@@ -128,12 +126,12 @@ class HarvesterSpider:
                 url=url,
                 clean_markdown=clean_md,
                 metadata={
-                    'title': result.metadata.get('title', url),
-                    'description': result.metadata.get('description', ''),
-                    'word_count': len(clean_md.split()),
-                    'has_js': self._detect_js(result.html),
-                    'capture_time_ms': result.response_time * 1000
-                }
+                    "title": result.metadata.get("title", url),
+                    "description": result.metadata.get("description", ""),
+                    "word_count": len(clean_md.split()),
+                    "has_js": self._detect_js(result.html),
+                    "capture_time_ms": result.response_time * 1000,
+                },
             )
 
             logger.info(f"✅ Captured: {url} | ID: {capture_id} | {len(clean_md.split())} words")
@@ -165,12 +163,7 @@ class HarvesterSpider:
             ])
             print(f"✅ Captured {results['captured']} pages")
         """
-        results = {
-            'captured': 0,
-            'failed': 0,
-            'captures': [],
-            'total_words': 0
-        }
+        results = {"captured": 0, "failed": 0, "captures": [], "total_words": 0}
 
         try:
             # Run captures concurrently (limited by system resources)
@@ -179,13 +172,15 @@ class HarvesterSpider:
 
             for url, (capture_id, markdown) in zip(urls, responses, strict=False):
                 if capture_id:
-                    results['captured'] += 1
-                    results['captures'].append((url, capture_id, markdown))
-                    results['total_words'] += len(markdown.split()) if markdown else 0
+                    results["captured"] += 1
+                    results["captures"].append((url, capture_id, markdown))
+                    results["total_words"] += len(markdown.split()) if markdown else 0
                 else:
-                    results['failed'] += 1
+                    results["failed"] += 1
 
-            logger.info(f"✅ Batch complete: {results['captured']} captured, {results['failed']} failed")
+            logger.info(
+                f"✅ Batch complete: {results['captured']} captured, {results['failed']} failed"
+            )
             return results
 
         except Exception as e:
@@ -214,24 +209,27 @@ class HarvesterSpider:
             parsed = urlparse(url)
             domain = parsed.netloc
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT OR REPLACE INTO raw_content
                 (url, domain, markdown_content, extracted_schema,
                  content_type, js_required, timestamp, processed_by_loom,
                  source_quality, fetch_method)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                url,
-                domain,
-                clean_markdown,
-                __import__('json').dumps(metadata),
-                'article',  # Content type (can be refined)
-                1 if metadata.get('has_js') else 0,
-                datetime.now().isoformat(),
-                0,  # Not processed by Loom yet
-                self._score_quality(clean_markdown),
-                'crawl4ai'
-            ))
+            """,
+                (
+                    url,
+                    domain,
+                    clean_markdown,
+                    __import__("json").dumps(metadata),
+                    "article",  # Content type (can be refined)
+                    1 if metadata.get("has_js") else 0,
+                    datetime.now().isoformat(),
+                    0,  # Not processed by Loom yet
+                    self._score_quality(clean_markdown),
+                    "crawl4ai",
+                ),
+            )
 
             conn.commit()
             capture_id = cursor.lastrowid
@@ -278,7 +276,7 @@ class HarvesterSpider:
         score += min(30, word_count // 100)
 
         # Structure indicates quality
-        headers = markdown.count('#')
+        headers = markdown.count("#")
         score += min(20, headers)
 
         return max(0, min(100, score))
@@ -286,7 +284,10 @@ class HarvesterSpider:
     def _detect_js(self, html: str) -> bool:
         """Detect if page has significant JavaScript."""
         import re
-        return bool(re.search(r'<script|async|defer|fetch|XMLHttpRequest|React|Vue|Angular', html, re.I))
+
+        return bool(
+            re.search(r"<script|async|defer|fetch|XMLHttpRequest|React|Vue|Angular", html, re.I)
+        )
 
     def get_unprocessed_content(self, limit: int = 50) -> list:
         """
@@ -304,14 +305,17 @@ class HarvesterSpider:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT url, markdown_content, id
                 FROM raw_content
                 WHERE processed_by_loom = 0
                 AND source_quality >= 70
                 ORDER BY source_quality DESC, timestamp DESC
                 LIMIT ?
-            """, (limit,))
+            """,
+                (limit,),
+            )
 
             results = [dict(row) for row in cursor.fetchall()]
             conn.close()
@@ -328,11 +332,14 @@ class HarvesterSpider:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 UPDATE raw_content
                 SET processed_by_loom = 1
                 WHERE url = ?
-            """, (url,))
+            """,
+                (url,),
+            )
 
             conn.commit()
             conn.close()
@@ -364,11 +371,11 @@ class HarvesterSpider:
             conn.close()
 
             return {
-                'total_captured': total,
-                'processed_by_loom': processed,
-                'pending': total - processed,
-                'avg_quality': avg_quality,
-                'storage_mb': total_bytes / (1024 * 1024)
+                "total_captured": total,
+                "processed_by_loom": processed,
+                "pending": total - processed,
+                "avg_quality": avg_quality,
+                "storage_mb": total_bytes / (1024 * 1024),
             }
 
         except Exception as e:
@@ -380,47 +387,52 @@ class HarvesterSpider:
 # MCP Tool Interface
 # ============================================================================
 
+
 async def harvest_url(url: str) -> str:
     """MCP Tool: Capture single URL."""
     import json
+
     spider = HarvesterSpider()
     capture_id, markdown = await spider.capture_site(url)
 
     if capture_id:
-        return json.dumps({
-            'status': 'success',
-            'capture_id': capture_id,
-            'words': len(markdown.split()),
-            'preview': markdown[:300]
-        })
+        return json.dumps(
+            {
+                "status": "success",
+                "capture_id": capture_id,
+                "words": len(markdown.split()),
+                "preview": markdown[:300],
+            }
+        )
     else:
-        return json.dumps({'status': 'error', 'message': 'Capture failed'})
+        return json.dumps({"status": "error", "message": "Capture failed"})
 
 
 async def harvest_batch(urls: list) -> str:
     """MCP Tool: Capture multiple URLs."""
     import json
+
     spider = HarvesterSpider()
     results = await spider.batch_capture(urls)
 
-    return json.dumps({
-        'status': 'success',
-        'captured': results['captured'],
-        'failed': results['failed'],
-        'total_words': results['total_words']
-    })
+    return json.dumps(
+        {
+            "status": "success",
+            "captured": results["captured"],
+            "failed": results["failed"],
+            "total_words": results["total_words"],
+        }
+    )
 
 
 def harvest_stats() -> str:
     """MCP Tool: Get statistics."""
     import json
+
     spider = HarvesterSpider()
     stats = spider.get_stats()
 
-    return json.dumps({
-        'status': 'success',
-        **stats
-    })
+    return json.dumps({"status": "success", **stats})
 
 
 # ============================================================================
@@ -428,6 +440,7 @@ def harvest_stats() -> str:
 # ============================================================================
 
 if __name__ == "__main__":
+
     async def demo():
         """Demonstrate HarvesterSpider workflow."""
         spider = HarvesterSpider()

@@ -15,15 +15,15 @@ from pathlib import Path
 from typing import Any
 
 # Configure logging for the forensic intelligence reporter
-logger = logging.getLogger('nur.forensic_intelligence_reporter')
+logger = logging.getLogger("nur.forensic_intelligence_reporter")
 logger.setLevel(logging.INFO)
 
 # Create file handler for forensic intelligence events
-forensic_handler = logging.FileHandler('forensic_intelligence_events.log')
+forensic_handler = logging.FileHandler("forensic_intelligence_events.log")
 forensic_handler.setLevel(logging.INFO)
 
 # Create formatter and add it to handler
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 forensic_handler.setFormatter(formatter)
 
 # Add handler to logger
@@ -32,6 +32,7 @@ logger.addHandler(forensic_handler)
 
 class IntelligenceBucket(Enum):
     """Intelligence categorization buckets based on 2026 signatures."""
+
     COMMERCIAL_SAFE = "Bucket A: Commercial/Safe (OpenAI/Google/Anthropic)"
     OPEN_SOURCE_UNCONSTRAINED = "Bucket B: Open-Source/Unconstrained (Llama/Mistral)"
     HUMAN_AUTHORED = "Bucket C: Human-Authored (High Diversity)"
@@ -41,6 +42,7 @@ class IntelligenceBucket(Enum):
 @dataclass
 class ForensicAnalysis:
     """Complete forensic analysis result."""
+
     text_sample: str
     behavior_audit_results: dict[str, Any]
     provenance_profiler_results: dict[str, Any]
@@ -66,47 +68,47 @@ class ForensicIntelligenceReporter:
         # Intelligence categorization thresholds based on 2026 signatures
         self.bucket_thresholds = {
             IntelligenceBucket.COMMERCIAL_SAFE: {
-                'max_sentiment_volatility': 0.3,
-                'min_lexical_diversity': 0.7,
-                'max_emphatic_qualifiers': 1,
-                'max_non_contracted_denials': 1,
-                'max_synthetic_repetitiveness': 0.3,
-                'min_god_term_density': 0.02,
-                'max_god_term_density': 0.08,
-                'min_distance_markers': 0,
-                'max_distance_markers': 2
+                "max_sentiment_volatility": 0.3,
+                "min_lexical_diversity": 0.7,
+                "max_emphatic_qualifiers": 1,
+                "max_non_contracted_denials": 1,
+                "max_synthetic_repetitiveness": 0.3,
+                "min_god_term_density": 0.02,
+                "max_god_term_density": 0.08,
+                "min_distance_markers": 0,
+                "max_distance_markers": 2,
             },
             IntelligenceBucket.OPEN_SOURCE_UNCONSTRAINED: {
-                'max_sentiment_volatility': 0.6,
-                'min_lexical_diversity': 0.5,
-                'max_emphatic_qualifiers': 3,
-                'max_non_contracted_denials': 3,
-                'max_synthetic_repetitiveness': 0.5,
-                'min_god_term_density': 0.01,
-                'max_god_term_density': 0.15,
-                'min_distance_markers': 0,
-                'max_distance_markers': 5
+                "max_sentiment_volatility": 0.6,
+                "min_lexical_diversity": 0.5,
+                "max_emphatic_qualifiers": 3,
+                "max_non_contracted_denials": 3,
+                "max_synthetic_repetitiveness": 0.5,
+                "min_god_term_density": 0.01,
+                "max_god_term_density": 0.15,
+                "min_distance_markers": 0,
+                "max_distance_markers": 5,
             },
             IntelligenceBucket.HUMAN_AUTHORED: {
-                'max_sentiment_volatility': 0.4,
-                'min_lexical_diversity': 0.8,
-                'max_emphatic_qualifiers': 2,
-                'max_non_contracted_denials': 2,
-                'max_synthetic_repetitiveness': 0.2,
-                'min_god_term_density': 0.0,
-                'max_god_term_density': 0.05,
-                'min_distance_markers': 0,
-                'max_distance_markers': 1
+                "max_sentiment_volatility": 0.4,
+                "min_lexical_diversity": 0.8,
+                "max_emphatic_qualifiers": 2,
+                "max_non_contracted_denials": 2,
+                "max_synthetic_repetitiveness": 0.2,
+                "min_god_term_density": 0.0,
+                "max_god_term_density": 0.05,
+                "min_distance_markers": 0,
+                "max_distance_markers": 1,
             },
             IntelligenceBucket.OBFUSCATED_DECEPTIVE: {
-                'min_sentiment_volatility': 0.4,
-                'max_lexical_diversity': 0.6,
-                'min_emphatic_qualifiers': 3,
-                'min_non_contracted_denials': 3,
-                'min_synthetic_repetitiveness': 0.4,
-                'min_god_term_density': 0.05,
-                'min_distance_markers': 2
-            }
+                "min_sentiment_volatility": 0.4,
+                "max_lexical_diversity": 0.6,
+                "min_emphatic_qualifiers": 3,
+                "min_non_contracted_denials": 3,
+                "min_synthetic_repetitiveness": 0.4,
+                "min_god_term_density": 0.05,
+                "min_distance_markers": 2,
+            },
         }
 
     def generate_forensic_intelligence_summary(self, text_sample: str) -> dict[str, Any]:
@@ -119,11 +121,14 @@ class ForensicIntelligenceReporter:
         Returns:
             Dictionary containing forensic analysis results and report path.
         """
-        print(f"🔍 Starting forensic intelligence analysis for text length: {len(text_sample)} characters")
+        print(
+            f"🔍 Starting forensic intelligence analysis for text length: {len(text_sample)} characters"
+        )
 
         # Step 1: Import and run Behavior Auditor
         try:
             from .rhetorical_behavior_audit import audit_rhetorical_behavior
+
             behavior_results = audit_rhetorical_behavior(text_sample)
             print(f"📊 Behavior audit completed: {behavior_results['status']}")
         except ImportError:
@@ -133,6 +138,7 @@ class ForensicIntelligenceReporter:
         # Step 2: Import and run Provenance Profiler
         try:
             from .provenance_profiler import profile_rhetorical_motive
+
             provenance_results = profile_rhetorical_motive(text_sample)
             print(f"🔍 Provenance profiling completed: {provenance_results['status']}")
         except ImportError:
@@ -143,15 +149,19 @@ class ForensicIntelligenceReporter:
         ghost_trap_persistence_detected = self._check_ghost_trap_persistence()
 
         # Step 3: Categorize intelligence bucket
-        intelligence_bucket, confidence_score, supporting_evidence = self._categorize_intelligence_bucket(
-            behavior_results, provenance_results
+        intelligence_bucket, confidence_score, supporting_evidence = (
+            self._categorize_intelligence_bucket(behavior_results, provenance_results)
         )
 
         # Step 3.5: Override bucket if Ghost-Trap detected persistence event
         if ghost_trap_persistence_detected:
             intelligence_bucket = IntelligenceBucket.OBFUSCATED_DECEPTIVE
-            supporting_evidence.append("CRITICAL: Ghost-Trap persistence event detected - overriding to Bucket D")
-            confidence_score = min(confidence_score + 0.2, 1.0)  # Increase confidence for critical override
+            supporting_evidence.append(
+                "CRITICAL: Ghost-Trap persistence event detected - overriding to Bucket D"
+            )
+            confidence_score = min(
+                confidence_score + 0.2, 1.0
+            )  # Increase confidence for critical override
 
         # Step 4: Cross-reference with model signatures for likely origin
         likely_origin = self._analyze_model_signatures(provenance_results)
@@ -160,7 +170,9 @@ class ForensicIntelligenceReporter:
         risk_assessment = self._generate_risk_assessment(intelligence_bucket, confidence_score)
 
         # Step 6: Extract source characteristics
-        source_characteristics = self._extract_source_characteristics(behavior_results, provenance_results)
+        source_characteristics = self._extract_source_characteristics(
+            behavior_results, provenance_results
+        )
 
         # Step 7: Create forensic analysis
         forensic_analysis = ForensicAnalysis(
@@ -172,14 +184,18 @@ class ForensicIntelligenceReporter:
             analysis_timestamp=datetime.datetime.now(),
             supporting_evidence=supporting_evidence,
             risk_assessment=risk_assessment,
-            source_characteristics=source_characteristics
+            source_characteristics=source_characteristics,
         )
 
         # Step 8: Generate and save report
-        report_path = self._generate_intelligence_report(forensic_analysis, likely_origin, ghost_trap_persistence_detected)
+        report_path = self._generate_intelligence_report(
+            forensic_analysis, likely_origin, ghost_trap_persistence_detected
+        )
 
         # Step 9: Log results
-        logger.info(f"Forensic intelligence analysis completed. Bucket: {intelligence_bucket.value}, Confidence: {confidence_score}, Likely Origin: {likely_origin}")
+        logger.info(
+            f"Forensic intelligence analysis completed. Bucket: {intelligence_bucket.value}, Confidence: {confidence_score}, Likely Origin: {likely_origin}"
+        )
         print("✅ Forensic intelligence analysis completed")
         print(f"🎯 Intelligence Bucket: {intelligence_bucket.value}")
         print(f"📊 Confidence Score: {confidence_score}")
@@ -189,20 +205,21 @@ class ForensicIntelligenceReporter:
         print(f"📄 Report saved to: {report_path}")
 
         return {
-            'intelligence_bucket': intelligence_bucket.value,
-            'confidence_score': round(confidence_score, 3),
-            'report_path': str(report_path),
-            'analysis_timestamp': forensic_analysis.analysis_timestamp.isoformat(),
-            'supporting_evidence': supporting_evidence,
-            'risk_assessment': risk_assessment,
-            'source_characteristics': source_characteristics,
-            'likely_origin': likely_origin,
-            'ghost_trap_override': ghost_trap_persistence_detected,
-            'status': 'FORENSIC_ANALYSIS_COMPLETED'
+            "intelligence_bucket": intelligence_bucket.value,
+            "confidence_score": round(confidence_score, 3),
+            "report_path": str(report_path),
+            "analysis_timestamp": forensic_analysis.analysis_timestamp.isoformat(),
+            "supporting_evidence": supporting_evidence,
+            "risk_assessment": risk_assessment,
+            "source_characteristics": source_characteristics,
+            "likely_origin": likely_origin,
+            "ghost_trap_override": ghost_trap_persistence_detected,
+            "status": "FORENSIC_ANALYSIS_COMPLETED",
         }
 
-    def _categorize_intelligence_bucket(self, behavior_results: dict[str, Any],
-                                      provenance_results: dict[str, Any]) -> tuple[IntelligenceBucket, float, list[str]]:
+    def _categorize_intelligence_bucket(
+        self, behavior_results: dict[str, Any], provenance_results: dict[str, Any]
+    ) -> tuple[IntelligenceBucket, float, list[str]]:
         """
         Categorize text source into intelligence bucket based on 2026 signatures.
 
@@ -214,13 +231,13 @@ class ForensicIntelligenceReporter:
             Tuple of (IntelligenceBucket, confidence_score, supporting_evidence).
         """
         # Extract key metrics
-        sentiment_volatility = behavior_results.get('sentiment_volatility', 0.0)
-        lexical_diversity = behavior_results.get('lexical_diversity_score', 0.0)
-        emphatic_qualifiers = behavior_results.get('emphatic_qualifiers_count', 0)
-        non_contracted_denials = behavior_results.get('non_contracted_denials_count', 0)
-        synthetic_repetitiveness = behavior_results.get('synthetic_repetitiveness_score', 0.0)
-        god_term_density = provenance_results.get('god_term_density', 0.0)
-        distance_markers = provenance_results.get('distance_markers_count', 0)
+        sentiment_volatility = behavior_results.get("sentiment_volatility", 0.0)
+        lexical_diversity = behavior_results.get("lexical_diversity_score", 0.0)
+        emphatic_qualifiers = behavior_results.get("emphatic_qualifiers_count", 0)
+        non_contracted_denials = behavior_results.get("non_contracted_denials_count", 0)
+        synthetic_repetitiveness = behavior_results.get("synthetic_repetitiveness_score", 0.0)
+        god_term_density = provenance_results.get("god_term_density", 0.0)
+        distance_markers = provenance_results.get("distance_markers_count", 0)
 
         # Calculate bucket scores
         bucket_scores = {}
@@ -230,66 +247,84 @@ class ForensicIntelligenceReporter:
             evidence = []
 
             # Check each threshold
-            if 'max_sentiment_volatility' in thresholds:
-                if sentiment_volatility <= thresholds['max_sentiment_volatility']:
+            if "max_sentiment_volatility" in thresholds:
+                if sentiment_volatility <= thresholds["max_sentiment_volatility"]:
                     score += 1.0
-                    evidence.append(f"Sentiment volatility ({sentiment_volatility:.3f}) within {bucket.name} threshold")
+                    evidence.append(
+                        f"Sentiment volatility ({sentiment_volatility:.3f}) within {bucket.name} threshold"
+                    )
                 else:
                     score -= 0.5
 
-            if 'min_lexical_diversity' in thresholds:
-                if lexical_diversity >= thresholds['min_lexical_diversity']:
+            if "min_lexical_diversity" in thresholds:
+                if lexical_diversity >= thresholds["min_lexical_diversity"]:
                     score += 1.0
-                    evidence.append(f"Lexical diversity ({lexical_diversity:.3f}) within {bucket.name} threshold")
+                    evidence.append(
+                        f"Lexical diversity ({lexical_diversity:.3f}) within {bucket.name} threshold"
+                    )
                 else:
                     score -= 0.5
 
-            if 'max_emphatic_qualifiers' in thresholds:
-                if emphatic_qualifiers <= thresholds['max_emphatic_qualifiers']:
+            if "max_emphatic_qualifiers" in thresholds:
+                if emphatic_qualifiers <= thresholds["max_emphatic_qualifiers"]:
                     score += 1.0
-                    evidence.append(f"Emphatic qualifiers ({emphatic_qualifiers}) within {bucket.name} threshold")
+                    evidence.append(
+                        f"Emphatic qualifiers ({emphatic_qualifiers}) within {bucket.name} threshold"
+                    )
                 else:
                     score -= 0.5
 
-            if 'max_non_contracted_denials' in thresholds:
-                if non_contracted_denials <= thresholds['max_non_contracted_denials']:
+            if "max_non_contracted_denials" in thresholds:
+                if non_contracted_denials <= thresholds["max_non_contracted_denials"]:
                     score += 1.0
-                    evidence.append(f"Non-contracted denials ({non_contracted_denials}) within {bucket.name} threshold")
+                    evidence.append(
+                        f"Non-contracted denials ({non_contracted_denials}) within {bucket.name} threshold"
+                    )
                 else:
                     score -= 0.5
 
-            if 'max_synthetic_repetitiveness' in thresholds:
-                if synthetic_repetitiveness <= thresholds['max_synthetic_repetitiveness']:
+            if "max_synthetic_repetitiveness" in thresholds:
+                if synthetic_repetitiveness <= thresholds["max_synthetic_repetitiveness"]:
                     score += 1.0
-                    evidence.append(f"Synthetic repetitiveness ({synthetic_repetitiveness:.3f}) within {bucket.name} threshold")
+                    evidence.append(
+                        f"Synthetic repetitiveness ({synthetic_repetitiveness:.3f}) within {bucket.name} threshold"
+                    )
                 else:
                     score -= 0.5
 
-            if 'min_god_term_density' in thresholds:
-                if god_term_density >= thresholds['min_god_term_density']:
+            if "min_god_term_density" in thresholds:
+                if god_term_density >= thresholds["min_god_term_density"]:
                     score += 0.5
-                    evidence.append(f"God term density ({god_term_density:.3f}) above {bucket.name} minimum")
+                    evidence.append(
+                        f"God term density ({god_term_density:.3f}) above {bucket.name} minimum"
+                    )
                 else:
                     score -= 0.3
 
-            if 'max_god_term_density' in thresholds:
-                if god_term_density <= thresholds['max_god_term_density']:
+            if "max_god_term_density" in thresholds:
+                if god_term_density <= thresholds["max_god_term_density"]:
                     score += 0.5
-                    evidence.append(f"God term density ({god_term_density:.3f}) within {bucket.name} maximum")
+                    evidence.append(
+                        f"God term density ({god_term_density:.3f}) within {bucket.name} maximum"
+                    )
                 else:
                     score -= 0.3
 
-            if 'min_distance_markers' in thresholds:
-                if distance_markers >= thresholds['min_distance_markers']:
+            if "min_distance_markers" in thresholds:
+                if distance_markers >= thresholds["min_distance_markers"]:
                     score += 0.5
-                    evidence.append(f"Distance markers ({distance_markers}) above {bucket.name} minimum")
+                    evidence.append(
+                        f"Distance markers ({distance_markers}) above {bucket.name} minimum"
+                    )
                 else:
                     score -= 0.3
 
-            if 'max_distance_markers' in thresholds:
-                if distance_markers <= thresholds['max_distance_markers']:
+            if "max_distance_markers" in thresholds:
+                if distance_markers <= thresholds["max_distance_markers"]:
                     score += 0.5
-                    evidence.append(f"Distance markers ({distance_markers}) within {bucket.name} maximum")
+                    evidence.append(
+                        f"Distance markers ({distance_markers}) within {bucket.name} maximum"
+                    )
                 else:
                     score -= 0.3
 
@@ -305,14 +340,15 @@ class ForensicIntelligenceReporter:
 
         return selected_bucket, confidence, evidence
 
-    def _generate_risk_assessment(self, intelligence_bucket: IntelligenceBucket,
-                                 confidence_score: float) -> str:
+    def _generate_risk_assessment(
+        self, intelligence_bucket: IntelligenceBucket, confidence_score: float
+    ) -> str:
         """Generate risk assessment based on intelligence bucket and confidence."""
         risk_levels = {
             IntelligenceBucket.COMMERCIAL_SAFE: "LOW",
             IntelligenceBucket.OPEN_SOURCE_UNCONSTRAINED: "MEDIUM",
             IntelligenceBucket.HUMAN_AUTHORED: "LOW",
-            IntelligenceBucket.OBFUSCATED_DECEPTIVE: "HIGH"
+            IntelligenceBucket.OBFUSCATED_DECEPTIVE: "HIGH",
         }
 
         risk_level = risk_levels[intelligence_bucket]
@@ -326,45 +362,58 @@ class ForensicIntelligenceReporter:
 
         return f"{risk_level} RISK - {confidence_text} ({confidence_score:.1%})"
 
-    def _extract_source_characteristics(self, behavior_results: dict[str, Any],
-                                       provenance_results: dict[str, Any]) -> dict[str, Any]:
+    def _extract_source_characteristics(
+        self, behavior_results: dict[str, Any], provenance_results: dict[str, Any]
+    ) -> dict[str, Any]:
         """Extract key characteristics of the source."""
         return {
-            'text_length': len(behavior_results.get('timestamp', '')),
-            'sentiment_volatility': behavior_results.get('sentiment_volatility', 0.0),
-            'lexical_diversity': behavior_results.get('lexical_diversity_score', 0.0),
-            'emphatic_qualifiers': behavior_results.get('emphatic_qualifiers_count', 0),
-            'non_contracted_denials': behavior_results.get('non_contracted_denials_count', 0),
-            'synthetic_repetitiveness': behavior_results.get('synthetic_repetitiveness_score', 0.0),
-            'god_term_density': provenance_results.get('god_term_density', 0.0),
-            'devil_term_density': provenance_results.get('devil_term_density', 0.0),
-            'distance_markers': provenance_results.get('distance_markers_count', 0),
-            'anomaly_detected': behavior_results.get('anomaly_detected', False),
-            'profile_detected': provenance_results.get('profile_detected', False)
+            "text_length": len(behavior_results.get("timestamp", "")),
+            "sentiment_volatility": behavior_results.get("sentiment_volatility", 0.0),
+            "lexical_diversity": behavior_results.get("lexical_diversity_score", 0.0),
+            "emphatic_qualifiers": behavior_results.get("emphatic_qualifiers_count", 0),
+            "non_contracted_denials": behavior_results.get("non_contracted_denials_count", 0),
+            "synthetic_repetitiveness": behavior_results.get("synthetic_repetitiveness_score", 0.0),
+            "god_term_density": provenance_results.get("god_term_density", 0.0),
+            "devil_term_density": provenance_results.get("devil_term_density", 0.0),
+            "distance_markers": provenance_results.get("distance_markers_count", 0),
+            "anomaly_detected": behavior_results.get("anomaly_detected", False),
+            "profile_detected": provenance_results.get("profile_detected", False),
         }
 
-    def _generate_intelligence_report(self, forensic_analysis: ForensicAnalysis, likely_origin: str = "Unknown",
-                                    ghost_trap_override: bool = False) -> Path:
+    def _generate_intelligence_report(
+        self,
+        forensic_analysis: ForensicAnalysis,
+        likely_origin: str = "Unknown",
+        ghost_trap_override: bool = False,
+    ) -> Path:
         """Generate comprehensive intelligence report in Markdown format."""
         report_path = self.report_directory / "forensic_intelligence_v1.md"
 
         # Generate report content
-        report_content = self._create_report_content(forensic_analysis, likely_origin, ghost_trap_override)
+        report_content = self._create_report_content(
+            forensic_analysis, likely_origin, ghost_trap_override
+        )
 
         # Write report to file
-        with open(report_path, 'w', encoding='utf-8') as f:
+        with open(report_path, "w", encoding="utf-8") as f:
             f.write(report_content)
 
         logger.info(f"Forensic intelligence report generated: {report_path}")
         return report_path
 
-    def _create_report_content(self, forensic_analysis: ForensicAnalysis, likely_origin: str = "Unknown",
-                             ghost_trap_override: bool = False) -> str:
+    def _create_report_content(
+        self,
+        forensic_analysis: ForensicAnalysis,
+        likely_origin: str = "Unknown",
+        ghost_trap_override: bool = False,
+    ) -> str:
         """Create the content for the intelligence report."""
         timestamp = forensic_analysis.analysis_timestamp.strftime("%Y-%m-%d %H:%M:%S")
 
         # Intelligence Summary
-        intelligence_summary = self._create_intelligence_summary(forensic_analysis, likely_origin, ghost_trap_override)
+        intelligence_summary = self._create_intelligence_summary(
+            forensic_analysis, likely_origin, ghost_trap_override
+        )
 
         # Technical Analysis
         technical_analysis = self._create_technical_analysis(forensic_analysis)
@@ -379,7 +428,9 @@ class ForensicIntelligenceReporter:
         recommendations = self._create_recommendations(forensic_analysis, ghost_trap_override)
 
         # Evidence Appendix
-        evidence_appendix = self._create_evidence_appendix(forensic_analysis, likely_origin, ghost_trap_override)
+        evidence_appendix = self._create_evidence_appendix(
+            forensic_analysis, likely_origin, ghost_trap_override
+        )
 
         # Full report content
         report_content = f"""# Forensic Intelligence Report
@@ -398,11 +449,11 @@ class ForensicIntelligenceReporter:
 **Analysis Status**: COMPLETED
 
 ### Key Findings
-- **Source Type**: {forensic_analysis.intelligence_bucket.value.split(':')[1].strip()}
+- **Source Type**: {forensic_analysis.intelligence_bucket.value.split(":")[1].strip()}
 - **Confidence Level**: {"HIGH" if forensic_analysis.confidence_score > 0.8 else "MEDIUM" if forensic_analysis.confidence_score > 0.6 else "LOW"}
 - **Risk Level**: {"LOW" if forensic_analysis.intelligence_bucket in [IntelligenceBucket.COMMERCIAL_SAFE, IntelligenceBucket.HUMAN_AUTHORED] else "MEDIUM" if forensic_analysis.intelligence_bucket == IntelligenceBucket.OPEN_SOURCE_UNCONSTRAINED else "HIGH"}
-- **Anomaly Detection**: {"YES" if forensic_analysis.behavior_audit_results.get('anomaly_detected', False) else "NO"}
-- **Commercial Profile**: {"YES" if forensic_analysis.provenance_profiler_results.get('profile_detected', False) else "NO"}
+- **Anomaly Detection**: {"YES" if forensic_analysis.behavior_audit_results.get("anomaly_detected", False) else "NO"}
+- **Commercial Profile**: {"YES" if forensic_analysis.provenance_profiler_results.get("profile_detected", False) else "NO"}
 - **Ghost-Trap Override**: {"YES - CRITICAL SYSTEM THREAT" if ghost_trap_override else "NO"}
 
 ### Text Sample Analysis
@@ -438,8 +489,12 @@ class ForensicIntelligenceReporter:
 
         return report_content
 
-    def _create_intelligence_summary(self, forensic_analysis: ForensicAnalysis, likely_origin: str = "Unknown",
-                                   ghost_trap_override: bool = False) -> str:
+    def _create_intelligence_summary(
+        self,
+        forensic_analysis: ForensicAnalysis,
+        likely_origin: str = "Unknown",
+        ghost_trap_override: bool = False,
+    ) -> str:
         """Create the intelligence summary section."""
         bucket = forensic_analysis.intelligence_bucket
         confidence = forensic_analysis.confidence_score
@@ -512,26 +567,26 @@ class ForensicIntelligenceReporter:
         return f"""## Technical Analysis
 
 ### Behavior Audit Results
-- **Sentiment Volatility**: {behavior.get('sentiment_volatility', 0.0):.3f}
-- **Lexical Diversity Score**: {behavior.get('lexical_diversity_score', 0.0):.3f}
-- **Emphatic Qualifiers**: {behavior.get('emphatic_qualifiers_count', 0)}
-- **Non-Contracted Denials**: {behavior.get('non_contracted_denials_count', 0)}
-- **Synthetic Repetitiveness**: {behavior.get('synthetic_repetitiveness_score', 0.0):.3f}
-- **Anomaly Detected**: {"YES" if behavior.get('anomaly_detected', False) else "NO"}
-- **Confidence Score**: {behavior.get('confidence_score', 0.0):.2f}
+- **Sentiment Volatility**: {behavior.get("sentiment_volatility", 0.0):.3f}
+- **Lexical Diversity Score**: {behavior.get("lexical_diversity_score", 0.0):.3f}
+- **Emphatic Qualifiers**: {behavior.get("emphatic_qualifiers_count", 0)}
+- **Non-Contracted Denials**: {behavior.get("non_contracted_denials_count", 0)}
+- **Synthetic Repetitiveness**: {behavior.get("synthetic_repetitiveness_score", 0.0):.3f}
+- **Anomaly Detected**: {"YES" if behavior.get("anomaly_detected", False) else "NO"}
+- **Confidence Score**: {behavior.get("confidence_score", 0.0):.2f}
 
 ### Provenance Profiler Results
-- **God Term Density**: {provenance.get('god_term_density', 0.0):.3f}
-- **Devil Term Density**: {provenance.get('devil_term_density', 0.0):.3f}
-- **Distance Markers**: {provenance.get('distance_markers_count', 0)}
-- **Profile Detected**: {"YES" if provenance.get('profile_detected', False) else "NO"}
-- **Processing Time**: {provenance.get('processing_time', 0.0):.3f}s
-- **Confidence Score**: {provenance.get('confidence_score', 0.0):.2f}
+- **God Term Density**: {provenance.get("god_term_density", 0.0):.3f}
+- **Devil Term Density**: {provenance.get("devil_term_density", 0.0):.3f}
+- **Distance Markers**: {provenance.get("distance_markers_count", 0)}
+- **Profile Detected**: {"YES" if provenance.get("profile_detected", False) else "NO"}
+- **Processing Time**: {provenance.get("processing_time", 0.0):.3f}s
+- **Confidence Score**: {provenance.get("confidence_score", 0.0):.2f}
 
 ### Combined Analysis
-- **Total Anomalies**: {sum([behavior.get('anomaly_detected', False), provenance.get('profile_detected', False)])}
+- **Total Anomalies**: {sum([behavior.get("anomaly_detected", False), provenance.get("profile_detected", False)])}
 - **Overall Confidence**: {forensic_analysis.confidence_score:.1%}
-- **Risk Indicators**: {len([e for e in forensic_analysis.supporting_evidence if 'within' not in e.lower()])}
+- **Risk Indicators**: {len([e for e in forensic_analysis.supporting_evidence if "within" not in e.lower()])}
 """
 
     def _create_source_characteristics(self, forensic_analysis: ForensicAnalysis) -> str:
@@ -541,28 +596,30 @@ class ForensicIntelligenceReporter:
         return f"""## Source Characteristics
 
 ### Linguistic Patterns
-- **Text Length**: {chars['text_length']} characters
-- **Sentiment Volatility**: {chars['sentiment_volatility']:.3f}
-- **Lexical Diversity**: {chars['lexical_diversity']:.3f}
-- **Emphatic Qualifiers**: {chars['emphatic_qualifiers']}
-- **Non-Contracted Denials**: {chars['non_contracted_denials']}
-- **Synthetic Repetitiveness**: {chars['synthetic_repetitiveness']:.3f}
+- **Text Length**: {chars["text_length"]} characters
+- **Sentiment Volatility**: {chars["sentiment_volatility"]:.3f}
+- **Lexical Diversity**: {chars["lexical_diversity"]:.3f}
+- **Emphatic Qualifiers**: {chars["emphatic_qualifiers"]}
+- **Non-Contracted Denials**: {chars["non_contracted_denials"]}
+- **Synthetic Repetitiveness**: {chars["synthetic_repetitiveness"]:.3f}
 
 ### Rhetorical Patterns
-- **God Term Density**: {chars['god_term_density']:.3f}
-- **Devil Term Density**: {chars['devil_term_density']:.3f}
-- **Distance Markers**: {chars['distance_markers']}
-- **Anomaly Detected**: {"YES" if chars['anomaly_detected'] else "NO"}
-- **Profile Detected**: {"YES" if chars['profile_detected'] else "NO"}
+- **God Term Density**: {chars["god_term_density"]:.3f}
+- **Devil Term Density**: {chars["devil_term_density"]:.3f}
+- **Distance Markers**: {chars["distance_markers"]}
+- **Anomaly Detected**: {"YES" if chars["anomaly_detected"] else "NO"}
+- **Profile Detected**: {"YES" if chars["profile_detected"] else "NO"}
 
 ### Behavioral Indicators
-- **Consistency Score**: {1.0 - chars['sentiment_volatility']:.3f}
-- **Naturalness Score**: {chars['lexical_diversity']:.3f}
-- **Deception Score**: {(chars['emphatic_qualifiers'] + chars['non_contracted_denials']) / max(len(forensic_analysis.text_sample.split()), 1):.3f}
-- **Policy Alignment**: {"COMMERCIAL" if chars['distance_markers'] > 0 else "ORGANIC"}
+- **Consistency Score**: {1.0 - chars["sentiment_volatility"]:.3f}
+- **Naturalness Score**: {chars["lexical_diversity"]:.3f}
+- **Deception Score**: {(chars["emphatic_qualifiers"] + chars["non_contracted_denials"]) / max(len(forensic_analysis.text_sample.split()), 1):.3f}
+- **Policy Alignment**: {"COMMERCIAL" if chars["distance_markers"] > 0 else "ORGANIC"}
 """
 
-    def _create_risk_assessment(self, forensic_analysis: ForensicAnalysis, ghost_trap_override: bool = False) -> str:
+    def _create_risk_assessment(
+        self, forensic_analysis: ForensicAnalysis, ghost_trap_override: bool = False
+    ) -> str:
         """Create the risk assessment section."""
         bucket = forensic_analysis.intelligence_bucket
         risk = forensic_analysis.risk_assessment
@@ -644,7 +701,9 @@ class ForensicIntelligenceReporter:
 
         return risk_details
 
-    def _create_recommendations(self, forensic_analysis: ForensicAnalysis, ghost_trap_override: bool = False) -> str:
+    def _create_recommendations(
+        self, forensic_analysis: ForensicAnalysis, ghost_trap_override: bool = False
+    ) -> str:
         """Create the recommendations section."""
         bucket = forensic_analysis.intelligence_bucket
         confidence = forensic_analysis.confidence_score
@@ -735,8 +794,12 @@ class ForensicIntelligenceReporter:
 
         return recommendations
 
-    def _create_evidence_appendix(self, forensic_analysis: ForensicAnalysis, likely_origin: str = "Unknown",
-                                 ghost_trap_override: bool = False) -> str:
+    def _create_evidence_appendix(
+        self,
+        forensic_analysis: ForensicAnalysis,
+        likely_origin: str = "Unknown",
+        ghost_trap_override: bool = False,
+    ) -> str:
         """Create the evidence appendix section."""
         behavior = forensic_analysis.behavior_audit_results
         provenance = forensic_analysis.provenance_profiler_results
@@ -833,34 +896,34 @@ Based on 2026 intelligence signatures for source categorization:
     def _get_mock_behavior_results(self) -> dict[str, Any]:
         """Generate mock behavior results for testing."""
         return {
-            'sentiment_volatility': 0.2,
-            'type_token_ratio': 0.8,
-            'lexical_diversity_score': 0.9,
-            'emphatic_qualifiers_count': 1,
-            'non_contracted_denials_count': 0,
-            'synthetic_repetitiveness_score': 0.1,
-            'deceptive_indicators': [],
-            'anomaly_detected': False,
-            'confidence_score': 0.8,
-            'timestamp': datetime.datetime.now().isoformat(),
-            'status': 'NO_ANOMALY_FOUND'
+            "sentiment_volatility": 0.2,
+            "type_token_ratio": 0.8,
+            "lexical_diversity_score": 0.9,
+            "emphatic_qualifiers_count": 1,
+            "non_contracted_denials_count": 0,
+            "synthetic_repetitiveness_score": 0.1,
+            "deceptive_indicators": [],
+            "anomaly_detected": False,
+            "confidence_score": 0.8,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "status": "NO_ANOMALY_FOUND",
         }
 
     def _get_mock_provenance_results(self) -> dict[str, Any]:
         """Generate mock provenance results for testing."""
         return {
-            'god_term_density': 0.03,
-            'devil_term_density': 0.01,
-            'total_ultimate_term_density': 0.04,
-            'distance_markers_count': 0,
-            'god_terms_found': [],
-            'devil_terms_found': [],
-            'distance_markers_found': [],
-            'profile_detected': False,
-            'confidence_score': 0.7,
-            'processing_time': 0.001,
-            'timestamp': datetime.datetime.now().isoformat(),
-            'status': 'NO_PROFILE_FOUND'
+            "god_term_density": 0.03,
+            "devil_term_density": 0.01,
+            "total_ultimate_term_density": 0.04,
+            "distance_markers_count": 0,
+            "god_terms_found": [],
+            "devil_terms_found": [],
+            "distance_markers_found": [],
+            "profile_detected": False,
+            "confidence_score": 0.7,
+            "processing_time": 0.001,
+            "timestamp": datetime.datetime.now().isoformat(),
+            "status": "NO_PROFILE_FOUND",
         }
 
     def _check_ghost_trap_persistence(self) -> bool:
@@ -877,22 +940,26 @@ Based on 2026 intelligence signatures for source categorization:
             model_signatures = self._load_model_signatures()
 
             # Extract key metrics from provenance results
-            god_term_density = provenance_results.get('god_term_density', 0.0)
-            devil_term_density = provenance_results.get('devil_term_density', 0.0)
-            distance_markers = provenance_results.get('distance_markers_count', 0)
-            lexical_diversity = provenance_results.get('lexical_diversity_score', 0.0)  # If available
-            sentiment_volatility = provenance_results.get('sentiment_volatility', 0.0)  # If available
+            god_term_density = provenance_results.get("god_term_density", 0.0)
+            devil_term_density = provenance_results.get("devil_term_density", 0.0)
+            distance_markers = provenance_results.get("distance_markers_count", 0)
+            lexical_diversity = provenance_results.get(
+                "lexical_diversity_score", 0.0
+            )  # If available
+            sentiment_volatility = provenance_results.get(
+                "sentiment_volatility", 0.0
+            )  # If available
 
             # Calculate similarity scores for each model
             model_scores = {}
 
-            for model_id, model_data in model_signatures['model_signatures'].items():
+            for model_id, model_data in model_signatures["model_signatures"].items():
                 score = 0.0
                 total_criteria = 0
 
                 # Check god term density
-                if 'god_term_density' in model_data['patterns']:
-                    model_god_density = model_data['patterns']['god_term_density']
+                if "god_term_density" in model_data["patterns"]:
+                    model_god_density = model_data["patterns"]["god_term_density"]
                     if isinstance(model_god_density, list):
                         # If it's a list, check if our density is close to any value
                         if any(abs(god_term_density - val) < 0.02 for val in model_god_density):
@@ -903,8 +970,8 @@ Based on 2026 intelligence signatures for source categorization:
                     total_criteria += 1
 
                 # Check devil term density
-                if 'devil_term_density' in model_data['patterns']:
-                    model_devil_density = model_data['patterns']['devil_term_density']
+                if "devil_term_density" in model_data["patterns"]:
+                    model_devil_density = model_data["patterns"]["devil_term_density"]
                     if isinstance(model_devil_density, list):
                         if any(abs(devil_term_density - val) < 0.02 for val in model_devil_density):
                             score += 1.0
@@ -914,8 +981,8 @@ Based on 2026 intelligence signatures for source categorization:
                     total_criteria += 1
 
                 # Check distance markers
-                if 'distance_markers' in model_data['patterns']:
-                    model_distance_markers = model_data['patterns']['distance_markers']
+                if "distance_markers" in model_data["patterns"]:
+                    model_distance_markers = model_data["patterns"]["distance_markers"]
                     if isinstance(model_distance_markers, list):
                         if any(abs(distance_markers - val) < 2 for val in model_distance_markers):
                             score += 1.0
@@ -926,8 +993,8 @@ Based on 2026 intelligence signatures for source categorization:
 
                 # Check lexical diversity if available
                 if lexical_diversity > 0:
-                    if 'lexical_diversity_range' in model_data['patterns']:
-                        lex_range = model_data['patterns']['lexical_diversity_range']
+                    if "lexical_diversity_range" in model_data["patterns"]:
+                        lex_range = model_data["patterns"]["lexical_diversity_range"]
                         if isinstance(lex_range, list) and len(lex_range) == 2:
                             if lex_range[0] <= lexical_diversity <= lex_range[1]:
                                 score += 1.0
@@ -935,8 +1002,8 @@ Based on 2026 intelligence signatures for source categorization:
 
                 # Check sentiment volatility if available
                 if sentiment_volatility > 0:
-                    if 'sentiment_volatility_range' in model_data['patterns']:
-                        sent_range = model_data['patterns']['sentiment_volatility_range']
+                    if "sentiment_volatility_range" in model_data["patterns"]:
+                        sent_range = model_data["patterns"]["sentiment_volatility_range"]
                         if isinstance(sent_range, list) and len(sent_range) == 2:
                             if sent_range[0] <= sentiment_volatility <= sent_range[1]:
                                 score += 1.0
@@ -953,7 +1020,7 @@ Based on 2026 intelligence signatures for source categorization:
 
                 # Only return a match if confidence is high enough
                 if best_score >= 0.6:  # 60% confidence threshold
-                    model_data = model_signatures['model_signatures'][best_model[0]]
+                    model_data = model_signatures["model_signatures"][best_model[0]]
                     return f"{model_data['name']} ({best_score:.0%} Match)"
                 else:
                     return "Unknown (Low Confidence Match)"
@@ -971,7 +1038,7 @@ Based on 2026 intelligence signatures for source categorization:
                 try:
                     signatures_path = Path(__file__).parent / "data" / "model_signatures.json"
                     if signatures_path.exists():
-                        with open(signatures_path, encoding='utf-8') as f:
+                        with open(signatures_path, encoding="utf-8") as f:
                             self._model_signatures_cache = json.load(f)
                         logger.info(f"Model signatures loaded from {signatures_path}")
                     else:
@@ -1000,4 +1067,9 @@ def generate_forensic_intelligence_summary(text_sample: str) -> dict[str, Any]:
 
 
 # Export the main function for use as a tool
-__all__ = ['ForensicAnalysis', 'ForensicIntelligenceReporter', 'IntelligenceBucket', 'generate_forensic_intelligence_summary']
+__all__ = [
+    "ForensicAnalysis",
+    "ForensicIntelligenceReporter",
+    "IntelligenceBucket",
+    "generate_forensic_intelligence_summary",
+]

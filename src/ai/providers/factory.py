@@ -12,14 +12,17 @@ def get_provider() -> SMEAIProvider:
 
     if provider_type == "langflow":
         from src.ai.providers.langflow_provider import LangflowProvider
+
         return LangflowProvider()
 
     elif provider_type == "sentinel":
         from src.ai.providers.sentinel_provider import SentinelProvider
+
         return SentinelProvider()
 
     elif provider_type == "mock":
         from src.ai.providers.mock_provider import MockProvider
+
         return MockProvider()
 
     raise ValueError(f"Unknown AI provider type: {provider_type}")

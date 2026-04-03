@@ -22,16 +22,15 @@ import logging
 import sys
 from typing import Any
 
-from src.core.constants import (
-    DEFAULT_LOG_LEVEL,
-    LOG_FORMAT,
-    LOG_DATE_FORMAT,
-    SME_VERSION,
-    SME_NAME,
-)
-
 # Standard bootstrap
 import src.bootstrap
+from src.core.constants import (
+    DEFAULT_LOG_LEVEL,
+    LOG_DATE_FORMAT,
+    LOG_FORMAT,
+    SME_NAME,
+    SME_VERSION,
+)
 
 src.bootstrap.initialize()
 
@@ -252,7 +251,9 @@ async def load_extensions() -> None:
                 f"(Plugin: {tool_info['plugin_id']})"
             )
         except Exception as e:
-            logger.exception(f"ExtensionManager: Failed to register tool '{tool_info['name']}': {e}")
+            logger.exception(
+                f"ExtensionManager: Failed to register tool '{tool_info['name']}': {e}"
+            )
             continue  # Graceful degradation - continue with other tools
 
 

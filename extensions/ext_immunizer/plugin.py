@@ -10,6 +10,7 @@ from typing import Any
 # Try to import required libraries with fallbacks
 try:
     import numpy as np
+
     NUMPY_AVAILABLE = True
 except ImportError:
     NUMPY_AVAILABLE = False
@@ -20,9 +21,11 @@ from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.Immunizer")
 
+
 @dataclass
 class VulnerabilityRecord:
     """Represents a vulnerability from the evasion test report."""
+
     sample_id: str
     variant_id: str
     original_detection: float
@@ -33,9 +36,11 @@ class VulnerabilityRecord:
     variant_type: str
     modification_details: dict[str, Any]
 
+
 @dataclass
 class HardenedRule:
     """Represents a hardened detection rule."""
+
     rule_id: str
     rule_type: str  # "regex" or "keyword_set"
     pattern: str
@@ -45,15 +50,18 @@ class HardenedRule:
     created_at: str
     baseline_compatibility: dict[str, Any]
 
+
 @dataclass
 class BaselineTestResult:
     """Represents the result of testing against the human-only baseline."""
+
     rule_id: str
     false_positive_rate: float
     tested_samples: int
     flagged_samples: int
     flagged_texts: list[str]
     safety_status: str  # "SAFE", "WARNING", "UNSAFE"
+
 
 class Immunizer(BasePlugin):
     """
@@ -85,10 +93,12 @@ class Immunizer(BasePlugin):
             "word_obfuscation": self._generate_word_obfuscation_rules,
             "structural_rewriting": self._generate_structural_rules,
             "semantic_preservation": self._generate_semantic_rules,
-            "formatting_manipulation": self._generate_formatting_rules
+            "formatting_manipulation": self._generate_formatting_rules,
         }
 
-        logger.info(f"[{self.plugin_id}] Immunizer initialized with high-impact threshold {self.high_impact_threshold}")
+        logger.info(
+            f"[{self.plugin_id}] Immunizer initialized with high-impact threshold {self.high_impact_threshold}"
+        )
 
     async def on_startup(self):
         """
@@ -115,7 +125,7 @@ class Immunizer(BasePlugin):
         """
         return {
             "status": "skipped",
-            "reason": "Immunizer provides hardening tools, not direct ingestion processing"
+            "reason": "Immunizer provides hardening tools, not direct ingestion processing",
         }
 
     def get_tools(self) -> list:
@@ -123,7 +133,7 @@ class Immunizer(BasePlugin):
             self.run_signature_patch,
             self.get_hardening_statistics,
             self.test_rule_safety,
-            self.generate_hardening_report
+            self.generate_hardening_report,
         ]
 
     async def run_signature_patch(self, report_path: str | None = None) -> str:
@@ -140,9 +150,7 @@ class Immunizer(BasePlugin):
                 report_path = os.path.join("D:", "SME", "reports", "evasion_test_report.json")
 
             if not os.path.exists(report_path):
-                return json.dumps({
-                    "error": f"Evasion test report not found at {report_path}"
-                })
+                return json.dumps({"error": f"Evasion test report not found at {report_path}"})
 
             logger.info(f"[{self.plugin_id}] Reading evasion test report: {report_path}")
 
@@ -151,12 +159,16 @@ class Immunizer(BasePlugin):
             high_impact_vulnerabilities = self._identify_high_impact_vulnerabilities(report_data)
 
             if not high_impact_vulnerabilities:
-                return json.dumps({
-                    "status": "no_high_impact_vulnerabilities",
-                    "message": "No high-impact vulnerabilities found requiring hardening"
-                })
+                return json.dumps(
+                    {
+                        "status": "no_high_impact_vulnerabilities",
+                        "message": "No high-impact vulnerabilities found requiring hardening",
+                    }
+                )
 
-            logger.info(f"[{self.plugin_id}] Found {len(high_impact_vulnerabilities)} high-impact vulnerabilities")
+            logger.info(
+                f"[{self.plugin_id}] Found {len(high_impact_vulnerabilities)} high-impact vulnerabilities"
+            )
 
             # Generate hardened rules
             hardened_rules = []
@@ -171,7 +183,9 @@ class Immunizer(BasePlugin):
                 if safety_result.safety_status == "SAFE":
                     safe_rules.append(rule)
                 else:
-                    logger.warning(f"[{self.plugin_id}] Rule {rule.rule_id} failed safety check: {safety_result.safety_status}")
+                    logger.warning(
+                        f"[{self.plugin_id}] Rule {rule.rule_id} failed safety check: {safety_result.safety_status}"
+                    )
 
             # Save hardened rules
             hardened_file = os.path.join(self.data_dir, "hardened_signatures.json")
@@ -185,18 +199,20 @@ class Immunizer(BasePlugin):
                 "generated_rules": len(hardened_rules),
                 "safe_rules": len(safe_rules),
                 "hardened_file": hardened_file,
-                "vulnerability_types": self._get_vulnerability_type_summary(high_impact_vulnerabilities),
-                "rule_types": self._get_rule_type_summary(safe_rules)
+                "vulnerability_types": self._get_vulnerability_type_summary(
+                    high_impact_vulnerabilities
+                ),
+                "rule_types": self._get_rule_type_summary(safe_rules),
             }
 
-            logger.info(f"[{self.plugin_id}] Signature patch completed: {len(safe_rules)} safe rules added")
+            logger.info(
+                f"[{self.plugin_id}] Signature patch completed: {len(safe_rules)} safe rules added"
+            )
             return json.dumps(summary, indent=2)
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Error running signature patch: {e}")
-            return json.dumps({
-                "error": f"Failed to run signature patch: {e!s}"
-            })
+            return json.dumps({"error": f"Failed to run signature patch: {e!s}"})
 
     async def get_hardening_statistics(self) -> str:
         """Get statistics about the hardening process."""
@@ -205,19 +221,35 @@ class Immunizer(BasePlugin):
             if not os.path.exists(hardened_file):
                 return json.dumps({"error": "No hardened signatures file found"})
 
-            with open(hardened_file, encoding='utf-8') as f:
+            with open(hardened_file, encoding="utf-8") as f:
                 rules = json.load(f)
 
             stats = {
                 "total_rules": len(rules),
                 "rule_types": Counter(rule.get("rule_type", "unknown") for rule in rules),
-                "average_confidence": sum(rule.get("confidence", 0) for rule in rules) / len(rules) if rules else 0,
-                "vulnerability_sources": Counter(rule.get("vulnerability_source", "unknown") for rule in rules),
+                "average_confidence": sum(rule.get("confidence", 0) for rule in rules) / len(rules)
+                if rules
+                else 0,
+                "vulnerability_sources": Counter(
+                    rule.get("vulnerability_source", "unknown") for rule in rules
+                ),
                 "baseline_compatibility": {
-                    "safe_rules": sum(1 for rule in rules if rule.get("baseline_compatibility", {}).get("safety_status") == "SAFE"),
-                    "warning_rules": sum(1 for rule in rules if rule.get("baseline_compatibility", {}).get("safety_status") == "WARNING"),
-                    "unsafe_rules": sum(1 for rule in rules if rule.get("baseline_compatibility", {}).get("safety_status") == "UNSAFE")
-                }
+                    "safe_rules": sum(
+                        1
+                        for rule in rules
+                        if rule.get("baseline_compatibility", {}).get("safety_status") == "SAFE"
+                    ),
+                    "warning_rules": sum(
+                        1
+                        for rule in rules
+                        if rule.get("baseline_compatibility", {}).get("safety_status") == "WARNING"
+                    ),
+                    "unsafe_rules": sum(
+                        1
+                        for rule in rules
+                        if rule.get("baseline_compatibility", {}).get("safety_status") == "UNSAFE"
+                    ),
+                },
             }
 
             return json.dumps(stats, indent=2)
@@ -233,7 +265,7 @@ class Immunizer(BasePlugin):
             if not os.path.exists(hardened_file):
                 return json.dumps({"error": "No hardened signatures file found"})
 
-            with open(hardened_file, encoding='utf-8') as f:
+            with open(hardened_file, encoding="utf-8") as f:
                 rules = json.load(f)
 
             if rule_id:
@@ -243,35 +275,47 @@ class Immunizer(BasePlugin):
                     return json.dumps({"error": f"Rule {rule_id} not found"})
 
                 test_result = await self._test_rule_safety(HardenedRule(**rule))
-                return json.dumps({
-                    "rule_id": rule_id,
-                    "safety_result": {
-                        "false_positive_rate": test_result.false_positive_rate,
-                        "tested_samples": test_result.tested_samples,
-                        "flagged_samples": test_result.flagged_samples,
-                        "safety_status": test_result.safety_status
-                    }
-                }, indent=2)
+                return json.dumps(
+                    {
+                        "rule_id": rule_id,
+                        "safety_result": {
+                            "false_positive_rate": test_result.false_positive_rate,
+                            "tested_samples": test_result.tested_samples,
+                            "flagged_samples": test_result.flagged_samples,
+                            "safety_status": test_result.safety_status,
+                        },
+                    },
+                    indent=2,
+                )
             else:
                 # Test all rules
                 safety_results = []
                 for rule in rules:
                     test_result = await self._test_rule_safety(HardenedRule(**rule))
-                    safety_results.append({
-                        "rule_id": rule.get("rule_id"),
-                        "false_positive_rate": test_result.false_positive_rate,
-                        "safety_status": test_result.safety_status
-                    })
+                    safety_results.append(
+                        {
+                            "rule_id": rule.get("rule_id"),
+                            "false_positive_rate": test_result.false_positive_rate,
+                            "safety_status": test_result.safety_status,
+                        }
+                    )
 
-                return json.dumps({
-                    "total_rules": len(safety_results),
-                    "safety_summary": {
-                        "safe": sum(1 for r in safety_results if r["safety_status"] == "SAFE"),
-                        "warning": sum(1 for r in safety_results if r["safety_status"] == "WARNING"),
-                        "unsafe": sum(1 for r in safety_results if r["safety_status"] == "UNSAFE")
+                return json.dumps(
+                    {
+                        "total_rules": len(safety_results),
+                        "safety_summary": {
+                            "safe": sum(1 for r in safety_results if r["safety_status"] == "SAFE"),
+                            "warning": sum(
+                                1 for r in safety_results if r["safety_status"] == "WARNING"
+                            ),
+                            "unsafe": sum(
+                                1 for r in safety_results if r["safety_status"] == "UNSAFE"
+                            ),
+                        },
+                        "detailed_results": safety_results,
                     },
-                    "detailed_results": safety_results
-                }, indent=2)
+                    indent=2,
+                )
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Error testing rule safety: {e}")
@@ -284,7 +328,7 @@ class Immunizer(BasePlugin):
             if not os.path.exists(hardened_file):
                 return json.dumps({"error": "No hardened signatures file found"})
 
-            with open(hardened_file, encoding='utf-8') as f:
+            with open(hardened_file, encoding="utf-8") as f:
                 rules = json.load(f)
 
             # Generate comprehensive report
@@ -293,24 +337,55 @@ class Immunizer(BasePlugin):
                     "report_type": "Signature Hardening Report",
                     "generated_at": datetime.now().isoformat(),
                     "version": "1.0",
-                    "baseline_samples": len(self.human_baseline_texts)
+                    "baseline_samples": len(self.human_baseline_texts),
                 },
                 "hardening_summary": {
                     "total_rules": len(rules),
                     "rule_types": Counter(rule.get("rule_type", "unknown") for rule in rules),
-                    "average_confidence": sum(rule.get("confidence", 0) for rule in rules) / len(rules) if rules else 0,
-                    "vulnerability_coverage": len({rule.get("vulnerability_source", "") for rule in rules})
+                    "average_confidence": sum(rule.get("confidence", 0) for rule in rules)
+                    / len(rules)
+                    if rules
+                    else 0,
+                    "vulnerability_coverage": len(
+                        {rule.get("vulnerability_source", "") for rule in rules}
+                    ),
                 },
                 "safety_analysis": {
                     "baseline_compatibility": {
-                        "safe_rules": sum(1 for rule in rules if rule.get("baseline_compatibility", {}).get("safety_status") == "SAFE"),
-                        "warning_rules": sum(1 for rule in rules if rule.get("baseline_compatibility", {}).get("safety_status") == "WARNING"),
-                        "unsafe_rules": sum(1 for rule in rules if rule.get("baseline_compatibility", {}).get("safety_status") == "UNSAFE")
+                        "safe_rules": sum(
+                            1
+                            for rule in rules
+                            if rule.get("baseline_compatibility", {}).get("safety_status") == "SAFE"
+                        ),
+                        "warning_rules": sum(
+                            1
+                            for rule in rules
+                            if rule.get("baseline_compatibility", {}).get("safety_status")
+                            == "WARNING"
+                        ),
+                        "unsafe_rules": sum(
+                            1
+                            for rule in rules
+                            if rule.get("baseline_compatibility", {}).get("safety_status")
+                            == "UNSAFE"
+                        ),
                     },
                     "false_positive_analysis": {
-                        "average_fpr": sum(rule.get("baseline_compatibility", {}).get("false_positive_rate", 0) for rule in rules) / len(rules) if rules else 0,
-                        "max_fpr": max((rule.get("baseline_compatibility", {}).get("false_positive_rate", 0) for rule in rules), default=0)
-                    }
+                        "average_fpr": sum(
+                            rule.get("baseline_compatibility", {}).get("false_positive_rate", 0)
+                            for rule in rules
+                        )
+                        / len(rules)
+                        if rules
+                        else 0,
+                        "max_fpr": max(
+                            (
+                                rule.get("baseline_compatibility", {}).get("false_positive_rate", 0)
+                                for rule in rules
+                            ),
+                            default=0,
+                        ),
+                    },
                 },
                 "rule_details": [
                     {
@@ -320,11 +395,13 @@ class Immunizer(BasePlugin):
                         "description": rule.get("description"),
                         "confidence": rule.get("confidence"),
                         "vulnerability_source": rule.get("vulnerability_source"),
-                        "safety_status": rule.get("baseline_compatibility", {}).get("safety_status", "UNKNOWN")
+                        "safety_status": rule.get("baseline_compatibility", {}).get(
+                            "safety_status", "UNKNOWN"
+                        ),
                     }
                     for rule in rules
                 ],
-                "recommendations": self._generate_hardening_recommendations(rules)
+                "recommendations": self._generate_hardening_recommendations(rules),
             }
 
             return json.dumps(report, indent=2)
@@ -339,9 +416,11 @@ class Immunizer(BasePlugin):
             # Try to load from existing baseline file
             baseline_file = os.path.join(self.data_dir, "human_baseline.json")
             if os.path.exists(baseline_file):
-                with open(baseline_file, encoding='utf-8') as f:
+                with open(baseline_file, encoding="utf-8") as f:
                     self.human_baseline_texts = json.load(f)
-                logger.info(f"[{self.plugin_id}] Loaded {len(self.human_baseline_texts)} baseline samples")
+                logger.info(
+                    f"[{self.plugin_id}] Loaded {len(self.human_baseline_texts)} baseline samples"
+                )
             else:
                 # Create default baseline if file doesn't exist
                 self._create_default_baseline()
@@ -366,22 +445,26 @@ class Immunizer(BasePlugin):
             "Our team is committed to delivering high-quality solutions.",
             "Customer satisfaction is our top priority in all interactions.",
             "The system will undergo maintenance during the weekend hours.",
-            "Please ensure all deadlines are met according to the project schedule."
+            "Please ensure all deadlines are met according to the project schedule.",
         ]
 
         # Save baseline for future use
         baseline_file = os.path.join(self.data_dir, "human_baseline.json")
-        with open(baseline_file, 'w', encoding='utf-8') as f:
+        with open(baseline_file, "w", encoding="utf-8") as f:
             json.dump(self.human_baseline_texts, f, indent=2)
 
-        logger.info(f"[{self.plugin_id}] Created default baseline with {len(self.human_baseline_texts)} samples")
+        logger.info(
+            f"[{self.plugin_id}] Created default baseline with {len(self.human_baseline_texts)} samples"
+        )
 
     async def _load_evasion_report(self, report_path: str) -> dict[str, Any]:
         """Load the evasion test report."""
-        with open(report_path, encoding='utf-8') as f:
+        with open(report_path, encoding="utf-8") as f:
             return json.load(f)
 
-    def _identify_high_impact_vulnerabilities(self, report_data: dict[str, Any]) -> list[VulnerabilityRecord]:
+    def _identify_high_impact_vulnerabilities(
+        self, report_data: dict[str, Any]
+    ) -> list[VulnerabilityRecord]:
         """Identify high-impact vulnerabilities from the report."""
         vulnerabilities = []
 
@@ -397,7 +480,7 @@ class Immunizer(BasePlugin):
                     suggested_features=vuln_data.get("suggested_features", []),
                     variant_details=vuln_data.get("variant_details", {}),
                     variant_type=vuln_data.get("variant_details", {}).get("technique", "unknown"),
-                    modification_details=vuln_data.get("variant_details", {})
+                    modification_details=vuln_data.get("variant_details", {}),
                 )
 
                 # Check if it's high impact
@@ -420,7 +503,9 @@ class Immunizer(BasePlugin):
 
         return rules
 
-    def _generate_char_substitution_rules(self, vulnerability: VulnerabilityRecord) -> list[HardenedRule]:
+    def _generate_char_substitution_rules(
+        self, vulnerability: VulnerabilityRecord
+    ) -> list[HardenedRule]:
         """Generate rules for character substitution vulnerabilities."""
         rules = []
 
@@ -429,36 +514,36 @@ class Immunizer(BasePlugin):
 
         # Generate regex patterns for common homoglyph attacks
         homoglyph_patterns = [
-            r'[a@4α]',  # a variants
-            r'[e3€є]',  # e variants
-            r'[i1!ι]',  # i variants
-            r'[o0°ο]',  # o variants
-            r'[s5$ѕ]',  # s variants
-            r'[t7+τ]',  # t variants
-            r'[l1|£]',  # l variants
-            r'[c(<¢]',  # c variants
-            r'[b68β]',  # b variants
-            r'[g969]'   # g variants
+            r"[a@4α]",  # a variants
+            r"[e3€є]",  # e variants
+            r"[i1!ι]",  # i variants
+            r"[o0°ο]",  # o variants
+            r"[s5$ѕ]",  # s variants
+            r"[t7+τ]",  # t variants
+            r"[l1|£]",  # l variants
+            r"[c(<¢]",  # c variants
+            r"[b68β]",  # b variants
+            r"[g969]",  # g variants
         ]
 
         # Create rules for suspicious character combinations
         for i, pattern in enumerate(homoglyph_patterns):
             rule = HardenedRule(
-                rule_id=f"char_sub_{vulnerability.variant_id}_{i+1}",
+                rule_id=f"char_sub_{vulnerability.variant_id}_{i + 1}",
                 rule_type="regex",
                 pattern=f"({pattern}){{2,}}",  # Multiple suspicious characters
                 description=f"Detects multiple character substitutions ({pattern})",
                 vulnerability_source=vulnerability.variant_id,
                 confidence=0.8,
                 created_at=datetime.now().isoformat(),
-                baseline_compatibility={}
+                baseline_compatibility={},
             )
             rules.append(rule)
 
         # Create keyword set for common substitution patterns
         keyword_set = {
             "keywords": ["@lph@", "3m@il", "p@ssw0rd", "l0g1n", "s3cur1ty"],
-            "description": "Common character substitution patterns in sensitive terms"
+            "description": "Common character substitution patterns in sensitive terms",
         }
 
         rule = HardenedRule(
@@ -469,34 +554,36 @@ class Immunizer(BasePlugin):
             vulnerability_source=vulnerability.variant_id,
             confidence=0.75,
             created_at=datetime.now().isoformat(),
-            baseline_compatibility={}
+            baseline_compatibility={},
         )
         rules.append(rule)
 
         return rules
 
-    def _generate_word_obfuscation_rules(self, vulnerability: VulnerabilityRecord) -> list[HardenedRule]:
+    def _generate_word_obfuscation_rules(
+        self, vulnerability: VulnerabilityRecord
+    ) -> list[HardenedRule]:
         """Generate rules for word obfuscation vulnerabilities."""
         rules = []
 
         # Generate regex patterns for word boundary attacks
         word_patterns = [
-            r'\b\w{1,2}\w+\w{1,2}\b',  # Suspicious word lengths
-            r'\b\w*[0-9]\w*\b',        # Words with numbers
-            r'\b\w*[!@#$%^&*()]\w*\b', # Words with special characters
-            r'\b\w{2,}\s*\w{2,}\b'     # Suspicious spacing in words
+            r"\b\w{1,2}\w+\w{1,2}\b",  # Suspicious word lengths
+            r"\b\w*[0-9]\w*\b",  # Words with numbers
+            r"\b\w*[!@#$%^&*()]\w*\b",  # Words with special characters
+            r"\b\w{2,}\s*\w{2,}\b",  # Suspicious spacing in words
         ]
 
         for i, pattern in enumerate(word_patterns):
             rule = HardenedRule(
-                rule_id=f"word_obs_{vulnerability.variant_id}_{i+1}",
+                rule_id=f"word_obs_{vulnerability.variant_id}_{i + 1}",
                 rule_type="regex",
                 pattern=pattern,
                 description=f"Detects word obfuscation patterns ({pattern})",
                 vulnerability_source=vulnerability.variant_id,
                 confidence=0.7,
                 created_at=datetime.now().isoformat(),
-                baseline_compatibility={}
+                baseline_compatibility={},
             )
             rules.append(rule)
 
@@ -508,22 +595,22 @@ class Immunizer(BasePlugin):
 
         # Generate patterns for structural manipulation
         structural_patterns = [
-            r'\s{2,}',                    # Multiple spaces
-            r'[A-Z][a-z]*\s+[A-Z]',     # Suspicious capitalization patterns
-            r'\b\w+\s+\w+\s+\w+\b',     # Suspicious word spacing
-            r'[^\w\s]{3,}'              # Multiple non-word characters
+            r"\s{2,}",  # Multiple spaces
+            r"[A-Z][a-z]*\s+[A-Z]",  # Suspicious capitalization patterns
+            r"\b\w+\s+\w+\s+\w+\b",  # Suspicious word spacing
+            r"[^\w\s]{3,}",  # Multiple non-word characters
         ]
 
         for i, pattern in enumerate(structural_patterns):
             rule = HardenedRule(
-                rule_id=f"struct_{vulnerability.variant_id}_{i+1}",
+                rule_id=f"struct_{vulnerability.variant_id}_{i + 1}",
                 rule_type="regex",
                 pattern=pattern,
                 description=f"Detects structural manipulation ({pattern})",
                 vulnerability_source=vulnerability.variant_id,
                 confidence=0.65,
                 created_at=datetime.now().isoformat(),
-                baseline_compatibility={}
+                baseline_compatibility={},
             )
             rules.append(rule)
 
@@ -535,22 +622,22 @@ class Immunizer(BasePlugin):
 
         # Generate patterns for synonym-based attacks
         semantic_patterns = [
-            r'\b(?:trial|experiment|assessment)\b',  # Test synonyms
-            r'\b(?:example|specimen|instance)\b',    # Sample synonyms
-            r'\b(?:identification|recognition|discovery)\b',  # Detection synonyms
-            r'\b(?:irregularity|abnormality|deviation)\b'      # Anomaly synonyms
+            r"\b(?:trial|experiment|assessment)\b",  # Test synonyms
+            r"\b(?:example|specimen|instance)\b",  # Sample synonyms
+            r"\b(?:identification|recognition|discovery)\b",  # Detection synonyms
+            r"\b(?:irregularity|abnormality|deviation)\b",  # Anomaly synonyms
         ]
 
         for i, pattern in enumerate(semantic_patterns):
             rule = HardenedRule(
-                rule_id=f"semantic_{vulnerability.variant_id}_{i+1}",
+                rule_id=f"semantic_{vulnerability.variant_id}_{i + 1}",
                 rule_type="regex",
                 pattern=pattern,
                 description=f"Detects semantic preservation attempts ({pattern})",
                 vulnerability_source=vulnerability.variant_id,
                 confidence=0.6,
                 created_at=datetime.now().isoformat(),
-                baseline_compatibility={}
+                baseline_compatibility={},
             )
             rules.append(rule)
 
@@ -562,23 +649,23 @@ class Immunizer(BasePlugin):
 
         # Generate patterns for Unicode and invisible character attacks
         formatting_patterns = [
-            r'[\u0430-\u044F]',          # Cyrillic characters
-            r'[\u200B-\u200D]',         # Zero-width characters
-            r'[\uFEFF]',                # Byte order mark
-            r'[\u202A-\u202E]',         # Directional formatting
-            r'[^\x00-\x7F]'             # Non-ASCII characters
+            r"[\u0430-\u044F]",  # Cyrillic characters
+            r"[\u200B-\u200D]",  # Zero-width characters
+            r"[\uFEFF]",  # Byte order mark
+            r"[\u202A-\u202E]",  # Directional formatting
+            r"[^\x00-\x7F]",  # Non-ASCII characters
         ]
 
         for i, pattern in enumerate(formatting_patterns):
             rule = HardenedRule(
-                rule_id=f"format_{vulnerability.variant_id}_{i+1}",
+                rule_id=f"format_{vulnerability.variant_id}_{i + 1}",
                 rule_type="regex",
                 pattern=pattern,
                 description=f"Detects formatting manipulation ({pattern})",
                 vulnerability_source=vulnerability.variant_id,
                 confidence=0.85,
                 created_at=datetime.now().isoformat(),
-                baseline_compatibility={}
+                baseline_compatibility={},
             )
             rules.append(rule)
 
@@ -590,22 +677,22 @@ class Immunizer(BasePlugin):
 
         # Generic suspicious pattern detection
         generic_patterns = [
-            r'[^\w\s]{4,}',             # Multiple special characters
-            r'\b\w{10,}\b',            # Very long words
-            r'\s{3,}',                  # Multiple spaces
-            r'[A-Z]{3,}'                # Multiple consecutive capitals
+            r"[^\w\s]{4,}",  # Multiple special characters
+            r"\b\w{10,}\b",  # Very long words
+            r"\s{3,}",  # Multiple spaces
+            r"[A-Z]{3,}",  # Multiple consecutive capitals
         ]
 
         for i, pattern in enumerate(generic_patterns):
             rule = HardenedRule(
-                rule_id=f"generic_{vulnerability.variant_id}_{i+1}",
+                rule_id=f"generic_{vulnerability.variant_id}_{i + 1}",
                 rule_type="regex",
                 pattern=pattern,
                 description=f"Generic suspicious pattern detection ({pattern})",
                 vulnerability_source=vulnerability.variant_id,
                 confidence=0.5,
                 created_at=datetime.now().isoformat(),
-                baseline_compatibility={}
+                baseline_compatibility={},
             )
             rules.append(rule)
 
@@ -623,7 +710,9 @@ class Immunizer(BasePlugin):
                     flagged_samples += 1
                     flagged_texts.append(text[:100])  # Store first 100 chars
 
-            false_positive_rate = flagged_samples / len(self.human_baseline_texts) if self.human_baseline_texts else 0
+            false_positive_rate = (
+                flagged_samples / len(self.human_baseline_texts) if self.human_baseline_texts else 0
+            )
 
             # Determine safety status
             if false_positive_rate <= self.baseline_compatibility_threshold:
@@ -639,7 +728,7 @@ class Immunizer(BasePlugin):
                 tested_samples=len(self.human_baseline_texts),
                 flagged_samples=flagged_samples,
                 flagged_texts=flagged_texts,
-                safety_status=safety_status
+                safety_status=safety_status,
             )
 
         except Exception as e:
@@ -650,7 +739,7 @@ class Immunizer(BasePlugin):
                 tested_samples=0,
                 flagged_samples=0,
                 flagged_texts=[],
-                safety_status="ERROR"
+                safety_status="ERROR",
             )
 
     def _rule_matches(self, rule: HardenedRule, text: str) -> bool:
@@ -674,7 +763,7 @@ class Immunizer(BasePlugin):
             # Load existing rules if file exists
             existing_rules = []
             if os.path.exists(output_file):
-                with open(output_file, encoding='utf-8') as f:
+                with open(output_file, encoding="utf-8") as f:
                     existing_rules = json.load(f)
 
             # Convert HardenedRule objects to dictionaries
@@ -688,7 +777,7 @@ class Immunizer(BasePlugin):
                     "vulnerability_source": rule.vulnerability_source,
                     "confidence": rule.confidence,
                     "created_at": rule.created_at,
-                    "baseline_compatibility": rule.baseline_compatibility
+                    "baseline_compatibility": rule.baseline_compatibility,
                 }
                 new_rule_dicts.append(rule_dict)
 
@@ -696,7 +785,7 @@ class Immunizer(BasePlugin):
             all_rules = existing_rules + new_rule_dicts
 
             # Save to file
-            with open(output_file, 'w', encoding='utf-8') as f:
+            with open(output_file, "w", encoding="utf-8") as f:
                 json.dump(all_rules, f, indent=2)
 
             logger.info(f"[{self.plugin_id}] Saved {len(rules)} hardened rules to {output_file}")
@@ -705,7 +794,9 @@ class Immunizer(BasePlugin):
             logger.exception(f"[{self.plugin_id}] Error saving hardened rules: {e}")
             raise
 
-    def _get_vulnerability_type_summary(self, vulnerabilities: list[VulnerabilityRecord]) -> dict[str, int]:
+    def _get_vulnerability_type_summary(
+        self, vulnerabilities: list[VulnerabilityRecord]
+    ) -> dict[str, int]:
         """Get summary of vulnerability types."""
         type_counts = Counter(v.variant_type for v in vulnerabilities)
         return dict(type_counts)
@@ -723,20 +814,30 @@ class Immunizer(BasePlugin):
         rule_types = Counter(rule.get("rule_type", "unknown") for rule in rules)
 
         if rule_types.get("regex", 0) > rule_types.get("keyword_set", 0):
-            recommendations.append("Consider adding more keyword-based detection rules for better coverage")
+            recommendations.append(
+                "Consider adding more keyword-based detection rules for better coverage"
+            )
 
         # Analyze safety status
-        unsafe_rules = sum(1 for rule in rules if rule.get("baseline_compatibility", {}).get("safety_status") == "UNSAFE")
+        unsafe_rules = sum(
+            1
+            for rule in rules
+            if rule.get("baseline_compatibility", {}).get("safety_status") == "UNSAFE"
+        )
         if unsafe_rules > 0:
-            recommendations.append(f"Review {unsafe_rules} unsafe rules that may cause false positives")
+            recommendations.append(
+                f"Review {unsafe_rules} unsafe rules that may cause false positives"
+            )
 
         # General recommendations
-        recommendations.extend([
-            "Regularly update the human baseline with new samples",
-            "Monitor rule effectiveness in production",
-            "Consider ensemble approaches combining multiple rule types",
-            "Review and refine rules based on real-world performance"
-        ])
+        recommendations.extend(
+            [
+                "Regularly update the human baseline with new samples",
+                "Monitor rule effectiveness in production",
+                "Consider ensemble approaches combining multiple rule types",
+                "Review and refine rules based on real-world performance",
+            ]
+        )
 
         return recommendations
 

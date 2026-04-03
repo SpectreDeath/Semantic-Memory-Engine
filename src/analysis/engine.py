@@ -10,17 +10,24 @@ analyzer = SentimentIntensityAnalyzer()
 # You can keep these in an external JSON/CSV as you scale
 custom_lexicon = {
     "dehumanizing_metaphors": {
-        "vermin": -3.0, "parasite": -3.5, "infestation": -2.5, "toxic": -2.0
+        "vermin": -3.0,
+        "parasite": -3.5,
+        "infestation": -2.5,
+        "toxic": -2.0,
     },
     "bureaucratic_distancing": {
-        "entities": -1.0, "units": -0.5, "processing_units": -1.5, "collateral": -2.0
-    }
+        "entities": -1.0,
+        "units": -0.5,
+        "processing_units": -1.5,
+        "collateral": -2.0,
+    },
 }
 
 # 2. UPDATE VADER WITH YOUR SIGNALS
 # This forces the engine to recognize your specific 'Character Tells'
 for category in custom_lexicon.values():
     analyzer.lexicon.update(category)
+
 
 def analyze_rhetoric(text):
     """
@@ -39,8 +46,9 @@ def analyze_rhetoric(text):
     return {
         "sentiment_summary": scores,
         "flagged_terms": found_signals,
-        "risk_level": "HIGH" if scores['neg'] > 0.4 or found_signals else "LOW"
+        "risk_level": "HIGH" if scores["neg"] > 0.4 or found_signals else "LOW",
     }
+
 
 # --- TEST CASE ---
 sample = "The entities represent a toxic infestation that must be cleared."

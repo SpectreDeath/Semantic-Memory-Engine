@@ -20,8 +20,10 @@ import pydantic_ai
 # Pydantic Models for Type-Safe Responses
 # ============================================================================
 
+
 class EntityExtraction(pydantic.BaseModel):
     """Extracted entity from forensic text."""
+
     name: str = pydantic.Field(..., description="Entity name")
     entity_type: str = pydantic.Field(..., description="Type: person, organization, location, etc.")
     confidence: float = pydantic.Field(..., ge=0.0, le=1.0, description="Confidence score")
@@ -29,15 +31,21 @@ class EntityExtraction(pydantic.BaseModel):
 
 class ForensicAnalysisResult(pydantic.BaseModel):
     """Structured forensic analysis output."""
+
     entities: list[EntityExtraction] = pydantic.Field(default_factory=list)
-    sentiment: str = pydantic.Field(..., description="Overall sentiment: positive, negative, neutral")
+    sentiment: str = pydantic.Field(
+        ..., description="Overall sentiment: positive, negative, neutral"
+    )
     key_findings: list[str] = pydantic.Field(default_factory=list)
-    risk_level: str = pydantic.Field(..., description="Risk assessment: low, medium, high, critical")
+    risk_level: str = pydantic.Field(
+        ..., description="Risk assessment: low, medium, high, critical"
+    )
     recommended_actions: list[str] = pydantic.Field(default_factory=list)
 
 
 class ClaimVerification(pydantic.BaseModel):
     """Epistemic verification result."""
+
     claim: str = pydantic.Field(..., description="The claim being verified")
     is_verified: bool = pydantic.Field(..., description="Whether the claim can be verified")
     confidence: float = pydantic.Field(..., ge=0.0, le=1.0)
@@ -63,16 +71,18 @@ Guidelines:
 6. Flag synthetic or potentially manipulated content
 """
 
+
 # Create the forensic agent with typed outputs
 # Note: Uses 'infer' model - will use OPENAI_API_KEY env var or can be configured
 # to use other providers (ollama, anthropic, etc.)
 def get_forensic_agent():
     """Lazy initialization of the forensic agent."""
     return pydantic_ai.Agent(
-        model='openai:gpt-4o-mini',  # Configurable - can use Ollama, Anthropic, etc.
+        model="openai:gpt-4o-mini",  # Configurable - can use Ollama, Anthropic, etc.
         result_type=ForensicAnalysisResult,
         system_prompt=FORENSIC_AGENT_SYSTEM_PROMPT,
     )
+
 
 # For backwards compatibility - will be lazily initialized
 forensic_agent = None
@@ -81,6 +91,7 @@ forensic_agent = None
 # ============================================================================
 # Legacy-style wrapper for SME compatibility
 # ============================================================================
+
 
 def analyze_forensic_text(text: str) -> dict[str, Any]:
     """
@@ -103,21 +114,14 @@ def analyze_forensic_text(text: str) -> dict[str, Any]:
     # Convert to dict for SME compatibility
     return {
         "entities": [
-            {
-                "name": e.name,
-                "type": e.entity_type,
-                "confidence": e.confidence
-            }
+            {"name": e.name, "type": e.entity_type, "confidence": e.confidence}
             for e in result.data.entities
         ],
         "sentiment": result.data.sentiment,
         "findings": result.data.key_findings,
         "risk_level": result.data.risk_level,
         "actions": result.data.recommended_actions,
-        "validation": {
-            "model": "pydantic-ai",
-            "validated": True
-        }
+        "validation": {"model": "pydantic-ai", "validated": True},
     }
 
 
@@ -129,21 +133,14 @@ async def analyze_forensic_text_async(text: str) -> dict[str, Any]:
 
     return {
         "entities": [
-            {
-                "name": e.name,
-                "type": e.entity_type,
-                "confidence": e.confidence
-            }
+            {"name": e.name, "type": e.entity_type, "confidence": e.confidence}
             for e in result.data.entities
         ],
         "sentiment": result.data.sentiment,
         "findings": result.data.key_findings,
         "risk_level": result.data.risk_level,
         "actions": result.data.recommended_actions,
-        "validation": {
-            "model": "pydantic-ai",
-            "validated": True
-        }
+        "validation": {"model": "pydantic-ai", "validated": True},
     }
 
 
@@ -159,7 +156,7 @@ def verify_claim(claim: str, evidence: list[str]) -> dict[str, Any]:
         Verification result with confidence score
     """
     verification_agent = pydantic_ai.Agent(
-        model='openai:gpt-4o-mini',
+        model="openai:gpt-4o-mini",
         result_type=ClaimVerification,
         system_prompt="""You are an epistemic verifier.
         Evaluate claims against provided evidence sources.
@@ -174,13 +171,14 @@ def verify_claim(claim: str, evidence: list[str]) -> dict[str, Any]:
         "verified": result.data.is_verified,
         "confidence": result.data.confidence,
         "sources": result.data.evidence_sources,
-        "notes": result.data.uncertainty_notes
+        "notes": result.data.uncertainty_notes,
     }
 
 
 # ============================================================================
 # Integration with SME Tool Registry
 # ============================================================================
+
 
 def register_with_sme_registry(registry):
     """
@@ -193,14 +191,14 @@ def register_with_sme_registry(registry):
         "pydantic_ai_analyze",
         analyze_forensic_text,
         description="AI-powered forensic text analysis using Pydantic-AI",
-        parameters={"text": "str"}
+        parameters={"text": "str"},
     )
 
     registry.add_tool(
         "pydantic_ai_verify",
         verify_claim,
         description="Verify forensic claims against evidence",
-        parameters={"claim": "str", "evidence": "list"}
+        parameters={"claim": "str", "evidence": "list"},
     )
 
 

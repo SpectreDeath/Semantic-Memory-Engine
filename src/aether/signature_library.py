@@ -45,6 +45,7 @@ NODE_SECRET_KEY_FILE = "data/aether/node_secret.key"
 
 class SignatureType(Enum):
     """Types of rhetorical signatures."""
+
     ENTROPY_PATTERN = "entropy_pattern"
     BURSTINESS_PATTERN = "burstiness_pattern"
     NGRAM_PATTERN = "ngram_pattern"
@@ -55,10 +56,11 @@ class SignatureType(Enum):
 
 class SharingLevel(Enum):
     """Signature sharing levels."""
-    PRIVATE = 0      # Not shared
-    TRUSTED = 1      # Shared with trusted nodes
-    FEDERATED = 2    # Shared with all federated nodes
-    PUBLIC = 3       # Public domain
+
+    PRIVATE = 0  # Not shared
+    TRUSTED = 1  # Shared with trusted nodes
+    FEDERATED = 2  # Shared with all federated nodes
+    PUBLIC = 3  # Public domain
 
 
 @dataclass
@@ -66,18 +68,19 @@ class SignatureNode:
     """
     Represents a single rhetorical signature with cryptographic verification.
     """
+
     id: str
-    signature_hash: str          # SHA-256 of the signature data
-    content_hash: str            # SHA-256 of the original text
+    signature_hash: str  # SHA-256 of the signature data
+    content_hash: str  # SHA-256 of the original text
     signature_type: str
-    features: dict[str, Any]      # Extracted features
-    ngrams: set[str]              # N-gram set for matching
-    trust_score: float            # NTS score from gatekeeper
+    features: dict[str, Any]  # Extracted features
+    ngrams: set[str]  # N-gram set for matching
+    trust_score: float  # NTS score from gatekeeper
     model_attribution: dict[str, Any]
     created_at: datetime = field(default_factory=datetime.now)
-    source_node: str = ""         # Origin node ID
+    source_node: str = ""  # Origin node ID
     sharing_level: int = SharingLevel.PRIVATE.value
-    hmac_signature: str = ""     # HMAC for verification
+    hmac_signature: str = ""  # HMAC for verification
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -94,7 +97,7 @@ class SignatureNode:
             "source_node": self.source_node,
             "sharing_level": self.sharing_level,
             "hmac_signature": self.hmac_signature,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
 
     @classmethod
@@ -112,7 +115,7 @@ class SignatureNode:
             source_node=data.get("source_node", ""),
             sharing_level=data.get("sharing_level", SharingLevel.PRIVATE.value),
             hmac_signature=data.get("hmac_signature", ""),
-            metadata=data.get("metadata", {})
+            metadata=data.get("metadata", {}),
         )
 
     def verify_hmac(self, secret_key: str) -> bool:
@@ -126,11 +129,7 @@ class SignatureNode:
     def _compute_hmac(self, secret_key: str) -> str:
         """Compute HMAC for this signature."""
         message = f"{self.signature_hash}:{self.content_hash}:{self.created_at.isoformat()}"
-        return hmac.new(
-            secret_key.encode(),
-            message.encode(),
-            hashlib.sha256
-        ).hexdigest()
+        return hmac.new(secret_key.encode(), message.encode(), hashlib.sha256).hexdigest()
 
     def sign(self, secret_key: str) -> None:
         """Sign this signature with HMAC."""
@@ -142,11 +141,12 @@ class ForensicProfile:
     """
     A collection of signatures representing a behavioral fingerprint.
     """
+
     id: str
     name: str
-    node_id: str              # Owner node
-    signatures: list[str]      # List of signature IDs
-    merkle_root: str          # Merkle tree root for verification
+    node_id: str  # Owner node
+    signatures: list[str]  # List of signature IDs
+    merkle_root: str  # Merkle tree root for verification
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
     sharing_level: int = SharingLevel.PRIVATE.value
@@ -164,7 +164,7 @@ class ForensicProfile:
             "updated_at": self.updated_at.isoformat(),
             "sharing_level": self.sharing_level,
             "metadata": self.metadata,
-            "peer_nodes": list(self.peer_nodes)
+            "peer_nodes": list(self.peer_nodes),
         }
 
     @classmethod
@@ -179,7 +179,7 @@ class ForensicProfile:
             updated_at=datetime.fromisoformat(data["updated_at"]),
             sharing_level=data.get("sharing_level", SharingLevel.PRIVATE.value),
             metadata=data.get("metadata", {}),
-            peer_nodes=set(data.get("peer_nodes", []))
+            peer_nodes=set(data.get("peer_nodes", [])),
         )
 
 
@@ -241,10 +241,7 @@ class SignatureLibrary:
     """
 
     def __init__(
-        self,
-        node_id: str,
-        node_secret: str | None = None,
-        signatures_dir: str = SIGNATURES_DIR
+        self, node_id: str, node_secret: str | None = None, signatures_dir: str = SIGNATURES_DIR
     ):
         self.node_id = node_id
         self.node_secret = node_secret or self._load_or_create_secret()
@@ -271,7 +268,7 @@ class SignatureLibrary:
             "total_profiles": 0,
             "signatures_created": 0,
             "signatures_shared": 0,
-            "verification_failures": 0
+            "verification_failures": 0,
         }
 
         print(f"[Aether.SignatureLibrary] Initialized for node: {node_id}")
@@ -289,7 +286,7 @@ class SignatureLibrary:
         secret = hashlib.sha256(os.urandom(32)).hexdigest()
 
         try:
-            with open(NODE_SECRET_KEY_FILE, 'w') as f:
+            with open(NODE_SECRET_KEY_FILE, "w") as f:
                 f.write(secret)
         except:
             pass
@@ -303,21 +300,23 @@ class SignatureLibrary:
                 df = pl.read_ipc(SIGNATURE_INDEX_FILE)
 
                 for row in df.to_dicts():
-                    sig = SignatureNode.from_dict({
-                        "id": row["id"],
-                        "signature_hash": row["signature_hash"],
-                        "content_hash": row["content_hash"],
-                        "signature_type": row["signature_type"],
-                        "features": json.loads(row["features"]),
-                        "ngrams": json.loads(row["ngrams"]),
-                        "trust_score": row["trust_score"],
-                        "model_attribution": json.loads(row["model_attribution"]),
-                        "created_at": row["created_at"],
-                        "source_node": row["source_node"],
-                        "sharing_level": row["sharing_level"],
-                        "hmac_signature": row["hmac_signature"],
-                        "metadata": json.loads(row["metadata"])
-                    })
+                    sig = SignatureNode.from_dict(
+                        {
+                            "id": row["id"],
+                            "signature_hash": row["signature_hash"],
+                            "content_hash": row["content_hash"],
+                            "signature_type": row["signature_type"],
+                            "features": json.loads(row["features"]),
+                            "ngrams": json.loads(row["ngrams"]),
+                            "trust_score": row["trust_score"],
+                            "model_attribution": json.loads(row["model_attribution"]),
+                            "created_at": row["created_at"],
+                            "source_node": row["source_node"],
+                            "sharing_level": row["sharing_level"],
+                            "hmac_signature": row["hmac_signature"],
+                            "metadata": json.loads(row["metadata"]),
+                        }
+                    )
                     self._signatures[sig.id] = sig
                     self._content_index[sig.content_hash] = sig.id
                     self._type_index[sig.signature_type].add(sig.id)
@@ -335,21 +334,23 @@ class SignatureLibrary:
         try:
             rows = []
             for sig in self._signatures.values():
-                rows.append({
-                    "id": sig.id,
-                    "signature_hash": sig.signature_hash,
-                    "content_hash": sig.content_hash,
-                    "signature_type": sig.signature_type,
-                    "features": json.dumps(sig.features),
-                    "ngrams": json.dumps(list(sig.ngrams)),
-                    "trust_score": sig.trust_score,
-                    "model_attribution": json.dumps(sig.model_attribution),
-                    "created_at": sig.created_at.isoformat(),
-                    "source_node": sig.source_node,
-                    "sharing_level": sig.sharing_level,
-                    "hmac_signature": sig.hmac_signature,
-                    "metadata": json.dumps(sig.metadata)
-                })
+                rows.append(
+                    {
+                        "id": sig.id,
+                        "signature_hash": sig.signature_hash,
+                        "content_hash": sig.content_hash,
+                        "signature_type": sig.signature_type,
+                        "features": json.dumps(sig.features),
+                        "ngrams": json.dumps(list(sig.ngrams)),
+                        "trust_score": sig.trust_score,
+                        "model_attribution": json.dumps(sig.model_attribution),
+                        "created_at": sig.created_at.isoformat(),
+                        "source_node": sig.source_node,
+                        "sharing_level": sig.sharing_level,
+                        "hmac_signature": sig.hmac_signature,
+                        "metadata": json.dumps(sig.metadata),
+                    }
+                )
 
             df = pl.DataFrame(rows)
             df.write_ipc(SIGNATURE_INDEX_FILE)
@@ -360,10 +361,11 @@ class SignatureLibrary:
     def _extract_ngrams(self, text: str, n: int = 3) -> set[str]:
         """Extract n-grams from text."""
         import re
-        words = re.findall(r'\b\w+\b', text.lower())
+
+        words = re.findall(r"\b\w+\b", text.lower())
         if len(words) < n:
             return set()
-        return {'_'.join(words[i:i+n]) for i in range(len(words) - n + 1)}
+        return {"_".join(words[i : i + n]) for i in range(len(words) - n + 1)}
 
     def _generate_signature_features(self, text: str) -> dict[str, Any]:
         """Extract rhetorical signature features from text."""
@@ -382,7 +384,7 @@ class SignatureLibrary:
             "attribution": attribution,
             "text_length": len(text),
             "word_count": len(text.split()),
-            "sentence_count": len([s for s in text.split('.') if s.strip()])
+            "sentence_count": len([s for s in text.split(".") if s.strip()]),
         }
 
     def create_signature(
@@ -390,7 +392,7 @@ class SignatureLibrary:
         text: str,
         signature_type: str = SignatureType.COMPOSITE.value,
         sharing_level: int = SharingLevel.PRIVATE.value,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> SignatureNode | None:
         """
         Create a new rhetorical signature from text.
@@ -409,11 +411,9 @@ class SignatureLibrary:
         ngrams = self._extract_ngrams(text)
 
         # Generate signature hash
-        sig_data = json.dumps({
-            "features": features,
-            "ngrams": sorted(ngrams),
-            "type": signature_type
-        }, sort_keys=True)
+        sig_data = json.dumps(
+            {"features": features, "ngrams": sorted(ngrams), "type": signature_type}, sort_keys=True
+        )
         signature_hash = hashlib.sha256(sig_data.encode()).hexdigest()
 
         # Create signature node
@@ -428,7 +428,7 @@ class SignatureLibrary:
             model_attribution=features.get("attribution", {}),
             source_node=self.node_id,
             sharing_level=sharing_level,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         # Sign the signature
@@ -449,11 +449,7 @@ class SignatureLibrary:
         return self._signatures.get(signature_id)
 
     def find_similar_signatures(
-        self,
-        text: str,
-        threshold: float = 0.7,
-        signature_type: str | None = None,
-        limit: int = 10
+        self, text: str, threshold: float = 0.7, signature_type: str | None = None, limit: int = 10
     ) -> list[tuple[SignatureNode, float]]:
         """Find similar signatures using n-gram overlap."""
         query_ngrams = self._extract_ngrams(text)
@@ -487,9 +483,7 @@ class SignatureLibrary:
         return results[:limit]
 
     def verify_signature(
-        self,
-        signature_id: str,
-        secret_key: str | None = None
+        self, signature_id: str, secret_key: str | None = None
     ) -> tuple[bool, str]:
         """
         Verify a signature's integrity.
@@ -520,7 +514,7 @@ class SignatureLibrary:
         name: str,
         signature_ids: list[str],
         sharing_level: int = SharingLevel.PRIVATE.value,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> ForensicProfile | None:
         """Create a forensic profile from signatures."""
         # Verify all signatures exist
@@ -540,7 +534,7 @@ class SignatureLibrary:
             signatures=valid_sigs,
             merkle_root=merkle_root,
             sharing_level=sharing_level,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         self._profiles[profile.id] = profile
@@ -559,8 +553,11 @@ class SignatureLibrary:
             return False, "Profile not found"
 
         # Rebuild Merkle tree
-        sig_hashes = [self._signatures[sid].signature_hash
-                     for sid in profile.signatures if sid in self._signatures]
+        sig_hashes = [
+            self._signatures[sid].signature_hash
+            for sid in profile.signatures
+            if sid in self._signatures
+        ]
 
         new_root = self._merkle_tree.build(sig_hashes)
 
@@ -569,11 +566,7 @@ class SignatureLibrary:
 
         return True, "Profile verified"
 
-    def export_profile(
-        self,
-        profile_id: str,
-        include_private: bool = False
-    ) -> dict[str, Any]:
+    def export_profile(self, profile_id: str, include_private: bool = False) -> dict[str, Any]:
         """
         Export a profile for sharing.
 
@@ -583,10 +576,7 @@ class SignatureLibrary:
         if not profile:
             return {"error": "Profile not found"}
 
-        export_data = {
-            "profile": profile.to_dict(),
-            "signatures": []
-        }
+        export_data = {"profile": profile.to_dict(), "signatures": []}
 
         for sig_id in profile.signatures:
             sig = self._signatures.get(sig_id)
@@ -601,11 +591,7 @@ class SignatureLibrary:
 
         return export_data
 
-    def import_profile(
-        self,
-        profile_data: dict[str, Any],
-        verify: bool = True
-    ) -> tuple[bool, str]:
+    def import_profile(self, profile_data: dict[str, Any], verify: bool = True) -> tuple[bool, str]:
         """
         Import a profile from another node.
 
@@ -656,11 +642,7 @@ class SignatureLibrary:
         except Exception as e:
             return False, f"Import failed: {e!s}"
 
-    def share_with_node(
-        self,
-        profile_id: str,
-        target_node_id: str
-    ) -> bool:
+    def share_with_node(self, profile_id: str, target_node_id: str) -> bool:
         """Share a profile with a specific node."""
         profile = self._profiles.get(profile_id)
         if not profile:
@@ -685,10 +667,7 @@ class SignatureLibrary:
             "signatures_created": self.stats["signatures_created"],
             "signatures_shared": self.stats["signatures_shared"],
             "verification_failures": self.stats["verification_failures"],
-            "by_type": {
-                stype: len(sids)
-                for stype, sids in self._type_index.items()
-            }
+            "by_type": {stype: len(sids) for stype, sids in self._type_index.items()},
         }
 
     def close(self):

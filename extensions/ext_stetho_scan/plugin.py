@@ -51,12 +51,12 @@ class StatisticalWatermarkDecoderPlugin:
 
         # Plugin configuration
         self.config = {
-            'z_score_threshold': 2.0,  # Threshold for significant Z-Scores
-            'confidence_threshold': 0.5,  # Minimum confidence score for watermark detection
-            'governor_integration': True,  # Enable Governor status checking
-            'cpu_monitoring': True,  # Enable CPU usage monitoring
-            'safe_mode': True,  # Use safe wrapper that checks Governor and CPU status
-            'log_detailed_results': True
+            "z_score_threshold": 2.0,  # Threshold for significant Z-Scores
+            "confidence_threshold": 0.5,  # Minimum confidence score for watermark detection
+            "governor_integration": True,  # Enable Governor status checking
+            "cpu_monitoring": True,  # Enable CPU usage monitoring
+            "safe_mode": True,  # Use safe wrapper that checks Governor and CPU status
+            "log_detailed_results": True,
         }
 
         # State tracking
@@ -70,11 +70,11 @@ class StatisticalWatermarkDecoderPlugin:
             print(f"Description: {self.description}")
 
             # Initialize Governor integration
-            if self.config.get('governor_integration', True):
+            if self.config.get("governor_integration", True):
                 print("✅ Governor integration enabled")
 
             # Initialize CPU monitoring
-            if self.config.get('cpu_monitoring', True):
+            if self.config.get("cpu_monitoring", True):
                 print("✅ CPU monitoring enabled")
 
             self.is_active = True
@@ -101,11 +101,11 @@ class StatisticalWatermarkDecoderPlugin:
     def get_status(self) -> dict[str, Any]:
         """Get current plugin status."""
         return {
-            'name': self.name,
-            'version': self.version,
-            'is_active': self.is_active,
-            'config': self.config,
-            'governor_status': self.governor_integration.get_status_info()
+            "name": self.name,
+            "version": self.version,
+            "is_active": self.is_active,
+            "config": self.config,
+            "governor_status": self.governor_integration.get_status_info(),
         }
 
     def configure(self, **kwargs) -> bool:
@@ -127,17 +127,18 @@ class StatisticalWatermarkDecoderPlugin:
         """Get available tools provided by this plugin."""
         tools = {}
 
-        if self.config.get('safe_mode', True):
+        if self.config.get("safe_mode", True):
             # Use safe wrapper that checks Governor status and CPU usage
-            tools['detect_watermark_pulse'] = self._create_safe_detection_tool()
+            tools["detect_watermark_pulse"] = self._create_safe_detection_tool()
         else:
             # Use direct detection function
-            tools['detect_watermark_pulse'] = self._create_direct_detection_tool()
+            tools["detect_watermark_pulse"] = self._create_direct_detection_tool()
 
         return tools
 
     def _create_safe_detection_tool(self) -> Callable:
         """Create the safe detection tool with Governor and CPU status checking."""
+
         def safe_detection_tool(text: str) -> dict[str, Any]:
             """
             Safe watermark detection tool that checks Governor status and CPU usage.
@@ -158,6 +159,7 @@ class StatisticalWatermarkDecoderPlugin:
 
     def _create_direct_detection_tool(self) -> Callable:
         """Create the direct detection tool without Governor checking."""
+
         def direct_detection_tool(text: str) -> dict[str, Any]:
             """
             Direct watermark detection tool without Governor status checking.
@@ -178,24 +180,22 @@ class StatisticalWatermarkDecoderPlugin:
 
     def get_hooks(self) -> dict[str, Callable]:
         """Get available hooks provided by this plugin."""
-        return {
-            'governor_status_check': create_stetho_governor_hook()
-        }
+        return {"governor_status_check": create_stetho_governor_hook()}
 
     def get_events(self) -> list[str]:
         """Get list of events this plugin can handle."""
         return [
-            'governor_status_changed',
-            'cpu_usage_changed',
-            'detection_started',
-            'detection_completed',
-            'watermark_detected'
+            "governor_status_changed",
+            "cpu_usage_changed",
+            "detection_started",
+            "detection_completed",
+            "watermark_detected",
         ]
 
     def handle_event(self, event_name: str, **kwargs) -> Any:
         """Handle plugin-specific events."""
-        if event_name == 'governor_status_changed':
-            new_status = kwargs.get('status', 'UNKNOWN')
+        if event_name == "governor_status_changed":
+            new_status = kwargs.get("status", "UNKNOWN")
             print(f"📊 Governor status changed to: {new_status}")
 
             # Update our Governor integration
@@ -208,12 +208,12 @@ class StatisticalWatermarkDecoderPlugin:
             else:
                 self.governor_integration._governor_status = GovernorStatus.UNKNOWN
 
-            self.governor_integration._last_status_check = kwargs.get('timestamp')
+            self.governor_integration._last_status_check = kwargs.get("timestamp")
 
-            return {'status_updated': True, 'new_status': new_status}
+            return {"status_updated": True, "new_status": new_status}
 
-        elif event_name == 'cpu_usage_changed':
-            cpu_level = kwargs.get('cpu_level', 'UNKNOWN')
+        elif event_name == "cpu_usage_changed":
+            cpu_level = kwargs.get("cpu_level", "UNKNOWN")
             print(f"💻 CPU usage level changed to: {cpu_level}")
 
             # Update our CPU usage tracking
@@ -226,23 +226,23 @@ class StatisticalWatermarkDecoderPlugin:
             else:
                 self.governor_integration._cpu_usage_level = CPUUsageLevel.UNKNOWN
 
-            return {'cpu_level_updated': True, 'new_level': cpu_level}
+            return {"cpu_level_updated": True, "new_level": cpu_level}
 
-        elif event_name == 'detection_started':
+        elif event_name == "detection_started":
             print("🔍 Watermark detection started")
-            return {'detection_started': True}
+            return {"detection_started": True}
 
-        elif event_name == 'detection_completed':
-            result = kwargs.get('result', {})
+        elif event_name == "detection_completed":
+            result = kwargs.get("result", {})
             print(f"✅ Watermark detection completed. Status: {result.get('status', 'unknown')}")
-            return {'detection_completed': True}
+            return {"detection_completed": True}
 
-        elif event_name == 'watermark_detected':
-            watermark_info = kwargs.get('watermark_info', {})
+        elif event_name == "watermark_detected":
+            watermark_info = kwargs.get("watermark_info", {})
             print(f"🚨 Watermark detected: {watermark_info}")
-            return {'watermark_handled': True}
+            return {"watermark_handled": True}
 
-        return {'event_handled': False}
+        return {"event_handled": False}
 
     def get_decoder_instance(self) -> StatisticalWatermarkDecoder:
         """Get an instance of the StatisticalWatermarkDecoder for advanced usage."""
@@ -264,4 +264,9 @@ def register_extension(manifest: dict, nexus_api: Any) -> StatisticalWatermarkDe
 
 
 # Export for use by the extension system
-__all__ = ['StatisticalWatermarkDecoderPlugin', 'get_plugin', 'register_extension', 'statistical_watermark_decoder_plugin']
+__all__ = [
+    "StatisticalWatermarkDecoderPlugin",
+    "get_plugin",
+    "register_extension",
+    "statistical_watermark_decoder_plugin",
+]

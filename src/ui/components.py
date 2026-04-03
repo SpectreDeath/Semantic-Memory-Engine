@@ -1,4 +1,3 @@
-
 import pandas as pd
 import streamlit as st
 
@@ -9,6 +8,7 @@ def render_metric_cards(osint_len, news_len, research_len):
     c1.metric("Actor Footprints", osint_len)
     c2.metric("News Articles", news_len)
     c3.metric("Research Papers", research_len)
+
 
 def render_identity_matrix(osint_data):
     """Render a color-coded matrix of Usernames vs Platforms."""
@@ -41,7 +41,8 @@ def render_identity_matrix(osint_data):
 
     # Custom styling
     st.markdown("### 🧬 Identity Correlation Matrix")
-    st.table(df) # st.table handles the density better for fixed matrices
+    st.table(df)  # st.table handles the density better for fixed matrices
+
 
 from streamlit_agraph import Config, Edge, Node, agraph
 
@@ -62,12 +63,16 @@ def render_tactical_graph(osint_data):
         user = scan.get("username", "Unknown")
         if user not in seen_nodes:
             # actor node
-            nodes.append(Node(id=user,
-                             label=user,
-                             size=30,
-                             color="#FF4B4B",
-                             shape="dot",
-                             font={'color': 'white', 'size': 14}))
+            nodes.append(
+                Node(
+                    id=user,
+                    label=user,
+                    size=30,
+                    color="#FF4B4B",
+                    shape="dot",
+                    font={"color": "white", "size": 14},
+                )
+            )
             seen_nodes.add(user)
 
         for p in scan.get("platforms", []):
@@ -76,18 +81,19 @@ def render_tactical_graph(osint_data):
                 plat_id = f"plat_{plat_name}"
                 if plat_id not in seen_nodes:
                     # platform node
-                    nodes.append(Node(id=plat_id,
-                                     label=plat_name,
-                                     size=20,
-                                     color="#238636",
-                                     shape="diamond",
-                                     font={'color': '#888', 'size': 12}))
+                    nodes.append(
+                        Node(
+                            id=plat_id,
+                            label=plat_name,
+                            size=20,
+                            color="#238636",
+                            shape="diamond",
+                            font={"color": "#888", "size": 12},
+                        )
+                    )
                     seen_nodes.add(plat_id)
 
-                edges.append(Edge(source=user,
-                                  target=plat_id,
-                                  color="#555555",
-                                  width=2))
+                edges.append(Edge(source=user, target=plat_id, color="#555555", width=2))
 
     config = Config(
         width=900,
@@ -102,12 +108,13 @@ def render_tactical_graph(osint_data):
 
     return agraph(nodes=nodes, edges=edges, config=config)
 
+
 def render_log_streamer(log_area, process):
     """Stream subprocess logs to the UI."""
     full_log = ""
     while True:
         output = process.stdout.readline()
-        if output == '' and process.poll() is not None:
+        if output == "" and process.poll() is not None:
             break
         if output:
             full_log += output

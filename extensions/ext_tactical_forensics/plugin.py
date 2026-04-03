@@ -10,17 +10,19 @@ from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.TacticalPack")
 
+
 class TacticalForensicExtension(BasePlugin):
     """
     Tactical Intelligence Pack for Lawnmower Man v1.1.1.
     Specialized for analyzing physical evidence patterns at critical sites.
     """
+
     def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
         self.threat_signatures = {
             "IED_Component": ["nitrate", "detonator", "timer", "circuit"],
             "CBRN_Precursor": ["hazardous", "chemical", "radiation", "biological"],
-            "Tactical_Comms": ["encrypted", "radio", "frequency", "signal"]
+            "Tactical_Comms": ["encrypted", "radio", "frequency", "signal"],
         }
 
     async def on_startup(self):
@@ -41,11 +43,13 @@ class TacticalForensicExtension(BasePlugin):
                 found_threats.append(threat)
 
         if found_threats:
-            logger.warning(f"[{self.plugin_id}] TACTICAL ALERT: Found signatures {found_threats} in evidence.")
+            logger.warning(
+                f"[{self.plugin_id}] TACTICAL ALERT: Found signatures {found_threats} in evidence."
+            )
             return {
                 "tactical_hits": found_threats,
                 "priority": "HIGH",
-                "risk_assessment": "Immediate review required by Explosive Ordnance Disposal (EOD)."
+                "risk_assessment": "Immediate review required by Explosive Ordnance Disposal (EOD).",
             }
 
         return {"status": "cleared", "tactical_hits": []}
@@ -69,8 +73,8 @@ class TacticalForensicExtension(BasePlugin):
         if os.path.isdir(site_path):
             for root, _, files in os.walk(site_path):
                 for file in files:
-                    if file.endswith(('.txt', '.md', '.log')):
-                        with open(os.path.join(root, file), errors='ignore') as f:
+                    if file.endswith((".txt", ".md", ".log")):
+                        with open(os.path.join(root, file), errors="ignore") as f:
                             content = f.read().lower()
                             for threat, signatures in self.threat_signatures.items():
                                 if any(sig in content for sig in signatures):
@@ -80,7 +84,7 @@ class TacticalForensicExtension(BasePlugin):
             "timestamp": datetime.now().isoformat(),
             "site": os.path.abspath(site_path),
             "threat_hits": hits,
-            "status": "DANGER" if hits else "CLEAR"
+            "status": "DANGER" if hits else "CLEAR",
         }
 
         # Hardware signature via SmeCoreBridge (through the bridge's nexus access)
@@ -105,16 +109,20 @@ class TacticalForensicExtension(BasePlugin):
                 score += 10
 
         level = "LOW"
-        if score > 15: level = "CRITICAL"
-        elif score > 8: level = "HIGH"
-        elif score > 3: level = "MEDIUM"
+        if score > 15:
+            level = "CRITICAL"
+        elif score > 8:
+            level = "HIGH"
+        elif score > 3:
+            level = "MEDIUM"
 
         result = {
             "threat_score": score,
             "threat_level": level,
-            "classification": "CONIDENTIAL // LAW ENFORCEMENT SENSITIVE"
+            "classification": "CONIDENTIAL // LAW ENFORCEMENT SENSITIVE",
         }
         return json.dumps(result, indent=2)
+
 
 def register_extension(manifest: dict[str, Any], nexus_api: Any):
     """

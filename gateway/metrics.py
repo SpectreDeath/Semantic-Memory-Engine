@@ -5,6 +5,7 @@ from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
 logger = logging.getLogger(__name__)
 
+
 class MetricsManager:
     """
     Handles Prometheus metrics for the Lawnmower Man gateway.
@@ -19,29 +20,26 @@ class MetricsManager:
             self.tool_calls_total = Counter(
                 "lawnmower_tool_calls_total",
                 "Total number of MCP tool calls",
-                ["tool_name", "category"]
+                ["tool_name", "category"],
             )
 
             self.tool_errors_total = Counter(
                 "lawnmower_tool_errors_total",
                 "Total number of failed tool calls",
-                ["tool_name", "error_type"]
+                ["tool_name", "error_type"],
             )
 
             self.tool_latency_seconds = Histogram(
-                "lawnmower_tool_latency_seconds",
-                "Tool execution latency in seconds",
-                ["tool_name"]
+                "lawnmower_tool_latency_seconds", "Tool execution latency in seconds", ["tool_name"]
             )
 
             self.active_sessions = Gauge(
-                "lawnmower_active_sessions",
-                "Number of currently active sessions"
+                "lawnmower_active_sessions", "Number of currently active sessions"
             )
 
             self.system_health = Gauge(
                 "lawnmower_system_health",
-                "Overall system health status (1=healthy, 0=degraded, -1=down)"
+                "Overall system health status (1=healthy, 0=degraded, -1=down)",
             )
 
     def start(self):
@@ -76,7 +74,9 @@ class MetricsManager:
             val = 1 if status == "healthy" else (0 if status == "degraded" else -1)
             self.system_health.set(val)
 
+
 _metrics_manager = None
+
 
 def get_metrics_manager() -> MetricsManager:
     global _metrics_manager

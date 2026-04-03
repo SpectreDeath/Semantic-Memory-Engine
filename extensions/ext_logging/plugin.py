@@ -53,7 +53,9 @@ class LoggingExtension(BasePlugin):
         except Exception as e:
             return json.dumps({"error": str(e)})
 
-    async def get_logs(self, level: str | None = None, component: str | None = None, limit: int = 100) -> str:
+    async def get_logs(
+        self, level: str | None = None, component: str | None = None, limit: int = 100
+    ) -> str:
         """Retrieve logs with optional filtering."""
         if not self.logging_system:
             return json.dumps({"error": "LoggingSystem not available"})

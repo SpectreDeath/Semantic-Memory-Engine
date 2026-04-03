@@ -8,9 +8,16 @@ class GraphCentrality:
     Analyzes node influence and centrality in forensic clusters.
     Optimized with __slots__.
     """
+
     __slots__ = ()
 
-    def identify_central_hubs(self, adjacency_matrix: list[list[float]], node_labels: list[str], max_iter: int = 100, tol: float = 1e-6) -> dict[str, Any]:
+    def identify_central_hubs(
+        self,
+        adjacency_matrix: list[list[float]],
+        node_labels: list[str],
+        max_iter: int = 100,
+        tol: float = 1e-6,
+    ) -> dict[str, Any]:
         """
         Identifies influential nodes using Power Iteration (Eigenvector Centrality).
         Simplified version of PageRank without the damping factor.
@@ -40,17 +47,22 @@ class GraphCentrality:
             v = v_next
 
         # Pair with labels and sort
-        centrality_scores = {label: float(score) for label, score in zip(node_labels, v, strict=False)}
+        centrality_scores = {
+            label: float(score) for label, score in zip(node_labels, v, strict=False)
+        }
         sorted_hubs = sorted(centrality_scores.items(), key=lambda x: x[1], reverse=True)
 
         return {
             "centrality_scores": centrality_scores,
             "top_hubs": [hub[0] for hub in sorted_hubs[:5]],
             "iterations": i + 1,
-            "status": "Success"
+            "status": "Success",
         }
 
-def identify_central_hubs(adjacency_matrix: list[list[float]], node_labels: list[str]) -> dict[str, Any]:
+
+def identify_central_hubs(
+    adjacency_matrix: list[list[float]], node_labels: list[str]
+) -> dict[str, Any]:
     """Standalone wrapper for Hub identification."""
     analyzer = GraphCentrality()
     return analyzer.identify_central_hubs(adjacency_matrix, node_labels)

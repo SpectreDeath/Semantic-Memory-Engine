@@ -10,9 +10,11 @@ from typing import Any
 
 logger = logging.getLogger("LawnmowerMan.ForensicVault")
 
+
 @dataclass
 class SuspectRecord:
     """Represents a suspect record in the forensic ledger."""
+
     sample_id: str
     model_fingerprint: str
     combined_anomaly_score: float
@@ -20,14 +22,17 @@ class SuspectRecord:
     source_plugin: str
     metadata: dict[str, Any]
 
+
 @dataclass
 class MatchResult:
     """Represents a fingerprint match result."""
+
     is_match: bool
     match_confidence: float
     matched_sample_id: str | None
     matched_fingerprint: str | None
     anomaly_score: float
+
 
 class ForensicVault:
     """
@@ -48,7 +53,9 @@ class ForensicVault:
         # Initialize database
         self._initialize_database()
 
-        logger.info(f"[{self.plugin_id}] Forensic Vault initialized with {self.fingerprint_threshold*100}% fingerprint threshold")
+        logger.info(
+            f"[{self.plugin_id}] Forensic Vault initialized with {self.fingerprint_threshold * 100}% fingerprint threshold"
+        )
 
     async def on_startup(self):
         """
@@ -75,7 +82,7 @@ class ForensicVault:
         """
         return {
             "status": "skipped",
-            "reason": "Forensic Vault provides cross-reference tools, not direct ingestion processing"
+            "reason": "Forensic Vault provides cross-reference tools, not direct ingestion processing",
         }
 
     def get_tools(self) -> list:
@@ -84,10 +91,17 @@ class ForensicVault:
             self.get_suspect_ledger_stats,
             self.add_suspect_record,
             self.get_matching_records,
-            self.clear_suspect_ledger
+            self.clear_suspect_ledger,
         ]
 
-    async def cross_reference_anomalies(self, sample_id: str, model_fingerprint: str, combined_anomaly_score: float, source_plugin: str = "unknown", metadata: dict[str, Any] | None = None) -> str:
+    async def cross_reference_anomalies(
+        self,
+        sample_id: str,
+        model_fingerprint: str,
+        combined_anomaly_score: float,
+        source_plugin: str = "unknown",
+        metadata: dict[str, Any] | None = None,
+    ) -> str:
         """
         Cross-reference anomalies against the suspect ledger.
 
@@ -97,14 +111,10 @@ class ForensicVault:
         try:
             # Validate input
             if not sample_id or not model_fingerprint:
-                return json.dumps({
-                    "error": "sample_id and model_fingerprint are required"
-                })
+                return json.dumps({"error": "sample_id and model_fingerprint are required"})
 
             if combined_anomaly_score < 0 or combined_anomaly_score > 1:
-                return json.dumps({
-                    "error": "combined_anomaly_score must be between 0 and 1"
-                })
+                return json.dumps({"error": "combined_anomaly_score must be between 0 and 1"})
 
             # Check for high-confidence deception (anomaly score >= threshold)
             is_high_confidence = combined_anomaly_score >= self.min_anomaly_score
@@ -119,7 +129,7 @@ class ForensicVault:
                 "is_high_confidence": is_high_confidence,
                 "match_found": match_result.is_match,
                 "match_confidence": match_result.match_confidence,
-                "action": "none"
+                "action": "none",
             }
 
             if match_result.is_match:
@@ -130,9 +140,11 @@ class ForensicVault:
                     result["previous_anomaly_score"] = match_result.anomaly_score
 
                     # Log the recurring pattern
-                    logger.warning(f"[{self.plugin_id}] RECURRING ADVERSARIAL PATTERN DETECTED: "
-                                 f"Sample {sample_id} matches {match_result.matched_sample_id} "
-                                 f"with {match_result.match_confidence*100:.1f}% confidence")
+                    logger.warning(
+                        f"[{self.plugin_id}] RECURRING ADVERSARIAL PATTERN DETECTED: "
+                        f"Sample {sample_id} matches {match_result.matched_sample_id} "
+                        f"with {match_result.match_confidence * 100:.1f}% confidence"
+                    )
 
                     # Update the matched record to indicate recurrence
                     await self._mark_as_recurring(match_result.matched_sample_id, sample_id)
@@ -143,9 +155,11 @@ class ForensicVault:
                     result["matched_sample_id"] = match_result.matched_sample_id
                     result["previous_anomaly_score"] = match_result.anomaly_score
 
-                    logger.info(f"[{self.plugin_id}] Pattern match found (low confidence): "
-                              f"Sample {sample_id} matches {match_result.matched_sample_id} "
-                              f"with {match_result.match_confidence*100:.1f}% confidence")
+                    logger.info(
+                        f"[{self.plugin_id}] Pattern match found (low confidence): "
+                        f"Sample {sample_id} matches {match_result.matched_sample_id} "
+                        f"with {match_result.match_confidence * 100:.1f}% confidence"
+                    )
 
             # Add new record to ledger
             await self._add_suspect_record(
@@ -153,16 +167,14 @@ class ForensicVault:
                 model_fingerprint=model_fingerprint,
                 combined_anomaly_score=combined_anomaly_score,
                 source_plugin=source_plugin,
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             return json.dumps(result, indent=2, default=str)
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Error in cross_reference_anomalies: {e}")
-            return json.dumps({
-                "error": f"Failed to cross-reference anomalies: {e!s}"
-            })
+            return json.dumps({"error": f"Failed to cross-reference anomalies: {e!s}"})
 
     async def get_suspect_ledger_stats(self) -> str:
         """Get statistics about the suspect ledger."""
@@ -172,15 +184,21 @@ class ForensicVault:
             total_count = self.nexus.nexus.execute(total_sql).fetchone()[0]
 
             # Get high-confidence records
-            high_conf_sql = "SELECT COUNT(*) FROM nexus_forensic_ledger WHERE combined_anomaly_score >= ?"
-            high_conf_count = self.nexus.nexus.execute(high_conf_sql, (self.min_anomaly_score,)).fetchone()[0]
+            high_conf_sql = (
+                "SELECT COUNT(*) FROM nexus_forensic_ledger WHERE combined_anomaly_score >= ?"
+            )
+            high_conf_count = self.nexus.nexus.execute(
+                high_conf_sql, (self.min_anomaly_score,)
+            ).fetchone()[0]
 
             # Get recurring patterns
             recurring_sql = "SELECT COUNT(*) FROM nexus_forensic_ledger WHERE is_recurring = 1"
             recurring_count = self.nexus.nexus.execute(recurring_sql).fetchone()[0]
 
             # Get source plugin distribution
-            plugin_sql = "SELECT source_plugin, COUNT(*) FROM nexus_forensic_ledger GROUP BY source_plugin"
+            plugin_sql = (
+                "SELECT source_plugin, COUNT(*) FROM nexus_forensic_ledger GROUP BY source_plugin"
+            )
             plugin_rows = self.nexus.nexus.execute(plugin_sql).fetchall()
             plugin_stats = {row[0]: row[1] for row in plugin_rows}
 
@@ -190,7 +208,7 @@ class ForensicVault:
                 "recurring_patterns": recurring_count,
                 "plugin_distribution": plugin_stats,
                 "fingerprint_threshold": self.fingerprint_threshold,
-                "min_anomaly_score": self.min_anomaly_score
+                "min_anomaly_score": self.min_anomaly_score,
             }
 
             return json.dumps(stats, indent=2)
@@ -199,7 +217,14 @@ class ForensicVault:
             logger.exception(f"[{self.plugin_id}] Error getting suspect ledger stats: {e}")
             return json.dumps({"error": f"Failed to get stats: {e!s}"})
 
-    async def add_suspect_record(self, sample_id: str, model_fingerprint: str, combined_anomaly_score: float, source_plugin: str = "unknown", metadata: dict[str, Any] | None = None) -> str:
+    async def add_suspect_record(
+        self,
+        sample_id: str,
+        model_fingerprint: str,
+        combined_anomaly_score: float,
+        source_plugin: str = "unknown",
+        metadata: dict[str, Any] | None = None,
+    ) -> str:
         """Manually add a suspect record to the ledger."""
         try:
             await self._add_suspect_record(
@@ -207,22 +232,24 @@ class ForensicVault:
                 model_fingerprint=model_fingerprint,
                 combined_anomaly_score=combined_anomaly_score,
                 source_plugin=source_plugin,
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
-            return json.dumps({
-                "status": "success",
-                "message": f"Added suspect record for {sample_id}",
-                "sample_id": sample_id
-            })
+            return json.dumps(
+                {
+                    "status": "success",
+                    "message": f"Added suspect record for {sample_id}",
+                    "sample_id": sample_id,
+                }
+            )
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Error adding suspect record: {e}")
-            return json.dumps({
-                "error": f"Failed to add suspect record: {e!s}"
-            })
+            return json.dumps({"error": f"Failed to add suspect record: {e!s}"})
 
-    async def get_matching_records(self, model_fingerprint: str, threshold: float | None = None) -> str:
+    async def get_matching_records(
+        self, model_fingerprint: str, threshold: float | None = None
+    ) -> str:
         """Get all records that match the given fingerprint above the threshold."""
         try:
             threshold = threshold or self.fingerprint_threshold
@@ -232,27 +259,35 @@ class ForensicVault:
 
             matches = []
             for record in all_records:
-                confidence = self._calculate_fingerprint_similarity(model_fingerprint, record.model_fingerprint)
+                confidence = self._calculate_fingerprint_similarity(
+                    model_fingerprint, record.model_fingerprint
+                )
 
                 if confidence >= threshold:
-                    matches.append({
-                        "sample_id": record.sample_id,
-                        "match_confidence": confidence,
-                        "anomaly_score": record.combined_anomaly_score,
-                        "source_plugin": record.source_plugin,
-                        "timestamp": record.timestamp.isoformat(),
-                        "is_recurring": getattr(record, 'is_recurring', False)
-                    })
+                    matches.append(
+                        {
+                            "sample_id": record.sample_id,
+                            "match_confidence": confidence,
+                            "anomaly_score": record.combined_anomaly_score,
+                            "source_plugin": record.source_plugin,
+                            "timestamp": record.timestamp.isoformat(),
+                            "is_recurring": getattr(record, "is_recurring", False),
+                        }
+                    )
 
             # Sort by match confidence
-            matches.sort(key=lambda x: x['match_confidence'], reverse=True)
+            matches.sort(key=lambda x: x["match_confidence"], reverse=True)
 
-            return json.dumps({
-                "query_fingerprint": model_fingerprint,
-                "threshold": threshold,
-                "matches_found": len(matches),
-                "matches": matches
-            }, indent=2, default=str)
+            return json.dumps(
+                {
+                    "query_fingerprint": model_fingerprint,
+                    "threshold": threshold,
+                    "matches_found": len(matches),
+                    "matches": matches,
+                },
+                indent=2,
+                default=str,
+            )
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Error getting matching records: {e}")
@@ -270,12 +305,16 @@ class ForensicVault:
             self.nexus.nexus.execute(clear_sql)
 
             # Log the clearing action
-            logger.info(f"[{self.plugin_id}] Suspect ledger cleared ({len(backup_data)} records removed)")
+            logger.info(
+                f"[{self.plugin_id}] Suspect ledger cleared ({len(backup_data)} records removed)"
+            )
 
-            return json.dumps({
-                "status": "success",
-                "message": f"Cleared {len(backup_data)} records from suspect ledger"
-            })
+            return json.dumps(
+                {
+                    "status": "success",
+                    "message": f"Cleared {len(backup_data)} records from suspect ledger",
+                }
+            )
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Error clearing suspect ledger: {e}")
@@ -310,7 +349,14 @@ class ForensicVault:
             logger.exception(f"[{self.plugin_id}] Failed to initialize database: {e}")
             raise
 
-    async def _add_suspect_record(self, sample_id: str, model_fingerprint: str, combined_anomaly_score: float, source_plugin: str, metadata: dict[str, Any]):
+    async def _add_suspect_record(
+        self,
+        sample_id: str,
+        model_fingerprint: str,
+        combined_anomaly_score: float,
+        source_plugin: str,
+        metadata: dict[str, Any],
+    ):
         """Add a suspect record to the ledger."""
         try:
             sql = """
@@ -319,16 +365,21 @@ class ForensicVault:
                 VALUES (?, ?, ?, ?, ?, ?)
             """
 
-            self.nexus.nexus.execute(sql, (
-                sample_id,
-                model_fingerprint,
-                combined_anomaly_score,
-                datetime.now().isoformat(),
-                source_plugin,
-                json.dumps(metadata)
-            ))
+            self.nexus.nexus.execute(
+                sql,
+                (
+                    sample_id,
+                    model_fingerprint,
+                    combined_anomaly_score,
+                    datetime.now().isoformat(),
+                    source_plugin,
+                    json.dumps(metadata),
+                ),
+            )
 
-            logger.debug(f"[{self.plugin_id}] Added suspect record: {sample_id} (score: {combined_anomaly_score})")
+            logger.debug(
+                f"[{self.plugin_id}] Added suspect record: {sample_id} (score: {combined_anomaly_score})"
+            )
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Failed to add suspect record: {e}")
@@ -344,7 +395,9 @@ class ForensicVault:
             highest_confidence = 0.0
 
             for record in all_records:
-                confidence = self._calculate_fingerprint_similarity(target_fingerprint, record.model_fingerprint)
+                confidence = self._calculate_fingerprint_similarity(
+                    target_fingerprint, record.model_fingerprint
+                )
 
                 if confidence > highest_confidence:
                     highest_confidence = confidence
@@ -357,7 +410,7 @@ class ForensicVault:
                     match_confidence=highest_confidence,
                     matched_sample_id=best_match.sample_id,
                     matched_fingerprint=best_match.model_fingerprint,
-                    anomaly_score=best_match.combined_anomaly_score
+                    anomaly_score=best_match.combined_anomaly_score,
                 )
             else:
                 return MatchResult(
@@ -365,7 +418,7 @@ class ForensicVault:
                     match_confidence=highest_confidence,
                     matched_sample_id=None,
                     matched_fingerprint=None,
-                    anomaly_score=0.0
+                    anomaly_score=0.0,
                 )
 
         except Exception as e:
@@ -381,14 +434,16 @@ class ForensicVault:
             records = []
             for row in rows:
                 metadata = json.loads(row[5]) if row[5] else {}
-                records.append(SuspectRecord(
-                    sample_id=row[0],
-                    model_fingerprint=row[1],
-                    combined_anomaly_score=row[2],
-                    timestamp=datetime.fromisoformat(row[3]),
-                    source_plugin=row[4],
-                    metadata=metadata
-                ))
+                records.append(
+                    SuspectRecord(
+                        sample_id=row[0],
+                        model_fingerprint=row[1],
+                        combined_anomaly_score=row[2],
+                        timestamp=datetime.fromisoformat(row[3]),
+                        source_plugin=row[4],
+                        metadata=metadata,
+                    )
+                )
 
             return records
 
@@ -419,10 +474,13 @@ class ForensicVault:
             # Method 1: Jaccard similarity on character sets
             set1 = set(fp1_norm)
             set2 = set(fp2_norm)
-            jaccard = len(set1.intersection(set2)) / len(set1.union(set2)) if set1.union(set2) else 0
+            jaccard = (
+                len(set1.intersection(set2)) / len(set1.union(set2)) if set1.union(set2) else 0
+            )
 
             # Method 2: Character frequency cosine similarity
             from collections import Counter
+
             counter1 = Counter(fp1_norm)
             counter2 = Counter(fp2_norm)
 
@@ -438,7 +496,9 @@ class ForensicVault:
             magnitude1 = sum(a * a for a in vec1) ** 0.5
             magnitude2 = sum(b * b for b in vec2) ** 0.5
 
-            cosine_sim = dot_product / (magnitude1 * magnitude2) if magnitude1 * magnitude2 > 0 else 0
+            cosine_sim = (
+                dot_product / (magnitude1 * magnitude2) if magnitude1 * magnitude2 > 0 else 0
+            )
 
             # Method 3: Levenshtein distance normalized
             lev_distance = self._levenshtein_distance(fp1_norm, fp2_norm)
@@ -485,7 +545,9 @@ class ForensicVault:
             """
             self.nexus.nexus.execute(sql, (new_sample_id, original_sample_id))
 
-            logger.info(f"[{self.plugin_id}] Marked {original_sample_id} as recurring with {new_sample_id}")
+            logger.info(
+                f"[{self.plugin_id}] Marked {original_sample_id} as recurring with {new_sample_id}"
+            )
 
         except Exception as e:
             logger.exception(f"[{self.plugin_id}] Error marking as recurring: {e}")

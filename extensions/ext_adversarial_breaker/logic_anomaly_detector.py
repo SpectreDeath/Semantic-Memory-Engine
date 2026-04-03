@@ -7,6 +7,7 @@ from typing import Any
 
 logger = logging.getLogger("LawnmowerMan.APB")
 
+
 class LogicAnomalyDetector:
     """
     Adversarial Pattern Breaker (APB) - Logic Anomaly Detector
@@ -34,7 +35,7 @@ class LogicAnomalyDetector:
                 "camouflage_detected": False,
                 "deception_confidence": 0.0,
                 "reason": "Text too short for analysis",
-                "analysis": {}
+                "analysis": {},
             }
 
         # Perform multiple anomaly checks
@@ -45,16 +46,15 @@ class LogicAnomalyDetector:
 
         # Determine if camouflage is detected (The Flatline Effect)
         # AI-Cleaned = Low Burstiness (uniform) + High Predictability (unique ratio < 0.4)
-        is_ai_smoothed = burstiness_analysis.get("burstiness_score", 10.0) < self.burstiness_smoothing_threshold and \
-                         pattern_analysis.get("type_token_ratio", 1.0) < self.unique_ratio_threshold
+        is_ai_smoothed = (
+            burstiness_analysis.get("burstiness_score", 10.0) < self.burstiness_smoothing_threshold
+            and pattern_analysis.get("type_token_ratio", 1.0) < self.unique_ratio_threshold
+        )
 
         # Calculate overall deception confidence
-        deception_confidence = self._calculate_deception_confidence([
-            entropy_analysis,
-            burstiness_analysis,
-            pattern_analysis,
-            lexical_analysis
-        ])
+        deception_confidence = self._calculate_deception_confidence(
+            [entropy_analysis, burstiness_analysis, pattern_analysis, lexical_analysis]
+        )
 
         # Override confidence if specific "Flatline Effect" detected
         if is_ai_smoothed:
@@ -72,8 +72,8 @@ class LogicAnomalyDetector:
                 "entropy_smoothing": entropy_analysis,
                 "burstiness_smoothing": burstiness_analysis,
                 "pattern_uniformity": pattern_analysis,
-                "lexical_smoothing": lexical_analysis
-            }
+                "lexical_smoothing": lexical_analysis,
+            },
         }
 
     def _analyze_entropy_smoothing(self, text: str) -> dict[str, Any]:
@@ -109,7 +109,7 @@ class LogicAnomalyDetector:
             "entropy_std": round(entropy_std, 4),
             "entropy_mean": round(entropy_mean, 4),
             "segment_count": len(segment_entropies),
-            "smoothing_score": round(1.0 - (entropy_std / 0.5), 4)  # Normalize to 0-1
+            "smoothing_score": round(1.0 - (entropy_std / 0.5), 4),  # Normalize to 0-1
         }
 
     def _analyze_burstiness_smoothing(self, text: str) -> dict[str, Any]:
@@ -137,7 +137,9 @@ class LogicAnomalyDetector:
             "anomaly_detected": is_smoothed,
             "burstiness_score": round(burstiness, 4),
             "sentence_count": len(sentence_lengths),
-            "length_variance": round(statistics.variance(sentence_lengths), 4) if len(sentence_lengths) > 1 else 0
+            "length_variance": round(statistics.variance(sentence_lengths), 4)
+            if len(sentence_lengths) > 1
+            else 0,
         }
 
     def _analyze_pattern_uniformity(self, text: str) -> dict[str, Any]:
@@ -162,9 +164,7 @@ class LogicAnomalyDetector:
 
         # Calculate uniformity score
         uniformity_score = self._calculate_uniformity_score(
-            type_token_ratio,
-            punctuation_pattern,
-            structural_pattern
+            type_token_ratio, punctuation_pattern, structural_pattern
         )
 
         # Check for excessive uniformity
@@ -175,7 +175,7 @@ class LogicAnomalyDetector:
             "uniformity_score": round(uniformity_score, 4),
             "type_token_ratio": round(type_token_ratio, 4),
             "punctuation_uniformity": round(punctuation_pattern, 4),
-            "structural_uniformity": round(structural_pattern, 4)
+            "structural_uniformity": round(structural_pattern, 4),
         }
 
     def _analyze_lexical_smoothing(self, text: str) -> dict[str, Any]:
@@ -188,7 +188,9 @@ class LogicAnomalyDetector:
 
         # Analyze word complexity distribution
         complexity_scores = [self._calculate_word_complexity(word) for word in words]
-        complexity_variance = statistics.variance(complexity_scores) if len(complexity_scores) > 1 else 0
+        complexity_variance = (
+            statistics.variance(complexity_scores) if len(complexity_scores) > 1 else 0
+        )
 
         # Analyze semantic diversity
         semantic_diversity = self._calculate_semantic_diversity(words)
@@ -198,9 +200,7 @@ class LogicAnomalyDetector:
 
         # Calculate lexical smoothing score
         smoothing_score = self._calculate_lexical_smoothing_score(
-            complexity_variance,
-            semantic_diversity,
-            transition_smoothness
+            complexity_variance, semantic_diversity, transition_smoothness
         )
 
         return {
@@ -208,7 +208,7 @@ class LogicAnomalyDetector:
             "lexical_smoothing_score": round(smoothing_score, 4),
             "complexity_variance": round(complexity_variance, 4),
             "semantic_diversity": round(semantic_diversity, 4),
-            "transition_smoothness": round(transition_smoothness, 4)
+            "transition_smoothness": round(transition_smoothness, 4),
         }
 
     def _calculate_deception_confidence(self, analyses: list[dict[str, Any]]) -> float:
@@ -255,7 +255,7 @@ class LogicAnomalyDetector:
         words = text.split()
         segments = []
         for i in range(0, len(words), segment_size):
-            segment = ' '.join(words[i:i + segment_size])
+            segment = " ".join(words[i : i + segment_size])
             segments.append(segment)
         return segments
 
@@ -278,12 +278,12 @@ class LogicAnomalyDetector:
     def _split_into_sentences(self, text: str) -> list[str]:
         """Split text into sentences."""
         # Simple sentence splitting
-        sentences = re.split(r'[.!?]+', text)
+        sentences = re.split(r"[.!?]+", text)
         return [s.strip() for s in sentences if s.strip()]
 
     def _analyze_punctuation_pattern(self, text: str) -> float:
         """Analyze uniformity of punctuation usage."""
-        punctuation = re.findall(r'[.,;:!?]', text)
+        punctuation = re.findall(r"[.,;:!?]", text)
         if not punctuation:
             return 0.0
 
@@ -329,9 +329,9 @@ class LogicAnomalyDetector:
         max_entropy = math.log2(len(starter_counts)) if starter_counts else 1.0
         return entropy / max_entropy if max_entropy > 0 else 0.0
 
-    def _calculate_uniformity_score(self, type_token_ratio: float,
-                                  punct_uniformity: float,
-                                  struct_uniformity: float) -> float:
+    def _calculate_uniformity_score(
+        self, type_token_ratio: float, punct_uniformity: float, struct_uniformity: float
+    ) -> float:
         """Calculate overall uniformity score."""
         # High type-token ratio + high uniformity = suspicious
         # Normalize type-token ratio (higher is more uniform)
@@ -346,7 +346,7 @@ class LogicAnomalyDetector:
         length_score = min(1.0, len(word) / 10.0)
 
         # Count vowel groups as rough syllable estimate
-        vowel_groups = len(re.findall(r'[aeiouy]+', word.lower()))
+        vowel_groups = len(re.findall(r"[aeiouy]+", word.lower()))
         syllable_score = min(1.0, vowel_groups / 3.0)
 
         return (length_score + syllable_score) / 2.0
@@ -358,11 +358,11 @@ class LogicAnomalyDetector:
         stemmed_words = set()
         for word in words:
             # Basic stemming
-            if word.endswith('ing'):
+            if word.endswith("ing"):
                 stemmed = word[:-3]
-            elif word.endswith('ed'):
+            elif word.endswith("ed"):
                 stemmed = word[:-2]
-            elif word.endswith('s'):
+            elif word.endswith("s"):
                 stemmed = word[:-1]
             else:
                 stemmed = word
@@ -395,12 +395,14 @@ class LogicAnomalyDetector:
         max_entropy = math.log2(len(transition_counts)) if transition_counts else 1.0
         return entropy / max_entropy if max_entropy > 0 else 0.0
 
-    def _calculate_lexical_smoothing_score(self, complexity_variance: float,
-                                         semantic_diversity: float,
-                                         transition_smoothness: float) -> float:
+    def _calculate_lexical_smoothing_score(
+        self, complexity_variance: float, semantic_diversity: float, transition_smoothness: float
+    ) -> float:
         """Calculate overall lexical smoothing score."""
         # Low complexity variance + low semantic diversity + high transition smoothness = suspicious
-        complexity_score = 1.0 - min(1.0, complexity_variance * 2.0)  # Invert: low variance = high score
+        complexity_score = 1.0 - min(
+            1.0, complexity_variance * 2.0
+        )  # Invert: low variance = high score
         semantic_score = 1.0 - semantic_diversity  # Invert: low diversity = high score
 
         # Combine scores

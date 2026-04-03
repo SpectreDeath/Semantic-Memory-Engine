@@ -23,11 +23,19 @@ def save_to_markdown(content, filename):
         f.write(content)
     return file_path
 
+
 def main():
     parser = argparse.ArgumentParser(description="Gather forensic news using Firecrawl.")
-    parser.add_argument("--query", type=str, default="latest digital forensic news", help="Search query for news")
+    parser.add_argument(
+        "--query", type=str, default="latest digital forensic news", help="Search query for news"
+    )
     parser.add_argument("--url", type=str, help="Specific URL to scrape instead of searching")
-    parser.add_argument("--limit", type=int, default=3, help="Number of search results to process (Free Tier friendly)")
+    parser.add_argument(
+        "--limit",
+        type=int,
+        default=3,
+        help="Number of search results to process (Free Tier friendly)",
+    )
     args = parser.parse_args()
 
     api_key = os.getenv("FIRECRAWL_API_KEY")
@@ -43,8 +51,8 @@ def main():
     try:
         if args.url:
             print(f"🔍 Scraping URL: {args.url}")
-            scrape_result = app.scrape_url(args.url, params={'formats': ['markdown']})
-            markdown_content = scrape_result.get('markdown', 'No markdown content found.')
+            scrape_result = app.scrape_url(args.url, params={"formats": ["markdown"]})
+            markdown_content = scrape_result.get("markdown", "No markdown content found.")
 
             filename = f"scrape_{timestamp}.md"
             path = save_to_markdown(markdown_content, filename)
@@ -53,19 +61,21 @@ def main():
         else:
             print(f"🔎 Searching for: {args.query}")
             # Use search to find relevant news
-            search_results = app.search(args.query, params={'limit': args.limit})
+            search_results = app.search(args.query, params={"limit": args.limit})
 
-            combined_markdown = f"# Forensic News Research - {datetime.now().strftime('%Y-%m-%d')}\n\n"
+            combined_markdown = (
+                f"# Forensic News Research - {datetime.now().strftime('%Y-%m-%d')}\n\n"
+            )
             combined_markdown += f"Query: {args.query}\n\n---\n\n"
 
-            for i, result in enumerate(search_results.get('data', [])):
-                url = result.get('url')
-                title = result.get('title', 'Untitled')
-                print(f"[{i+1}/{args.limit}] Processing: {title}")
+            for i, result in enumerate(search_results.get("data", [])):
+                url = result.get("url")
+                title = result.get("title", "Untitled")
+                print(f"[{i + 1}/{args.limit}] Processing: {title}")
 
                 # Scrape each search result
-                scrape_result = app.scrape_url(url, params={'formats': ['markdown']})
-                markdown = scrape_result.get('markdown', '')
+                scrape_result = app.scrape_url(url, params={"formats": ["markdown"]})
+                markdown = scrape_result.get("markdown", "")
 
                 if markdown:
                     combined_markdown += f"## {title}\n"
@@ -80,6 +90,7 @@ def main():
     except Exception as e:
         print(f"❌ An error occurred: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

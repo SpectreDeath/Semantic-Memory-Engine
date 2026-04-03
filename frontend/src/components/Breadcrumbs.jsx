@@ -1,6 +1,8 @@
 import React from 'react';
 import { ChevronRight, Home } from 'lucide-react';
 
+export { generateBreadcrumbs } from '../utils/breadcrumbs';
+
 /**
  * Breadcrumbs Component
  * Navigation trail showing current location

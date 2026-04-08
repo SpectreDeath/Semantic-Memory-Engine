@@ -279,7 +279,7 @@ class SignatureLibrary:
             try:
                 with open(NODE_SECRET_KEY_FILE) as f:
                     return f.read().strip()
-            except:
+            except OSError:
                 pass
 
         # Generate new secret
@@ -288,7 +288,7 @@ class SignatureLibrary:
         try:
             with open(NODE_SECRET_KEY_FILE, "w") as f:
                 f.write(secret)
-        except:
+        except OSError:
             pass
 
         return secret

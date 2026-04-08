@@ -136,7 +136,7 @@ def generate_case_report(output_path, osint_data, sentiment_data=None):
                         1,
                     )
                 pdf.ln(5)
-        except:
+        except Exception:
             pass
 
     # Sentiment Section (if provided)

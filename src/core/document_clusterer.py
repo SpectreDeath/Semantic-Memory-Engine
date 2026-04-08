@@ -95,7 +95,7 @@ class DocumentClusterer:
         if self.has_nltk:
             try:
                 self.stop_words = set(stopwords.words("english"))
-            except:
+            except LookupError:
                 self.stop_words = self._get_basic_stopwords()
         else:
             self.stop_words = self._get_basic_stopwords()
@@ -545,7 +545,7 @@ class DocumentClusterer:
         if self.has_nltk:
             try:
                 return word_tokenize(text)
-            except:
+            except LookupError:
                 pass
 
         import re

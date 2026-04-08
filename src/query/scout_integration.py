@@ -597,7 +597,7 @@ class Scout:
         try:
             job_result = self.trigger_harvest_for_gap(gap)
             return job_result.get("job_id", "unknown")
-        except:
+        except Exception:
             return "failed"
 
     def _save_gaps_to_db(self, gaps: list[KnowledgeGap]):

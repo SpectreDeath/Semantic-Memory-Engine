@@ -6,7 +6,7 @@
 **Hardware:** NVIDIA GeForce GTX 1660 Ti 6GB VRAM
 
 ## Python Version: 3.13 (Recommended)
-- **Note**: Python 3.14 has compatibility issues with spacy (Pydantic v1). Use Python 3.12+ for compatibility.
+- **Note**: Python 3.14 has compatibility issues with spacy (Pydantic v1). Use Python 3.13 for compatibility.
 
 ## Completed Utility Suite
 

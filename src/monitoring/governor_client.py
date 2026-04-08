@@ -160,7 +160,7 @@ class Governor:
                     snap.gpu_temperature = pynvml.nvmlDeviceGetTemperature(
                         handle, pynvml.NVML_TEMPERATURE_GPU
                     )
-                except:
+                except Exception:
                     pass  # Temperature may not be supported
 
             except Exception as e:

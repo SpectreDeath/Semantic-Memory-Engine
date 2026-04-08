@@ -168,7 +168,7 @@ class SignalAggregator:
                             elif isinstance(data, list):
                                 merged_data["entries"].extend(data)
                             merged_data["total_entries"] += 1
-                    except:
+                    except Exception:
                         pass
 
             return merged_data

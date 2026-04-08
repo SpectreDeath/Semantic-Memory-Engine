@@ -39,7 +39,7 @@ try:
 except LookupError:
     try:
         nltk.download("punkt_tab", quiet=True)
-    except:
+    except Exception:
         # Fallback for older NLTK versions
         try:
             nltk.data.find("tokenizers/punkt")
@@ -594,7 +594,7 @@ class ScribeEngine:
         try:
             diversity = 100 * np.log(N) / (1 - (V / N))
             return min(diversity / 1000, 1.0)  # Normalize to 0-1
-        except:
+        except (ZeroDivisionError, ValueError):
             return V / N  # Fallback to simple TTR
 
     def _detect_passive_voice(self, text: str) -> float:

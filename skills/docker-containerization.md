@@ -1,7 +1,7 @@
 ---
 Domain: DevOps
 Version: 1.0.0
-Complexity: intermediate
+Complexity: Intermediate
 Type: deployment
 Category: infrastructure
 name: Docker Containerization
@@ -15,7 +15,7 @@ Source_File: docker-compose.yaml
 Deploy and manage the SME (Semantic Memory Engine) stack using Docker containers with auto-healing and health checks.
 
 ## Description
-SME v3.0.0 uses a multi-container architecture with Docker Compose for orchestration. The stack includes the Operator (core logic), Sidecar (AI bridge), Frontend (Control Room UI), and PostgreSQL Nexus (database).
+SME v3.0.1 uses a multi-container architecture with Docker Compose for orchestration. The stack includes the Operator (core logic with embedded AI provider), Frontend (Control Room UI), and PostgreSQL Nexus (database).
 
 ## Architecture
 
@@ -23,8 +23,7 @@ SME v3.0.0 uses a multi-container architecture with Docker Compose for orchestra
 ┌─────────────────────────────────────────────┐
 │              Docker Compose Stack            │
 ├─────────────────────────────────────────────┤
-│  sme-operator    │ Port 8000  │ Core Logic  │
-│  sme-sidecar     │ Port 8089  │ AI Bridge   │
+│  sme-operator    │ Port 8000  │ Core Logic │
 │  sme-frontend    │ Port 5173  │ Control Room │
 │  postgres-nexus  │ Port 5432  │ Database    │
 └─────────────────────────────────────────────┘
@@ -74,7 +73,6 @@ cp .env.example .env
 ### Health Checks
 Each container includes health checks:
 - **Operator**: HTTP GET /health on port 8000
-- **Sidecar**: HTTP GET /health on port 8089
 - **Frontend**: HTTP GET / on port 5173
 - **PostgreSQL**: pg_isready command
 
@@ -90,12 +88,6 @@ deploy:
 ```
 
 ## Examples
-
-### Scaling Services
-```bash
-# Scale sidecar instances
-docker-compose up -d --scale sme-sidecar=3
-```
 
 ### Debugging
 ```bash

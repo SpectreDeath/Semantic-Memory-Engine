@@ -86,7 +86,7 @@ class TextSummarizer:
         if self.has_nltk:
             try:
                 self.stop_words = set(stopwords.words("english"))
-            except:
+            except LookupError:
                 logger.warning("NLTK stopwords not available, using basic set")
                 self.stop_words = self._get_basic_stopwords()
         else:
@@ -386,7 +386,7 @@ class TextSummarizer:
         if self.has_nltk:
             try:
                 return sent_tokenize(text)
-            except:
+            except LookupError:
                 pass
 
         # Fallback: simple split on periods
@@ -398,7 +398,7 @@ class TextSummarizer:
         if self.has_nltk:
             try:
                 return word_tokenize(text)
-            except:
+            except LookupError:
                 pass
 
         # Fallback: simple split

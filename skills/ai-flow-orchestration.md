@@ -6,7 +6,7 @@ Type: Tool
 Category: Orchestration
 name: ai-flow-orchestration
 Source: Semantic Memory Engine (SME)
-Source_File: src/ai/flows/
+Source_File: src/ai/bridge.py
 ---
 
 ## Purpose

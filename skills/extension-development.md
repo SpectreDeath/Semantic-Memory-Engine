@@ -1,7 +1,7 @@
 ---
 Domain: Plugin Development
 Version: 1.0.0
-Complexity: intermediate
+Complexity: Intermediate
 Type: development
 Category: extensibility
 name: Extension Development

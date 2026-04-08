@@ -16,7 +16,7 @@ Fixed critical compatibility issues and improved test coverage.
 
 ### Changed
 
-- Updated `requires-python` to `>=3.12` in pyproject.toml
+- Updated `requires-python` to `>=3.13` in pyproject.toml
 - Updated Dockerfile.operator to use Python 3.13
 - Added type annotations across codebase (100+ files)
 

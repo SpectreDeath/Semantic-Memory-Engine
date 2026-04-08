@@ -96,7 +96,6 @@ env_registry: list[EnvVarSpec] = [
     ("POSTGRES_USER", False, validate_non_empty_string, "PostgreSQL username"),
     ("POSTGRES_PASSWORD", False, validate_non_empty_string, "PostgreSQL password"),
     ("POSTGRES_DB", False, validate_non_empty_string, "PostgreSQL database name"),
-    ("SME_SIDECAR_URL", False, validate_url, "Sidecar service URL"),
     ("SME_CORS_ORIGINS", False, validate_non_empty_string, "CORS origins"),
     ("SME_DATA_DIR", False, validate_non_empty_string, "Data directory path"),
     ("SME_USE_POSTGRES", False, validate_boolean, "Use PostgreSQL flag"),

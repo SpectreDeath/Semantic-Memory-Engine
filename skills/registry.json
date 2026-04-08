@@ -12,13 +12,26 @@
     "purpose": "Provides adaptive learning capabilities that improve stylometric models based on new training data.",
     "description": "The Adaptive Learning module continuously improves stylometric models by learning from new samples. It updates writer profiles and refines classification based on feedback.",
     "workflow": [
-      "New Sample",
-      "Model Update",
-      "Profile Refinement",
-      "Validation"
+      "Receive and Validate New Sample Input",
+      "Update ML Model with New Features",
+      "Refine Writer Profile Parameters",
+      "Validate Model Output Quality"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "analysis"
+    ]
   },
   {
     "name": "adversarial-pattern-detection",
@@ -33,16 +46,32 @@
     "purpose": "Detects AI-generated or AI-smoothed text by analyzing linguistic patterns including burstiness variance, perplexity scores, and synthetic signature indicators. Part of the Adversarial Pattern Breaker ",
     "description": "The Adversarial Pattern Detection tool identifies text that exhibits characteristics of AI generation or AI-assisted smoothing. It analyzes burstiness (sentence/word length variance), perplexity (lang",
     "workflow": [
-      "Text Preprocessing",
-      "Burstiness Analysis",
-      "Perplexity Scoring",
-      "SimHash Comparison",
-      "Smoothing Detection",
-      "Score Computation",
-      "Reporting"
+      "NLP Preprocessing Pipeline",
+      "Process: Burstiness Analysis",
+      "Process: Perplexity Scoring",
+      "Process: SimHash Comparison",
+      "Process: Smoothing Detection",
+      "Process: Score Computation",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "security",
+      "ai",
+      "advanced",
+      "analysis"
+    ]
   },
   {
     "name": "adversarial-simulation",
@@ -54,19 +83,32 @@
     "source_file": "extensions/ext_adversarial_tester/",
     "source_exists": true,
     "spec_path": "skills\\adversarial-simulation.md",
-    "purpose": "Simulates adversarial attacks and tests system robustness by generating varied attack scenarios to probe SME defenses.",
+    "purpose": "Simulates and tests adversarial attacks and tests system robustness by generating varied attack scenarios to probe SME defenses.",
     "description": "The Adversarial Tester creates and executes simulated attack scenarios against the SME system. It tests detection capabilities, response procedures, and system resilience against various threat vector",
     "workflow": [
-      "Scenario Selection",
-      "Payload Generation",
-      "Attack Execution",
-      "Detection Verification",
-      "Response Testing",
-      "Vulnerability Assessment",
-      "Report Generation"
+      "Process: Scenario Selection",
+      "API Payload Generation",
+      "Process: Attack Execution",
+      "Process: Detection Verification",
+      "Process: Response Testing",
+      "Process: Vulnerability Assessment",
+      "Analysis Summary Report Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "security",
+      "advanced"
+    ]
   },
   {
     "name": "agent-behavior-audit",
@@ -78,19 +120,33 @@
     "source_file": "extensions/ext_behavior_audit/",
     "source_exists": true,
     "spec_path": "skills\\agent-behavior-audit.md",
-    "purpose": "Audits AI agent behavior against defined protocols, policies, and ethical guidelines to ensure compliance and responsible operation.",
+    "purpose": "Audits and validates AI agent behavior against defined protocols, policies, and ethical guidelines to ensure compliance and responsible operation.",
     "description": "The Behavior Audit extension monitors and evaluates agent actions against predetermined behavioral policies. It checks for policy violations, ethical concerns, and operational drift, providing governa",
     "workflow": [
-      "Policy Loading",
-      "Action Logging",
-      "Compliance Checking",
-      "Risk Assessment",
-      "Drift Detection",
-      "Alert Generation",
-      "Reporting"
+      "Load Behavioral Policy Definitions",
+      "Process: Action Logging",
+      "Verify Compliance Requirements",
+      "Assess Risk Level and Impact",
+      "Detect Behavioral Drift Patterns",
+      "Priority Alert Generation",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "advanced",
+      "analysis"
+    ]
   },
   {
     "name": "agent-logic-execution",
@@ -105,15 +161,30 @@
     "purpose": "Handles agent reasoning and logic execution, managing thought processes, planning, and decision making.",
     "description": "The Agent Logic module manages the reasoning and decision-making processes for AI agents. It handles planning, execution tracking, goal management, and\u53cd\u601d for agent operations.",
     "workflow": [
-      "Goal Analysis",
-      "Plan Creation",
-      "Step Execution",
-      "Monitoring",
-      "Adjustment",
-      "Completion"
+      "Analyze User Goal and Intent",
+      "Create Execution Plan",
+      "Execute Planned Steps",
+      "Monitor Execution Progress",
+      "Adjust Plan Based on Feedback",
+      "Mark Task as Complete"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "advanced",
+      "orchestration"
+    ]
   },
   {
     "name": "ai-bridge-rpc",
@@ -128,14 +199,29 @@
     "purpose": "Provides asynchronous JSON-RPC bridge for non-blocking communication with AI agents.",
     "description": "The AI Bridge RPC module implements asynchronous JSON-RPC communication for AI agent interactions. It prevents IDE blocking and improves concurrency handling for agent communications.",
     "workflow": [
-      "RPC Setup",
-      "Request Reception",
-      "Async Processing",
-      "Response Return",
-      "Connection Management"
+      "Process: RPC Setup",
+      "Process: Request Reception",
+      "Process: Async Processing",
+      "Process: Response Return",
+      "Connection Lifecycle Management"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "integration",
+      "advanced"
+    ]
   },
   {
     "name": "ai-flow-orchestration",
@@ -147,18 +233,32 @@
     "source_file": "src/ai/flows/",
     "source_exists": true,
     "spec_path": "skills\\ai-flow-orchestration.md",
-    "purpose": "Orchestrates complex AI workflows by managing flow execution, step sequencing, and state management.",
+    "purpose": "Orchestrates and manages complex AI workflows by managing flow execution, step sequencing, and state management.",
     "description": "The AI Flow Orchestration module manages complex multi-step AI workflows. It handles step sequencing, state tracking, conditional branching, and error recovery for sophisticated AI operations.",
     "workflow": [
-      "Flow Definition",
-      "State Management",
-      "Step Sequencing",
-      "Branching",
-      "Error Recovery",
-      "Completion"
+      "Process: Flow Definition",
+      "Workflow State Management",
+      "Process: Step Sequencing",
+      "Process: Branching",
+      "Process: Error Recovery",
+      "Mark Task as Complete"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "configuration",
+      "state data"
+    ],
+    "outputs": [
+      "status update",
+      "configuration state"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "advanced",
+      "orchestration"
+    ]
   },
   {
     "name": "ai-tools-management",
@@ -173,14 +273,28 @@
     "purpose": "Manages AI tool registration, discovery, and execution for the SME agent system.",
     "description": "The AI Tools Management module handles the registration and lifecycle of AI-accessible tools. It provides tool discovery, parameter validation, execution, and result handling.",
     "workflow": [
-      "Tool Registration",
-      "Discovery",
-      "Validation",
-      "Execution",
-      "Result Handling"
+      "Process: Tool Registration",
+      "Process: Discover Plugins",
+      "Validate Model Output Quality",
+      "Process: Execution",
+      "Process: Result Handling"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "ai",
+      "intermediate"
+    ]
   },
   {
     "name": "aifdb-connector",
@@ -192,15 +306,30 @@
     "source_file": "src/query/aifdb_connector.py",
     "source_exists": true,
     "spec_path": "skills\\aifdb-connector.md",
-    "purpose": "Connects to AI-focused databases for specialized knowledge retrieval and agent memory storage.",
+    "purpose": "Connects and integrates to AI-focused databases for specialized knowledge retrieval and agent memory storage.",
     "description": "The AIFDB Connector provides integration with AI-focused databases for specialized knowledge storage and retrieval. It connects to vector databases and agent memory systems.",
     "workflow": [
-      "Connection",
-      "Query Execution",
-      "Result Processing"
+      "Establish Database Connection",
+      "Execute Query Request",
+      "Query Result Processing"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "ai",
+      "integration",
+      "intermediate"
+    ]
   },
   {
     "name": "alert-management",
@@ -215,14 +344,26 @@
     "purpose": "Manages alert generation, routing, and notification for SME system events and anomalies.",
     "description": "The Alert Management utility handles system alerts and notifications. It manages alert generation based on system events, routes alerts to appropriate handlers, and manages notification delivery.",
     "workflow": [
-      "Alert Detection",
-      "Classification",
-      "Routing",
-      "Notification",
-      "Tracking"
+      "Process: Alert Detection",
+      "Process: Classify Results",
+      "Process: Routing",
+      "Process: Notification",
+      "Process: Tracking"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "parameters or seed data"
+    ],
+    "outputs": [
+      "generated report",
+      "structured output"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "utilities"
+    ]
   },
   {
     "name": "analysis-engine",
@@ -237,15 +378,28 @@
     "purpose": "Central analysis engine coordinating all forensic analysis operations across the SME system.",
     "description": "The Analysis Engine serves as the central coordinator for all forensic analysis operations. It manages analysis workflows, orchestrates analysis tools, handles resource allocation, and provides the un",
     "workflow": [
-      "Task Receipt",
-      "Workflow Planning",
-      "Tool Selection",
-      "Execution",
-      "Result Aggregation",
-      "Output Generation"
+      "Process: Task Receipt",
+      "Process: Workflow Planning",
+      "Process: Tool Selection",
+      "Process: Execution",
+      "Process: Result Aggregation",
+      "Formatting and Output Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "forensic",
+      "analysis"
+    ]
   },
   {
     "name": "archival-diff-analysis",
@@ -260,15 +414,28 @@
     "purpose": "Performs comparative analysis between historical and current data states to identify changes, modifications, and temporal anomalies.",
     "description": "The Archival Diff tool compares document versions or data snapshots across time, identifying what has changed, been added, or removed. It maintains historical archives and provides detailed diff repor",
     "workflow": [
-      "Snapshot Capture",
-      "Baseline Selection",
-      "Diff Computation",
-      "Change Classification",
-      "Significance Scoring",
-      "Report Generation"
+      "Process: Snapshot Capture",
+      "Process: Baseline Selection",
+      "Process: Diff Computation",
+      "Process: Change Classification",
+      "Process: Significance Scoring",
+      "Analysis Summary Report Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "forensic",
+      "intermediate",
+      "analysis"
+    ]
   },
   {
     "name": "async-ai-bridge",
@@ -283,14 +450,29 @@
     "purpose": "Provides async communication bridge between SME components and AI systems for non-blocking operations.",
     "description": "The AI Bridge module provides asynchronous communication between SME components and AI systems. It handles streaming responses, concurrent requests, and non-blocking operations for improved performanc",
     "workflow": [
-      "Request Creation",
-      "Connection Management",
-      "Streaming Handling",
-      "Response Aggregation",
-      "Callback Handling"
+      "Process: Request Creation",
+      "Connection Lifecycle Management",
+      "Process: Streaming Handling",
+      "Process: Response Aggregation",
+      "Process: Callback Handling"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "integration",
+      "advanced"
+    ]
   },
   {
     "name": "authentication",
@@ -305,12 +487,25 @@
     "purpose": "Manages user authentication, authorization, and access control across the SME system.",
     "description": "The Authentication module handles user authentication, session management, and authorization. It provides role-based access control and secure credential management.",
     "workflow": [
-      "Credential Verification",
-      "Session Management",
-      "Authorization"
+      "Process: Credential Verification",
+      "Process: Session Management",
+      "Process: Authorization"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "core"
+    ]
   },
   {
     "name": "batch-processing",
@@ -325,13 +520,25 @@
     "purpose": "Handles batch processing operations for processing large volumes of documents or data efficiently.",
     "description": "The Batch Processing module manages efficient processing of large data batches. It handles queueing, parallel processing, and resource management for batch operations.",
     "workflow": [
-      "Batch Creation",
-      "Queue Management",
-      "Parallel Execution",
-      "Result Collection"
+      "Create Batch Job",
+      "Manage Job Queue",
+      "Execute Jobs in Parallel",
+      "Aggregated Results Collection"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "raw data stream"
+    ],
+    "outputs": [
+      "processed data",
+      "transformed content"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "core"
+    ]
   },
   {
     "name": "brain-worker-management",
@@ -346,15 +553,27 @@
     "purpose": "Manages the brain worker processes for distributed AI processing across the SME infrastructure.",
     "description": "The Brain Worker module coordinates distributed AI processing tasks across worker nodes. It handles task distribution, result aggregation, worker health monitoring, and load balancing.",
     "workflow": [
-      "Task Creation",
-      "Worker Selection",
-      "Distribution",
-      "Result Collection",
-      "Aggregation",
-      "Worker Management"
+      "Process: Task Creation",
+      "Process: Worker Selection",
+      "Process: Distribution",
+      "Aggregated Results Collection",
+      "Process: Aggregation",
+      "Process: Worker Management"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "raw data stream"
+    ],
+    "outputs": [
+      "processed data",
+      "transformed content"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "advanced"
+    ]
   },
   {
     "name": "caching",
@@ -369,13 +588,26 @@
     "purpose": "Provides intelligent caching layer for frequently accessed data to improve performance.",
     "description": "The Caching module implements intelligent caching with invalidation strategies. It caches computation results, query results, and frequently accessed data.",
     "workflow": [
-      "Cache Check",
-      "Cache Miss",
-      "Cache Store",
-      "Cache Return"
+      "Check Cache for Hit",
+      "Handle Cache Miss",
+      "Store Data in Cache",
+      "Return Cached Data"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "core"
+    ]
   },
   {
     "name": "centrifuge-storage",
@@ -390,12 +622,25 @@
     "purpose": "Manages the Centrifuge storage system for high-performance data access and retrieval.",
     "description": "The Centrifuge Storage module provides high-performance data storage and retrieval. It handles data organization, indexing, and fast access for the knowledge base.",
     "workflow": [
-      "Data Storage",
-      "Indexing",
-      "Retrieval"
+      "Process: Data Storage",
+      "Index for Search",
+      "Retrieve Matching Data"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "data"
+    ]
   },
   {
     "name": "cloud-fetching",
@@ -407,17 +652,30 @@
     "source_file": "src/gathering/cloud_fetcher.py",
     "source_exists": true,
     "spec_path": "skills\\cloud-fetching.md",
-    "purpose": "Fetches content from cloud storage providers including Google Drive, Dropbox, OneDrive, and S3.",
+    "purpose": "Fetches and retrieves content from cloud storage providers including Google Drive, Dropbox, OneDrive, and S3.",
     "description": "The Cloud Fetching module retrieves content from various cloud storage services. It handles authentication, file listing, content downloading, and format conversion for cloud-stored documents.",
     "workflow": [
-      "Provider Selection",
-      "Authentication",
-      "File Discovery",
-      "Content Download",
-      "Format Conversion"
+      "Process: Provider Selection",
+      "Process: Authentication",
+      "Process: File Discovery",
+      "Process: Content Download",
+      "Process: Format Conversion"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "search query",
+      "filters"
+    ],
+    "outputs": [
+      "matching results",
+      "data records"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "data"
+    ]
   },
   {
     "name": "cognitive-mirror-test",
@@ -432,16 +690,29 @@
     "purpose": "Performs self-reflective diagnostics for agent cognition, testing reasoning consistency, decision transparency, and cognitive blind spots.",
     "description": "The Mirror Test provides introspective analysis of AI agent reasoning. It tests whether agents can consistently explain their decisions, identifies cognitive biases and blind spots, and verifies reaso",
     "workflow": [
-      "Reasoning Extraction",
-      "Consistency Testing",
-      "Transparency Analysis",
-      "Bias Detection",
+      "Process: Reasoning Extraction",
+      "Process: Consistency Testing",
+      "Process: Transparency Analysis",
+      "Process: Bias Detection",
       "Blind Spot Identification",
-      "Confidence Calibration",
-      "Report Generation"
+      "Process: Confidence Calibration",
+      "Analysis Summary Report Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "monitoring"
+    ]
   },
   {
     "name": "concept-resolution",
@@ -453,16 +724,29 @@
     "source_file": "src/query/concept_resolver.py",
     "source_exists": true,
     "spec_path": "skills\\concept-resolution.md",
-    "purpose": "Resolves ambiguous concepts and maps queries to precise semantic entities in the knowledge base.",
+    "purpose": "Resolves and maps ambiguous concepts and maps queries to precise semantic entities in the knowledge base.",
     "description": "The Concept Resolution module handles query ambiguity by mapping concepts to their precise meanings in the knowledge base. It resolves synonyms, homonyms, and contextual meanings.",
     "workflow": [
-      "Concept Extraction",
-      "Disambiguation",
-      "Entity Mapping",
-      "Refinement"
+      "Extract Concepts from Query",
+      "Disambiguate Entity Meanings",
+      "Map to Known Entities",
+      "Refine Search Results"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "search query",
+      "filters"
+    ],
+    "outputs": [
+      "matching results",
+      "data records"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "query"
+    ]
   },
   {
     "name": "config-management",
@@ -477,12 +761,25 @@
     "purpose": "Manages system configuration including environment variables, settings, and configuration validation.",
     "description": "The Configuration Management module handles system configuration. It manages environment variables, validates settings, and provides configuration access throughout the system.",
     "workflow": [
-      "Config Loading",
-      "Validation",
-      "Access"
+      "Load Configuration Settings",
+      "Validate Model Output Quality",
+      "Grant Appropriate Access"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds",
+    "tags": [
+      "basic",
+      "core"
+    ]
   },
   {
     "name": "context-sniffer",
@@ -494,16 +791,28 @@
     "source_file": "src/utils/context_sniffer.py",
     "source_exists": true,
     "spec_path": "skills\\context-sniffer.md",
-    "purpose": "Identifies project context and determines appropriate processing persona based on file analysis.",
+    "purpose": "Identifies and determines project context and determines appropriate processing persona based on file analysis.",
     "description": "The Context Sniffer is a lightweight utility for determining project context from file analysis. It identifies the domain, type, and appropriate persona for processing files based on extension pattern",
     "workflow": [
-      "File Input",
-      "Pattern Matching",
-      "Context Determination",
-      "Persona Selection"
+      "File Validation and Input",
+      "Match Patterns in Content",
+      "Determine Processing Context",
+      "Select Appropriate Persona"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "raw data stream"
+    ],
+    "outputs": [
+      "processed data",
+      "transformed content"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "nlp"
+    ]
   },
   {
     "name": "contrastive-analysis",
@@ -518,13 +827,26 @@
     "purpose": "Performs contrastive analysis between texts to highlight stylistic differences and similarities.",
     "description": "The Contrastive Analysis module compares writing styles between texts to identify differences and similarities. It highlights distinctive features and common patterns.",
     "workflow": [
-      "Text Selection",
-      "Feature Comparison",
-      "Difference Analysis",
-      "Report Generation"
+      "Select Text Samples",
+      "Compare Feature Vectors",
+      "Process: Analyze Differences",
+      "Analysis Summary Report Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "forensic",
+      "intermediate",
+      "analysis"
+    ]
   },
   {
     "name": "dark-data-discovery",
@@ -536,18 +858,31 @@
     "source_file": "extensions/ext_nur/",
     "source_exists": true,
     "spec_path": "skills\\dark-data-discovery.md",
-    "purpose": "Illuminates dark data and knowledge gaps by identifying unaddressed questions, missing context, and unexplored areas within the knowledge graph.",
+    "purpose": "Discovers and illuminates dark data and knowledge gaps by identifying unaddressed questions, missing context, and unexplored areas within the knowledge graph.",
     "description": "The Nur (Light) extension discovers areas of uncertainty and knowledge gaps in the SME system. It identifies questions without answers, claims without evidence, and topics without sufficient coverage,",
     "workflow": [
-      "Question Mining",
-      "Claim Extraction",
-      "Coverage Analysis",
-      "Gap Prioritization",
-      "Investigation Suggestions",
-      "Reporting"
+      "Process: Question Mining",
+      "Process: Claim Extraction",
+      "Process: Coverage Analysis",
+      "Process: Gap Prioritization",
+      "Process: Investigation Suggestions",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "data"
+    ]
   },
   {
     "name": "dashboard",
@@ -562,12 +897,25 @@
     "purpose": "Provides command-line dashboard interface for SME monitoring and operations.",
     "description": "The Dashboard module provides a command-line interface for system monitoring. It displays system status, metrics, and operational controls.",
     "workflow": [
-      "Data Collection",
-      "Display",
-      "Interaction"
+      "Source Data Collection",
+      "Render Data for Display",
+      "Handle User Interactions"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "visualization",
+      "intermediate"
+    ]
   },
   {
     "name": "data-auditing",
@@ -582,14 +930,27 @@
     "purpose": "Performs outlier detection and data quality auditing using PyOD's Isolation Forest algorithm for anomaly identification.",
     "description": "The Data Auditor provides outlier detection capabilities using PyOD's Isolation Forest. It scans datasets for anomalies, identifies unusual patterns, and provides configurable contamination rates for ",
     "workflow": [
-      "Data Loading",
-      "Model Configuration",
-      "Anomaly Detection",
-      "Result Analysis",
-      "Reporting"
+      "Configurable Data Loading",
+      "Process: Model Configuration",
+      "Process: Anomaly Detection",
+      "Process: Result Analysis",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "data",
+      "intermediate",
+      "analysis"
+    ]
   },
   {
     "name": "data-correlation",
@@ -601,18 +962,32 @@
     "source_file": "src/analysis/correlator.py",
     "source_exists": true,
     "spec_path": "skills\\data-correlation.md",
-    "purpose": "Identifies correlations and relationships between disparate data sources to discover hidden patterns and dependencies.",
+    "purpose": "Identifies and determines correlations and relationships between disparate data sources to discover hidden patterns and dependencies.",
     "description": "The Data Correlation module analyzes multiple data sources to identify statistical and semantic correlations. It helps discover hidden relationships, dependencies, and patterns that aren't immediately",
     "workflow": [
-      "Data Ingestion",
-      "Preprocessing",
-      "Correlation Analysis",
-      "Pattern Discovery",
-      "Dependency Mapping",
-      "Reporting"
+      "Process: Data Ingestion",
+      "Process: Preprocessing",
+      "Process: Correlation Analysis",
+      "Process: Pattern Discovery",
+      "Process: Dependency Mapping",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "analysis",
+      "intermediate",
+      "data"
+    ]
   },
   {
     "name": "data-loaders",
@@ -627,14 +1002,26 @@
     "purpose": "Handles loading of various data formats including CSV, JSON, XML, and binary formats for SME processing.",
     "description": "The Data Loaders module provides unified data loading across multiple formats. It handles format detection, parsing, and conversion for consistent processing pipeline input.",
     "workflow": [
-      "Format Detection",
-      "Parser Selection",
-      "Parsing",
-      "Validation",
-      "Output"
+      "Process: Format Detection",
+      "Process: Parser Selection",
+      "Parse Input Data",
+      "Validate Model Output Quality",
+      "Formatting and Output"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "raw data stream"
+    ],
+    "outputs": [
+      "processed data",
+      "transformed content"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "data"
+    ]
   },
   {
     "name": "data-management",
@@ -649,13 +1036,25 @@
     "purpose": "Manages data lifecycle including creation, updating, deletion, and data relationships.",
     "description": "The Data Management module handles all data operations in the SME system. It manages data creation, updates, relationships, and lifecycle.",
     "workflow": [
-      "Create",
-      "Update",
-      "Delete",
-      "Relationships"
+      "Create New Records",
+      "Update Existing Records",
+      "Process: Delete Records",
+      "Process: Manage Relationships"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "parameters or seed data"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "data"
+    ]
   },
   {
     "name": "database-auditing",
@@ -670,14 +1069,28 @@
     "purpose": "Performs database health checks, schema validation, and integrity verification for SME databases.",
     "description": "The Database Auditing utility checks database health, validates schemas, verifies data integrity, and identifies issues in SME database systems.",
     "workflow": [
-      "Connection Test",
-      "Schema Validation",
-      "Integrity Check",
-      "Health Metrics",
-      "Reporting"
+      "Process: Connection Test",
+      "Process: Schema Validation",
+      "Process: Integrity Check",
+      "Process: Health Metrics",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "data",
+      "intermediate",
+      "analysis"
+    ]
   },
   {
     "name": "document-clustering",
@@ -692,12 +1105,24 @@
     "purpose": "Groups documents into clusters based on similarity for organization and analysis.",
     "description": "The Document Clustering module groups similar documents together. It uses semantic similarity to create clusters for organization and analysis.",
     "workflow": [
-      "Feature Extraction",
-      "Clustering",
-      "Labeling"
+      "Extract Features from Input",
+      "Cluster Similar Elements",
+      "Apply Labels to Clusters"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "analysis"
+    ]
   },
   {
     "name": "document-comparison",
@@ -712,15 +1137,28 @@
     "purpose": "Compares documents across multiple dimensions including content, structure, style, and metadata to assess similarity and differences.",
     "description": "The Document Comparison module provides comprehensive document comparison capabilities. It analyzes content similarity, structural differences, stylistic variations, and metadata differences between d",
     "workflow": [
-      "Document Loading",
-      "Content Analysis",
-      "Structure Analysis",
-      "Style Comparison",
-      "Metadata Comparison",
-      "Report Generation"
+      "Process: Document Loading",
+      "Process: Content Analysis",
+      "Process: Structure Analysis",
+      "Process: Style Comparison",
+      "Process: Metadata Comparison",
+      "Analysis Summary Report Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "analysis"
+    ]
   },
   {
     "name": "enterprise-ai-integration",
@@ -735,14 +1173,29 @@
     "purpose": "Integrates enterprise AI systems and workflows into the SME infrastructure for corporate environments.",
     "description": "The Enterprise AI module handles integration with enterprise AI systems including authentication, compliance, audit logging, and enterprise-specific workflows.",
     "workflow": [
-      "Enterprise Auth",
-      "System Connection",
-      "Workflow Execution",
-      "Compliance Check",
-      "Audit Logging"
+      "Process: Enterprise Auth",
+      "Process: System Connection",
+      "Process: Workflow Execution",
+      "Process: Compliance Check",
+      "Process: Audit Logging"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "integration",
+      "advanced"
+    ]
   },
   {
     "name": "entity-linking",
@@ -757,12 +1210,25 @@
     "purpose": "Links extracted entities to knowledge base entries for disambiguation and context.",
     "description": "The Entity Linking module connects extracted entities to the knowledge base. It provides context, disambiguation, and relationship mapping.",
     "workflow": [
-      "Entity Extraction",
-      "Linking",
-      "Disambiguation"
+      "Extract Named Entities",
+      "Link Related Entities",
+      "Disambiguate Entity Meanings"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "analysis"
+    ]
   },
   {
     "name": "entity-redaction",
@@ -777,14 +1243,27 @@
     "purpose": "Redacts sensitive entities including names, emails, URLs, and other PII from text to preserve identity neutrality.",
     "description": "The Entity Redaction tool automatically strips personally identifiable information (PII) from text. It removes proper names, email addresses, URLs, phone numbers, and other sensitive entities while pr",
     "workflow": [
-      "Entity Detection",
-      "Classification",
-      "Replacement",
-      "Verification",
-      "Output"
+      "Process: Entity Detection",
+      "Process: Classify Results",
+      "Process: Replacement",
+      "Process: Verification",
+      "Formatting and Output"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "utilities"
+    ]
   },
   {
     "name": "error-handling",
@@ -799,15 +1278,28 @@
     "purpose": "Provides standardized error handling, exception management, and recovery mechanisms across the SME system.",
     "description": "The Error Handling utility provides consistent error management across SME components. It handles exceptions, implements retry logic, manages fallbacks, and provides detailed error reporting.",
     "workflow": [
-      "Error Detection",
-      "Classification",
-      "Recovery Action",
-      "Logging",
-      "Notification",
-      "Recovery"
+      "Process: Error Detection",
+      "Process: Classify Results",
+      "Process: Recovery Action",
+      "Process: Logging",
+      "Process: Notification",
+      "Process: Recovery"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "configuration",
+      "state data"
+    ],
+    "outputs": [
+      "status update",
+      "configuration state"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "utilities"
+    ]
   },
   {
     "name": "event-system",
@@ -822,12 +1314,25 @@
     "purpose": "Provides event-driven architecture for system components to communicate asynchronously.",
     "description": "The Event System module implements event-driven communication. Components can publish and subscribe to events for loose coupling.",
     "workflow": [
-      "Event Publishing",
-      "Event Routing",
-      "Event Handling"
+      "Publish Event to Bus",
+      "Route Events to Subscribers",
+      "Handle Received Events"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "core"
+    ]
   },
   {
     "name": "external-ai-connector",
@@ -839,17 +1344,32 @@
     "source_file": "src/ai/external_ai_integration.py",
     "source_exists": true,
     "spec_path": "skills\\external-ai-connector.md",
-    "purpose": "Connects to external AI services and APIs beyond the built-in providers for extended capabilities.",
+    "purpose": "Connects and integrates to external AI services and APIs beyond the built-in providers for extended capabilities.",
     "description": "The External AI Connector provides integration with third-party AI services including OpenAI, Google, Azure, and custom APIs. It handles authentication, rate limiting, and response normalization.",
     "workflow": [
-      "Service Configuration",
-      "Authentication",
-      "Request Execution",
-      "Response Processing",
-      "Rate Management"
+      "Process: Service Configuration",
+      "Process: Authentication",
+      "Process: Request Execution",
+      "Process: Response Processing",
+      "Process: Rate Management"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "integration",
+      "advanced"
+    ]
   },
   {
     "name": "factory-pattern",
@@ -864,13 +1384,25 @@
     "purpose": "Provides object creation patterns for consistent component instantiation across the system.",
     "description": "The Factory module implements object creation patterns. It provides consistent component instantiation and manages complex object creation.",
     "workflow": [
-      "Type Determination",
-      "Creation",
-      "Configuration",
-      "Return"
+      "Determine Object Type",
+      "Create Object Instance",
+      "Configure Object Properties",
+      "Return Configured Object"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "parameters or seed data"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "core"
+    ]
   },
   {
     "name": "federation-gate-control",
@@ -885,15 +1417,29 @@
     "purpose": "Manages inter-system federation and data exchange between SME instances and external knowledge bases.",
     "description": "The Federation Gate controls data exchange between distributed SME instances and external systems. It handles authentication, data transformation, rate limiting, and protocol translation for federated",
     "workflow": [
-      "Peer Discovery",
-      "Authentication",
-      "Data Preparation",
-      "Transfer Execution",
-      "Rate Management",
-      "Audit Logging"
+      "Process: Peer Discovery",
+      "Process: Authentication",
+      "Feature Engineering Preparation",
+      "Process: Transfer Execution",
+      "Process: Rate Management",
+      "Process: Audit Logging"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "integration"
+    ]
   },
   {
     "name": "file-service",
@@ -908,13 +1454,26 @@
     "purpose": "Handles file operations including reading, writing, and managing file resources.",
     "description": "The File Service module manages file operations. It handles file I/O, resource management, and file-based data access.",
     "workflow": [
-      "File Open",
-      "Operation",
-      "Resource Management",
-      "File Close"
+      "Open File Handle",
+      "Perform File Operation",
+      "Manage System Resources",
+      "Close File Handle"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds",
+    "tags": [
+      "basic",
+      "core"
+    ]
   },
   {
     "name": "forensic-data-vault",
@@ -929,16 +1488,30 @@
     "purpose": "Provides secure, tamper-evident storage for sensitive evidentiary data with full audit logging and access controls.",
     "description": "The Forensic Data Vault is a secure storage system designed for evidentiary data preservation. It maintains cryptographic integrity through TPM-signed manifests, provides role-based access controls, a",
     "workflow": [
-      "Data Classification",
-      "Encryption",
-      "Storage",
-      "Manifest Signing",
-      "Access Control",
-      "Audit Logging",
-      "Retrieval"
+      "Process: Data Classification",
+      "Process: Encryption",
+      "Process: Store Data",
+      "Process: Manifest Signing",
+      "Process: Access Control",
+      "Process: Audit Logging",
+      "Retrieve Matching Data"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "search query",
+      "filters"
+    ],
+    "outputs": [
+      "matching results",
+      "data records"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "forensic",
+      "intermediate",
+      "data"
+    ]
   },
   {
     "name": "gephi-visualization-export",
@@ -953,13 +1526,25 @@
     "purpose": "Exports data in formats compatible with Gephi for network visualization and graph analysis.",
     "description": "The Gephi Bridge exports SME data to Gephi-compatible formats (GraphML, CSV, etc.) for visualization. It supports multiple export modes including project view, trust score visualization, knowledge cor",
     "workflow": [
-      "Data Preparation",
-      "Mode Selection",
-      "Export Generation",
-      "Visualization"
+      "Feature Engineering Preparation",
+      "Select Export Mode",
+      "Generate Export Package",
+      "Process: Visualization"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "visualization",
+      "intermediate"
+    ]
   },
   {
     "name": "ghost-trap-detection",
@@ -971,19 +1556,33 @@
     "source_file": "extensions/ext_ghost_trap/",
     "source_exists": true,
     "spec_path": "skills\\ghost-trap-detection.md",
-    "purpose": "Identifies stealthy, obfuscated, or hidden processes, signals, and data flows that may indicate covert operations or data exfiltration.",
+    "purpose": "Identifies and determines stealthy, obfuscated, or hidden processes, signals, and data flows that may indicate covert operations or data exfiltration.",
     "description": "The Ghost Trap detects hidden or obfuscated activity by analyzing process patterns, network behavior, and data flows. It identifies signatures of stealth techniques including steganography, covert cha",
     "workflow": [
-      "Baseline Establishment",
-      "Anomaly Detection",
-      "Steganography Analysis",
+      "Process: Baseline Establishment",
+      "Process: Anomaly Detection",
+      "Process: Steganography Analysis",
       "Covert Channel Detection",
-      "Obfuscation Analysis",
-      "Risk Assessment",
-      "Reporting"
+      "Process: Obfuscation Analysis",
+      "Assess Risk Level and Impact",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "security",
+      "advanced",
+      "analysis"
+    ]
   },
   {
     "name": "harvester-web-ingestion",
@@ -998,16 +1597,29 @@
     "purpose": "Ingests web content from URLs and converts it into semantic atomic facts for AI agent consumption. The Harvester supports multiple file formats and cloud storage providers.",
     "description": "The Harvester is a web ingestion engine that transforms URLs into structured, queryable semantic data. It supports PDF, DOCX, HTML, and various cloud storage sources (Google Drive, Dropbox, OneDrive, ",
     "workflow": [
-      "URL Parsing",
-      "Content Fetching",
-      "Format Detection",
-      "Content Extraction",
-      "Semantic Processing",
-      "Entity Redaction",
-      "Storage"
+      "Process: URL Parsing",
+      "Process: Content Fetching",
+      "Process: Format Detection",
+      "Process: Content Extraction",
+      "Process: Semantic Processing",
+      "Process: Entity Redaction",
+      "Process: Store Data"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "search query",
+      "filters"
+    ],
+    "outputs": [
+      "matching results",
+      "data records"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "data"
+    ]
   },
   {
     "name": "impostor-detection",
@@ -1022,13 +1634,27 @@
     "purpose": "Detects writing style impersonation and identifies when someone is trying to mimic another author's style.",
     "description": "The Impostor Detection module identifies when writing attempts to mimic another author's style. It detects subtle differences that indicate impersonation rather than genuine authorship.",
     "workflow": [
-      "Reference Analysis",
-      "Suspicious Analysis",
-      "Impostor Detection",
-      "Confidence Scoring"
+      "Process: Reference Analysis",
+      "Analyze Suspicious Patterns",
+      "Process: Impostor Detection",
+      "Calculate Confidence Scores"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "security",
+      "advanced",
+      "analysis"
+    ]
   },
   {
     "name": "intelligence-reporting",
@@ -1043,15 +1669,27 @@
     "purpose": "Generates structured intelligence reports from forensic analysis results with proper formatting, summaries, and actionable insights.",
     "description": "The Intelligence Reports module transforms raw forensic analysis into polished intelligence reports. It handles formatting, summarization, visualization integration, and export in various formats.",
     "workflow": [
-      "Data Collection",
-      "Template Selection",
-      "Content Generation",
-      "Visualization",
-      "Review",
-      "Export"
+      "Source Data Collection",
+      "Process: Template Selection",
+      "Process: Content Generation",
+      "Process: Visualization",
+      "Process: Review",
+      "Process: Export"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "reporting"
+    ]
   },
   {
     "name": "json-utilities",
@@ -1066,13 +1704,26 @@
     "purpose": "Provides JSON parsing, validation, transformation, and manipulation utilities for SME data handling.",
     "description": "The JSON Utilities module provides comprehensive JSON handling capabilities including parsing, validation, transformation, and pretty printing. It handles JSON Schema validation and complex transforma",
     "workflow": [
-      "Parsing",
-      "Validation",
-      "Transformation",
-      "Output"
+      "Parse Input Data",
+      "Validate Model Output Quality",
+      "Transform Data Format",
+      "Formatting and Output"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds",
+    "tags": [
+      "basic",
+      "utilities"
+    ]
   },
   {
     "name": "knowledge-domain-mapping",
@@ -1087,16 +1738,29 @@
     "purpose": "Creates cartographic maps of knowledge domains, visualizing relationships between topics, concepts, and data sources within the SME knowledge graph.",
     "description": "The Atlas extension generates visual and structural representations of knowledge domains. It maps concepts, identifies clusters, shows relationships between topics, and provides interactive navigation",
     "workflow": [
-      "Domain Selection",
-      "Concept Extraction",
-      "Relationship Analysis",
-      "Clustering",
-      "Visualization Generation",
-      "Interactive Mapping",
-      "Export"
+      "Process: Domain Selection",
+      "Extract Concepts from Query",
+      "Process: Relationship Analysis",
+      "Cluster Similar Elements",
+      "Process: Visualization Generation",
+      "Process: Interactive Mapping",
+      "Process: Export"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "ai",
+      "intermediate"
+    ]
   },
   {
     "name": "knowledge-graph-operations",
@@ -1111,15 +1775,29 @@
     "purpose": "Manages the SME knowledge graph for storing, querying, and traversing semantic relationships between entities, concepts, and documents.",
     "description": "The Knowledge Graph module provides graph-based storage and operations for semantic relationships. It supports entity creation, relationship mapping, graph traversal, path finding, and complex queries",
     "workflow": [
-      "Entity Management",
-      "Relationship Mapping",
-      "Graph Traversal",
-      "Path Finding",
-      "Query Execution",
-      "Indexing"
+      "Process: Entity Management",
+      "Process: Relationship Mapping",
+      "Process: Graph Traversal",
+      "Process: Path Finding",
+      "Execute Query Request",
+      "Index for Search"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "visualization",
+      "analysis"
+    ]
   },
   {
     "name": "lexicon-management",
@@ -1134,12 +1812,24 @@
     "purpose": "Manages lexicons and vocabulary databases for stylometric analysis including custom word lists and linguistic features.",
     "description": "The Lexicon Management module handles lexicons and vocabulary lists used in stylometric analysis. It supports importing, exporting, and managing custom word lists.",
     "workflow": [
-      "Import",
-      "Management",
-      "Lookup"
+      "Import Data into System",
+      "Manage Data Resources",
+      "Lookup Matching Records"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "utilities"
+    ]
   },
   {
     "name": "llm-provider-management",
@@ -1154,14 +1844,28 @@
     "purpose": "Manages multiple LLM providers including Ollama, Langflow, Anthropic, and custom providers with unified interface.",
     "description": "The LLM Provider Management module provides a unified interface for various AI model providers. It handles provider selection, fallback logic, routing, and standardized output formatting across differ",
     "workflow": [
-      "Provider Discovery",
-      "Capability Matching",
-      "Request Routing",
-      "Response Handling",
-      "Fallback Management"
+      "Process: Provider Discovery",
+      "Process: Capability Matching",
+      "Process: Route Requests",
+      "Process: Response Handling",
+      "Process: Fallback Management"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "advanced"
+    ]
   },
   {
     "name": "log-analysis",
@@ -1176,14 +1880,27 @@
     "purpose": "Provides log parsing, filtering, searching, and analysis capabilities for SME system logs.",
     "description": "The Log Analysis utility processes SME system logs for debugging, monitoring, and audit purposes. It supports filtering by level, searching patterns, aggregating statistics, and generating insights.",
     "workflow": [
-      "Log Ingestion",
-      "Filtering",
-      "Search",
-      "Analysis",
-      "Reporting"
+      "Process: Log Ingestion",
+      "Process: Filtering",
+      "Process: Search",
+      "Process: Perform Analysis",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "forensic",
+      "intermediate",
+      "analysis"
+    ]
   },
   {
     "name": "logging-system",
@@ -1198,13 +1915,26 @@
     "purpose": "Provides centralized logging for system events, debugging, and audit trails.",
     "description": "The Logging System module handles system-wide logging. It captures events, errors, and debug information for monitoring and troubleshooting.",
     "workflow": [
-      "Log Collection",
-      "Formatting",
-      "Output",
-      "Rotation"
+      "Collect Log Entries",
+      "Format Log Messages",
+      "Formatting and Output",
+      "Rotate Log Files"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "core"
+    ]
   },
   {
     "name": "logic-consistency-verification",
@@ -1219,15 +1949,27 @@
     "purpose": "Verifies logical consistency of forensic findings and detects contradictions, logical fallacies, and reasoning errors in analysis outputs.",
     "description": "The Logic Auditor examines forensic findings for internal consistency and logical soundness. It identifies contradictions between conclusions, detects common logical fallacies, and verifies that evide",
     "workflow": [
-      "Finding Extraction",
-      "Consistency Analysis",
-      "Fallacy Detection",
-      "Evidence Mapping",
-      "Confidence Scoring",
-      "Report Generation"
+      "Process: Finding Extraction",
+      "Process: Consistency Analysis",
+      "Process: Fallacy Detection",
+      "Process: Evidence Mapping",
+      "Calculate Confidence Scores",
+      "Analysis Summary Report Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "analysis"
+    ]
   },
   {
     "name": "nexus-interface",
@@ -1242,13 +1984,27 @@
     "purpose": "Provides interface to Nexus service for inter-component communication and data exchange.",
     "description": "The Nexus Interface module connects to the Nexus service. It handles communication, data exchange, and service discovery.",
     "workflow": [
-      "Connection",
-      "Service Discovery",
-      "Data Exchange",
-      "Response Handling"
+      "Establish Database Connection",
+      "Discover Available Services",
+      "Exchange Data with Service",
+      "Process: Response Handling"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "integration",
+      "intermediate"
+    ]
   },
   {
     "name": "nlp-processing",
@@ -1263,13 +2019,25 @@
     "purpose": "Provides advanced NLP processing including tokenization, lemmatization, POS tagging, and Named Entity Recognition.",
     "description": "The NLP Processing module provides comprehensive natural language processing capabilities. It handles tokenization, lemmatization, part-of-speech tagging, and named entity recognition for text analysi",
     "workflow": [
-      "Text Input",
-      "Tokenization",
-      "Processing",
-      "Output"
+      "Text Validation and Input",
+      "Tokenize Text Content",
+      "Data Transformation Processing",
+      "Formatting and Output"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "raw data stream"
+    ],
+    "outputs": [
+      "processed data",
+      "transformed content"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "nlp"
+    ]
   },
   {
     "name": "osint-toolkit",
@@ -1284,13 +2052,26 @@
     "purpose": "Provides Open Source Intelligence collection capabilities including source discovery, data gathering, and threat intelligence.",
     "description": "The OSINT Toolkit module provides comprehensive open source intelligence gathering. It discovers sources, collects data from public sources, and provides threat intelligence for security operations.",
     "workflow": [
-      "Source Discovery",
-      "Data Collection",
-      "Processing",
-      "Intelligence Generation"
+      "Discover Data Sources",
+      "Source Data Collection",
+      "Data Transformation Processing",
+      "Process: Generate Intelligence"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "osint"
+    ]
   },
   {
     "name": "overlap-discovery",
@@ -1305,15 +2086,28 @@
     "purpose": "Discovers semantic overlap between document collections to identify redundancy, cross-references, and shared content.",
     "description": "The Overlap Discovery tool analyzes multiple document collections to identify shared content, redundant information, and cross-references. It uses embedding similarity and exact matching to detect var",
     "workflow": [
-      "Collection Loading",
-      "Embedding Generation",
-      "Similarity Computation",
-      "Overlap Detection",
-      "Redundancy Analysis",
-      "Reporting"
+      "Process: Collection Loading",
+      "Process: Embedding Generation",
+      "Process: Similarity Computation",
+      "Process: Overlap Detection",
+      "Process: Redundancy Analysis",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "analysis"
+    ]
   },
   {
     "name": "performance-monitoring",
@@ -1328,14 +2122,27 @@
     "purpose": "Monitors system performance metrics including CPU, memory, VRAM, and response times for hardware optimization.",
     "description": "The Performance Monitoring utility tracks system resource usage and operation performance. It provides real-time metrics for CPU, RAM, VRAM, and operation timing to support optimization decisions.",
     "workflow": [
-      "Metric Collection",
-      "Threshold Monitoring",
-      "Alert Generation",
-      "Trend Analysis",
-      "Reporting"
+      "Process: Metric Collection",
+      "Process: Threshold Monitoring",
+      "Priority Alert Generation",
+      "Process: Trend Analysis",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "monitoring"
+    ]
   },
   {
     "name": "plugin-system",
@@ -1350,13 +2157,26 @@
     "purpose": "Manages plugin loading, lifecycle, and integration for extensible SME functionality.",
     "description": "The Plugin System module handles plugin management. It loads, initializes, and manages plugin lifecycle for system extensibility.",
     "workflow": [
-      "Discovery",
-      "Loading",
-      "Initialization",
-      "Integration"
+      "Process: Discover Plugins",
+      "Load Plugin Code",
+      "Process: Initialize Plugin",
+      "Integrate with System"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "core"
+    ]
   },
   {
     "name": "polars-forensics",
@@ -1371,15 +2191,28 @@
     "purpose": "Provides high-performance forensic data analysis using Polars LazyFrames for large-scale corpus comparisons and transformations.",
     "description": "The Polars Forensics module leverages Polars LazyFrames for efficient handling of large forensic datasets. It provides optimized operations for data filtering, aggregation, joins, and complex transfor",
     "workflow": [
-      "Data Loading",
-      "Query Planning",
-      "Lazy Evaluation",
-      "Aggregation",
-      "Transformation",
-      "Output"
+      "Configurable Data Loading",
+      "Process: Query Planning",
+      "Process: Lazy Evaluation",
+      "Process: Aggregation",
+      "Transform Data Format",
+      "Formatting and Output"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "forensic",
+      "analysis"
+    ]
   },
   {
     "name": "pydantic-agent",
@@ -1394,14 +2227,28 @@
     "purpose": "Provides Pydantic-based AI agent with structured input/output validation for type-safe AI operations.",
     "description": "The Pydantic Agent module implements AI agent patterns using Pydantic for type validation. It ensures structured inputs and outputs for reliable AI operations with automatic validation.",
     "workflow": [
-      "Schema Definition",
-      "Validation",
-      "Execution",
-      "Output Validation",
-      "Error Handling"
+      "Process: Schema Definition",
+      "Validate Model Output Quality",
+      "Process: Execution",
+      "Formatting and Output Validation",
+      "Process: Error Handling"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "advanced"
+    ]
   },
   {
     "name": "query-engine",
@@ -1413,16 +2260,29 @@
     "source_file": "src/query/engine.py",
     "source_exists": true,
     "spec_path": "skills\\query-engine.md",
-    "purpose": "Core query processing engine for semantic search and knowledge retrieval across the SME system.",
+    "purpose": "Provides core functionality for query processing engine for semantic search and knowledge retrieval across the SME system.",
     "description": "The Query Engine provides semantic search capabilities across the SME knowledge base. It handles query parsing, semantic matching, ranking, and result generation for knowledge retrieval.",
     "workflow": [
-      "Query Parsing",
-      "Semantic Matching",
-      "Ranking",
-      "Result Generation"
+      "Parse Search Query",
+      "Process: Match Semantically",
+      "Process: Rank Results",
+      "Formatted Result Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "raw data stream"
+    ],
+    "outputs": [
+      "processed data",
+      "transformed content"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "query",
+      "data"
+    ]
   },
   {
     "name": "query-verification",
@@ -1437,14 +2297,28 @@
     "purpose": "Verifies query results for accuracy, freshness, and relevance before returning to users.",
     "description": "The Query Verification module validates search results before delivery. It checks result accuracy, verifies currency, and ensures relevance to the original query.",
     "workflow": [
-      "Result Collection",
-      "Accuracy Check",
-      "Freshness Check",
-      "Relevance Verification",
-      "Filtering"
+      "Aggregated Results Collection",
+      "Process: Accuracy Check",
+      "Process: Freshness Check",
+      "Process: Relevance Verification",
+      "Process: Filtering"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "search query",
+      "filters"
+    ],
+    "outputs": [
+      "matching results",
+      "data records"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "query",
+      "data"
+    ]
   },
   {
     "name": "rhetorical-analysis",
@@ -1459,15 +2333,29 @@
     "purpose": "Analyzes rhetorical patterns in text including argumentation structures, persuasion techniques, and rhetorical device usage.",
     "description": "The Rhetorical Analysis module examines text for rhetorical patterns and argumentation structures. It identifies persuasion techniques, logical fallacies, rhetorical devices, and overall rhetorical st",
     "workflow": [
-      "Text Processing",
-      "Device Detection",
-      "Argument Mapping",
-      "Persuasion Analysis",
-      "Fallacy Detection",
-      "Reporting"
+      "Process: Text Processing",
+      "Process: Device Detection",
+      "Process: Argument Mapping",
+      "Process: Persuasion Analysis",
+      "Process: Fallacy Detection",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "forensic",
+      "analysis"
+    ]
   },
   {
     "name": "rolling-delta-analysis",
@@ -1482,13 +2370,26 @@
     "purpose": "Performs rolling window analysis to track style changes over time within a document or author's corpus.",
     "description": "The Rolling Delta Analysis module tracks stylistic changes over time using rolling window analysis. It identifies temporal patterns and evolution in writing style.",
     "workflow": [
-      "Time Segmentation",
-      "Style Calculation",
-      "Delta Calculation",
-      "Pattern Detection"
+      "Process: Time Segmentation",
+      "Process: Style Calculation",
+      "Calculate Style Delta",
+      "Detect Style Patterns"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "forensic",
+      "intermediate",
+      "analysis"
+    ]
   },
   {
     "name": "rss-bridge",
@@ -1503,13 +2404,27 @@
     "purpose": "Monitors and ingests content from RSS/Atom feeds for continuous information gathering.",
     "description": "The RSS Bridge module monitors RSS and Atom feeds, collecting new content as it's published. It supports feed discovery, subscription management, and incremental content retrieval.",
     "workflow": [
-      "Feed Subscription",
-      "Polling",
-      "Content Retrieval",
-      "Processing"
+      "Subscribe to RSS Feed",
+      "Poll for Updates",
+      "Retrieve Feed Content",
+      "Data Transformation Processing"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "search query",
+      "filters"
+    ],
+    "outputs": [
+      "matching results",
+      "data records"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "integration",
+      "intermediate",
+      "data"
+    ]
   },
   {
     "name": "scholar-api",
@@ -1524,13 +2439,27 @@
     "purpose": "Retrieves academic papers and scholarly content from academic databases and research APIs.",
     "description": "The Scholar API module accesses academic databases and research repositories to retrieve scholarly content. It supports searching, citation retrieval, and metadata extraction.",
     "workflow": [
-      "Search Query",
-      "API Call",
-      "Result Processing",
-      "Content Retrieval"
+      "Process: Search Query",
+      "Call External API",
+      "Query Result Processing",
+      "Retrieve Feed Content"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "search query",
+      "filters"
+    ],
+    "outputs": [
+      "matching results",
+      "data records"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "integration",
+      "intermediate",
+      "data"
+    ]
   },
   {
     "name": "scout-discovery",
@@ -1545,13 +2474,26 @@
     "purpose": "Discovers and explores knowledge sources across the SME infrastructure for exploratory search.",
     "description": "The Scout Discovery module provides exploratory search and knowledge discovery. It helps users find relevant information by exploring connections and suggesting related concepts.",
     "workflow": [
-      "Exploration Query",
-      "Discovery",
-      "Navigation",
-      "Suggestions"
+      "Process: Exploration Query",
+      "Process: Discover Plugins",
+      "Navigate Graph Nodes",
+      "Process: Generate Suggestions"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "search query",
+      "filters"
+    ],
+    "outputs": [
+      "matching results",
+      "data records"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "query"
+    ]
   },
   {
     "name": "scrapegraph-harvesting",
@@ -1566,15 +2508,29 @@
     "purpose": "Provides advanced web scraping capabilities using ScrapeGraph AI for intelligent, graph-based web content extraction.",
     "description": "The ScrapeGraph Harvester integrates ScrapeGraph AI for intelligent web scraping. It uses AI-driven graph-based extraction to navigate complex websites, handle dynamic content, and extract structured ",
     "workflow": [
-      "Target Analysis",
-      "Extraction Strategy",
-      "Data Navigation",
-      "Content Extraction",
-      "Post-processing",
-      "Storage"
+      "Process: Target Analysis",
+      "Process: Extraction Strategy",
+      "Process: Data Navigation",
+      "Process: Content Extraction",
+      "Process: Post-processing",
+      "Process: Store Data"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "search query",
+      "filters"
+    ],
+    "outputs": [
+      "matching results",
+      "data records"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "visualization",
+      "intermediate",
+      "data"
+    ]
   },
   {
     "name": "semantic-auditor",
@@ -1589,16 +2545,28 @@
     "purpose": "Performs deep semantic analysis of corpus consistency to identify contradictions,\u4e3b\u9898 drift, and logical gaps across document collections.",
     "description": "The Semantic Auditor analyzes multiple documents or document sections to detect semantic inconsistencies, topic drift, and logical contradictions. It uses embeddings and vector similarity to compare m",
     "workflow": [
-      "Corpus Ingestion",
-      "Embedding Generation",
-      "Similarity Analysis",
-      "Contradiction Detection",
-      "Topic Tracking",
-      "Gap Identification",
-      "Report Generation"
+      "Process: Corpus Ingestion",
+      "Process: Embedding Generation",
+      "Process: Similarity Analysis",
+      "Process: Contradiction Detection",
+      "Process: Topic Tracking",
+      "Process: Gap Identification",
+      "Analysis Summary Report Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "analysis"
+    ]
   },
   {
     "name": "semantic-database",
@@ -1613,13 +2581,26 @@
     "purpose": "Provides semantic storage and retrieval for knowledge base entries.",
     "description": "The Semantic Database module provides semantic storage capabilities. It stores knowledge entries with semantic relationships and supports complex queries.",
     "workflow": [
-      "Storage",
-      "Indexing",
-      "Retrieval",
-      "Ranking"
+      "Process: Store Data",
+      "Index for Search",
+      "Retrieve Matching Data",
+      "Process: Rank Results"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "data"
+    ]
   },
   {
     "name": "sentiment-analysis",
@@ -1634,13 +2615,28 @@
     "purpose": "Analyzes text to determine sentiment polarity and emotional tone.",
     "description": "The Sentiment Analysis module analyzes text to identify sentiment. It determines positive, negative, or neutral sentiment and measures intensity.",
     "workflow": [
-      "Text Input",
-      "Analysis",
-      "Classification",
-      "Output"
+      "Text Validation and Input",
+      "Process: Perform Analysis",
+      "Process: Classify Results",
+      "Formatting and Output"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "forensic",
+      "intermediate",
+      "nlp",
+      "analysis"
+    ]
   },
   {
     "name": "sidecar-agent-execution",
@@ -1655,15 +2651,30 @@
     "purpose": "Executes AI operations in the SME sidecar process, providing the AI bridge between the operator and inference layer.",
     "description": "The Sidecar Agent Execution module runs in a separate Python process (sidecar) to handle AI inference. It manages model loading, prompt processing, response generation, and memory management for AI op",
     "workflow": [
-      "Task Reception",
-      "Model Loading",
-      "Prompt Processing",
-      "Inference",
-      "Post-processing",
-      "Memory Management"
+      "Process: Task Reception",
+      "Process: Model Loading",
+      "Process: Prompt Processing",
+      "Process: Inference",
+      "Process: Post-processing",
+      "Process: Memory Management"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "advanced",
+      "orchestration"
+    ]
   },
   {
     "name": "sme-gateway-connection",
@@ -1678,15 +2689,29 @@
     "purpose": "Establishes and manages connection to the SME (Semantic Memory Engine) MCP Gateway for accessing forensic AI capabilities. This skill enables AI agents to connect to the Lawnmower Man gateway and exec",
     "description": "The SME Gateway provides a Model Context Protocol (MCP) server that exposes forensic capabilities including trust scoring, adversarial pattern detection, stylometric analysis, and web ingestion. This ",
     "workflow": [
-      "Connection Setup",
-      "Handshake",
-      "Tool Discovery",
-      "Tool Invocation",
-      "Result Processing",
-      "Connection Management"
+      "Process: Connection Setup",
+      "Process: Handshake",
+      "Process: Tool Discovery",
+      "Process: Tool Invocation",
+      "Query Result Processing",
+      "Connection Lifecycle Management"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "integration",
+      "intermediate"
+    ]
   },
   {
     "name": "smolagents-foundation",
@@ -1701,14 +2726,28 @@
     "purpose": "Provides smolagents-based implementation for lightweight, efficient agent operations in forensic contexts.",
     "description": "The Smolagents Foundation module implements lightweight agent patterns using the smolagents framework. It provides efficient, minimal-overhead agents for forensic analysis tasks.",
     "workflow": [
-      "Agent Creation",
-      "Task Definition",
-      "Execution",
-      "Result Collection",
-      "Cleanup"
+      "Process: Agent Creation",
+      "Process: Task Definition",
+      "Process: Execution",
+      "Aggregated Results Collection",
+      "Process: Cleanup"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "advanced"
+    ]
   },
   {
     "name": "social-intelligence-crawling",
@@ -1723,16 +2762,28 @@
     "purpose": "Monitors and analyzes social media platforms for intelligence gathering, including bot detection, sentiment analysis, and trend tracking across multiple platforms.",
     "description": "The Social Intelligence Crawler provides multi-platform social media monitoring capabilities. It can scrape Twitter/X, Reddit, TikTok, and other platforms, performing sentiment analysis, bot detection",
     "workflow": [
-      "Platform Selection",
-      "Query Formulation",
-      "Data Collection",
-      "Bot Detection",
-      "Sentiment Analysis",
-      "Trend Extraction",
-      "Report Generation"
+      "Process: Platform Selection",
+      "Process: Query Formulation",
+      "Source Data Collection",
+      "Process: Bot Detection",
+      "Process: Sentiment Analysis",
+      "Process: Trend Extraction",
+      "Analysis Summary Report Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "osint"
+    ]
   },
   {
     "name": "stylometric-analysis",
@@ -1747,15 +2798,29 @@
     "purpose": "Analyzes writing style signatures to identify authorship, compare documents, and detect stylistic anomalies. Uses faststylometry for efficient writer profiling.",
     "description": "Stylometric Analysis extracts linguistic features from text to create authorship fingerprints. It analyzes vocabulary richness, sentence structure, function word usage, and punctuation patterns to bui",
     "workflow": [
-      "Feature Extraction",
-      "Profile Generation",
-      "Reference Comparison",
-      "Manhattan Distance",
-      "Anomaly Detection",
-      "Reporting"
+      "Extract Features from Input",
+      "Process: Profile Generation",
+      "Process: Reference Comparison",
+      "Process: Manhattan Distance",
+      "Process: Anomaly Detection",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "forensic",
+      "analysis"
+    ]
   },
   {
     "name": "stylometry-engine",
@@ -1767,16 +2832,30 @@
     "source_file": "src/scribe/engine.py",
     "source_exists": true,
     "spec_path": "skills\\stylometry-engine.md",
-    "purpose": "Core stylometry engine for analyzing writing styles, author identification, and text fingerprinting.",
+    "purpose": "Provides core functionality for stylometry engine for analyzing writing styles, author identification, and text fingerprinting.",
     "description": "The Stylometry Engine provides core writing style analysis capabilities. It extracts linguistic features, creates writer profiles, and supports authorship attribution through stylometric analysis.",
     "workflow": [
-      "Feature Extraction",
-      "Profile Creation",
-      "Comparison",
-      "Attribution"
+      "Extract Features from Input",
+      "Process: Profile Creation",
+      "Process: Comparison",
+      "Process: Attribute Authorship"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "nlp",
+      "analysis"
+    ]
   },
   {
     "name": "synthetic-source-detection",
@@ -1791,15 +2870,29 @@
     "purpose": "Detects machine-generated text patterns using SimHash near-duplicate detection and burstiness analysis to identify synthetic content sources.",
     "description": "The Synthetic Source Auditor identifies text that exhibits characteristics of AI generation. It uses SimHash for near-duplicate detection against known AI-generated text databases, analyzes burstiness",
     "workflow": [
-      "SimHash Generation",
-      "Database Comparison",
-      "Burstiness Analysis",
-      "Source Attribution",
-      "Confidence Scoring",
-      "Reporting"
+      "Process: SimHash Generation",
+      "Process: Database Comparison",
+      "Process: Burstiness Analysis",
+      "Process: Source Attribution",
+      "Calculate Confidence Scores",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "text or data to analyze"
+    ],
+    "outputs": [
+      "analysis results",
+      "detection scores"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "security",
+      "ai",
+      "advanced",
+      "analysis"
+    ]
   },
   {
     "name": "system-health-scan",
@@ -1814,16 +2907,29 @@
     "purpose": "Performs comprehensive system health and diagnostic scanning to assess SME infrastructure, detect issues, and provide optimization recommendations.",
     "description": "The Stetho Scan is a deep diagnostic tool that examines the SME system's health across multiple dimensions: database connectivity, API responsiveness, extension loading, memory usage, and processing q",
     "workflow": [
-      "Component Enumeration",
-      "Connectivity Testing",
-      "Performance Sampling",
-      "Queue Analysis",
-      "Error Scanning",
-      "Health Scoring",
-      "Recommendation Generation"
+      "Process: Component Enumeration",
+      "Process: Connectivity Testing",
+      "Process: Performance Sampling",
+      "Process: Queue Analysis",
+      "Process: Error Scanning",
+      "Process: Health Scoring",
+      "Process: Recommendation Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "monitoring"
+    ]
   },
   {
     "name": "system-policy-governor",
@@ -1838,15 +2944,28 @@
     "purpose": "Provides central control mechanism for system policies, resource allocation, and operational governance across the SME infrastructure.",
     "description": "The Governor extension serves as the central control plane for SME policies. It manages resource allocation, enforces operational boundaries, controls extension loading, and coordinates cross-componen",
     "workflow": [
-      "Policy Definition",
-      "Resource Allocation",
-      "Extension Control",
-      "Boundary Enforcement",
-      "Audit Logging",
-      "Coordination"
+      "Process: Policy Definition",
+      "Process: Resource Allocation",
+      "Process: Extension Control",
+      "Process: Boundary Enforcement",
+      "Process: Audit Logging",
+      "Process: Coordination"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "governance"
+    ]
   },
   {
     "name": "tactical-evidence-analysis",
@@ -1861,15 +2980,29 @@
     "purpose": "Provides specialized tools for analyzing tactical forensic evidence including IED patterns, CBRN indicators, and tactical anomalies.",
     "description": "The Tactical Intelligence Pack contains specialized forensic analysis capabilities for tactical scenarios. It includes tools for detecting improvised explosive device (IED) patterns, chemical/biologic",
     "workflow": [
-      "Evidence Classification",
-      "Pattern Detection",
-      "Indicator Scanning",
-      "Anomaly Identification",
-      "Risk Assessment",
-      "Reporting"
+      "Process: Evidence Classification",
+      "Detect Style Patterns",
+      "Process: Indicator Scanning",
+      "Process: Anomaly Identification",
+      "Assess Risk Level and Impact",
+      "Generate Analysis Report"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "forensic",
+      "analysis"
+    ]
   },
   {
     "name": "text-summarization",
@@ -1884,13 +3017,27 @@
     "purpose": "Generates concise summaries of long documents and text content.",
     "description": "The Text Summarization module creates condensed summaries of text. It extracts key information and generates coherent summaries.",
     "workflow": [
-      "Input Processing",
-      "Extraction",
-      "Summary Generation",
-      "Output"
+      "Validation and Input Processing",
+      "Extract Key Information",
+      "Process: Generate Summary",
+      "Formatting and Output"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "nlp",
+      "analysis"
+    ]
   },
   {
     "name": "threat-immunization",
@@ -1905,15 +3052,28 @@
     "purpose": "Provides proactive system immunization against detected threat patterns by implementing preventive measures and hardening defenses.",
     "description": "The Immunizer extension proactively protects the SME system against identified threats. When threats are detected, it implements hardening measures, updates security policies, and strengthens defenses",
     "workflow": [
-      "Threat Detection",
-      "Impact Analysis",
-      "Immunization Strategy",
-      "Implementation",
-      "Verification",
-      "Monitoring"
+      "Process: Threat Detection",
+      "Process: Impact Analysis",
+      "Process: Immunization Strategy",
+      "Process: Implementation",
+      "Process: Verification",
+      "Monitor Execution Progress"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "security",
+      "advanced"
+    ]
   },
   {
     "name": "tpm-echo-reference",
@@ -1928,14 +3088,27 @@
     "purpose": "Reference implementation of TPM (Trusted Platform Module) signing and echo verification for extension development.",
     "description": "The Sample Echo provides a reference implementation for TPM-signed verification. It demonstrates the standard pattern for creating TPM-signed tool outputs and is used as a boilerplate for developing n",
     "workflow": [
-      "TPM Initialization",
-      "Key Management",
-      "Signing",
-      "Verification",
-      "Echo Response"
+      "Process: TPM Initialization",
+      "Process: Key Management",
+      "Process: Signing",
+      "Process: Verification",
+      "Process: Echo Response"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "reference"
+    ]
   },
   {
     "name": "trust-score-analysis",
@@ -1950,16 +3123,30 @@
     "purpose": "Calculates epistemic trust scores (NTS - Normalized Trust Score) for data signals and information sources. The Epistemic Gatekeeper visualizes trust scores and enforces epistemic boundaries.",
     "description": "The Trust Score Analysis tool evaluates the reliability and authenticity of data sources by computing multi-dimensional trust metrics. It considers source provenance, temporal consistency, cross-refer",
     "workflow": [
-      "Source Identification",
-      "Provenance Analysis",
-      "Temporal Consistency",
-      "Cross-Reference Validation",
-      "Adversarial Indicators",
-      "Score Calculation",
-      "Visualization"
+      "Process: Source Identification",
+      "Process: Provenance Analysis",
+      "Process: Temporal Consistency",
+      "Process: Cross-Reference Validation",
+      "Process: Adversarial Indicators",
+      "Process: Score Calculation",
+      "Process: Visualization"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "context parameters"
+    ],
+    "outputs": [
+      "analysis results",
+      "findings"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "forensic",
+      "analysis"
+    ]
   },
   {
     "name": "unified-provider",
@@ -1974,13 +3161,27 @@
     "purpose": "Provides unified provider interface for consistent access to all AI models across different backends.",
     "description": "The Unified Provider module creates a single interface for all AI model providers, abstracting differences and providing consistent API for AI operations across different backends.",
     "workflow": [
-      "Provider Abstraction",
-      "Request Routing",
-      "Response Normalization",
-      "Error Unification"
+      "Abstract Provider Interface",
+      "Process: Route Requests",
+      "Process: Normalize Responses",
+      "Unify Error Handling"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "query",
+      "context",
+      "parameters"
+    ],
+    "outputs": [
+      "AI response",
+      "processed result"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "ai",
+      "advanced"
+    ]
   },
   {
     "name": "validation-framework",
@@ -1995,13 +3196,26 @@
     "purpose": "Provides validation framework for input checking, data integrity, and compliance verification.",
     "description": "The Validation Framework module validates inputs and data. It checks data integrity, enforces rules, and ensures compliance with system requirements.",
     "workflow": [
-      "Rule Definition",
-      "Input Checking",
-      "Result Generation",
-      "Error Reporting"
+      "Define Validation Rules",
+      "Validation and Input Checking",
+      "Formatted Result Generation",
+      "Report Validation Errors"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "input data",
+      "parameters"
+    ],
+    "outputs": [
+      "output result",
+      "processed data"
+    ],
+    "estimated_time": "minutes to hours",
+    "tags": [
+      "advanced",
+      "core"
+    ]
   },
   {
     "name": "web-researcher",
@@ -2016,13 +3230,26 @@
     "purpose": "Performs comprehensive web research including multi-source gathering, fact-checking, and source verification.",
     "description": "The Web Researcher module conducts automated web research. It searches multiple sources, verifies facts, and compiles research reports from web content.",
     "workflow": [
-      "Research Planning",
-      "Source Discovery",
-      "Content Gathering",
-      "Verification",
-      "Report Generation"
+      "Process: Research Planning",
+      "Discover Data Sources",
+      "Process: Content Gathering",
+      "Process: Verification",
+      "Analysis Summary Report Generation"
     ],
     "source": "Semantic Memory Engine (SME)",
-    "implementation_status": "verified"
+    "implementation_status": "verified",
+    "inputs": [
+      "search query",
+      "filters"
+    ],
+    "outputs": [
+      "matching results",
+      "data records"
+    ],
+    "estimated_time": "seconds to minutes",
+    "tags": [
+      "intermediate",
+      "data"
+    ]
   }
 ]

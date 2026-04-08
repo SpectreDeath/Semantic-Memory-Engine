@@ -6,7 +6,7 @@ Type: Tool
 Category: AI
 name: ai-tools-management
 Source: Semantic Memory Engine (SME)
-Source_File: src/ai/tools/
+Source_File: src/core/factory.py
 ---
 
 ## Purpose

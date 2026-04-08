@@ -61,7 +61,7 @@ def get_system_stats():
 
         if torch.cuda.is_available():
             vram = torch.cuda.memory_percent()
-    except:
+    except Exception:
         pass
     return cpu, ram, vram
 
@@ -73,7 +73,7 @@ def get_memory_metrics():
         cursor.execute("SELECT COUNT(*) FROM atomic_facts")
         facts_count = cursor.fetchone()[0]
         conn.close()
-    except:
+    except Exception:
         facts_count = 0
 
     # We'll mock the vector count for now as ChromaDB access is via API
@@ -124,7 +124,7 @@ with col4:
         cursor.execute("SELECT COUNT(DISTINCT session_id) FROM forensic_events")
         s_count = cursor.fetchone()[0]
         conn.close()
-    except:
+    except Exception:
         s_count = 0
     st.metric("Active Sessions", s_count)
 

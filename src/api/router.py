@@ -204,24 +204,20 @@ async def get_batch_results(job_id: str, user: User = Depends(get_current_user))
 async def get_all_connections_status():
     """Get summarized status of all infrastructure connections."""
     try:
-        import httpx
-
-        from src.ai.bridge import SIDECAR_URL
+        from src.ai.bridge import _get_provider
 
         status = {
             "api": "online",
-            "sidecar": "offline",
+            "ai_provider": "offline",
             "database": "offline",
             "tools": ToolFactory.health_check(),
         }
 
-        # Check Sidecar
+        # Check AI Provider
         try:
-            async with httpx.AsyncClient(timeout=2.0) as client:
-                resp = await client.get(f"{SIDECAR_URL}/health")
-                if resp.status_code == 200:
-                    status["sidecar"] = resp.json()
-        except:
+            provider = _get_provider()
+            status["ai_provider"] = provider.__class__.__name__
+        except Exception:
             pass
 
         # Check Database (Check if we can query the factory's DB instance)
@@ -229,7 +225,7 @@ async def get_all_connections_status():
             db = ToolFactory.create_semantic_db()
             if db:  # placeholder for actual health check
                 status["database"] = "online"
-        except:
+        except Exception:
             pass
 
         return status

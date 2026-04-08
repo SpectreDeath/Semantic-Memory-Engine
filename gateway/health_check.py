@@ -5,7 +5,6 @@ import time
 from pathlib import Path
 from typing import Any
 
-import httpx
 import psycopg2
 
 logger = logging.getLogger("lawnmower.health_check")
@@ -14,7 +13,6 @@ REQUIRED_ENV_VARS = [
     "SME_GATEWAY_SECRET",
     "SME_ADMIN_PASSWORD",
     "SME_HSM_SECRET",
-    "SME_SIDECAR_URL",
 ]
 
 _DEFAULT_DATA_DIR = str(Path(__file__).resolve().parent.parent / "data")
@@ -26,8 +24,6 @@ POSTGRES_CONFIG = {
     "port": os.environ.get("POSTGRES_PORT", "5432"),
     "database": os.environ.get("POSTGRES_DB", "sme_nexus"),
 }
-
-SIDECAR_URL = os.environ.get("SME_SIDECAR_URL", "http://127.0.0.1:8089")
 
 
 def _check_postgresql() -> dict[str, str]:
@@ -75,28 +71,20 @@ def _check_sqlite() -> dict[str, str]:
         return {"status": "fail", "message": f"SQLite error: {e}"}
 
 
-def _check_sidecar() -> dict[str, str]:
+def _check_ai_provider() -> dict[str, str]:
+    """Check if AI provider can be initialized."""
     try:
-        with httpx.Client(timeout=5.0) as client:
-            response = client.get(f"{SIDECAR_URL}/health")
-            if response.status_code == 200:
-                logger.info("Sidecar health check passed")
-                return {"status": "pass", "message": f"Sidecar service available at {SIDECAR_URL}"}
-            else:
-                logger.warning(f"Sidecar health check returned status {response.status_code}")
-                return {
-                    "status": "fail",
-                    "message": f"Sidecar returned status {response.status_code}",
-                }
-    except httpx.ConnectError as e:
-        logger.warning(f"Sidecar health check failed: {e}")
-        return {"status": "fail", "message": f"Cannot connect to sidecar at {SIDECAR_URL}: {e}"}
-    except httpx.TimeoutException as e:
-        logger.warning(f"Sidecar health check timed out: {e}")
-        return {"status": "fail", "message": f"Sidecar request timed out: {e}"}
+        from src.ai.providers.factory import get_provider
+
+        provider = get_provider()
+        logger.info(f"AI provider check passed: {provider.__class__.__name__}")
+        return {
+            "status": "pass",
+            "message": f"AI Provider available: {provider.__class__.__name__}",
+        }
     except Exception as e:
-        logger.warning(f"Sidecar health check error: {e}")
-        return {"status": "fail", "message": f"Sidecar error: {e}"}
+        logger.warning(f"AI provider check failed: {e}")
+        return {"status": "fail", "message": f"AI Provider error: {e}"}
 
 
 def _check_environment() -> dict[str, str]:
@@ -176,7 +164,7 @@ def deep_health_check() -> dict[str, Any]:
     checks = {
         "postgresql": _check_postgresql(),
         "sqlite": _check_sqlite(),
-        "sidecar": _check_sidecar(),
+        "ai_provider": _check_ai_provider(),
         "environment": _check_environment(),
         "disk_space": _check_disk_space(),
         "extensions": _check_extensions(),

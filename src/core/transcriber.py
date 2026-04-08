@@ -328,7 +328,7 @@ def list_transcripts() -> str:
                                 "timestamp": data.get("timestamp"),
                             }
                         )
-                    except:
+                    except (json.JSONDecodeError, KeyError, TypeError):
                         pass
 
         return json.dumps(

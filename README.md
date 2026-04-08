@@ -1,10 +1,10 @@
-# 🌿 Lawnmower Man: Forensic MCP Gateway (v3.0.0)
+# 🌿 Lawnmower Man: Forensic MCP Gateway (v3.0.1)
 
 > **The Semantic Memory Engine (SME) Bridge for Agentic AI.**
 > *Now featuring the Interactive Control Room & Unified Ingestion.*
 
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Version](https://img.shields.io/badge/Version-3.0.0_Odyssey_Release-green.svg)
+![Version](https://img.shields.io/badge/Version-3.0.1-green.svg)
 ![Architecture](https://img.shields.io/badge/Architecture-Modular_Plugin-blueviolet.svg)
 ![Hardware Optimized](https://img.shields.io/badge/Hardware-1660_Ti_6GB-green.svg)
 
@@ -12,16 +12,16 @@
 
 ## 🚀 Overview
 
-Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents. Version 3.0.0 introduces the **Control Room**, a unified web interface for managing service connections and web ingestion.
+Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents. Version 3.0.1 features an embedded AI provider in the Operator for simpler architecture.
 
-- **Interactive Control Room**: Real-time monitoring of AI Providers, Sidecars, and Databases.
+- **Interactive Control Room**: Real-time monitoring of AI Providers and Databases.
 - **Cloud Storage Integration**: Ingest content from Google Drive, Dropbox, OneDrive, and S3.
 - **Social Intelligence Crawler**: Multi-platform social media monitoring and bot detection.
 - **PostgreSQL Nexus**: Production-grade database layer with connection pooling.
 - **The Harvester**: One-click web ingestion converting URLs into semantic atomic facts.
 - **Epistemic Trust**: Calculated Trust Scores for all data signals.
 - **Containerized Stack**: Full Docker support with auto-healing and health checks.
-- **Asynchronous JSON-RPC Bridge**: Non-blocking communication with AI agents.
+- **Asynchronous AI Bridge**: Direct provider integration in operator process.
 - **Plugin Data Access Layer**: Abstracted SQL queries for PostgreSQL migration.
 - **VS Code Extension Config**: Configurable Python paths for development environments.
 
@@ -66,12 +66,12 @@ Version 3.0.0 introduces a professional "Glassmorphism" dashboard for managing y
 
 ## 🏗️ Technical Architecture
 
-Lawnmower Man utilizes a dual-Python "Sidecar" architecture to balance performance and compatibility.
+Lawnmower Man uses a single Python process architecture with embedded AI provider for simplicity and direct GPU access.
 
 ```mermaid
 graph TD
     Client[AI Agent] <-->|MCP Protocol| Op[SME Operator - Py 3.14]
-    Op <-->|HTTP/JSON-RPC| Sidecar[AI Sidecar - Py 3.13]
+    Op <-->|Direct| Provider[AI Provider - Embedded]
     Op <-->|Websocket| UI[Control Room Dashboard]
 
     subgraph Core [Logic Layer]
@@ -81,7 +81,7 @@ graph TD
     end
 
     subgraph AI [Inference Layer]
-        Sidecar <--> Model[LLM / Langflow]
+        Operator <-->|Provider| Model[LLM / Langflow]
     end
 ```
 
@@ -99,17 +99,14 @@ docker-compose up --build
 
 This starts:
 
-- `sme-operator`: Core logic (Port 8000)
-- `sme-sidecar`: AI bridge (Port 8089)
+- `sme-operator`: Core logic with embedded AI provider (Port 8000)
 - `sme-frontend`: Control Room UI (Port 5173)
 
 ### Local Manual Start
 
 1. **Copy environment config**: `cp .env.example .env` then fill in your secrets
 2. **Operator**: `python -m src.api.main`
-3. **Sidecar**: `python -m src.ai.sidecar`
-4. **Frontend**: `cd frontend && npm run dev`
-
+3. **Frontend**: `cd frontend && npm run dev`
 ---
 
 ## 🛠️ Utility Suite
@@ -253,11 +250,30 @@ Our utilities are specifically optimized for the 1660 Ti's 6GB VRAM limitations:
 
 ## 📦 Requirements
 
-- Python 3.12+ (3.13 recommended for spacy compatibility)
+- Python 3.13
 - `fastmcp`
 - `pydantic`
 - `faststylometry`
 - `statistics` (Standard Lib)
+
+---
+
+## Skills
+
+This project has additional skills available in `.kilo/skills/`:
+
+- **context-offloading**: Use for saving agent context across sessions, tracking decisions, and maintaining project memory.
+  - Triggers: "save context", "remember", "memory", "prior context", "load history", "session memory", "project memory"
+
+- **skill-analyzer**: Use for analyzing existing skills to understand capabilities and triggers.
+  - Triggers: "analyze skill", "what does this skill do", "skill review", "evaluate skill"
+
+### Context Storage
+
+This project uses `.context/` directory for persistent agent memory:
+- `.context/identity.md` - Project purpose, stack, conventions
+- `.context/decisions.md` - Architecture decisions
+- `.context/session-logs/` - Session notes
 
 ---
 

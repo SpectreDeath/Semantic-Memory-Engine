@@ -44,7 +44,7 @@ def get_network_summary() -> str:
     hostname = socket.gethostname()
     try:
         local_ip = socket.gethostbyname(hostname)
-    except:
+    except socket.gaierror:
         local_ip = "Unknown"
 
     latency = check_latency()

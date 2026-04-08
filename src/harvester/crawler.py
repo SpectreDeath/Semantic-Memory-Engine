@@ -579,7 +579,7 @@ class HarvesterCrawler:
                 try:
                     json_ld = json.loads(script.string)
                     result["json_ld"].append(json_ld)
-                except:
+                except (json.JSONDecodeError, TypeError):
                     pass
 
             # Extract microdata
@@ -675,7 +675,7 @@ class HarvesterCrawler:
                         try:
                             await page.wait_for_selector(wait_selector, timeout=10000)
                             result["js_interactions_applied"].append(f"Waited for: {wait_selector}")
-                        except:
+                        except Exception:
                             logger.warning(f"Selector {wait_selector} not found")
 
                     # Auto-scroll for lazy loading
@@ -839,7 +839,7 @@ class HarvesterCrawler:
             row = cursor.fetchone()
             conn.close()
             return dict(row) if row else None
-        except:
+        except Exception:
             return None
 
     def _store_to_centrifuge(self, url: str, fetch_result: dict):

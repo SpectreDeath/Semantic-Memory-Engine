@@ -26,7 +26,7 @@ def get_thermal_stats() -> str:
             f"VRAM: {mem.used // 1024**2}MB / {mem.total // 1024**2}MB"
         )
         pynvml.nvmlShutdown()
-    except:
+    except Exception:
         gpu_info = "GPU: Error accessing NVML"
 
     return f"--- HARDWARE STATUS ---\nCPU: {cpu}%\n{gpu_info}"

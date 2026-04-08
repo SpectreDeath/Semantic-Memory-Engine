@@ -1,7 +1,7 @@
 ---
 Domain: Security
 Version: 2.0.0
-Complexity: advanced
+Complexity: Advanced
 Type: analysis
 Category: counter-intelligence
 name: Adversarial Pattern Detection & Simulation

@@ -12,6 +12,8 @@ bin/grafana/
 
 # --- Python & Virtual Environments ---
 .venv/
+.venv313/
+.brain_venv/
 __pycache__/
 *.py[cod]
 *$py.class

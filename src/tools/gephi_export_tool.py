@@ -30,7 +30,10 @@ from mcp.server.fastmcp import FastMCP
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent  # D:\SME
 GEPHI_BRIDGE = PROJECT_ROOT / "src" / "utils" / "gephi_bridge.py"
 EXPORT_DIR = PROJECT_ROOT / "data" / "exports"
-PYTHON_EXE = PROJECT_ROOT / ".venv" / "Scripts" / "python.exe"
+
+# Configurable venv path - set SME_VENV env var to override
+_VENV_NAME = os.getenv("SME_VENV", ".venv")
+PYTHON_EXE = PROJECT_ROOT / _VENV_NAME / "Scripts" / "python.exe"
 
 VALID_MODES = ("project", "trust", "knowledge", "synthetic")
 

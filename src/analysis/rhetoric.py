@@ -1,6 +1,10 @@
 import json
 
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from textblob import TextBlob
+
+nltk.download("vader_lexicon")
 
 # Your custom dictionary (Risk Signals)
 custom_lexicon = {
@@ -30,11 +34,6 @@ def analyze_rhetoric(text):
 # Example crawl-ready text
 sample_text = "The entities were cleared as part of the toxic infestation removal."
 print(analyze_rhetoric(sample_text))
-import nltk
-from nltk.sentiment.vader import SentimentIntensityAnalyzer
-
-# Ensure you have the lexicon downloaded (only needed once)
-nltk.download("vader_lexicon")
 
 
 class RhetoricAnalyzer:

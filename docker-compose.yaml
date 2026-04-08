@@ -14,7 +14,6 @@ services:
     environment:
       - SME_GATEWAY_SECRET=${SME_GATEWAY_SECRET}
       - SME_ADMIN_PASSWORD=${SME_ADMIN_PASSWORD}
-      - SME_SIDECAR_URL=http://sme-sidecar:8089
     depends_on:
       - sme-operator
     volumes:
@@ -47,7 +46,6 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - SME_SIDECAR_URL=http://sme-sidecar:8089
       - SME_DATA_DIR=/app/data
       # Security — values must be set in a .env file (see .env.example)
       - SME_GATEWAY_SECRET=${SME_GATEWAY_SECRET}
@@ -55,8 +53,6 @@ services:
       - SME_HSM_SECRET=${SME_HSM_SECRET}
       - SME_CORS_ORIGINS=${SME_CORS_ORIGINS:-http://localhost:80,http://localhost:5173}
     depends_on:
-      sme-sidecar:
-        condition: service_healthy
       postgres:
         condition: service_healthy
     volumes:
@@ -64,48 +60,6 @@ services:
       - ./data:/app/data
     networks:
       - frontend-net
-      - backend-net
-
-  sme-sidecar:
-    build:
-      context: .
-      dockerfile: Dockerfile.sidecar
-    container_name: sme_sidecar
-    restart: unless-stopped
-    ports:
-      - "8089:8089"
-    environment:
-      - SME_AI_PROVIDER=ollama
-      - SME_OPERATOR_URL=http://sme-operator:8000
-      # AI Provider URLs - use Docker service names
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - LANGFLOW_BASE_URL=http://langflow:7860
-      # Hardware config — passed through from config/config.yaml values
-      - SME_VRAM_LIMIT_MB=4096
-      - SME_OFFLOAD_THRESHOLD_MB=3584
-      - SME_DATA_DIR=/app/data
-    depends_on:
-      ollama:
-        condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          # Caps system RAM (not VRAM — Docker cannot cap GPU VRAM directly).
-          # True VRAM limiting requires application-level controls such as
-          # PYTORCH_CUDA_ALLOC_CONF or torch.cuda.set_per_process_memory_fraction().
-          memory: 4G
-        reservations:
-          devices:
-            - driver: nvidia
-              count: 1
-              capabilities: [gpu]
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8089/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    networks:
       - backend-net
 
   sme-frontend:

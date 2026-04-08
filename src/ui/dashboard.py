@@ -237,7 +237,7 @@ with tab_tactical:
                     logs.append(log_entry)
                     with open(pivot_log, "w") as f:
                         json.dump(logs, f, indent=4)
-                except:
+                except Exception:
                     pass
 
                 # Targeted Execution

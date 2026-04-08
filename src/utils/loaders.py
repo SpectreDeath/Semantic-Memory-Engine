@@ -13,5 +13,5 @@ def load_intel_data(file_path):
     try:
         with open(path, encoding="utf-8") as f:
             return json.load(f)
-    except:
+    except (json.JSONDecodeError, IOError):
         return []

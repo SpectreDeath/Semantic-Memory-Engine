@@ -300,3 +300,121 @@ async def ingest_from_url(request: IngestRequest):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =============================================================================
+# Workflow API
+# =============================================================================
+
+
+@router.get("/workflows")
+async def list_workflows():
+    """List all available workflows."""
+    try:
+        from src.orchestration.workflow_engine import get_engine
+
+        engine = get_engine()
+        workflows = engine.list_workflows()
+        return {"workflows": workflows}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/workflows")
+async def create_workflow(request: dict):
+    """Create a new workflow definition."""
+    try:
+        from src.orchestration.workflow_engine import get_engine
+        from src.orchestration.step_registry import get_step_registry
+
+        engine = get_engine()
+        registry = get_step_registry()
+
+        for step_def in request.get("steps", []):
+            handler_name = step_def.get("handler")
+            if handler_name:
+                handler = registry.get_handler(handler_name)
+                engine.register_step(handler_name, handler)
+
+        workflow = engine.create_workflow(
+            name=request["name"],
+            description=request.get("description", ""),
+            steps=request.get("steps", []),
+            parallel=request.get("parallel", False),
+        )
+
+        return {
+            "workflow_id": workflow.workflow_id,
+            "name": workflow.name,
+            "status": "created",
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/workflows/{workflow_id}")
+async def get_workflow(workflow_id: str):
+    """Get workflow definition."""
+    try:
+        from src.orchestration.workflow_engine import get_engine
+
+        engine = get_engine()
+        workflow = engine.get_workflow(workflow_id)
+        if not workflow:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+        return workflow
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/workflows/{workflow_id}/execute")
+async def execute_workflow(workflow_id: str, input_data: dict):
+    """Execute a workflow with input data."""
+    try:
+        from src.orchestration.workflow_engine import get_engine
+        from src.orchestration.step_registry import get_step_registry
+
+        engine = get_engine()
+        registry = get_step_registry()
+
+        workflow_def = engine.get_workflow(workflow_id)
+        if not workflow_def:
+            raise HTTPException(status_code=404, detail="Workflow not found")
+
+        for step_def in workflow_def.get("definition", {}).get("steps", []):
+            handler_name = step_def.get("handler")
+            if handler_name:
+                handler = registry.get_handler(handler_name)
+                if handler:
+                    engine.register_step(handler_name, handler)
+
+        workflow = engine.create_workflow(
+            name=workflow_def["name"],
+            description=workflow_def.get("description", ""),
+            steps=workflow_def.get("definition", {}).get("steps", []),
+            parallel=workflow_def.get("definition", {}).get("parallel", False),
+        )
+
+        import asyncio
+
+        result = await engine.execute(workflow, input_data)
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/workflows/steps")
+async def list_workflow_steps():
+    """List all available workflow steps."""
+    try:
+        from src.orchestration.step_registry import get_step_registry
+
+        registry = get_step_registry()
+        steps = registry.list_steps()
+        return {"steps": steps}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

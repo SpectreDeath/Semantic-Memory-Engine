@@ -64,9 +64,7 @@ class ForensicScout:
 
         return segments
 
-    def harvest(
-        self, url: str, author_id: str | None = None
-    ) -> Generator[dict[str, Any]]:
+    def harvest(self, url: str, author_id: str | None = None) -> Generator[dict[str, Any]]:
         """
         Streams harvested content in memory-efficient chunks.
 

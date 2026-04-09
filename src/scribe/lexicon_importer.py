@@ -62,13 +62,13 @@ class LexiconImporter:
         finally:
             conn.close()
 
-    def _stream_csv(self, file_path: str) -> Generator[dict[str, str], None, None]:
+    def _stream_csv(self, file_path: str) -> Generator[dict[str, str]]:
         """Read CSV file line-by-line to keep memory usage low."""
         with open(file_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             yield from reader
 
-    def _stream_json(self, file_path: str) -> Generator[dict[str, Any], None, None]:
+    def _stream_json(self, file_path: str) -> Generator[dict[str, Any]]:
         """Read JSON file (assumes list of objects) iteratively."""
         # For very large JSONs, ijson would be better, but for now we use a generator
         # around the loaded data if it's a standard list.

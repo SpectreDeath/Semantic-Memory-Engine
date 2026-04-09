@@ -66,7 +66,7 @@ class ForensicScout:
 
     def harvest(
         self, url: str, author_id: str | None = None
-    ) -> Generator[dict[str, Any], None, None]:
+    ) -> Generator[dict[str, Any]]:
         """
         Streams harvested content in memory-efficient chunks.
 

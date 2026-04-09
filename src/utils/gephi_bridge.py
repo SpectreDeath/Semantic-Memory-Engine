@@ -131,7 +131,7 @@ def get_file_metadata():
                 try:
                     with open(file_path, encoding="utf-8", errors="ignore") as f:
                         lines = len(f.readlines())
-                except IOError:
+                except OSError:
                     lines = 0
 
                 files.append(

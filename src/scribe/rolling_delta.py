@@ -26,7 +26,7 @@ class RollingDelta:
 
     def generate_windows(
         self, text: str, window_size: int = 5000, step: int = 500
-    ) -> Generator[tuple[int, str], None, None]:
+    ) -> Generator[tuple[int, str]]:
         """
         Yields text segments based on token count windowing.
         Generator implementation keeps memory footprint low.

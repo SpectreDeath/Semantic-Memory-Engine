@@ -197,8 +197,8 @@ class WorkflowGenerator:
 
 async def generate_and_execute(task: str, input_data: dict[str, Any]) -> dict[str, Any]:
     """Generate workflow from task and execute it."""
-    from src.orchestration.workflow_engine import get_engine
     from src.orchestration.step_registry import get_step_registry
+    from src.orchestration.workflow_engine import get_engine
 
     generator = WorkflowGenerator()
     engine = get_engine()

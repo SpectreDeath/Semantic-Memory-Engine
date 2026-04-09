@@ -324,8 +324,8 @@ async def list_workflows():
 async def create_workflow(request: dict):
     """Create a new workflow definition."""
     try:
-        from src.orchestration.workflow_engine import get_engine
         from src.orchestration.step_registry import get_step_registry
+        from src.orchestration.workflow_engine import get_engine
 
         engine = get_engine()
         registry = get_step_registry()
@@ -373,8 +373,8 @@ async def get_workflow(workflow_id: str):
 async def execute_workflow(workflow_id: str, input_data: dict):
     """Execute a workflow with input data."""
     try:
-        from src.orchestration.workflow_engine import get_engine
         from src.orchestration.step_registry import get_step_registry
+        from src.orchestration.workflow_engine import get_engine
 
         engine = get_engine()
         registry = get_step_registry()

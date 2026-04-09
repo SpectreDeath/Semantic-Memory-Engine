@@ -16,10 +16,11 @@ import json
 import logging
 import sqlite3
 import uuid
+from collections.abc import Callable
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from src.core.config import Config
 
@@ -291,7 +292,7 @@ class WorkflowEngine:
             tasks = [self._execute_step(s, workflow.context) for s in ready]
             results = await asyncio.gather(*tasks, return_exceptions=True)
 
-            for step, result in zip(ready, results):
+            for step, result in zip(ready, results, strict=True):
                 if isinstance(result, Exception):
                     step.status = StepStatus.FAILED
                     step.error = str(result)
@@ -338,7 +339,7 @@ class WorkflowEngine:
 
             return result
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             step.status = StepStatus.FAILED
             step.error = f"Timeout after {step.timeout}s"
             self._save_step(step, context.get("input", {}), "failed", None, step.error)

@@ -8,7 +8,8 @@ Each entry maps: step_name -> (handler_function, param_schema)
 """
 
 import logging
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger("StepRegistry")
 

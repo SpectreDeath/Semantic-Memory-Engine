@@ -418,3 +418,34 @@ async def list_workflow_steps():
         return {"steps": steps}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/workflows/generate")
+async def generate_workflow(request: dict):
+    """Generate a workflow from task description and execute it."""
+    try:
+        from src.orchestration.workflow_generator import generate_and_execute
+
+        task = request.get("task", "")
+        input_data = request.get("input_data", {})
+
+        if not task:
+            raise HTTPException(status_code=400, detail="Task description required")
+
+        result = await generate_and_execute(task, input_data)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/workflows/generate/handlers")
+async def list_generators():
+    """List available workflow step handlers for generation."""
+    try:
+        from src.orchestration.workflow_generator import get_generator
+
+        generator = get_generator()
+        handlers = generator.list_available_handlers()
+        return {"handlers": handlers}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

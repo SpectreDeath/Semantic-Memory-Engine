@@ -12,8 +12,6 @@ from __future__ import annotations
 # =============================================================================
 DEFAULT_OPERATOR_HOST: str = "0.0.0.0"
 DEFAULT_OPERATOR_PORT: int = 8000
-DEFAULT_SIDECAR_HOST: str = "0.0.0.0"
-DEFAULT_SIDECAR_PORT: int = 8089
 DEFAULT_FRONTEND_PORT: int = 5173
 DEFAULT_POSTGRES_PORT: int = 5432
 

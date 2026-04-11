@@ -92,8 +92,9 @@ def create_sme_step_registry() -> StepRegistry:
     def scholar_search_handler(query: str, max_results: int = 10, **kwargs) -> dict:
         """Search academic papers via CrossRef API."""
         try:
-            import requests
             import json
+
+            import requests
 
             # CrossRef API - free, no key required
             url = "https://api.crossref.org/works"
@@ -138,9 +139,10 @@ def create_sme_step_registry() -> StepRegistry:
     def osint_scan_handler(username: str, platforms: list | None = None, **kwargs) -> dict:
         """Run OSINT scan on username."""
         try:
-            from src.gathering.osint_toolkit import footprint_username, save_to_json
             import io
             import sys
+
+            from src.gathering.osint_toolkit import footprint_username, save_to_json
 
             # Capture output to avoid print statements
             old_stdout = sys.stdout
@@ -163,8 +165,9 @@ def create_sme_step_registry() -> StepRegistry:
     def search_wikipedia_handler(query: str, **kwargs) -> dict:
         """Search Wikipedia for a person or topic."""
         try:
-            import requests
             import json
+
+            import requests
 
             # Wikipedia API search
             search_url = "https://en.wikipedia.org/w/api.php"
@@ -429,9 +432,9 @@ def create_sme_step_registry() -> StepRegistry:
     def query_db_handler(query: str, params: dict | None = None, **kwargs) -> dict:
         """Query database using SQLite."""
         try:
-            import sqlite3
             import json
             import os
+            import sqlite3
 
             # Use the SME database
             db_path = os.path.join(os.getcwd(), "data", "storage", "laboratory.db")

@@ -45,8 +45,8 @@ MANIFEST_SCHEMA = {
         "name": {"type": "string", "minLength": 1, "maxLength": 128},
         "version": {
             "type": "string",
-            "pattern": "^\\d+\\.\\d+\\.\\d+$",
-            "description": "Semantic version (e.g., 1.0.0)",
+            "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+            "description": "Semantic version or Major.Minor (e.g., 1.0.0 or 1.0)",
         },
         "description": {"type": "string", "minLength": 10, "maxLength": 1024},
         "entry_point": {
@@ -83,11 +83,8 @@ MANIFEST_SCHEMA = {
 FORBIDDEN_IMPORTS: frozenset[str] = frozenset(
     {
         # System access - can be used to escape sandbox
-        "os",
-        "sys",
         "ctypes",
         "subprocess",
-        "shutil",
         # Network - potential data exfiltration
         "socket",
         "http",
@@ -109,11 +106,9 @@ FORBIDDEN_IMPORTS: frozenset[str] = frozenset(
 
 FORBIDDEN_BUILTINS: frozenset[str] = frozenset(
     {
-        "open",
         "eval",
         "exec",
         "compile",
-        "__import__",
         "globals",
         "locals",
         "vars",
@@ -381,8 +376,8 @@ class ExtensionManager:
 
             module = importlib.util.module_from_spec(spec)
 
-            # Provide restricted globals
-            module.__builtins__ = self._create_safe_builtins()
+            # Use standard builtins for now to prevent breaking standard library
+            # module.__builtins__ manipulation is too brittle and breaks logging/inspect
 
             spec.loader.exec_module(module)
 

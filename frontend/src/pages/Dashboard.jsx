@@ -47,23 +47,24 @@ const Dashboard = () => {
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
-      <section className="card glass-panel">
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }} role="feed" aria-label="Dashboard metrics">
+      <section className="card glass-panel" aria-labelledby="ingestion-title">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Activity size={18} /> Live Ingestion Feed
+          <h3 id="ingestion-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Activity size={18} aria-hidden="true" /> Live Ingestion Feed
           </h3>
-          <span style={{ fontSize: '0.7rem', color: 'var(--success)', fontWeight: 600 }}>
+          <span style={{ fontSize: '0.7rem', color: 'var(--success)', fontWeight: 600 }} role="status" aria-label="Streaming status">
             STREAMING
           </span>
         </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>
           Latest entities discovery and processed data markers.
         </p>
-        <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ marginTop: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }} role="list" aria-label="Recent feed items">
           {feedItems.map((item, i) => (
             <div
               key={i}
+              role="listitem"
               style={{
                 padding: '0.75rem',
                 borderLeft: `3px solid ${item.type === 'SENTIMENT' ? 'var(--danger)' : 'var(--accent-cyan)'}`,
@@ -74,7 +75,7 @@ const Dashboard = () => {
                 <span style={{ color: item.type === 'SENTIMENT' ? 'var(--danger)' : 'var(--accent-cyan)', fontWeight: 600 }}>
                   {item.type}
                 </span>
-                <span style={{ color: 'var(--text-secondary)' }}>{item.time}</span>
+                <time style={{ color: 'var(--text-secondary)' }}>{item.time}</time>
               </div>
               <div style={{ fontWeight: 400, marginTop: '0.25rem' }}>{item.msg}</div>
             </div>
@@ -82,10 +83,10 @@ const Dashboard = () => {
         </div>
       </section>
 
-      <section className="card glass-panel">
+      <section className="card glass-panel" aria-labelledby="overlays-title">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Network size={18} /> Semantic Overlays
+          <h3 id="overlays-title" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Network size={18} aria-hidden="true" /> Semantic Overlays
           </h3>
         </div>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginTop: '0.5rem' }}>

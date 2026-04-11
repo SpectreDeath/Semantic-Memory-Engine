@@ -309,10 +309,8 @@ class WorkflowEngine:
         for dep in step.depends_on:
             if dep not in context.get("steps", {}):
                 return False
-            dep_step = next(
-                (s for s in context.get("steps", {}).values() if s.step_id == dep), None
-            )
-            if dep_step and dep_step.status == StepStatus.FAILED:
+            dep_result = context.get("steps", {}).get(dep)
+            if dep_result and dep_result.get("status") == "failed":
                 return False
         return True
 

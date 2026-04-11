@@ -46,6 +46,18 @@ class WorkflowGenerator:
                 "params": {"username": "$input.username"},
                 "keywords": ["osint", "investigate", "profile", "social", "account"],
             },
+            "wikipedia": {
+                "handler": "search_wikipedia",
+                "params": {"query": "$input.query"},
+                "keywords": [
+                    "wikipedia",
+                    "encyclopedia",
+                    "background",
+                    "biography",
+                    "profile",
+                    "research",
+                ],
+            },
             # ANALYSIS
             "sentiment": {
                 "handler": "sentiment",

@@ -178,15 +178,25 @@ const GlobalSearch = ({ isOpen, onClose, onNavigate }) => {
             padding: '1rem 1.5rem',
             borderBottom: '1px solid var(--glass-border)',
           }}
+          role="search"
         >
-          <Search size={20} color="var(--text-secondary)" />
+          <Search size={20} color="var(--text-secondary)" aria-hidden="true" />
+          <label htmlFor="global-search-input" className="visually-hidden">
+            Search tools, entities, and history
+          </label>
           <input
+            id="global-search-input"
             ref={inputRef}
             type="text"
             placeholder="Search tools, entities, history..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={isOpen}
+            aria-controls="search-results"
+            aria-activedescendant={results[selectedIndex] ? `result-${selectedIndex}` : undefined}
             style={{
               flex: 1,
               marginLeft: '1rem',
@@ -230,23 +240,33 @@ const GlobalSearch = ({ isOpen, onClose, onNavigate }) => {
         </div>
 
         {/* Results */}
-        <div style={{ overflowY: 'auto', flex: 1, padding: '0.5rem' }}>
+        <div style={{ overflowY: 'auto', flex: 1, padding: '0.5rem' }} role="listbox" id="search-results" aria-label="Search results">
           {loading ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }} role="status" aria-live="polite">
               Searching...
             </div>
           ) : query && results.length === 0 ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }} role="status">
               No results found for "{query}"
             </div>
           ) : query ? (
-            <div>
+            <div role="list">
               {results.map((result, index) => {
                 const Icon = result.icon || Search;
                 return (
                   <div
                     key={result.id}
+                    id={`result-${index}`}
+                    role="option"
+                    aria-selected={index === selectedIndex}
                     onClick={() => handleSelectResult(result)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleSelectResult(result);
+                      }
+                    }}
+                    tabIndex={0}
                     style={{
                       display: 'flex',
                       alignItems: 'center',

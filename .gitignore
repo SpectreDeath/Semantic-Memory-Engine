@@ -52,3 +52,6 @@ data/aether/signature_index.ipc
 # --- Agent & RL4 Tools ---
 .agent/
 .rl4/
+
+# --- Memtext Context ---
+.context/

@@ -90,12 +90,43 @@ def create_sme_step_registry() -> StepRegistry:
     registry.register("rss_fetch", rss_bridge_handler, {"feed_url": "string"})
 
     def scholar_search_handler(query: str, max_results: int = 10, **kwargs) -> dict:
-        """Search academic papers."""
+        """Search academic papers via CrossRef API."""
         try:
-            from src.gathering.scholar_api import ScholarAPI
+            import requests
+            import json
 
-            api = ScholarAPI()
-            papers = api.search(query, max_results)
+            # CrossRef API - free, no key required
+            url = "https://api.crossref.org/works"
+            params = {
+                "query": query,
+                "rows": min(max_results, 20),
+                "select": "title,author,published,container-title,doi,abstract",
+            }
+
+            response = requests.get(url, params=params, timeout=15)
+            response.raise_for_status()
+            data = response.json()
+
+            papers = []
+            for item in data.get("message", {}).get("items", []):
+                authors = item.get("author", [])
+                author_names = [
+                    f"{a.get('given', '')} {a.get('family', '')}".strip() for a in authors
+                ]
+
+                papers.append(
+                    {
+                        "title": item.get("title", [""])[0] if item.get("title") else "",
+                        "authors": author_names[:5],  # Limit to 5 authors
+                        "year": item.get("published", {}).get("date-parts", [[None]])[0][0],
+                        "journal": item.get("container-title", [""])[0]
+                        if item.get("container-title")
+                        else "",
+                        "doi": item.get("doi", ""),
+                        "abstract": item.get("abstract", "")[:300] if item.get("abstract") else "",
+                    }
+                )
+
             return {"status": "success", "count": len(papers), "papers": papers}
         except Exception as e:
             return {"status": "error", "error": str(e)}
@@ -107,13 +138,88 @@ def create_sme_step_registry() -> StepRegistry:
     def osint_scan_handler(username: str, platforms: list | None = None, **kwargs) -> dict:
         """Run OSINT scan on username."""
         try:
-            from src.gathering.osint_toolkit import OSINTToolkit
+            from src.gathering.osint_toolkit import footprint_username, save_to_json
+            import io
+            import sys
 
-            toolkit = OSINTToolkit()
-            result = toolkit.scan_username(username, platforms or ["twitter", "reddit"])
+            # Capture output to avoid print statements
+            old_stdout = sys.stdout
+            old_stderr = sys.stderr
+            sys.stdout = io.StringIO()
+            sys.stderr = io.StringIO()
+
+            result = footprint_username(username)
+
+            # Restore stdout
+            sys.stdout = old_stdout
+            sys.stderr = old_stderr
+
+            # Save results
+            save_to_json(result)
             return {"status": "success", "result": result}
         except Exception as e:
             return {"status": "error", "error": str(e)}
+
+    def search_wikipedia_handler(query: str, **kwargs) -> dict:
+        """Search Wikipedia for a person or topic."""
+        try:
+            import requests
+            import json
+
+            # Wikipedia API search
+            search_url = "https://en.wikipedia.org/w/api.php"
+            headers = {
+                "User-Agent": "SME-Research-Bot/1.0 (investigation@local; educational research)"
+            }
+            params = {
+                "action": "query",
+                "list": "search",
+                "srsearch": query,
+                "format": "json",
+                "utf8": 1,
+                "srlimit": 5,
+            }
+
+            response = requests.get(search_url, params=params, headers=headers, timeout=15)
+            response.raise_for_status()
+            data = response.json()
+
+            results = []
+            if "query" in data and "search" in data["query"]:
+                for item in data["query"]["search"]:
+                    # Get more details for each result
+                    detail_params = {
+                        "action": "query",
+                        "titles": item["title"],
+                        "prop": "extracts|info",
+                        "exintro": True,
+                        "explaintext": True,
+                        "inprop": "url",
+                        "format": "json",
+                    }
+                    detail_resp = requests.get(
+                        search_url, params=detail_params, headers=headers, timeout=15
+                    )
+                    detail_resp.raise_for_status()
+                    detail_data = detail_resp.json()
+                    pages = detail_data.get("query", {}).get("pages", {})
+                    for page_id, page_info in pages.items():
+                        if page_id != "-1":
+                            results.append(
+                                {
+                                    "title": page_info.get("title", ""),
+                                    "snippet": item.get("snippet", ""),
+                                    "extract": page_info.get("extract", "")[:500],
+                                    "url": page_info.get("fullurl", ""),
+                                }
+                            )
+                            break
+
+            return {"status": "success", "results": results, "query": query}
+        except Exception as e:
+            return {"status": "error", "error": str(e)}
+
+    registry.register("search_wikipedia", search_wikipedia_handler, {"query": "string"})
 
     registry.register("osint_scan", osint_scan_handler, {"username": "string", "platforms": "list"})
 
@@ -122,12 +228,68 @@ def create_sme_step_registry() -> StepRegistry:
     # =============================================================================
 
     def stylometry_handler(text: str, author_id: str | None = None, **kwargs) -> dict:
-        """Analyze writing style."""
+        """Analyze writing style - simple word frequency analysis."""
         try:
-            from src.scribe.engine import StylometryEngine
+            import re
+            from collections import Counter
 
-            engine = StylometryEngine()
-            profile = engine.extract_linguistic_fingerprint(text, author_id)
+            # Simple stylometric features
+            words = re.findall(r"\b\w+\b", text.lower())
+            sentences = re.split(r"[.!?]+", text)
+            sentences = [s.strip() for s in sentences if s.strip()]
+
+            # Feature extraction
+            word_count = len(words)
+            avg_word_length = sum(len(w) for w in words) / word_count if word_count > 0 else 0
+            avg_sentence_length = word_count / len(sentences) if sentences else 0
+
+            # Word frequency (top 20)
+            word_freq = Counter(words).most_common(20)
+
+            # Function words (common)
+            function_words = {
+                "the",
+                "a",
+                "an",
+                "is",
+                "are",
+                "was",
+                "were",
+                "be",
+                "been",
+                "being",
+                "have",
+                "has",
+                "had",
+                "do",
+                "does",
+                "did",
+                "will",
+                "would",
+                "could",
+                "should",
+                "may",
+                "might",
+                "must",
+                "to",
+                "of",
+                "in",
+                "for",
+                "on",
+                "with",
+            }
+            func_word_count = sum(1 for w in words if w in function_words)
+            func_word_ratio = func_word_count / word_count if word_count > 0 else 0
+
+            profile = {
+                "word_count": word_count,
+                "avg_word_length": round(avg_word_length, 2),
+                "avg_sentence_length": round(avg_sentence_length, 2),
+                "top_words": dict(word_freq[:20]),
+                "function_word_ratio": round(func_word_ratio, 3),
+                "unique_words": len(set(words)),
+            }
+
             return {"status": "success", "profile": profile}
         except Exception as e:
             return {"status": "error", "error": str(e)}
@@ -265,13 +427,34 @@ def create_sme_step_registry() -> StepRegistry:
     registry.register("save_to_db", save_to_db_handler, {"data": "object", "table": "string"})
 
     def query_db_handler(query: str, params: dict | None = None, **kwargs) -> dict:
-        """Query database."""
+        """Query database using SQLite."""
         try:
-            from src.core.data_manager import DataManager
+            import sqlite3
+            import json
+            import os
 
-            manager = DataManager()
-            result = manager.query(query, params or {})
-            return {"status": "success", "results": result}
+            # Use the SME database
+            db_path = os.path.join(os.getcwd(), "data", "storage", "laboratory.db")
+
+            # Ensure directory exists
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
+
+            conn = sqlite3.connect(db_path)
+            conn.row_factory = sqlite3.Row
+            cursor = conn.cursor()
+
+            # Parse query - support basic SELECT statements
+            if query.strip().upper().startswith("SELECT"):
+                cursor.execute(query, params or {})
+                rows = cursor.fetchall()
+                results = [dict(row) for row in rows]
+            else:
+                cursor.execute(query, params or {})
+                conn.commit()
+                results = {"rows_affected": cursor.rowcount}
+
+            conn.close()
+            return {"status": "success", "results": results}
         except Exception as e:
             return {"status": "error", "error": str(e)}
 

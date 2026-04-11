@@ -118,9 +118,12 @@ const Layout = () => {
   const breadcrumbs = generateBreadcrumbs(location.pathname);
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container" role="application" aria-label="SimpleMem Laboratory">
+      {/* Skip link for accessibility */}
+      <a href="#main-content" className="skip-link">Skip to main content</a>
+      
       {/* Sidebar */}
-      <aside className="sidebar glass-panel">
+      <aside className="sidebar glass-panel" role="navigation" aria-label="Main navigation">
         <div style={{ marginBottom: '2rem' }}>
           <h2 style={{ color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <BrainCircuit size={28} /> SimpleMem
@@ -130,7 +133,7 @@ const Layout = () => {
           </p>
         </div>
 
-        <nav>
+        <nav role="navigation" aria-label="Primary navigation">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (
@@ -138,8 +141,17 @@ const Layout = () => {
                 key={tab.id}
                 className={`sidebar-item ${activeTab === tab.id ? 'active' : ''}`}
                 onClick={() => navigate(tab.path)}
+                role="menuitem"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    navigate(tab.path);
+                  }
+                }}
+                aria-current={activeTab === tab.id ? 'page' : undefined}
               >
-                <Icon size={20} /> {tab.label}
+                <Icon size={20} aria-hidden="true" /> {tab.label}
               </div>
             );
           })}
@@ -157,8 +169,17 @@ const Layout = () => {
             className="sidebar-item"
             onClick={() => setSearchOpen(true)}
             style={{ marginBottom: '0.5rem' }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setSearchOpen(true);
+              }
+            }}
+            aria-label="Open search, press Cmd+K"
           >
-            <Search size={18} /> 
+            <Search size={18} aria-hidden="true" /> 
             <span style={{ flex: 1 }}>Search</span>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>⌘K</span>
           </div>
@@ -168,8 +189,17 @@ const Layout = () => {
             className="sidebar-item"
             onClick={toggleTheme}
             style={{ marginBottom: '0.5rem' }}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleTheme();
+              }
+            }}
+            aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
           >
-            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+            {isDark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
             {isDark ? 'Light Mode' : 'Dark Mode'}
           </div>
 
@@ -181,6 +211,8 @@ const Layout = () => {
               alignItems: 'center',
               gap: '8px',
             }}
+            role="status"
+            aria-live="polite"
           >
             <div className="status-indicator"></div> System Online
           </div>
@@ -188,7 +220,7 @@ const Layout = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="main-content">
+      <main className="main-content" id="main-content" role="main" aria-label="Page content">
         <header
           style={{
             marginBottom: '2rem',

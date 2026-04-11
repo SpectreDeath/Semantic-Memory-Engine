@@ -58,7 +58,8 @@ class ForensicIntelligenceReporter:
     """Generates unified forensic intelligence reports from multiple analysis sources."""
 
     def __init__(self):
-        self.report_directory = Path("D:/SME/reports")
+        ext_dir = Path(__file__).parent
+        self.report_directory = ext_dir / "reports"
         self.report_directory.mkdir(parents=True, exist_ok=True)
 
         # Model signatures cache for low disk I/O

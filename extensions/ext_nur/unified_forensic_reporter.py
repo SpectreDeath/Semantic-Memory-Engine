@@ -57,7 +57,8 @@ class UnifiedForensicReporter:
     """Generates unified forensic reports from all extension logs."""
 
     def __init__(self):
-        self.report_dir = Path("D:/SME/reports")
+        ext_dir = Path(__file__).parent
+        self.report_dir = ext_dir / "reports"
         self.report_dir.mkdir(parents=True, exist_ok=True)
 
         # Log file patterns for each extension

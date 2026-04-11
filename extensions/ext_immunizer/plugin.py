@@ -79,8 +79,9 @@ class Immunizer(BasePlugin):
         self.baseline_compatibility_threshold = 0.05  # Max 5% false positive rate allowed
         self.min_confidence_score = 0.70  # Minimum confidence for generated rules
 
-        # Output directory
-        self.data_dir = os.path.join("D:", "SME", "data")
+        # Output directory - use relative path from extension directory
+        ext_dir = os.path.dirname(os.path.abspath(__file__))
+        self.data_dir = os.path.join(ext_dir, "data")
         os.makedirs(self.data_dir, exist_ok=True)
 
         # Baseline data
@@ -147,7 +148,8 @@ class Immunizer(BasePlugin):
         try:
             # Determine report path
             if not report_path:
-                report_path = os.path.join("D:", "SME", "reports", "evasion_test_report.json")
+                ext_dir = os.path.dirname(os.path.abspath(__file__))
+                report_path = os.path.join(ext_dir, "reports", "evasion_test_report.json")
 
             if not os.path.exists(report_path):
                 return json.dumps({"error": f"Evasion test report not found at {report_path}"})

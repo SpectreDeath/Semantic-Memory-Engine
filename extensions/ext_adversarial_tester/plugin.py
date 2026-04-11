@@ -207,7 +207,8 @@ class AdversarialTester(BasePlugin):
             report = await self._generate_comprehensive_report()
 
             if format.lower() == "json":
-                output_file = os.path.join("D:", "SME", "reports", "evasion_test_report.json")
+                ext_dir = os.path.dirname(os.path.abspath(__file__))
+                output_file = os.path.join(ext_dir, "reports", "evasion_test_report.json")
                 with open(output_file, "w", encoding="utf-8") as f:
                     json.dump(report, f, indent=2, default=str)
                 return json.dumps(

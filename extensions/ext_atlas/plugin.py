@@ -76,8 +76,9 @@ class Atlas(BasePlugin):
             "Unknown": "#95A5A6",  # Gray
         }
 
-        # Ensure reports directory exists
-        self.reports_dir = os.path.join("D:", "SME", "reports")
+        # Ensure reports directory exists - use relative path from extension directory
+        ext_dir = os.path.dirname(os.path.abspath(__file__))
+        self.reports_dir = os.path.join(ext_dir, "reports")
         os.makedirs(self.reports_dir, exist_ok=True)
 
         logger.info(f"[{self.plugin_id}] Atlas initialized with T-SNE visualization capabilities")

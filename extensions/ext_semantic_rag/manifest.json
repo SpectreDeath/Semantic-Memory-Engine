@@ -1,0 +1,8 @@
+{
+    "plugin_id": "ext_semantic_rag",
+    "name": "Semantic RAG Optimizer",
+    "version": "1.0.0",
+    "description": "Optimize semantic memory and RAG pipelines - chunking, similarity tuning, retrieval analysis",
+    "author": "SME",
+    "dependencies": ["numpy"]
+}

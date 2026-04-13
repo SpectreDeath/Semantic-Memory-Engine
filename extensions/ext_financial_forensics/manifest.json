@@ -1,0 +1,23 @@
+{
+    "plugin_id": "ext_financial_forensics",
+    "name": "Financial Forensics Layer",
+    "version": "1.0.0",
+    "description": "Advanced financial transaction analysis, behavioral profiling, and anomaly detection.",
+    "author": "Antigravity",
+    "dependencies": [
+        "networkx",
+        "web3",
+        "dask",
+        "pyod",
+        "pandas",
+        "matplotlib",
+        "requests",
+        "ccxt"
+    ],
+    "config": {
+        "benford_threshold": 0.1,
+        "contamination": 0.1,
+        "z_threshold": 3.0,
+        "time_window": 10
+    }
+}

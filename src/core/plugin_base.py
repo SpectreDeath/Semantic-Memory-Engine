@@ -4,7 +4,16 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any
 
-ALLOWED_TABLES = {"skills", "sessions", "events", "metrics", "forensic_events", "source_provenance"}
+ALLOWED_TABLES = {
+    "skills",
+    "sessions",
+    "events",
+    "metrics",
+    "forensic_events",
+    "source_provenance",
+    "financial_transactions",
+    "forensic_anomalies",
+}
 
 
 def _validate_table_name(table_name: str) -> None:

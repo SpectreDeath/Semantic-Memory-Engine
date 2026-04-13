@@ -32,6 +32,11 @@ class EventType(Enum):
     ENTITY_LINKED = "entity_linked"
     DOCUMENTS_CLUSTERED = "documents_clustered"
 
+    # Financial Forensic events
+    TRANSACTION_INGESTED = "transaction_ingested"
+    TRANSACTION_ANALYZED = "transaction_analyzed"
+    FORENSIC_ANOMALY_DETECTED = "forensic_anomaly_detected"
+
     # Query events
     QUERY_EXECUTED = "query_executed"
     SEARCH_PERFORMED = "search_performed"

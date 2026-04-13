@@ -1,0 +1,8 @@
+{
+    "plugin_id": "ext_code_quality",
+    "name": "Code Quality Enhancer",
+    "version": "1.0.0",
+    "description": "Enhanced code quality checks beyond basic linting - security scanning, performance anti-patterns, architecture quality",
+    "author": "SME",
+    "dependencies": ["regex"]
+}

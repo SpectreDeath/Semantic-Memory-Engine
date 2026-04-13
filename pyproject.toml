@@ -54,6 +54,12 @@ dependencies = [
     "prefect>=2.14.0",
     "pyod>=1.0.0",
     "waybackpy==3.0.6",
+    "networkx>=3.0",
+    "web3[tester]>=6.0.0",
+    "dask[complete]>=2024.1.0",
+    "matplotlib>=3.8.0",
+    "requests>=2.31.0",
+    "ccxt>=2.0.0",
     # Testing
     "pytest-asyncio>=0.21.0",
     # Windows

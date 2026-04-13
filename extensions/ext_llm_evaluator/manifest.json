@@ -1,0 +1,8 @@
+{
+    "plugin_id": "ext_llm_evaluator",
+    "name": "LLM Evaluator",
+    "version": "1.0.0",
+    "description": "Evaluate AI agent outputs for quality, safety, accuracy and completeness",
+    "author": "SME",
+    "dependencies": []
+}

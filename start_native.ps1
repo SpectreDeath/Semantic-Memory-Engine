@@ -11,6 +11,21 @@ Write-Host "  SME v3.0.1 - Native Startup (No Sidecar)" -ForegroundColor Cyan
 Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 
+
+# Check Python version - MUST use 3.13 (spacy incompatible with 3.14)
+$pythonVersion = & $PYTHON_EXE -c "import sys; print(sys.version_info[0]*10 + sys.version_info[1])" 2>$null
+if ($LASTEXITCODE -ne 0 -or $pythonVersion -lt 13) {
+    Write-Host "Error: Python 3.13 required. Found: $($pythonVersion/10)" -ForegroundColor Red
+    Write-Host "Install Python 3.13: https://www.python.org/downloads/" -ForegroundColor Yellow
+    exit 1
+}
+if ($pythonVersion -gt 13) {
+    Write-Host "Error: Python 3.14 not supported (spacy incompatible)" -ForegroundColor Red
+    Write-Host "Install Python 3.13: https://www.python.org/downloads/" -ForegroundColor Yellow
+    exit 1
+}
+Write-Host "Python version check: OK ($([math]::Floor($pythonVersion/10)).$($pythonVersion%10))" -ForegroundColor Green
+
 # 1. Determine Python Executable
 $PYTHON_EXE = "python"
 if (Test-Path ".venv313\Scripts\python.exe") {
@@ -88,4 +103,5 @@ try {
     }
     Write-Host "Cleanup complete." -ForegroundColor Green
 }
+
 

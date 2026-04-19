@@ -3,7 +3,7 @@ name = "sme-forensic-toolkit"
 # Keep this in sync with the latest CHANGELOG entry
 version = "3.0.1"
 description = "Hardware-aware semantic memory engine for 10GB datasets"
-requires-python = ">=3.13"
+requires-python = ">=3.13, <3.14"  # spacy incompatible with 3.14
 # NOTE: requirements.txt has a superset of these deps with specific pins.
 # Use requirements.txt for Docker builds, pyproject.toml for pip install.
 dependencies = [

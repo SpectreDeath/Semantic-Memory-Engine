@@ -20,6 +20,9 @@ import {
   Moon,
   Search,
   BookOpen,
+  Clock,
+  Key,
+  History,
 } from 'lucide-react';
 
 import { ws } from './api';
@@ -36,6 +39,9 @@ import ToolLab from './pages/ToolLab';
 import HarvesterPanel from './pages/HarvesterPanel';
 import ConnectionsManager from './pages/ConnectionsManager';
 import ApiDocs from './pages/ApiDocs';
+import Timeline from './pages/Timeline/Timeline';
+import APIKeyManager from './pages/APIKeyManager/APIKeyManager';
+import AuditLog from './pages/AuditLog/AuditLog';
 import './index.css';
 
 // ============================================================================
@@ -56,6 +62,9 @@ const Layout = () => {
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
     { id: 'brain', label: 'The Brain', icon: Network, path: '/brain' },
     { id: 'reports', label: 'Intelligences', icon: FileText, path: '/reports' },
+    { id: 'timeline', label: 'Timeline', icon: Clock, path: '/timeline' },
+    { id: 'api-keys', label: 'API Keys', icon: Key, path: '/api-keys' },
+    { id: 'audit-log', label: 'Audit Log', icon: History, path: '/audit-log' },
     { id: 'lab', label: 'Tool Lab', icon: FlaskConical, path: '/lab' },
     { id: 'harvester', label: 'Harvester', icon: Globe, path: '/harvester' },
     { id: 'connections', label: 'Connections', icon: Unplug, path: '/connections' },
@@ -265,6 +274,9 @@ const Layout = () => {
             <Route path="/" element={<Dashboard />} />
             <Route path="/brain" element={<Brain />} />
             <Route path="/reports" element={<Intelligences />} />
+            <Route path="/timeline" element={<Timeline />} />
+            <Route path="/api-keys" element={<APIKeyManager />} />
+            <Route path="/audit-log" element={<AuditLog />} />
             <Route path="/lab" element={<ToolLab />} />
             <Route path="/harvester" element={<HarvesterPanel />} />
             <Route path="/connections" element={<ConnectionsManager />} />

@@ -1,0 +1,11 @@
+{
+  "": {
+    "indicator": "",
+    "type": "ip",
+    "reputation": "unknown",
+    "score": 0,
+    "categories": [],
+    "last_checked": "2026-04-18T08:11:30.692027",
+    "details": "Demo mode - configure API keys for real lookups"
+  }
+}

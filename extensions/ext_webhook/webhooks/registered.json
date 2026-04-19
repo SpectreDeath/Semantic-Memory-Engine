@@ -1,0 +1,28 @@
+{
+  "d7eed07d9ff0": {
+    "id": "d7eed07d9ff0",
+    "name": "Test",
+    "url": "https://example.com",
+    "events": [
+      "test.event"
+    ],
+    "secret": "",
+    "enabled": true,
+    "created_at": "2026-04-19T18:23:42.712157",
+    "last_triggered": "2026-04-19T18:23:42.752291",
+    "failure_count": 0
+  },
+  "cb372d51fb03": {
+    "id": "cb372d51fb03",
+    "name": "Test",
+    "url": "https://example.com/webhook",
+    "events": [
+      "test.event"
+    ],
+    "secret": "",
+    "enabled": true,
+    "created_at": "2026-04-19T18:23:42.749640",
+    "last_triggered": "2026-04-19T18:23:42.753196",
+    "failure_count": 0
+  }
+}

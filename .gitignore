@@ -55,3 +55,6 @@ data/aether/signature_index.ipc
 
 # --- Memtext Context ---
 .context/
+
+# --- Private Cases (Not Public) ---
+private/

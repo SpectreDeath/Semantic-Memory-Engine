@@ -1,4 +1,5 @@
 {
+  "plugin_id": "ext_nur",
   "name": "ext_nur",
   "version": "1.0.0",
   "description": "Unified Forensic Reporter Extension - Aggregates logs from all extensions and generates comprehensive reports",

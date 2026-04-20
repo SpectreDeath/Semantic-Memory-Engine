@@ -1,5 +1,6 @@
 {
-    "name": "Forensic Echo",
+    "plugin_id": "ext_sample_echo",
+    "name": "ext_sample_echo",
     "version": "0.1",
     "description": "Standard sample extension for metadata echoing and TPM signature verification.",
     "entry_point": "plugin.py",

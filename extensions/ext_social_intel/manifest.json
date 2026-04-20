@@ -1,5 +1,6 @@
 {
-  "name": "Social Media Intelligence Crawler",
+  "plugin_id": "ext_social_intel",
+  "name": "ext_social_intel",
   "version": "1.0.0",
   "description": "Advanced social media monitoring and disinformation detection system",
   "author": "SME Team",

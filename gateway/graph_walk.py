@@ -194,7 +194,7 @@ class GraphWalkKNNOps:
         indices = []
         values = []
         for idx, (hash_key, count) in enumerate(char_ngrams.items()):
-            indices.append(hash(text) % self.vector_size)
+            indices.append(hash(hash_key) % self.vector_size)
             values.append(count / total)
             if len(indices) >= self.vector_size:
                 break
@@ -541,7 +541,7 @@ if FAISS_AVAILABLE:
 
             # Add vectors to index
             self._index.add(vectors_np)
-            self._id_map = {i: nid for i, nid in enumerate(self.node_ids)}
+            self._id_map = dict(enumerate(self.node_ids))
             self._indexed = True
 
             logger.info(
@@ -638,7 +638,7 @@ if FAISS_AVAILABLE:
 
             self.vector_size = data.get("vector_size", d)
             self.node_ids = data.get("node_ids", [])
-            self._id_map = {i: nid for i, nid in enumerate(self.node_ids)}
+            self._id_map = dict(enumerate(self.node_ids))
 
             # Rebuild nodes dict
             self.nodes = {}

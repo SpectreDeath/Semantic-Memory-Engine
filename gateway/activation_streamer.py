@@ -167,10 +167,9 @@ class GephiWebSocketStreamer:
                     self._buffer.append(message)
                 # Trigger reconnection
                 asyncio.create_task(self._schedule_reconnect())
-        else:
-            # Buffer for later delivery if not connected
-            if len(self._buffer) < self._buffer_max:
-                self._buffer.append(message)
+        # Buffer for later delivery if not connected
+        elif len(self._buffer) < self._buffer_max:
+            self._buffer.append(message)
         return False
 
     async def stream_node(self, node: StreamNode) -> bool:

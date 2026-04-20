@@ -88,6 +88,8 @@ nlp = [
 performance = [
     "orjson>=3.9.0",
     "uvloop>=0.20.0",
+    "faiss-cpu>=1.7.0; platform_system != 'Windows'",
+    "faiss-cpu>=1.7.0; platform_system == 'Windows'",
 ]
 # Install with: pip install -e ".[observability]"
 observability = [

@@ -64,7 +64,16 @@ class GephiWebSocketStreamer:
 
     Connects to Gephi's Graph Streaming plugin and pushes
     nodes/edges as the LLM processes forensic queries.
+
+    Features:
+    - Automatic reconnection with exponential backoff
+    - Buffered streaming (stores items during disconnect, flushes on reconnect)
+    - Graceful degradation when Gephi unavailable
     """
+
+    RECONNECT_MIN_DELAY = 1.0  # seconds
+    RECONNECT_MAX_DELAY = 30.0  # seconds
+    RECONNECT_FACTOR = 1.5
 
     def __init__(self, gephi_url: str = GEPHI_WS_URL, workspace: str = "workspace0"):
         self.gephi_url = gephi_url.replace("workspace0", workspace)
@@ -72,9 +81,14 @@ class GephiWebSocketStreamer:
         self.websocket = None
         self.connected = False
         self.stream_count = 0
+        self._buffer: list[dict] = []
+        self._buffer_max = 1000
+        self._reconnect_attempts = 0
+        self._reconnect_delay = self.RECONNECT_MIN_DELAY
+        self._monitor_task: asyncio.Task | None = None
 
-    async def connect(self) -> bool:
-        """Connect to Gephi WebSocket."""
+    async def connect(self, retry: bool = True) -> bool:
+        """Connect to Gephi WebSocket with optional retry."""
         if not WEBSOCKETS_AVAILABLE:
             logger.warning("websockets not available")
             return False
@@ -82,24 +96,85 @@ class GephiWebSocketStreamer:
         try:
             self.websocket = await websockets.connect(self.gephi_url)
             self.connected = True
+            self._reconnect_attempts = 0
+            self._reconnect_delay = self.RECONNECT_MIN_DELAY
             logger.info(f"Connected to Gephi: {self.gephi_url}")
+
+            # Flush buffered items on reconnection
+            if self._buffer:
+                await self._flush_buffer()
             return True
         except Exception as e:
             logger.warning(f"Gephi connection failed: {e}")
             self.connected = False
+            if retry:
+                await self._schedule_reconnect()
             return False
 
-    async def disconnect(self):
-        """Disconnect from Gephi."""
+    async def _schedule_reconnect(self) -> None:
+        """Schedule a reconnection attempt with exponential backoff."""
+        self._reconnect_attempts += 1
+        delay = min(
+            self.RECONNECT_MIN_DELAY * (self.RECONNECT_FACTOR ** (self._reconnect_attempts - 1)),
+            self.RECONNECT_MAX_DELAY,
+        )
+        logger.info(f"Reconnecting in {delay:.1f}s (attempt {self._reconnect_attempts})")
+        await asyncio.sleep(delay)
+        await self.connect(retry=True)
+
+    async def disconnect(self) -> None:
+        """Disconnect from Gephi and cancel reconnection monitor."""
+        if self._monitor_task:
+            self._monitor_task.cancel()
+            try:
+                await self._monitor_task
+            except asyncio.CancelledError:
+                pass
         if self.websocket:
             await self.websocket.close()
-            self.connected = False
+        self.connected = False
 
-    async def stream_node(self, node: StreamNode):
-        """Stream a single node to Gephi."""
-        if not self.connected:
+    async def _flush_buffer(self) -> None:
+        """Flush buffered items to Gephi after reconnection."""
+        if not self._buffer or not self.connected:
             return
 
+        logger.info(f"Flushing {len(self._buffer)} buffered items to Gephi")
+        buffered = self._buffer[:]
+        self._buffer.clear()
+
+        for item in buffered:
+            try:
+                await self.websocket.send(json.dumps(item))
+                self.stream_count += 1
+            except Exception as e:
+                logger.warning(f"Failed to flush buffered item: {e}")
+                self._buffer.insert(0, item)  # re-queue failed
+                break
+
+    async def _send_with_retry(self, message: dict) -> bool:
+        """Send message with automatic buffering on failure."""
+        if self.connected and self.websocket:
+            try:
+                await self.websocket.send(json.dumps(message))
+                self.stream_count += 1
+                return True
+            except Exception as e:
+                logger.warning(f"Send failed: {e}")
+                self.connected = False
+                # Buffer for later delivery
+                if len(self._buffer) < self._buffer_max:
+                    self._buffer.append(message)
+                # Trigger reconnection
+                asyncio.create_task(self._schedule_reconnect())
+        else:
+            # Buffer for later delivery if not connected
+            if len(self._buffer) < self._buffer_max:
+                self._buffer.append(message)
+        return False
+
+    async def stream_node(self, node: StreamNode) -> bool:
+        """Stream a single node to Gephi."""
         gephi_node = {
             "anType": "node",
             "key": node.id,
@@ -114,40 +189,40 @@ class GephiWebSocketStreamer:
                 **node.attributes,
             },
         }
+        return await self._send_with_retry(gephi_node)
 
-        await self.websocket.send(json.dumps(gephi_node))
-        self.stream_count += 1
-
-    async def stream_edge(self, edge: StreamEdge):
+    async def stream_edge(self, edge: StreamEdge) -> bool:
         """Stream a single edge to Gephi."""
-        if not self.connected:
-            return
-
         edge_id = f"{edge.source}-{edge.target}"
         gephi_edge = {
             "anType": "edge",
             "key": edge_id,
             "source": edge.source,
             "target": edge.target,
-            "attrs": {
-                "weight": edge.weight,
-                "label": edge.label,
-            },
+            "attrs": {"weight": edge.weight, "label": edge.label},
         }
+        return await self._send_with_retry(gephi_edge)
 
-        await self.websocket.send(json.dumps(gephi_edge))
-        self.stream_count += 1
-
-    async def stream_batch(self, nodes: list[StreamNode], edges: list[StreamEdge]):
+    async def stream_batch(
+        self, nodes: list[StreamNode], edges: list[StreamEdge]
+    ) -> dict[str, Any]:
         """Stream a batch of nodes and edges."""
-        if not self.connected:
-            return
+        success = 0
+        failed = 0
 
         for node in nodes:
-            await self.stream_node(node)
+            if await self.stream_node(node):
+                success += 1
+            else:
+                failed += 1
 
         for edge in edges:
-            await self.stream_edge(edge)
+            if await self.stream_edge(edge):
+                success += 1
+            else:
+                failed += 1
+
+        return {"success": success, "failed": failed, "total": success + failed}
 
     async def stream_activation_update(
         self, layer: int, neuron: int, activation: float, concept: str = ""
@@ -187,6 +262,8 @@ class GephiWebSocketStreamer:
             "gephi_url": self.gephi_url,
             "workspace": self.workspace,
             "stream_count": self.stream_count,
+            "buffer_size": len(self._buffer),
+            "reconnect_attempts": self._reconnect_attempts,
         }
 
 
@@ -202,80 +279,107 @@ class GephiHTTPStreamer:
         self.workspace = workspace
         self.connected = False
         self.stream_count = 0
-        self._buffer = []
+        self._failed_count = 0
+        self._buffer: list[dict] = []
+        self._buffer_max = 1000
 
     def check_connection(self) -> bool:
         """Check if Gephi Streaming Plugin is available."""
         try:
-            resp = requests.get(GEPHI_HTTP_URL, timeout=1)
+            resp = requests.get(GEPHI_HTTP_URL, timeout=2)
             self.connected = resp.status_code < 500
             return self.connected
         except Exception:
             self.connected = False
             return False
 
+    def _post_to_gephi(self, payload: dict) -> bool:
+        """POST a single item to Gephi with error handling."""
+        if not self.connected and not self.check_connection():
+            # Buffer for later retry
+            if len(self._buffer) < self._buffer_max:
+                self._buffer.append(payload)
+            return False
+
+        try:
+            resp = requests.post(
+                f"{self.stream_url}/graph",
+                json=payload,
+                headers={"Content-Type": "application/json"},
+                timeout=2,
+            )
+            if resp.status_code in (200, 201):
+                self.stream_count += 1
+                self.connected = True
+                # Flush buffer on successful connection
+                self._flush_buffer()
+                return True
+            else:
+                self.connected = False
+                self._failed_count += 1
+                if len(self._buffer) < self._buffer_max:
+                    self._buffer.append(payload)
+        except Exception:
+            self.connected = False
+            self._failed_count += 1
+            if len(self._buffer) < self._buffer_max:
+                self._buffer.append(payload)
+        return False
+
+    def _flush_buffer(self) -> int:
+        """Flush buffered items to Gephi. Returns count of successfully flushed."""
+        if not self._buffer:
+            return 0
+        flushed = 0
+        pending = []
+        for item in self._buffer:
+            try:
+                resp = requests.post(
+                    f"{self.stream_url}/graph",
+                    json=item,
+                    headers={"Content-Type": "application/json"},
+                    timeout=2,
+                )
+                if resp.status_code in (200, 201):
+                    self.stream_count += 1
+                    flushed += 1
+                else:
+                    pending.append(item)
+            except Exception:
+                pending.append(item)
+        self._buffer = pending
+        if flushed > 0:
+            logger.info(f"Flushed {flushed} buffered items to Gephi")
+        return flushed
+
     def stream_node(self, node: StreamNode) -> bool:
         """Stream a node via HTTP POST."""
-        if not self.connected:
-            if not self.check_connection():
-                return False
-
         payload = {
             "anType": "node",
             "key": node.id,
             "attrs": {
                 "label": node.label,
                 "size": node.size,
-                "r": int(node.color[1:3], 16) if len(node.color) > 1 else 0,
-                "g": int(node.color[3:5], 16) if len(node.color) > 3 else 0,
-                "b": int(node.color[5:7], 16) if len(node.color) > 5 else 0,
+                "r": int(node.color[1:3], 16),
+                "g": int(node.color[3:5], 16),
+                "b": int(node.color[5:7], 16),
                 "x": node.x,
                 "y": node.y,
+                **node.attributes,
             },
         }
-        payload["attrs"].update(node.attributes)
-
-        try:
-            resp = requests.post(
-                f"{self.stream_url}/graph",
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=1,
-            )
-            if resp.status_code in (200, 201):
-                self.stream_count += 1
-                return True
-        except Exception:
-            pass
-        return False
+        return self._post_to_gephi(payload)
 
     def stream_edge(self, edge: StreamEdge) -> bool:
         """Stream an edge via HTTP POST."""
-        if not self.connected:
-            if not self.check_connection():
-                return False
-
         payload = {
             "anType": "edge",
             "key": f"{edge.source}-{edge.target}",
             "source": edge.source,
             "target": edge.target,
-            "attrs": {
-                "weight": edge.weight,
-                "label": edge.label,
-            },
+            "attrs": {"weight": edge.weight, "label": edge.label},
         }
-
-        try:
-            resp = requests.post(
-                f"{self.stream_url}/graph",
-                json=payload,
-                headers={"Content-Type": "application/json"},
-                timeout=1,
-            )
-            return resp.status_code in (200, 201)
-        except Exception:
-            return False
+        return self._post_to_gephi(payload)
 
     def stream_batch(self, nodes: list[StreamNode], edges: list[StreamEdge]) -> dict[str, Any]:
         """Stream multiple nodes/edges in batch."""
@@ -315,6 +419,8 @@ class GephiHTTPStreamer:
             "url": self.stream_url,
             "workspace": self.workspace,
             "stream_count": self.stream_count,
+            "buffer_size": len(self._buffer),
+            "failed_count": self._failed_count,
         }
 
 

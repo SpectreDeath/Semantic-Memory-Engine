@@ -189,7 +189,7 @@ class SemanticRAGExtension(BasePlugin):
 
     async def tune_similarity(self, threshold: float = 0.7) -> str:
         """Show similarity threshold recommendations."""
-        rec = {name: value for name, value in SIMILARITY_THRESHOLDS.items()}
+        rec = dict(SIMILARITY_THRESHOLDS)
 
         rec["recommended"] = threshold if threshold >= 0.7 else 0.7
 

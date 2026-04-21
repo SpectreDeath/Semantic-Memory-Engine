@@ -1,0 +1,16 @@
+{
+    "plugin_id": "ext_scheduled_jobs",
+    "name": "Scheduled Jobs",
+    "version": "1.0.0",
+    "description": "Cron-like scheduling for periodic tasks including data scans, reports, cleanups, and custom scheduled jobs. Supports intervals, cron expressions, and one-time scheduling.",
+    "entry_point": "plugin.py",
+    "author": "SME",
+    "category": "automation",
+    "dependencies": ["croniter"],
+    "hooks": ["on_startup", "on_shutdown"],
+    "permissions": {
+        "network_access": true,
+        "filesystem_read": true,
+        "filesystem_write": true
+    }
+}

@@ -46,13 +46,41 @@ class IngestionTask:
 class ResourceMonitor:
     """Monitors system resources, particularly VRAM usage."""
 
-    def __init__(self, vram_threshold_gb: float = 5.8):
-        self.vram_threshold_gb = vram_threshold_gb
+    def __init__(self, vram_threshold_gb: float | None = None):
+        # Adaptive thresholding logic
+        if vram_threshold_gb is None:
+            self.vram_threshold_gb = self._detect_optimal_threshold()
+        else:
+            self.vram_threshold_gb = vram_threshold_gb
+
         self.monitoring = False
         self.monitor_thread = None
         self.current_vram_usage = 0.0
         self.vram_history = deque(maxlen=100)  # Keep last 100 readings
         self._lock = threading.Lock()
+
+    def _detect_optimal_threshold(self) -> float:
+        """Detect total VRAM and calculate optimal threshold (95% of total)."""
+        try:
+            if HAS_NVML:
+                pynvml.nvmlInit()
+                handle = pynvml.nvmlDeviceGetHandleByIndex(0)
+                info = pynvml.nvmlDeviceGetMemoryInfo(handle)
+                total_gb = info.total / (1024**3)
+                pynvml.nvmlShutdown()
+
+                # Set threshold to 95% of total VRAM
+                threshold = total_gb * 0.95
+                logger.info(
+                    f"[Governor] Detected {total_gb:.2f}GB total VRAM. Setting adaptive threshold to {threshold:.2f}GB"
+                )
+                return threshold
+        except Exception as e:
+            logger.debug(f"[Governor] Adaptive VRAM detection failed: {e}")
+
+        # Fallback to 5.8GB (Target 1660 Ti profile)
+        logger.info("[Governor] Using target profile VRAM threshold: 5.8GB")
+        return 5.8
 
     def start_monitoring(self):
         """Start background VRAM monitoring."""
@@ -161,8 +189,11 @@ class Governor(BasePlugin):
     def __init__(self, manifest: dict[str, Any], nexus_api: Any):
         super().__init__(manifest, nexus_api)
 
+        # Resource monitoring (initialized first to detect optimal threshold)
+        self.resource_monitor = ResourceMonitor()
+        self.vram_threshold_gb = self.resource_monitor.vram_threshold_gb
+
         # Configuration
-        self.vram_threshold_gb = 5.8
         self.cache_clear_delay_seconds = 30
         self.max_queue_size = 100
 
@@ -175,9 +206,6 @@ class Governor(BasePlugin):
         self.ingestion_queue = asyncio.Queue(maxsize=self.max_queue_size)
         self.processing_task = None
         self.shutdown_event = asyncio.Event()
-
-        # Resource monitoring
-        self.resource_monitor = ResourceMonitor(self.vram_threshold_gb)
 
         # Statistics
         self.stats = {

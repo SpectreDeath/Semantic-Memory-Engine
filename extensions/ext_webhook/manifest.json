@@ -1,0 +1,16 @@
+{
+    "plugin_id": "ext_webhook",
+    "name": "Webhook Manager",
+    "version": "1.0.0",
+    "description": "Webhook triggers for system events including data ingestion, analysis complete, threats detected, and custom events. Enables integration with external systems.",
+    "entry_point": "plugin.py",
+    "author": "SME",
+    "category": "integration",
+    "dependencies": ["httpx", "aioschedule"],
+    "hooks": ["on_startup", "on_shutdown", "on_event"],
+    "permissions": {
+        "network_access": true,
+        "filesystem_read": true,
+        "filesystem_write": true
+    }
+}

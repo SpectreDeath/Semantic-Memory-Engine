@@ -1,0 +1,16 @@
+{
+    "plugin_id": "ext_prompt_library",
+    "name": "Prompt Library",
+    "version": "1.0.0",
+    "description": "Store, version, and manage prompts for different AI tasks. Supports versioning, tagging, categories, and template variables.",
+    "entry_point": "plugin.py",
+    "author": "SME",
+    "category": "ai",
+    "dependencies": [],
+    "hooks": ["on_startup"],
+    "permissions": {
+        "network_access": false,
+        "filesystem_read": true,
+        "filesystem_write": true
+    }
+}

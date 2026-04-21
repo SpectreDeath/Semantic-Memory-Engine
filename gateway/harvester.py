@@ -60,7 +60,7 @@ class EvidenceHarvester:
 
         total = len(tokens)
         if total == 0:
-            return {"tokens": {}, "total": 0}
+            return {"token_counts": {}, "total_tokens": 0, "vocabulary_size": 0, "top_tokens": []}
 
         counts = {}
         for t in tokens:

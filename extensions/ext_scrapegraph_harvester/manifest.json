@@ -6,11 +6,11 @@
   "entry_point": "plugin.py",
   "author": "SME Architect",
   "category": "forensics",
-  "dependencies": {
-    "scrapegraphai": "^0.1.0",
-    "playwright": "^1.40.0",
-    "pydantic": "^2.5.0"
-  },
+  "dependencies": [
+    "scrapegraphai>=0.1.0",
+    "playwright>=1.40.0",
+    "pydantic>=2.5.0"
+  ],
   "tools": [
     {
       "name": "scrape_and_remember",

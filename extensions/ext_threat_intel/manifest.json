@@ -1,0 +1,16 @@
+{
+    "plugin_id": "ext_threat_intel",
+    "name": "Threat Intelligence",
+    "version": "1.0.0",
+    "description": "Integration with external threat intelligence feeds including VirusTotal, AlienVault OTX, and abuse.ch. Provides IOC enrichment, reputation checks, and threat categorization.",
+    "entry_point": "plugin.py",
+    "author": "SME",
+    "category": "security",
+    "dependencies": ["httpx"],
+    "hooks": ["on_startup"],
+    "permissions": {
+        "network_access": true,
+        "filesystem_read": true,
+        "filesystem_write": true
+    }
+}

@@ -1,4 +1,5 @@
 {
+  "plugin_id": "ext_ghost_trap",
   "name": "ext_ghost_trap",
   "version": "1.0.0",
   "description": "Ghost Trap Extension - Monitors for potential self-replication events and unauthorized file creation",

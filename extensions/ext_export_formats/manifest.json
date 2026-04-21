@@ -1,0 +1,16 @@
+{
+    "plugin_id": "ext_export_formats",
+    "name": "Export Formats",
+    "version": "1.0.0",
+    "description": "Export forensic reports in multiple formats including PDF, Word (DOCX), HTML, and Markdown. Supports custom templates and branding.",
+    "entry_point": "plugin.py",
+    "author": "SME",
+    "category": "export",
+    "dependencies": ["reportlab", "python-docx"],
+    "hooks": ["on_startup"],
+    "permissions": {
+        "network_access": false,
+        "filesystem_read": true,
+        "filesystem_write": true
+    }
+}

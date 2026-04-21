@@ -12,8 +12,27 @@ class SourceDeAnonymizationEngine:
     Uses Cosine Similarity to match text against signatures in data/signatures.json
     """
 
-    def __init__(self, signatures_path: str = r"d:\SME\data\signatures.json"):
-        self.signatures_path = signatures_path
+    def __init__(self, signatures_path: str | None = None):
+        if signatures_path is None:
+            # Dynamic path resolution for portability
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            # Case 1: Bundled with extension
+            local_path = os.path.join(base_dir, "signatures.json")
+            # Case 2: In shared data directory (../../data/signatures.json)
+            shared_path = os.path.abspath(
+                os.path.join(base_dir, "..", "..", "data", "signatures.json")
+            )
+
+            if os.path.exists(local_path):
+                self.signatures_path = local_path
+            elif os.path.exists(shared_path):
+                self.signatures_path = shared_path
+            else:
+                # Default fallback
+                self.signatures_path = shared_path
+        else:
+            self.signatures_path = signatures_path
+
         self.signatures = self._load_signatures()
 
     def _load_signatures(self) -> dict[str, Any]:
@@ -211,7 +230,7 @@ class SourceDeAnonymizationEngine:
 
 
 def create_sda_engine(
-    signatures_path: str = r"d:\SME\data\signatures.json",
+    signatures_path: str | None = None,
 ) -> SourceDeAnonymizationEngine:
     """Factory function to create and return an SDA engine instance."""
     return SourceDeAnonymizationEngine(signatures_path)

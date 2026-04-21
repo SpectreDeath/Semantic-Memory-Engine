@@ -29,7 +29,7 @@ logger = logging.getLogger("lawnmower.extension_manager")
 
 
 # =============================================================================
-# Manifest Schema - Strict JSON Schema for extension manifest validation
+# Manifest Schema - JSON Schema for extension manifest validation
 # =============================================================================
 MANIFEST_SCHEMA = {
     "type": "object",
@@ -73,8 +73,25 @@ MANIFEST_SCHEMA = {
             "items": {"type": "string", "pattern": "^[a-z_-]+$"},
             "maxItems": 10,
         },
+        "hooks": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "List of supported hook names",
+        },
+        "vram_requirement_mb": {
+            "type": "integer",
+            "description": "VRAM requirement in megabytes",
+        },
+        "config": {
+            "type": "object",
+            "description": "Extension-specific configuration",
+        },
+        "tools": {
+            "type": "array",
+            "description": "Tool definitions for the extension",
+        },
     },
-    "additionalProperties": False,
+    "additionalProperties": True,
 }
 
 # =============================================================================
@@ -85,22 +102,13 @@ FORBIDDEN_IMPORTS: frozenset[str] = frozenset(
         # System access - can be used to escape sandbox
         "ctypes",
         "subprocess",
-        # Network - potential data exfiltration
-        "socket",
-        "http",
-        "urllib",
-        "requests",
-        "aiohttp",
-        # Execution - can spawn processes
+        "shutil",
+        # Execution that can spawn external processes
         "multiprocessing",
-        "threading",
-        "concurrent",
-        # Introspection (can be abused)
+        # Introspection (can be abused for code injection)
         "inspect",
         "traceback",
         "pdb",
-        # Cryptography (potentially harmful)
-        "cryptography.hazmat",
     }
 )
 

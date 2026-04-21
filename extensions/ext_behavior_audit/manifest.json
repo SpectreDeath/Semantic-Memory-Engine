@@ -1,11 +1,13 @@
 {
-  "name": "ext_behavior_audit",
+  "plugin_id": "ext_behavior_audit",
+  "name": "Behavior Audit",
   "version": "1.0.0",
   "description": "Rhetorical Behavior Audit Extension - Analyzes text for sentiment volatility, synthetic repetitiveness, and deceptive language patterns",
   "author": "SME",
   "dependencies": [
     "nltk"
   ],
+  "category": "audit",
   "tools": [
     {
       "name": "audit_rhetorical_behavior",
@@ -18,7 +20,5 @@
       "function": "provenance_profiler.py"
     }
   ],
-  "hooks": {
-    "governor_status_check": "governor_integration.py"
-  }
+  "hooks": ["on_startup", "on_ingestion"]
 }

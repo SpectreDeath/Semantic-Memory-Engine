@@ -1,0 +1,16 @@
+{
+    "plugin_id": "ext_api_key_manager",
+    "name": "API Key Manager",
+    "version": "1.0.0",
+    "description": "Secure management of external API keys for OpenAI, Anthropic, custom endpoints, and other services. Provides encryption, rotation reminders, and usage tracking.",
+    "entry_point": "plugin.py",
+    "author": "SME",
+    "category": "security",
+    "dependencies": ["cryptography"],
+    "hooks": ["on_startup"],
+    "permissions": {
+        "network_access": false,
+        "filesystem_read": true,
+        "filesystem_write": true
+    }
+}

@@ -21,7 +21,18 @@ class SemanticAuditor:
         self.manifest = manifest
         self.nexus = nexus_api  # SmeCoreBridge
         self.plugin_id = manifest.get("plugin_id")
-        self.signatures_path = r"d:\SME\data\signatures.json"
+
+        # Dynamic path resolution for portability
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        local_path = os.path.join(base_dir, "signatures.json")
+        shared_path = os.path.abspath(os.path.join(base_dir, "..", "..", "data", "signatures.json"))
+
+        if os.path.exists(local_path):
+            self.signatures_path = local_path
+        elif os.path.exists(shared_path):
+            self.signatures_path = shared_path
+        else:
+            self.signatures_path = shared_path
 
     async def on_startup(self):
         """

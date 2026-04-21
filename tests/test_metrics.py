@@ -8,11 +8,37 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
+from prometheus_client import CollectorRegistry
 
+import gateway.metrics as metrics_mod
 from gateway.metrics import MetricsManager, get_metrics_manager
+
+
+@pytest.fixture(scope="session", autouse=True)
+def mock_prometheus_metrics():
+    """Patch Prometheus metric classes to avoid registry duplication issues."""
+    with (
+        patch("gateway.metrics.Counter", MagicMock()),
+        patch("gateway.metrics.Gauge", MagicMock()),
+        patch("gateway.metrics.Histogram", MagicMock()),
+    ):
+        yield
+
+
+@pytest.fixture(autouse=True)
+def reset_metrics_manager(monkeypatch):
+    """Reset the MetricsManager singleton and Prometheus registry before each test."""
+    # Clear the global singleton
+    metrics_mod._metrics_manager = None
+    # Replace the default registry with a fresh one to avoid duplicate timeseries
+    monkeypatch.setattr("prometheus_client.REGISTRY", CollectorRegistry())
+    yield
+    # Cleanup after test
+    metrics_mod._metrics_manager = None
+    monkeypatch.setattr("prometheus_client.REGISTRY", CollectorRegistry())
 
 
 def test_metrics_manager_default_enabled():

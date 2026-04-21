@@ -3,10 +3,11 @@ Tests for ext_scheduled_jobs extension
 ======================================
 """
 
-import pytest
 import json
-from unittest.mock import MagicMock, patch
 from datetime import datetime, timedelta
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestScheduledJob:

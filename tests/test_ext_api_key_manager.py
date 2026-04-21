@@ -3,10 +3,11 @@ Tests for ext_api_key_manager extension
 ========================================
 """
 
-import pytest
 import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 
 class TestAPIKeyManager:

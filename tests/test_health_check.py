@@ -8,16 +8,17 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from gateway.health_check import (
+    REQUIRED_ENV_VARS,
+    _check_ai_provider,
+    _check_disk_space,
+    _check_environment,
     _check_postgresql,
     _check_sqlite,
-    _check_ai_provider,
-    _check_environment,
-    _check_disk_space,
-    REQUIRED_ENV_VARS,
 )
 
 
@@ -40,7 +41,7 @@ def test_check_postgresql_operational_error():
 
 
 def test_check_sqlite_success(tmp_path):
-    db_file = tmp_path / "test.db"
+    db_file = tmp_path / "forensic_nexus.db"
     import sqlite3
 
     conn = sqlite3.connect(str(db_file))
@@ -74,17 +75,16 @@ def test_check_ai_provider_failure():
 
 
 def test_check_environment_all_present():
-    env = {var: "value" for var in REQUIRED_ENV_VARS}
+    env = dict.fromkeys(REQUIRED_ENV_VARS, "value")
     with patch.dict(os.environ, env, clear=False):
         result = _check_environment()
         assert result["status"] == "pass"
 
 
 def test_check_environment_missing():
-    # Ensure only some are set
+    # Ensure only a couple are set; SME_HSM_SECRET missing -> should fail
     env = {"SME_GATEWAY_SECRET": "secret", "SME_ADMIN_PASSWORD": "pass"}
-    # SME_HSM_SECRET missing -> should fail
-    with patch.dict(os.environ, env, clear=False):
+    with patch.dict(os.environ, env, clear=True):
         result = _check_environment()
         assert result["status"] == "fail"
         assert "SME_HSM_SECRET" in result["message"]

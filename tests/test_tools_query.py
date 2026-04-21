@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
-from gateway.tools.query import QUERY_TOOLS
 from gateway.tool_registry import ToolDefinition
+from gateway.tools.query import QUERY_TOOLS
 
 
 def test_query_tools_keys():

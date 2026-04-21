@@ -40,7 +40,8 @@ def test_rate_limiter_sliding_window_expiry(monkeypatch):
     assert not rl.is_allowed("c1")[0]
 
     # Mock time to move beyond 60 seconds
-    monkeypatch.setattr(time, "time", lambda: time.time() + 61)
+    base_time = time.time()
+    monkeypatch.setattr(time, "time", lambda: base_time + 61)
     # Now previous requests should be expired, allowed again
     allowed, remaining = rl.is_allowed("c1")
     assert allowed is True

@@ -19,7 +19,6 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-
 # =============================================================================
 # Test Manifest Schema Validation
 # =============================================================================
@@ -37,8 +36,9 @@ class TestManifestValidation:
 
     def test_valid_manifest_passes(self):
         """Valid manifest should pass validation."""
-        from gateway.extension_manager import MANIFEST_SCHEMA
         from jsonschema import validate
+
+        from gateway.extension_manager import MANIFEST_SCHEMA
 
         # Should not raise
         validate(instance=self.VALID_MANIFEST, schema=MANIFEST_SCHEMA)
@@ -68,8 +68,9 @@ class TestManifestValidation:
     )
     def test_invalid_manifest_rejected(self, invalid_manifest, expected_error):
         """Invalid manifests should be rejected with appropriate errors."""
-        from gateway.extension_manager import MANIFEST_SCHEMA
         from jsonschema import ValidationError
+
+        from gateway.extension_manager import MANIFEST_SCHEMA
 
         with pytest.raises(ValidationError) as exc_info:
             from jsonschema import validate
@@ -152,7 +153,7 @@ class TestImportRestrictions:
 
     def test_import_blocker_raises_on_forbidden(self):
         """Import blocker should raise ImportError for forbidden modules."""
-        from gateway.extension_manager import ImportBlocker, FORBIDDEN_IMPORTS
+        from gateway.extension_manager import FORBIDDEN_IMPORTS, ImportBlocker
 
         blocker = ImportBlocker(strict=True)
         blocker.install()

@@ -9,17 +9,16 @@ os.environ.setdefault("SME_GATEWAY_SECRET", "test-secret-key-1234567890123456789
 os.environ.setdefault("SME_ADMIN_PASSWORD", "admin-pass-xyz")
 
 import datetime
+import sys
+from pathlib import Path
 from unittest.mock import patch
 
 import jwt
 import pytest
 
-import sys
-from pathlib import Path
-
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
-from gateway.auth import AuthManager, get_auth_manager, SECRET_KEY, ALGORITHM, TOKEN_EXPIRY_HOURS
+from gateway.auth import ALGORITHM, SECRET_KEY, TOKEN_EXPIRY_HOURS, AuthManager, get_auth_manager
 
 
 @pytest.fixture(autouse=True)

@@ -71,7 +71,8 @@ def test_half_open_after_timeout(monkeypatch):
     assert cb.state == CircuitState.OPEN
 
     # Move time forward beyond recovery_timeout
-    monkeypatch.setattr(time, "time", lambda: time.time() + 2)
+    base_time = time.time()
+    monkeypatch.setattr(time, "time", lambda: base_time + 2)
     # Accessing state property triggers transition
     state = cb.state
     assert state == CircuitState.HALF_OPEN
@@ -88,7 +89,8 @@ def test_half_open_success_closes_circuit(monkeypatch):
     assert cb.state == CircuitState.OPEN
 
     # Fast forward time
-    monkeypatch.setattr(time, "time", lambda: time.time() + 1)
+    base_time = time.time()
+    monkeypatch.setattr(time, "time", lambda: base_time + 1)
     # Trigger half-open
     _ = cb.state
     assert cb.state == CircuitState.HALF_OPEN
@@ -109,7 +111,8 @@ def test_half_open_failure_reopens(monkeypatch):
     for _ in range(2):
         cb.call(fail_func, fallback="fb")
     # Fast forward to half-open
-    monkeypatch.setattr(time, "time", lambda: time.time() + 1)
+    base_time = time.time()
+    monkeypatch.setattr(time, "time", lambda: base_time + 1)
     _ = cb.state  # triggers HALF_OPEN
 
     # One failure should revert to OPEN

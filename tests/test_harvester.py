@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
 import os
 import tempfile
+
 import pytest
 
 from gateway.harvester import EvidenceHarvester
@@ -90,7 +91,8 @@ def test_generate_fingerprint_empty():
     fp = h.generate_stylometric_fingerprint("")
     assert fp["total_tokens"] == 0
     assert fp["vocabulary_size"] == 0
-    assert fp["tokens"] == {}
+    assert fp["token_counts"] == {}
+    assert fp["top_tokens"] == []
 
 
 def test_harvest_integration(tmp_path):
@@ -98,5 +100,5 @@ def test_harvest_integration(tmp_path):
     f.write_text("Test data with some content.")
     h = EvidenceHarvester()
     result = h.harvest(str(tmp_path))
-    assert "tokens" in result
+    assert "token_counts" in result
     assert result["total_tokens"] > 0

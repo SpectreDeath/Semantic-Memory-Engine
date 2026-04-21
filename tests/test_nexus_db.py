@@ -50,34 +50,31 @@ def test_nexus_query_select(tmp_path):
     assert results[0]["value"] == "hello"
 
 
-def test_nexus_execute_commit():
-    # Use temporary in-memory? Not easily. Use tmp_path.
-    with tempfile.TemporaryDirectory() as tmp:
-        nexus = ForensicNexus(base_dir=tmp)
-        nexus.execute("CREATE TABLE foo (id INTEGER)")
-        # verify by query
-        rows = nexus.query("SELECT name FROM sqlite_master WHERE type='table' AND name='foo'")
-        assert len(rows) == 1
+def test_nexus_execute_commit(tmp_path):
+    base = tmp_path / "data"
+    nexus = ForensicNexus(base_dir=str(base))
+    nexus.execute("CREATE TABLE foo (id INTEGER)")
+    # verify by query
+    rows = nexus.query("SELECT name FROM sqlite_master WHERE type='table' AND name='foo'")
+    assert len(rows) == 1
 
 
-def test_nexus_query_error_returns_empty():
-    with tempfile.TemporaryDirectory() as tmp:
-        nexus = ForensicNexus(base_dir=tmp)
-        results = nexus.query("SELECT * FROM nonexistent_table")
-        assert results == []
+def test_nexus_query_error_returns_empty(tmp_path):
+    nexus = ForensicNexus(base_dir=str(tmp_path))
+    results = nexus.query("SELECT * FROM nonexistent_table")
+    assert results == []
 
 
-def test_nexus_execute_rollback_on_error():
-    with tempfile.TemporaryDirectory() as tmp:
-        nexus = ForensicNexus(base_dir=tmp)
-        nexus.execute("CREATE TABLE bar (id INTEGER)")
-        # This will fail due to syntax error
-        with pytest.raises(Exception):
-            nexus.execute("INVALID SQL")
-        # Table should still exist (commit didn't happen)
-        # But rollback after error ensures no partial commit
-        rows = nexus.query("SELECT name FROM sqlite_master WHERE type='table' AND name='bar'")
-        assert len(rows) == 1  # table exists, create was before error
+def test_nexus_execute_rollback_on_error(tmp_path):
+    nexus = ForensicNexus(base_dir=str(tmp_path))
+    nexus.execute("CREATE TABLE bar (id INTEGER)")
+    # This will fail due to syntax error
+    with pytest.raises(Exception):
+        nexus.execute("INVALID SQL")
+    # Table should still exist (commit didn't happen)
+    # But rollback after error ensures no partial commit
+    rows = nexus.query("SELECT name FROM sqlite_master WHERE type='table' AND name='bar'")
+    assert len(rows) == 1  # table exists, create was before error
 
 
 def test_get_unified_forensic_feed(tmp_path):

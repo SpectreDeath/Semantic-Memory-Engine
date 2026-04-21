@@ -7,8 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
-from gateway.tools.diagnostics import DIAGNOSTIC_TOOLS
 from gateway.tool_registry import ToolDefinition
+from gateway.tools.diagnostics import DIAGNOSTIC_TOOLS
 
 
 def test_diagnostic_tools_keys():

@@ -16,16 +16,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
 from gateway.graph_walk import (
     DEFAULT_VECTOR_SIZE,
-    GraphWalkKNNOps,
     GraphWalkFAISS,
+    GraphWalkKNNOps,
     GraphWalkProvider,
-    KnowledgeNode,
     KnowledgeEdge,
+    KnowledgeNode,
     RetrievalResult,
-    knn_search_tool,
     graph_walk_stats_tool,
+    knn_search_tool,
 )
-
 
 # ============================================================================
 # Fixtures
@@ -309,7 +308,7 @@ def test_graph_walk_stats_tool():
 
 # Check FAISS availability
 try:
-    import faiss  # noqa: F401
+    import faiss
 
     FAISS_AVAILABLE = True
 except ImportError:

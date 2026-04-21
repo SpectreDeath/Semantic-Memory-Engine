@@ -18,15 +18,14 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
 from gateway.activation_streamer import (
+    ActivationMonitor,
     GephiHTTPStreamer,
     GephiWebSocketStreamer,
-    ActivationMonitor,
-    StreamNode,
     StreamEdge,
-    stream_activations_tool,
+    StreamNode,
     gephi_connection_tool,
+    stream_activations_tool,
 )
-
 
 # ============================================================================
 # StreamNode / StreamEdge fixtures

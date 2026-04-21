@@ -7,18 +7,19 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
-import os
 import json
+import os
 import sqlite3
 import tempfile
 from unittest.mock import patch
+
 import pytest
 
 from gateway.session_manager import (
-    Session,
-    SessionManager,
     DB_PATH,
     MAX_HISTORY,
+    Session,
+    SessionManager,
     get_session_manager,
 )
 
@@ -53,12 +54,12 @@ def test_add_history_appends_and_respects_limit():
 
 def test_update_and_get_scratchpad():
     sess = Session("sid")
-    sess.update_scratchpad("key1", "value1")
-    sess.update_scratchpad("num", 42)
-    assert sess.get_scratchpad() == {"key1": "value1", "num": 42}
+    sess.scratchpad["key1"] = "value1"
+    sess.scratchpad["num"] = 42
+    assert sess.scratchpad == {"key1": "value1", "num": 42}
     # Overwrite
-    sess.update_scratchpad("key1", "new")
-    assert sess.get_scratchpad()["key1"] == "new"
+    sess.scratchpad["key1"] = "new"
+    assert sess.scratchpad["key1"] == "new"
 
 
 def test_add_history_logs_to_db(temp_db):

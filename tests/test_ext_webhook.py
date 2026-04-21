@@ -3,10 +3,11 @@ Tests for ext_webhook extension
 ===============================
 """
 
-import pytest
 import json
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 class TestWebhookManager:

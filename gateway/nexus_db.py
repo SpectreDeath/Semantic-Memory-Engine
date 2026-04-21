@@ -41,10 +41,13 @@ class ForensicNexus:
         self.conn.row_factory = sqlite3.Row
 
         # Enable Write-Ahead Logging for concurrent tool access
+        cursor = self.conn.cursor()
         try:
-            self.conn.execute("PRAGMA journal_mode=WAL;")
+            cursor.execute("PRAGMA journal_mode=WAL;")
         except Exception as e:
             logger.warning(f"Nexus: Failed to enable WAL mode: {e}")
+        finally:
+            cursor.close()
 
         # Attach subordinate databases
         self._attach_subordinates()
@@ -68,14 +71,25 @@ class ForensicNexus:
                         pass
 
                 cursor = self.conn.cursor()
-                cursor.execute("PRAGMA database_list")
-                attached = [row[1] for row in cursor.fetchall()]
-
-                if schema not in attached:
-                    self.conn.execute(f"ATTACH DATABASE '{abs_path}' AS {schema}")
-                    logger.info(f"Nexus: Attached {schema} from {abs_path}")
+                try:
+                    cursor.execute("PRAGMA database_list")
+                    attached = [row[1] for row in cursor.fetchall()]
+                    if schema not in attached:
+                        # Use the same cursor to ATTACH
+                        cursor.execute(f"ATTACH DATABASE '{abs_path}' AS {schema}")
+                        logger.info(f"Nexus: Attached {schema} from {abs_path}")
+                finally:
+                    cursor.close()
             except Exception as e:
                 logger.warning(f"Nexus: Failed to attach {schema} ({abs_path}): {e}")
+
+    def close(self):
+        """Close the database connection."""
+        if hasattr(self, "conn") and self.conn:
+            try:
+                self.conn.close()
+            except Exception:
+                pass
 
     def attach_db(self, db_path: str, schema_name: str):
         """Dynamically attach a new database to the nexus."""
@@ -89,8 +103,12 @@ class ForensicNexus:
             if not all(c.isalnum() or c == "_" for c in schema_name):
                 raise ValueError(f"Invalid schema name: {schema_name}")
 
-            self.conn.execute(f"ATTACH DATABASE '{abs_path}' AS {schema_name}")
-            logger.info(f"Nexus: Dynamically attached {schema_name} from {abs_path}")
+            cursor = self.conn.cursor()
+            try:
+                cursor.execute(f"ATTACH DATABASE '{abs_path}' AS {schema_name}")
+                logger.info(f"Nexus: Dynamically attached {schema_name} from {abs_path}")
+            finally:
+                cursor.close()
         except Exception as e:
             if "already in use" in str(e):
                 return  # Already attached — not an error
@@ -101,22 +119,30 @@ class ForensicNexus:
         """Run a cross-database query and return results as dicts."""
         try:
             cursor = self.conn.cursor()
-            cursor.execute(sql, params)
-            rows = cursor.fetchall()
-            return [dict(row) for row in rows]
+            try:
+                cursor.execute(sql, params)
+                rows = cursor.fetchall()
+                return [dict(row) for row in rows]
+            finally:
+                cursor.close()
         except Exception as e:
             logger.exception(f"Nexus Query Error: {e}\nSQL: {sql}")
             return []
 
     def execute(self, sql: str, params: tuple = ()):
         """Execute a write operation."""
+        cursor = None
         try:
-            self.conn.execute(sql, params)
+            cursor = self.conn.cursor()
+            cursor.execute(sql, params)
             self.conn.commit()
         except Exception as e:
             logger.exception(f"Nexus Execution Error: {e}\nSQL: {sql}")
             self.conn.rollback()
             raise
+        finally:
+            if cursor is not None:
+                cursor.close()
 
     def get_unified_forensic_feed(self, limit: int = 10) -> list[dict[str, Any]]:
         """
@@ -141,11 +167,15 @@ class ForensicNexus:
     def get_status(self) -> dict[str, Any]:
         """Return the status of attached databases."""
         cursor = self.conn.cursor()
-        cursor.execute("PRAGMA database_list")
-        return {
-            "primary": self.primary_path,
-            "attached": [dict(row) for row in cursor.fetchall()],
-        }
+        try:
+            cursor.execute("PRAGMA database_list")
+            rows = cursor.fetchall()
+            return {
+                "primary": self.primary_path,
+                "attached": [dict(row) for row in rows],
+            }
+        finally:
+            cursor.close()
 
 
 # ---------------------------------------------------------------------------

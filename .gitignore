@@ -58,3 +58,7 @@ data/aether/signature_index.ipc
 
 # --- Private Cases (Not Public) ---
 private/
+
+# --- Extension Export Artifacts ---
+extensions/*/exports/
+extensions/*/export/

@@ -94,7 +94,7 @@ performance = [
 # Install with: pip install -e ".[observability]"
 observability = [
     "structlog>=24.0.0",
-    "memtext>=0.5.0",
+    "memtext>=0.6.0",
 ]
 
 [project.scripts]

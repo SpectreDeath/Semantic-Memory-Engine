@@ -69,7 +69,7 @@ class Prompt:
         }
 
     @staticmethod
-    def from_dict(data: dict) -> "Prompt":
+    def from_dict(data: dict) -> Prompt:
         prompt = Prompt(
             data["prompt_id"],
             data["name"],

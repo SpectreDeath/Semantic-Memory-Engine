@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Key, Plus, Trash2, Copy, AlertTriangle, Eye, EyeOff } from 'lucide-react';
-import { api } from '../api';
+import { Key, Plus, Trash2, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { api } from '../../api';
 
 const APIKeyManager = () => {
   const [keys, setKeys] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [visibleKey, setVisibleKey] = useState(null);
   const [newKey, setNewKey] = useState({ name: '', api_key: '', provider: 'openai', expiry_days: 90, notes: '' });
-
-  useEffect(() => {
-    fetchKeys();
-  }, []);
 
   const fetchKeys = async () => {
     setLoading(true);
@@ -27,6 +22,10 @@ const APIKeyManager = () => {
     setLoading(false);
   };
 
+  useEffect(() => {
+    fetchKeys(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, []);
+
   const addKey = async () => {
     if (!newKey.name || !newKey.api_key) return;
     try {
@@ -34,7 +33,7 @@ const APIKeyManager = () => {
       setNewKey({ name: '', api_key: '', provider: 'openai', expiry_days: 90, notes: '' });
       setShowAdd(false);
       fetchKeys();
-    } catch (e) {
+    } catch {
       alert('Failed to add key');
     }
   };
@@ -47,10 +46,6 @@ const APIKeyManager = () => {
     } catch {
       setKeys(keys.filter(k => k.id !== keyId));
     }
-  };
-
-  const copyKey = (text) => {
-    navigator.clipboard.writeText(text);
   };
 
   const getProviderColor = (provider) => {

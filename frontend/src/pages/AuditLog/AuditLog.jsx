@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, Download, Calendar, User, Activity } from 'lucide-react';
+import { Search, Download, User, Activity } from 'lucide-react';
+import { api } from '../../api';
 
 const AuditLog = () => {
   const [logs, setLogs] = useState([]);
@@ -15,10 +16,6 @@ const AuditLog = () => {
     { id: 'error', label: 'Error', color: '#ef4444' },
     { id: 'critical', label: 'Critical', color: '#dc2626' },
   ];
-
-  useEffect(() => {
-    fetchLogs();
-  }, [search, levelFilter, dateRange]);
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -39,6 +36,10 @@ const AuditLog = () => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchLogs(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [search, levelFilter, dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getLevelColor = (level) => {
     const levelData = levels.find(l => l.id === level);

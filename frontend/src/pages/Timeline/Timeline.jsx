@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, Filter, Download, RefreshCw } from 'lucide-react';
-import { api } from '../api';
+import { api } from '../../api';
 
 const Timeline = () => {
   const [events, setEvents] = useState([]);
@@ -16,10 +16,6 @@ const Timeline = () => {
     { id: 'system', label: 'System' },
     { id: 'webhook', label: 'Webhooks' },
   ];
-
-  useEffect(() => {
-    fetchEvents();
-  }, [filter, dateRange]);
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -40,6 +36,10 @@ const Timeline = () => {
     }
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchEvents(); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [filter, dateRange]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const getSeverityColor = (severity) => {
     switch (severity) {

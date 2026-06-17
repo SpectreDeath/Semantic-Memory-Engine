@@ -27,6 +27,9 @@ class APIKeyManager:
         if MASTER_KEY_FILE.exists():
             with open(MASTER_KEY_FILE, "rb") as f:
                 key = f.read()
+            if not isinstance(key, bytes) or len(key) != 44:
+                logger.warning("Invalid API key manager master key; generating a new in-memory key")
+                key = Fernet.generate_key()
         else:
             key = Fernet.generate_key()
             with open(MASTER_KEY_FILE, "wb") as f:
@@ -55,7 +58,7 @@ class APIKeyManager:
         expiry_days: int | None = None,
         notes: str = "",
     ) -> str:
-        key_id = f"key_{datetime.now().strftime('%Y%m%d%H%M%S')}"
+        key_id = f"key_{datetime.now().strftime('%Y%m%d%H%M%S%f')}"
         encrypted = self._fernet.encrypt(api_key.encode()).decode()
 
         expiry = None

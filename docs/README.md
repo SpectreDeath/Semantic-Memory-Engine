@@ -5,30 +5,24 @@
 ## Getting Started
 
 - **[progress.md](progress.md)** - Current project status, completed utilities, and development roadmap (most recently updated)
-- **[ADVANCED_QUICKSTART.md](ADVANCED_QUICKSTART.md)** - Comprehensive setup and deployment guide
 
 ## Architecture & Development
 
 ### System Architecture
-- **[CONTROL_ROOM_OPERATOR.md](CONTROL_ROOM_OPERATOR.md)** - Operator control and management
-- **[CONTAINER_INFRASTRUCTURE_ANALYSIS.md](CONTAINER_INFRASTRUCTURE_ANALYSIS.md)** - Docker and container deployment details
-- **[DEPENDENCY_GRAPH.md](DEPENDENCY_GRAPH.md)** - Project dependency relationships
 - **[EXTENSION_CONTRACT.md](EXTENSION_CONTRACT.md)** - Extension API specification
 
 ### Extensions & Modules
-- **[EXTENSIONS_CATALOG.md](EXTENSIONS_CATALOG.md)** - Complete extension inventory
-- **[SME_LOGIC_EXTENSIONS_TRAJECTORY.md](SME_LOGIC_EXTENSIONS_TRAJECTORY.md)** - Extension development trajectory
-- **[TRAJECTORY_SUMMARY.md](TRAJECTORY_SUMMARY.md)** - Overall project development roadmap
+- **[TRAJECTORY_SUMMARY.md](archive/legacy/TRAJECTORY_SUMMARY.md)** - Historical extension development trajectory
 
 ### Specialized Capabilities
-- **[CRAWLING_CAPABILITIES_EXPANSION.md](CRAWLING_CAPABILITIES_EXPANSION.md)** - Web crawling and data harvesting
-- **[SCRAPEGRAPH_INTEGRATION_SUMMARY.md](SCRAPEGRAPH_INTEGRATION_SUMMARY.md)** - ScrapeGraphAI integration (v2.3.4 reference - needs v3.0.1 update)
-- **[SCRAPEGRAPH_IMPROVEMENTS_SUMMARY.md](SCRAPEGRAPH_IMPROVEMENTS_SUMMARY.md)** - ScrapeGraphAI enhancements and fixes
+- **[CRAWLING_CAPABILITIES_EXPANSION.md](archive/legacy/CRAWLING_CAPABILITIES_EXPANSION.md)** - Historical crawling expansion analysis
+- **[SCRAPEGRAPH_INTEGRATION_SUMMARY.md](archive/legacy/SCRAPEGRAPH_INTEGRATION_SUMMARY.md)** - Historical ScrapeGraphAI integration summary
+- **[SCRAPEGRAPH_IMPROVEMENTS_SUMMARY.md](archive/legacy/SCRAPEGRAPH_IMPROVEMENTS_SUMMARY.md)** - Historical ScrapeGraphAI improvement notes
 
 ## Operations & Maintenance
 
 ### Configuration
-- **[ENVIRONMENT_VARIABLES.md](ENVIRONMENT_VARIABLES.md)** - Environment configuration settings
+- **[ENVIRONMENT_VARIABLES.md](archive/legacy/ENVIRONMENT_VARIABLES.md)** - Historical environment configuration settings
 
 ### Monitoring & Diagnostics
 - **[ERROR_HANDLING_GUIDE.md](ERROR_HANDLING_GUIDE.md)** - Error handling patterns and troubleshooting
@@ -39,7 +33,6 @@
 
 ## Data & Storage
 
-- **[FILE_MANIFEST.md](FILE_MANIFEST.md)** - Project file inventory
 - **[MIGRATION_SQLITE_TO_POSTGRES.md](MIGRATION_SQLITE_TO_POSTGRES.md)** - Database migration guide
 
 ## Project Management

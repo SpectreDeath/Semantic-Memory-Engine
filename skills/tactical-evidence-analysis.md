@@ -52,6 +52,6 @@ The Tactical Intelligence Pack contains specialized forensic analysis capabiliti
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
 
 ---

@@ -20,23 +20,26 @@ Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway tha
 - **PostgreSQL Nexus**: Production-grade database layer with connection pooling.
 - **The Harvester**: One-click web ingestion converting URLs into semantic atomic facts.
 - **Epistemic Trust**: Calculated Trust Scores for all data signals.
-- **Containerized Stack**: Full Docker support with auto-healing and health checks.
+- **Native Operator Process**: Embedded AI provider with direct GPU access.
 - **Asynchronous AI Bridge**: Direct provider integration in operator process.
 - **Plugin Data Access Layer**: Abstracted SQL queries for PostgreSQL migration.
 - **VS Code Extension Config**: Configurable Python paths for development environments.
 
 ---
 
-## 🚀 Get Started (30-Second Launch)
+## 🚀 Get Started (30-Second Native Launch)
 
-The recommended way to run SME v3.0.0 is via **GHCR (GitHub Container Registry)** to bypass local dependency issues.
+The recommended way to run SME v3.0.1 is native mode with Python 3.13.
 
 ```bash
-# 1. Download the blueprint
-curl -O https://raw.githubusercontent.com/SpectreDeath/Semantic-Memory-Engine/main/docker-compose.yaml
+# 1. Install the project in editable mode
+pip install -e .
 
-# 2. Fire up the laboratory
-docker-compose up -d
+# 2. Start the operator
+python -m src.api.main
+
+# 3. In a second terminal, start the frontend
+cd frontend && npm run dev
 ```
 
 **Visit [http://localhost:5173](http://localhost:5173) to begin.**
@@ -45,9 +48,9 @@ docker-compose up -d
 
 ## 🕹️ The Control Room UI
 
-Version 3.0.0 introduces a professional "Glassmorphism" dashboard for managing your forensic lab, now with advanced cloud ingestion and social intelligence monitoring. For a detailed walkthrough, see the **[Control Room Operator Guide](docs/CONTROL_ROOM_OPERATOR.md)**.
+Version 3.0.1 introduces a professional "Glassmorphism" dashboard for managing your forensic lab, now with advanced cloud ingestion and social intelligence monitoring. For a detailed walkthrough, see the **[Control Room Operator Guide](docs/archive/legacy/CONTROL_ROOM_OPERATOR.md)**.
 
-> **Screenshot**: See [docs/CONTROL_ROOM_OPERATOR.md](docs/CONTROL_ROOM_OPERATOR.md) for UI walkthroughs and annotated screenshots of the Control Room dashboard.
+> **Screenshot**: See [docs/archive/legacy/CONTROL_ROOM_OPERATOR.md](docs/archive/legacy/CONTROL_ROOM_OPERATOR.md) for UI walkthroughs and annotated screenshots of the Control Room dashboard.
 
 ### 🔌 Connections Manager
 
@@ -70,7 +73,7 @@ Lawnmower Man uses a single Python process architecture with embedded AI provide
 
 ```mermaid
 graph TD
-    Client[AI Agent] <-->|MCP Protocol| Op[SME Operator - Py 3.14]
+    Client[AI Agent] <-->|MCP Protocol| Op[SME Operator - Py 3.13]
     Op <-->|Direct| Provider[AI Provider - Embedded]
     Op <-->|Websocket| UI[Control Room Dashboard]
 
@@ -89,9 +92,24 @@ graph TD
 
 ## 🚀 Deployment
 
-### Docker (Recommended)
+### Local Manual Start (Recommended)
 
-The easiest way to get started is using the unified container stack:
+The easiest way to run SME v3.0.1 is native mode:
+
+```bash
+pip install -e .
+python -m src.api.main
+```
+
+In a second terminal, start the frontend:
+
+```bash
+cd frontend && npm run dev
+```
+
+### Docker (Optional)
+
+The legacy container stack is still documented for reference:
 
 ```bash
 docker-compose up --build
@@ -101,12 +119,6 @@ This starts:
 
 - `sme-operator`: Core logic with embedded AI provider (Port 8000)
 - `sme-frontend`: Control Room UI (Port 5173)
-
-### Local Manual Start
-
-1. **Copy environment config**: `cp .env.example .env` then fill in your secrets
-2. **Operator**: `python -m src.api.main`
-3. **Frontend**: `cd frontend && npm run dev`
 ---
 
 ## 🛠️ Utility Suite
@@ -148,7 +160,7 @@ Our lightweight utility tools are optimized for the NVIDIA GeForce GTX 1660 Ti 6
 
 ---
 
-## 🧱 Modular Architecture (v3.0.0)
+## 🧱 Modular Architecture (v3.0.1)
 
 The system is split into the **Core Gateway** and **Hot-Swappable Extensions**.
 
@@ -184,13 +196,13 @@ graph TD
 
 ## 🛠️ Usage
 
-### 1. Run the Gateway (Production)
+### 1. Run the Gateway (Native)
 
 ```bash
-python -m gateway.mcp_server
+python -m src.api.main
 ```
 
-*Exposes the MCP server on stdio for agent connection.*
+*Exposes the MCP gateway and embedded AI provider on the operator process.*
 
 ### 2. Verify System Health
 
@@ -200,7 +212,7 @@ python gateway/test_gateway.py
 
 *Checks core subsystems and verifies plugin loading.*
 
-### 3. Docker Deployment
+### 3. Optional Docker Deployment
 
 ```bash
 docker-compose up lawnmower-gateway
@@ -210,14 +222,14 @@ docker-compose up lawnmower-gateway
 
 ## 🧩 Creating Extensions
 
-Lawnmower Man supports a standard v3.0.0+ boilerplate for new capabilities.
+Lawnmower Man supports a standard v3.0.1+ boilerplate for new capabilities.
 
 1. Create a folder in `extensions/` (e.g., `ext_my_tool`).
 2. Add a `manifest.json`.
 3. Implement `plugin.py` with standard hooks (`on_startup`, `on_ingestion`).
 
-See **[Extensions Catalog](docs/EXTENSIONS_CATALOG.md)** for a complete list of available plugins.
-See **[SME Check Architecture](docs/archive/SME_CHECK_ARCHITECTURE.md)** for validation and health check logic.
+See **[Extensions Catalog](docs/archive/legacy/EXTENSIONS_CATALOG.md)** for a complete list of available plugins.
+See **[EXTENSION_CONTRACT.md](docs/EXTENSION_CONTRACT.md)** for extension development guidance and validation hooks.
 
 ---
 

@@ -122,4 +122,4 @@ python -m pytest tests/test_extension_matrix.py -v
 - Follow the established tool naming conventions
 - Document all tools with clear descriptions and parameter types
 
-See `docs/SME_LOGIC_EXTENSIONS_TRAJECTORY.md` for the full trajectory and file references.
+See `docs/archive/legacy/SME_LOGIC_EXTENSIONS_TRAJECTORY.md` for the full trajectory and file references.

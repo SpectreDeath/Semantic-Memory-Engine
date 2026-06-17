@@ -53,4 +53,4 @@ The Ghost Trap detects hidden or obfuscated activity by analyzing process patter
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)

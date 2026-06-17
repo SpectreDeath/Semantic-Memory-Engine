@@ -55,4 +55,4 @@ The Mirror Test provides introspective analysis of AI agent reasoning. It tests 
 
 - [Logic Consistency Verification](SKILL.logic-consistency-verification/)
 - [System Health Scan](SKILL.system-health-scan/)
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)

@@ -52,6 +52,6 @@ The Immunizer extension proactively protects the SME system against identified t
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
 
 ---

@@ -124,7 +124,7 @@ class TestJobScheduler:
             )
 
             assert job_id is not None
-            assert "Daily Backup" in scheduler.jobs[job_id]["name"]
+            assert "Daily Backup" in scheduler.jobs[job_id].name
 
     def test_unregister_job(self):
         """Should remove job."""

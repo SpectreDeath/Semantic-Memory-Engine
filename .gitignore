@@ -23,16 +23,26 @@ __pycache__/
 *.log
 data/raw/
 data/processed/
+data/corpus/**
+!data/corpus/
+!data/corpus/.gitignore
+data/raw_cache/**
+!data/raw_cache/
+!data/raw_cache/.gitignore
 models/*.bin
 models/*.pt
 bandit_results.json
 
 # --- Build Artifacts & IDE ---
 *.egg-info/
+.coverage
+htmlcov/
 .cocoindex_code/
 .cursor/
 legacy/
 node_modules/
+sme-ide-extension/node_modules/
+sme-ide-extension/out/
 
 # --- SME Specific Data ---
 data/forensic_nexus.db
@@ -58,6 +68,11 @@ data/aether/signature_index.ipc
 
 # --- Private Cases (Not Public) ---
 private/
+
+# --- Extension Runtime State ---
+extensions/ext_api_key_manager/keys/.master.key
+extensions/ext_scheduled_jobs/jobs.json
+extensions/ext_webhook/webhooks/registered.json
 
 # --- Extension Export Artifacts ---
 extensions/*/exports/

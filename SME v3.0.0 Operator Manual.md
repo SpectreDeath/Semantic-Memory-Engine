@@ -1,6 +1,6 @@
 # 🛰️ SME v3.0.0: The Control Room Operator Manual
 
-This guide covers the deployment and operation of the **Semantic Memory Engine (SME)** forensic suite. By using the containerized v3.0.0 release, you bypass the [dependency conflicts](https://github.com/SpectreDeath/Semantic-Memory-Engine/blob/main/docs/DEPENDENCY_GRAPH.md) found in previous versions.
+This guide covers the deployment and operation of the **Semantic Memory Engine (SME)** forensic suite. By using the containerized v3.0.0 release, you bypass the [dependency conflicts](https://github.com/SpectreDeath/Semantic-Memory-Engine/blob/main/docs/archive/legacy/DEPENDENCY_GRAPH.md) found in previous versions.
 
 ## 1. 🚀 Quick Deployment
 

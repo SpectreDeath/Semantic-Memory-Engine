@@ -53,5 +53,5 @@ The Stetho Scan is a deep diagnostic tool that examines the SME system's health 
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
 - [Performance Optimization Guide](D:/SME/docs/PERFORMANCE_OPTIMIZATION_GUIDE.md)

@@ -189,7 +189,7 @@ class LegacyExtension:
   - `docs/PERFORMANCE_OPTIMIZATION_GUIDE.md` - Performance optimization guide
   - `docs/PHASE_3_PROGRESS.md` - Progress tracking
   - `docs/PHASE_4_COMPLETE.md` - Phase 4 completion
-  - `docs/TRAJECTORY_SUMMARY.md` - Complete trajectory summary
+  - `docs/archive/legacy/TRAJECTORY_SUMMARY.md` - Complete trajectory summary
 
 ## 🚀 **Enterprise-Grade Features Delivered**
 

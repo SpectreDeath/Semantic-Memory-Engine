@@ -53,4 +53,4 @@ The Synthetic Source Auditor identifies text that exhibits characteristics of AI
 ## See Also
 
 - [Adversarial Pattern Detection](SKILL.adversarial-pattern-detection/)
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)

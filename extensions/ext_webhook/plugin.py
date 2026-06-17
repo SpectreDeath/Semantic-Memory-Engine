@@ -68,7 +68,12 @@ class WebhookManager:
         return False
 
     def list_webhooks(self) -> list[dict[str, Any]]:
-        return list(self.webhooks.values())
+        webhooks = []
+        for webhook in self.webhooks.values():
+            webhook_copy = dict(webhook)
+            webhook_copy["secret"] = ""
+            webhooks.append(webhook_copy)
+        return webhooks
 
     async def trigger(self, event: str, payload: dict[str, Any]) -> list[dict[str, Any]]:
         results = []

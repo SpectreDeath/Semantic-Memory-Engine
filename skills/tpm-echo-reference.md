@@ -52,6 +52,6 @@ The Sample Echo provides a reference implementation for TPM-signed verification.
 ## See Also
 
 - [Extension Contract](D:/SME/docs/EXTENSION_CONTRACT.md)
-- [Developing Extensions](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Developing Extensions](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
 
 ---

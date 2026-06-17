@@ -12,28 +12,35 @@ Write-Host "==========================================" -ForegroundColor Cyan
 Write-Host ""
 
 
-# Check Python version - MUST use 3.13 (spacy incompatible with 3.14)
-$pythonVersion = & $PYTHON_EXE -c "import sys; print(sys.version_info[0]*10 + sys.version_info[1])" 2>$null
-if ($LASTEXITCODE -ne 0 -or $pythonVersion -lt 13) {
-    Write-Host "Error: Python 3.13 required. Found: $($pythonVersion/10)" -ForegroundColor Red
-    Write-Host "Install Python 3.13: https://www.python.org/downloads/" -ForegroundColor Yellow
-    exit 1
-}
-if ($pythonVersion -gt 13) {
-    Write-Host "Error: Python 3.14 not supported (spacy incompatible)" -ForegroundColor Red
-    Write-Host "Install Python 3.13: https://www.python.org/downloads/" -ForegroundColor Yellow
-    exit 1
-}
-Write-Host "Python version check: OK ($([math]::Floor($pythonVersion/10)).$($pythonVersion%10))" -ForegroundColor Green
-
-# 1. Determine Python Executable
+# 1. Determine Python Executable - MUST use 3.13 (spacy incompatible with 3.14)
 $PYTHON_EXE = "python"
 if (Test-Path ".venv313\Scripts\python.exe") {
     $PYTHON_EXE = "$SCRIPT_DIR\.venv313\Scripts\python.exe"
     Write-Host "Using Virtual Environment: .venv313" -ForegroundColor Gray
+} elseif ($PSVersionTable.PSEdition -eq "Desktop" -and (Get-Command py -ErrorAction SilentlyContinue)) {
+    $python313 = & py -3.13 -c "import sys; print(sys.executable)" 2>$null
+    if ($LASTEXITCODE -eq 0 -and $python313) {
+        $PYTHON_EXE = $python313.Trim()
+        Write-Host "Using Python 3.13: $PYTHON_EXE" -ForegroundColor Gray
+    } else {
+        Write-Host "Warning: Python 3.13 not found via py -3.13. Falling back to system python." -ForegroundColor Yellow
+    }
 } else {
     Write-Host "Warning: .venv313 not found. Falling back to system python." -ForegroundColor Yellow
 }
+
+$pythonVersion = & $PYTHON_EXE -c "import sys; print(sys.version_info[0]*10 + sys.version_info[1])" 2>$null
+if ($LASTEXITCODE -ne 0 -or $pythonVersion -lt 13) {
+    Write-Host "Error: Python 3.13 required. Found: $($pythonVersion/10)" -ForegroundColor Red
+    Write-Host "Install Python 3.13 or create .venv313." -ForegroundColor Yellow
+    exit 1
+}
+if ($pythonVersion -gt 13) {
+    Write-Host "Error: Python 3.14 not supported (spacy incompatible)" -ForegroundColor Red
+    Write-Host "Install Python 3.13 or create .venv313." -ForegroundColor Yellow
+    exit 1
+}
+Write-Host "Python version check: OK ($([math]::Floor($pythonVersion/10)).$($pythonVersion%10))" -ForegroundColor Green
 
 # Check for .env file
 if (-not (Test-Path ".env")) {

@@ -60,6 +60,6 @@ The Forensic Data Vault is a secure storage system designed for evidentiary data
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
 
 ---

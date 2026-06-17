@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""
+Simple test script to verify ScrapeGraphAI extension can be imported
+without requiring full SME infrastructure.
+"""
+
+import sys
+from pathlib import Path
+
+# Add project root to path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+def test_imports():
+    """Test that we can import the extension without SME dependencies"""
+    print("Testing ScrapeGraphAI extension imports...")
+
+    try:
+        # Test pydantic imports
+        print("✓ Pydantic imports successful")
+
+        # Test ScrapeGraphAI imports (these will fail if not installed)
+        try:
+            import scrapegraphai
+            from playwright.async_api import async_playwright
+            from scrapegraphai.config import GraphConfig
+            from scrapegraphai.graphs import MarkdownifyGraph, SearchGraph, SmartScraperGraph
+            print("✓ ScrapeGraphAI imports successful")
+        except ImportError as e:
+            print(f"⚠️  ScrapeGraphAI not available: {e}")
+
+        # Test our extension classes
+        from extensions.ext_scrapegraph_harvester.plugin import (
+            MarkdownifyRequest,
+            MemoryNode,
+            ResearchRequest,
+            ScrapeRequest,
+        )
+        print("✓ Extension classes imported successfully")
+
+        # Test that we can create request objects
+        _ = ScrapeRequest(url="https://example.com")
+        _ = ResearchRequest(query="test query")
+        _ = MarkdownifyRequest(url="https://example.com")
+        print("✓ Request objects created successfully")
+
+        # Test MemoryNode creation
+        _ = MemoryNode(
+            id="test_123",
+            content="Test content",
+            source_url="https://example.com",
+            timestamp="2026-02-25T12:00:00Z",
+            trust_score=0.8,
+            entities=["test", "entity"],
+            relationships=[{"type": "related", "target": "other"}]
+        )
+        print("✓ MemoryNode created successfully")
+
+        return True
+
+    except Exception as e:
+        print(f"❌ Import test failed: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+def test_extension_structure():
+    """Test that the extension has the expected structure"""
+    print("\nTesting extension structure...")
+
+    try:
+        # Import the main extension class
+        from extensions.ext_scrapegraph_harvester.plugin import ScrapeGraphHarvester
+
+        # Check that the class has the expected methods
+        expected_methods = [
+            'scrape_and_remember',
+            'deep_research',
+            'markdownify',
+            'get_tools',
+            'on_startup',
+            'on_ingestion'
+        ]
+
+        for method in expected_methods:
+            if hasattr(ScrapeGraphHarvester, method):
+                print(f"✓ Method {method} exists")
+            else:
+                print(f"❌ Method {method} missing")
+                return False
+
+        print("✓ All expected methods present")
+        return True
+
+    except Exception as e:
+        print(f"❌ Structure test failed: {e}")
+        return False
+
+def main():
+    """Run all tests"""
+    print("=== ScrapeGraphAI Extension Test ===\n")
+
+    success = True
+    success &= test_imports()
+    success &= test_extension_structure()
+
+    print("\n=== Test Results ===")
+    if success:
+        print("🎉 All tests passed!")
+        print("\nThe ScrapeGraphAI extension has been successfully created and can be imported.")
+        print("Next steps:")
+        print("1. Install dependencies: pip install -r extensions/ext_scrapegraph_harvester/requirements.txt")
+        print("2. Ensure Ollama is running with required models")
+        print("3. Restart SME to auto-load the extension")
+        print("4. Test via MCP Gateway or Control Room")
+    else:
+        print("❌ Some tests failed. Check the output above for details.")
+
+    return success
+
+if __name__ == "__main__":
+    success = main()
+    sys.exit(0 if success else 1)

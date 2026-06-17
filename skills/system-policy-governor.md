@@ -52,6 +52,6 @@ The Governor extension serves as the central control plane for SME policies. It 
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
 
 ---

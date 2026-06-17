@@ -59,6 +59,6 @@ The Logic Auditor examines forensic findings for internal consistency and logica
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
 
 ---

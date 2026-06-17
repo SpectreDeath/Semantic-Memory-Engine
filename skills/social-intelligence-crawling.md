@@ -59,7 +59,7 @@ The Social Intelligence Crawler provides multi-platform social media monitoring 
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
-- [SME Documentation - Control Room](D:/SME/docs/CONTROL_ROOM_OPERATOR.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
+- [SME Documentation - Control Room](../docs/archive/legacy/CONTROL_ROOM_OPERATOR.md)
 
 ---

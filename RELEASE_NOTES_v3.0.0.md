@@ -161,7 +161,7 @@ The V3.0 "Odyssey" release brings substantial architectural improvements to the 
 ### Documentation
 
 - **API Documentation**: Available at `/api/docs`
-- **User Guide**: See `docs/CONTROL_ROOM_OPERATOR.md`
+- **User Guide**: See `docs/archive/legacy/CONTROL_ROOM_OPERATOR.md`
 - **Development Guide**: See `docs/PLUGIN_DEVELOPMENT_v3.0.0.md`
 
 ### Community

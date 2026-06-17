@@ -22,8 +22,10 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import math
 import re
 import sqlite3
+from collections import Counter
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
@@ -52,6 +54,15 @@ except LookupError:
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+PASSIVE_VOICE_RE = re.compile(
+    r"\b(was|were|is|are|be|been|being|has been|have been|had been)\s+\w+ed\b",
+    re.IGNORECASE,
+)
+CLAUSE_CONJUNCTION_RE = re.compile(
+    r"\b(and|but|or|while|whereas|although|because|since|when|where)\b",
+    re.IGNORECASE,
+)
 
 from src.core.config import Config
 
@@ -86,6 +97,7 @@ class LinguisticFingerprint:
     active_voice_ratio: float = 0.0
     avg_clause_count: float = 0.0
     punctuation_profile: dict = None  # {',': 0.5, ';': 0.1, ...}
+    micro_features: dict = None  # {feature_id: value, ...}
     signal_weights: dict = None  # {signal_id: weight, ...}
     signal_vector: list[float] = None  # Normalized vector for cosine similarity
     text_sample_count: int = 0
@@ -94,6 +106,8 @@ class LinguisticFingerprint:
     def __post_init__(self):
         if self.punctuation_profile is None:
             self.punctuation_profile = {}
+        if self.micro_features is None:
+            self.micro_features = {}
         if self.signal_weights is None:
             self.signal_weights = {}
         if not self.created_at:
@@ -223,6 +237,7 @@ class ScribeEngine:
                 active_voice_ratio=float(active_ratio),
                 avg_clause_count=float(avg_clause_count),
                 punctuation_profile=punctuation_profile,
+                micro_features=self.extract_micro_features(text),
                 signal_weights=signal_weights,
                 signal_vector=signal_vector,
                 text_sample_count=len(words),
@@ -589,6 +604,8 @@ class ScribeEngine:
 
         if V == 0 or N == 0:
             return 0.0
+        if V == N:
+            return 1.0
 
         # Honoré's statistic: more accurate than simple TTR
         try:
@@ -599,12 +616,11 @@ class ScribeEngine:
 
     def _detect_passive_voice(self, text: str) -> float:
         """Estimate passive voice ratio (simple heuristic)."""
-        sentences = sent_tokenize(text)
+        sentences = self._split_sentences(text)
         passive_count = 0
 
         for sent in sentences:
-            # Simple detection: "was/were" + past participle
-            if re.search(r"\b(was|were|is|are|be|been|being)\s+\w+ed\b", sent, re.IGNORECASE):
+            if PASSIVE_VOICE_RE.search(sent):
                 passive_count += 1
 
         return passive_count / len(sentences) if sentences else 0.0
@@ -614,12 +630,7 @@ class ScribeEngine:
         clause_counts = []
 
         for sent in sentences:
-            # Count conjunctions as rough proxy for clauses
-            conj_count = len(
-                re.findall(
-                    r"\b(and|but|or|because|since|although|if|when|where)\b", sent, re.IGNORECASE
-                )
-            )
+            conj_count = len(CLAUSE_CONJUNCTION_RE.findall(sent))
             clause_counts.append(conj_count + 1)  # At least 1 main clause
 
         return np.mean(clause_counts) if clause_counts else 1.0
@@ -633,9 +644,75 @@ class ScribeEngine:
 
         for p in punct_chars:
             count = text.count(p)
-            profile[p] = count / max(total_chars, 1)  # Normalize by text length
+            profile[p] = count / max(total_chars, 1)
 
         return profile
+
+    def _split_sentences(self, text: str) -> list[str]:
+        raw_sentences = re.split(r"(?<=[.!?])\s+(?=[A-Z\"'“‘0-9])", text)
+        sentences = [sent.strip() for sent in raw_sentences if sent.strip()]
+        return sentences or sent_tokenize(text)
+
+    def extract_micro_features(self, text: str) -> dict[str, float]:
+        """Extract structural and weakly lexical invariants for validation layers."""
+        sentences = self._split_sentences(text)
+        words = word_tokenize(text.lower())
+        alpha_words = [w for w in words if w.isalpha()]
+        word_count = len(alpha_words)
+        sentence_count = len(sentences)
+        comma_count = text.count(",")
+        sentence_end_count = text.count(".") + text.count("!") + text.count("?")
+        semicolon_count = text.count(";")
+        colon_count = text.count(":")
+        em_dash_count = text.count("—") + text.count("–")
+        paren_count = text.count("(") + text.count(")")
+        passive_count = 0
+        active_markers = 0
+        coordinated_statutory = 0
+        long_chains = 0
+        clause_lengths = []
+
+        for sent in sentences:
+            sent_words = [w for w in word_tokenize(sent.lower()) if w.isalpha()]
+            if PASSIVE_VOICE_RE.search(sent):
+                passive_count += 1
+            if re.search(r"\b\w+s\s+\w+\b", sent, re.IGNORECASE) or re.search(
+                r"\b\w+\s+\w+ed\b", sent, re.IGNORECASE
+            ):
+                active_markers += 1
+            conjunction_count = len(CLAUSE_CONJUNCTION_RE.findall(sent))
+            clause_lengths.append(conjunction_count + 1)
+            if conjunction_count >= 3 and len(sent_words) >= 20:
+                long_chains += 1
+            if re.search(
+                r"\b(shall|must|may|will)\s+\w+(?:\s+\w+){0,8}\s+(and|or)\s+\w+\b",
+                sent,
+                re.IGNORECASE,
+            ):
+                coordinated_statutory += 1
+
+        features = {
+            "word_count": float(word_count),
+            "sentence_count": float(sentence_count),
+            "avg_sentence_length": sum(len(s.split()) for s in sentences) / max(sentence_count, 1),
+            "avg_clause_chain_length": sum(clause_lengths) / max(len(clause_lengths), 1),
+            "comma_per_1000_words": comma_count / max(word_count, 1) * 1000,
+            "sentence_end_per_1000_words": sentence_end_count / max(word_count, 1) * 1000,
+            "comma_to_sentence_end_ratio": comma_count / max(sentence_end_count, 1),
+            "semicolon_per_1000_words": semicolon_count / max(word_count, 1) * 1000,
+            "colon_per_1000_words": colon_count / max(word_count, 1) * 1000,
+            "em_dash_per_1000_words": em_dash_count / max(word_count, 1) * 1000,
+            "parenthetical_per_1000_words": paren_count / max(word_count, 1) * 1000,
+            "passive_voice_ratio": min(passive_count / max(sentence_count, 1), 1.0),
+            "active_voice_ratio": min(active_markers / max(sentence_count, 1), 1.0),
+            "coordinated_statutory_phrase_per_1000_words": coordinated_statutory
+            / max(word_count, 1)
+            * 1000,
+            "long_chained_construction_per_1000_words": long_chains / max(word_count, 1) * 1000,
+        }
+        return {
+            key: float(value) if math.isfinite(value) else 0.0 for key, value in features.items()
+        }
 
     def _map_to_rhetoric_signals(self, text: str) -> dict[str, float]:
         """

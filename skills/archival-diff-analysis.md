@@ -52,4 +52,4 @@ The Archival Diff tool compares document versions or data snapshots across time,
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)

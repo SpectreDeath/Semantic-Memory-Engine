@@ -52,8 +52,8 @@ The Harvester is a web ingestion engine that transforms URLs into structured, qu
 - **Location**: `D:/SME/src/harvester/`
 
 ## See Also
+- [SME Documentation - Harvester Panel](../docs/archive/legacy/CONTROL_ROOM_OPERATOR.md)
 
-- [SME Documentation - Harvester Panel](D:/SME/docs/CONTROL_ROOM_OPERATOR.md)
-- [Crawling Capabilities Expansion](D:/SME/docs/CRAWLING_CAPABILITIES_EXPANSION.md)
+- [Crawling Capabilities Expansion](../docs/archive/legacy/CRAWLING_CAPABILITIES_EXPANSION.md)
 
 ---

@@ -53,7 +53,7 @@ The Trust Score Analysis tool evaluates the reliability and authenticity of data
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
 - [Poisoned Well Report](D:/SME/docs/OPERATION_POISONED_WELL_REPORT.md)
 
 ---

@@ -134,14 +134,14 @@ For tool-specific options, try:
 
 Documentation:
   - README.md                 : Main documentation
-  - docs/CONTROL_ROOM_OPERATOR.md : Getting started guide
+  - docs/archive/legacy/CONTROL_ROOM_OPERATOR.md : Getting started guide
   - config/config.yaml        : Configuration settings
 """)
 
 
 def show_version() -> None:
     """Display version information."""
-    from src.core.constants import SME_VERSION, SME_NAME
+    from src.core.constants import SME_NAME, SME_VERSION
     print(f"""
 {SME_NAME} v{SME_VERSION}
 Powered by FastMCP, PostgreSQL Nexus, and Modular Extensions

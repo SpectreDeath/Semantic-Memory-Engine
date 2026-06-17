@@ -53,4 +53,4 @@ The Nur (Light) extension discovers areas of uncertainty and knowledge gaps in t
 ## See Also
 
 - [Atlas - Knowledge Mapping](SKILL.knowledge-domain-mapping/)
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)

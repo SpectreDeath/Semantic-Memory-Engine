@@ -115,7 +115,7 @@ class BasePlugin(ABC):
         """
         self.manifest = manifest
         self.nexus = nexus_api
-        self.dal = PluginDAL(nexus_api)
+        self.dal = PluginDAL(nexus_api) if nexus_api is not None else None
         self.plugin_id = manifest.get("plugin_id", self.__class__.__name__)
 
     async def on_startup(self) -> None:

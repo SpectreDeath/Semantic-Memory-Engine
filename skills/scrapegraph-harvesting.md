@@ -52,6 +52,6 @@ The ScrapeGraph Harvester integrates ScrapeGraph AI for intelligent web scraping
 
 ## See Also
 
-- [ScrapeGraph Integration Summary](D:/SME/docs/SCRAPEGRAPH_INTEGRATION_SUMMARY.md)
+- [ScrapeGraph Integration Summary](../docs/archive/legacy/SCRAPEGRAPH_INTEGRATION_SUMMARY.md)
 
 ---

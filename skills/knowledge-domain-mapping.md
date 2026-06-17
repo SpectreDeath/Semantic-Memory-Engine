@@ -57,5 +57,5 @@ Visualizations capped at 2,000 nodes for hardware constraints (GTX 1660 Ti)
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
 - [Gephi Bridge](D:/SME/src/utils/gephi_bridge.py)

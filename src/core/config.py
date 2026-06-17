@@ -21,6 +21,46 @@ from typing import Any
 
 import yaml
 
+DEFAULT_CONFIG: dict[str, Any] = {
+    "storage": {
+        "base_dir": "./data",
+        "db_path": "./data/storage/laboratory.db",
+        "log_dir": "./data/logs",
+        "lexicon_dir": "./data/lexicons",
+    },
+    "analysis": {
+        "thresholds": {
+            "high_alert_sentiment": 0.4,
+            "similarity_threshold": 0.6,
+        },
+        "lookback_days": 7,
+    },
+    "mcp": {
+        "host": "localhost",
+        "port": 8000,
+    },
+    "nltk": {
+        "data_dir": "./data/nltk_data",
+        "auto_download": True,
+        "install_optional": False,
+        "languages": ["english"],
+    },
+    "hardware": {
+        "vram_limit_mb": 6144,
+        "offload_threshold_mb": 5500,
+        "offload_strategy": "gguf_first",
+        "lora_dir": "models/adapters",
+        "gguf_dir": "models/gguf",
+        "base_model": "models/gguf/mistral-7b-v0.1.Q4_K_M.gguf",
+    },
+    "skills": {
+        "enabled": True,
+        "directory": "./skills",
+        "registry_path": "./skills/registry.json",
+        "auto_rebuild": False,
+    },
+}
+
 
 class ConfigError(Exception):
     """Raised when configuration is invalid or missing."""
@@ -57,26 +97,39 @@ class Config:
         config_path = self._find_config_file()
 
         if not config_path:
-            raise ConfigError("config.yaml not found. Expected at: config/config.yaml")
+            self._config = DEFAULT_CONFIG.copy()
+            return
 
         try:
             with open(config_path) as f:
-                self._config = yaml.safe_load(f) or {}
+                loaded = yaml.safe_load(f) or {}
+            self._config = self._deep_merge(DEFAULT_CONFIG, loaded)
         except Exception as e:
             raise ConfigError(f"Failed to load config from {config_path}: {e}")
 
     @staticmethod
+    def _deep_merge(base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
+        result = dict(base)
+        for key, value in override.items():
+            if isinstance(value, dict) and isinstance(result.get(key), dict):
+                result[key] = Config._deep_merge(result[key], value)
+            else:
+                result[key] = value
+        return result
+
+    @staticmethod
     def _find_config_file() -> Path | None:
         """Find config.yaml in various possible locations."""
+        project_root = Path(__file__).resolve().parents[2]
         possible_paths = [
             Path("config/config.yaml"),
             Path("./config/config.yaml"),
-            Path(__file__).parent.parent.parent / "config" / "config.yaml",
+            project_root / "config" / "config.yaml",
         ]
 
         for path in possible_paths:
-            if path.exists():
-                return path
+            if path.resolve().exists():
+                return path.resolve()
 
         return None
 

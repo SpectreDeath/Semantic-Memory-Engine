@@ -53,4 +53,4 @@ The Behavior Audit extension monitors and evaluates agent actions against predet
 
 ## See Also
 
-- [Extensions Catalog](D:/SME/docs/EXTENSIONS_CATALOG.md)
+- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)

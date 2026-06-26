@@ -42,8 +42,7 @@ ruff check src/ gateway/ extensions/
 
 - Use Python 3.13 only (3.14 has spacy compatibility issues)
 - Dependencies are in `pyproject.toml` (not requirements.txt)
-- All skills are in `skills/` directory
-- Use `SME_VENV` env var to override venv path in gephi_export_tool.py
+- Skills are in `skills/` directory (some organized in subdirectories like `skills/analysis/`)
 - Health checks no longer reference sidecar
 
 ## Code Style
@@ -55,6 +54,6 @@ ruff check src/ gateway/ extensions/
 
 ## Common Patterns
 
-- Extensions: `extensions/ext_*/plugin.py`
+- Extensions: `extensions/ext_*/plugin.py` (some diagnostic extensions have no exposed tools)
 - AI providers: `src/ai/providers/`
-- Skills: `skills/*.md`
+- Skills: `skills/*.md` and `skills/*/analysis/*.py`

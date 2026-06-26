@@ -1,7 +1,7 @@
 # --- Environment & Secrets ---
 .env
 config/*.json
-!config/default_settings.json  # Optional: keep a template if you want
+!config/default_settings.json
 
 # --- Binaries & Large Files ---
 *.exe
@@ -82,3 +82,6 @@ extensions/ext_webhook/webhooks/registered.json
 # --- Extension Export Artifacts ---
 extensions/*/exports/
 extensions/*/export/
+
+# --- Skills Organization ---
+skills/registry.json

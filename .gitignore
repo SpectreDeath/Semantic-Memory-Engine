@@ -21,6 +21,7 @@ __pycache__/
 
 # --- AI & Data ---
 *.log
+data/logs/
 data/raw/
 data/processed/
 data/corpus/**

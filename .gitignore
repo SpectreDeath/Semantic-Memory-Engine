@@ -69,8 +69,12 @@ data/aether/signature_index.ipc
 # --- Private Cases (Not Public) ---
 private/
 
+# --- Reports (generated output) ---
+reports/
+
 # --- Extension Runtime State ---
 extensions/ext_api_key_manager/keys/.master.key
+extensions/ext_api_key_manager/keys/encrypted_keys.json
 extensions/ext_scheduled_jobs/jobs.json
 extensions/ext_webhook/webhooks/registered.json
 

@@ -8,9 +8,10 @@
 ## 2026-06-27: Phased Testing Strategy
 **Decision**: Add phase1/phase2/phase3 test markers to pytest.ini with auto-tagging in conftest.py
 **Reason**: Large test suite (710+ tests) was timing out; needed runtime controls
-**Status**: Implemented
+**Status**: Implemented and verified
 **Counts**: Phase1=364, Phase2=210, Phase3=67 tests (641 total marked)
 **Usage**: `pytest -m phase1`, `pytest -m phase2`, `pytest -m phase3`
+**Results**: Phase1 passed 337/364 (5 pre-existing failures in mocking)
 
 ## 2026-06-27: Generated Artifact Management
 **Decision**: Add `reports/`, `data/logs/`, `skills/registry.json` to .gitignore

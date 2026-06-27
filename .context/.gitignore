@@ -1,0 +1,6 @@
+# Keep identity and decisions tracked
+# Ignore runtime logs and database
+memtext.db
+projects.db
+session-logs/
+*.log

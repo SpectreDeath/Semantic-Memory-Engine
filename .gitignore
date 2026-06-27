@@ -65,7 +65,9 @@ data/aether/signature_index.ipc
 .rl4/
 
 # --- Memtext Context ---
-.context/
+.context/memtext.db
+.context/projects.db
+.context/session-logs/
 
 # --- Private Cases (Not Public) ---
 private/

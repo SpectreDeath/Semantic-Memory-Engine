@@ -30,6 +30,10 @@ class SkillInfo:
     source: str | None = None
     implementation_status: str = "unknown"
     content: str = ""
+    inputs: list = field(default_factory=list)
+    outputs: list = field(default_factory=list)
+    estimated_time: str = ""
+    tags: list = field(default_factory=list)
 
 
 class SkillsLoader:

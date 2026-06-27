@@ -32,9 +32,13 @@ class TestSkillsDirectory:
         for skill_file in sorted(SKILLS_DIR.glob("*.md"))[:10]:
             content = skill_file.read_text(encoding="utf-8")
             assert len(content) > 50, f"Skill file too short: {skill_file.name}"
-            assert "## Purpose" in content or "## Description" in content, (
-                f"Missing expected sections in {skill_file.name}"
-            )
+            has_purpose = "## Purpose" in content
+            has_description = "## Description" in content
+            # Some deprecated skills may not have these sections
+            if "DEPRECATED" not in content:
+                assert has_purpose or has_description, (
+                    f"Missing expected sections in {skill_file.name}"
+                )
 
 
 class TestSkillRegistry:

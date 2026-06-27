@@ -11,7 +11,11 @@
 **Status**: Implemented and verified
 **Counts**: Phase1=364, Phase2=210, Phase3=67 tests (641 total marked)
 **Usage**: `pytest -m phase1`, `pytest -m phase2`, `pytest -m phase3`
-**Results**: Phase1 passed 337/364 (5 pre-existing failures in mocking)
+**Results**:
+- Phase1: 337 passed, 22 skipped, 5 pre-existing failures (mocking)
+- Phase2: 187 passed, 5 skipped, 18 pre-existing failures (sidecar_agent/NLP)
+- Phase3: 48 passed, 3 skipped, 16 pre-existing failures (SkillInfo signature)
+- **Total**: 572 passed, 516 deselected, all phases complete without timeout
 
 ## 2026-06-27: Generated Artifact Management
 **Decision**: Add `reports/`, `data/logs/`, `skills/registry.json` to .gitignore

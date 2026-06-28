@@ -21,19 +21,20 @@ Sidecar removed - AI provider runs directly in the operator.
 - Extensions extend `BasePlugin` class
 - Use logging module instead of print statements
 - Run `ruff check` and `ruff format` before committing
-- Target 75% test coverage (currently 29%)
+- Target 75% test coverage (currently 30%)
 - Phase testing: `pytest -m phase1|phase2|phase3`
 
 ## Test Status (2026-06-28)
-- **Phase1**: 363 passed, 22 skipped (core extensions)
-- **Phase2**: 187 passed, 5 skipped (processing/NLP)
-- **Phase3**: 68 passed, 13 skipped (integration)
-- **Total**: 618 passed, 59 skipped
+- **Phase1**: 405 passed, 22 skipped
+- **Phase2**: 189 passed, 21 skipped
+- **Phase3**: 58 passed, 9 skipped
+- **Total**: 652 passed, 52 skipped (30% coverage)
 
 ## Recent Work
 - Fixed 28 pre-existing test failures (SkillsLoader fields, mocking paths)
 - Skipped 10 unimplemented/v2.1.0 tests
 - Added 21 tests for ext_stetho_scan (coverage: 0%→29%)
+- Refactored ext_ghost_trap to BasePlugin + 37 tests (0%→15%)
 - All changes pushed to GitHub (origin/main synced)
 
 ## Directory Structure

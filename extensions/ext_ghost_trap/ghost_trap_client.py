@@ -18,7 +18,6 @@ from typing import Any
 
 logger = logging.getLogger("lawnmower.ghost_trap")
 
-# Default paths for Ghost-Trap data
 DEFAULT_DATA_DIR = os.environ.get("SME_DATA_DIR", "data")
 GHOST_TRAP_DIR = os.path.join(DEFAULT_DATA_DIR, "ghost_trap")
 
@@ -69,7 +68,6 @@ class GhostTrapClient:
         """
         events = self._read_jsonl(self.events_file, limit)
 
-        # Filter by time
         cutoff = datetime.now() - timedelta(hours=hours)
         filtered = []
 
@@ -81,7 +79,6 @@ class GhostTrapClient:
                 if event_time.replace(tzinfo=None) >= cutoff:
                     filtered.append(event)
             except (ValueError, TypeError):
-                # If timestamp parsing fails, include the event
                 filtered.append(event)
 
         return filtered
@@ -99,16 +96,13 @@ class GhostTrapClient:
         """
         alerts = self._read_jsonl(self.alerts_file, 100)
 
-        # Filter by time
         cutoff = datetime.now() - timedelta(hours=hours)
         filtered = []
 
         for alert in alerts:
-            # Apply severity filter
             if severity and alert.get("severity") != severity:
                 continue
 
-            # Apply time filter
             try:
                 alert_time = datetime.fromisoformat(
                     alert.get("timestamp", "").replace("Z", "+00:00")
@@ -162,7 +156,6 @@ class GhostTrapClient:
         """
         events = self._read_jsonl(self.events_file, limit=1000)
 
-        # Normalize path for comparison
         path = os.path.normpath(path).lower()
 
         for event in events:
@@ -188,9 +181,6 @@ class GhostTrapClient:
         }
 
 
-# ---------------------------------------------------------------------------
-# Singleton accessor
-# ---------------------------------------------------------------------------
 _client: GhostTrapClient | None = None
 
 

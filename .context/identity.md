@@ -36,6 +36,12 @@ Sidecar removed - AI provider runs directly in the operator.
 - Added 21 tests for ext_stetho_scan (coverage: 0%→29%)
 - Refactored ext_ghost_trap to BasePlugin + 37 tests (0%→15%)
 - All changes pushed to GitHub (origin/main synced)
+- Implemented skill extraction pipeline (src/utils/skill_extractor.py, scripts/extract_skill.py)
+- Implemented Nexus Vault Bridge (src/utils/nexus_vault.py) for PostgreSQL/SQLite metadata ingestion
+- Added live SkillsMP.com ingestion via crawl fetch with streaming GitHub raw content
+- Added 2 gold-standard skills in skills/gold_standard/
+- Ran project-wide ruff format (67 files reformatted)
+- CI Code Quality job passes on gateway/ src/ extensions/ after formatting fixes
 
 ## Directory Structure
 - `extensions/ext_*/plugin.py` - Plugin implementations

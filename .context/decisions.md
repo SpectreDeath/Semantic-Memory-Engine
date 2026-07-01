@@ -33,3 +33,42 @@
 - Timestamp upgraded to `%Y-%m-%dT%H:%M:%S.%f%z` for microsecond-precision, sortable ISO 8601.
 **Verification**: All unit tests pass (nested JSON, prose rejection, failure hoisting, placeholder filtering, 6-error collection, ruff clean, doctor green).
 **Status**: Complete
+## 2026-07-01 [nexus-vault, postgresql, metadata-ingestion, v3.0.1]
+**Decision**: Create Nexus Vault Bridge to ingest validated SKILL.md metadata into PostgreSQL.
+**Changes**:
+- `src/utils/nexus_vault.py` - scans `.kilo/vault/*.metadata.json`, extracts 4 normalized semantic fields: triggers (`tags`), constraints (`category`/`type`/`inputs`/`outputs`), workflow (`workflow` list), version (`version` with `0.0.0` fallback).
+- Dual-backend: PostgreSQL (`semantic.skill_patterns` schema, JSONB fields) when `SME_USE_POSTGRES` set; SQLite (`skill_patterns` table, TEXT fields) otherwise via `gateway.nexus_db`.
+- Auto-calculates Epistemic Trust Score: base 0.5 + 0.1 per signal (source attribution, >=3 workflow steps, strict SemVer, non-empty triggers, non-empty constraints), clamped to [0.0, 1.0].
+- Idempotent upsert via `UNIQUE(skill_name, version)` with `ON CONFLICT DO UPDATE`.
+- Lightweight: reads only sidecar metadata; never parses full SKILL.md body, never clones repos.
+**Verification**: `ruff check` clean, `py_compile` clean, unit test confirmed placeholder filtering and trust score delta on source presence.
+**Status**: Complete
+
+## 2026-07-01 [ci-fixes, lint, formatting, ghost-trap, v3.0.1]
+**Decision**: Fix CI Code Quality failures from commit 066c892 and subsequent formatting drift.
+**Changes**:
+- `extensions/ext_ghost_trap/plugin.py`: sorted import block (`error_handling` before `plugin_base`), added trailing newline at EOF.
+- `extensions/ext_ghost_trap/ghost_trap_client.py`: added trailing newline at EOF.
+- Ran `ruff format` project-wide: 67 files reformatted, 350 left unchanged. Committed as separate chore commit cf0bf9c to avoid noise in feature commit.
+- CI block: Node.js 20 deprecation warnings are runner-level notices, not code issues. Codecov upload failure is infra-related.
+**Verification**: `ruff check` clean on `gateway/ src/ extensions/` (309 files). `ruff format --check` passes on CI-scoped directories.
+**Status**: Complete
+
+## 2026-07-01 [crawl-fetch, skillsmp, live-ingestion, v3.0.1]
+**Decision**: Add live skill ingestion from SkillsMP.com to `scripts/extract_skill.py`.
+**Implementation**:
+- `crawl fetch` subcommand (~220 lines) with helpers: `_skillsmp_search()`, `_github_url_to_raw()`, `_stream_github_raw()`, `_is_plausible_skill_md()`.
+- SkillsMP stream uses `requests.get(stream=True)` with 4 KB chunks; appends `/SKILL.md` to GitHub URLs.
+- `_is_plausible_skill_md()` filters out 404s, empty stubs, malformed sources: requires min 50 chars and presence of YAML frontmatter (`---`) or `## purpose`/`## description` headings.
+- GitHub URL conversion handles 3 patterns: `owner/repo`, `owner/repo/tree/branch`, `owner/repo/blob/branch/path`.
+**Verification**: Live API returns real entries; raw fetch retrieved 2,552-char SKILL.md for python-debugpy.
+**Status**: Complete
+
+## 2026-07-01 [windows-env, clipboard, py3.13, v3.0.1]
+**Environment Constraints**:
+- Windows 32-bit: clipboard fallback chain `win32clipboard` -> `ctypes` -> actionable error.
+- Python 3.13 required (3.14 causes pydantic V1 incompatibility). `requires-python = '>=3.13, <3.14'` in pyproject.toml.
+- `pynvml` not installed: VRAM check falls back to `recommended_gold_standards=2` without actual GPU read.
+- PowerShell 5.1: no `&&` chaining; use `;` or separate commands.
+- CRLF line endings on Windows cause LF warnings in git.
+**Status**: Active constraints

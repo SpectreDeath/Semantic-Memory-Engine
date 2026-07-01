@@ -15,6 +15,7 @@ def test_forensic_math():
     v2 = {"the": 0.4, "and": 0.3, "victim": 0.1}
 
     from src.sme.vendor.forensic_math import dict_to_vectors
+
     nv1, nv2 = dict_to_vectors(v1, v2)
     similarity = forensic_math.calculate_cosine_similarity(nv1, nv2)
     print(f"[+] Cosine Similarity: {similarity:.4f}")
@@ -22,7 +23,7 @@ def test_forensic_math():
 
     # 2. Levenshtein Distance
     s1 = "administrator"
-    s2 = "adminstrator" # Typo (missing 'i')
+    s2 = "adminstrator"  # Typo (missing 'i')
     distance = forensic_math.calculate_typo_distance(s1, s2)
     print(f"[+] Typo Distance: {distance}")
     assert distance == 1
@@ -32,9 +33,12 @@ def test_forensic_math():
     list2 = ["exploit", "buffer", "underflow", "shellcode"]
     overlap = forensic_math.calculate_set_overlap(list1, list2)
     print(f"[+] Set Overlap (Jaccard): {overlap:.4f}")
-    assert overlap == 2/6 # intersection {exploit, buffer} (2), union {exploit, buffer, overflow, underflow, nop, shellcode} (6)
+    assert (
+        overlap == 2 / 6
+    )  # intersection {exploit, buffer} (2), union {exploit, buffer, overflow, underflow, nop, shellcode} (6)
 
     print("[+] All math algorithms verified successfully!")
+
 
 if __name__ == "__main__":
     try:
@@ -42,5 +46,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"[-] Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

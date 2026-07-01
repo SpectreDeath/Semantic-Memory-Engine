@@ -23,13 +23,15 @@ class TestToolFactoryThreadSafety:
     def test_lock_exists(self):
         """ToolFactory should have a lock for thread safety."""
         from src.core.factory import ToolFactory
-        assert hasattr(ToolFactory, '_lock')
+
+        assert hasattr(ToolFactory, "_lock")
         assert isinstance(ToolFactory._lock, type(threading.RLock()))
 
     def test_instances_dict_exists(self):
         """ToolFactory should have _instances dict for caching."""
         from src.core.factory import ToolFactory
-        assert hasattr(ToolFactory, '_instances')
+
+        assert hasattr(ToolFactory, "_instances")
         assert isinstance(ToolFactory._instances, dict)
 
     def test_create_with_lock_thread_safe(self):
@@ -50,7 +52,7 @@ class TestToolFactoryThreadSafety:
             return MagicMock()
 
         def create_from_thread():
-            ToolFactory.create_with_lock('test_tool', mock_creator)
+            ToolFactory.create_with_lock("test_tool", mock_creator)
 
         # Create multiple threads
         threads = [threading.Thread(target=create_from_thread) for _ in range(10)]
@@ -61,7 +63,7 @@ class TestToolFactoryThreadSafety:
 
         # Should have created instance only once due to lock
         assert creation_count == 1
-        assert 'test_tool' in ToolFactory._instances
+        assert "test_tool" in ToolFactory._instances
 
         # Cleanup
         ToolFactory._instances.clear()
@@ -69,21 +71,24 @@ class TestToolFactoryThreadSafety:
     def test_multiple_tools_thread_safe(self):
         """Multiple different tools created concurrently should be safe."""
         from src.core.factory import ToolFactory
+
         ToolFactory._instances.clear()
 
         errors = []
 
         def create_tool(name):
             try:
+
                 def creator():
                     return MagicMock()
+
                 ToolFactory.create_with_lock(name, creator)
             except Exception as e:
                 errors.append(e)
 
         threads = []
         for i in range(20):
-            t = threading.Thread(target=create_tool, args=(f'tool_{i}',))
+            t = threading.Thread(target=create_tool, args=(f"tool_{i}",))
             threads.append(t)
             t.start()
 
@@ -104,8 +109,9 @@ class TestVramGuardrailFix:
     def test_vram_config_is_stored(self):
         """VRAM limit config value should be stored, not discarded."""
         from src.core.config import Config
+
         config = Config()
-        result = config.get('hardware', {}).get('vram_limit_mb', 6144)
+        result = config.get("hardware", {}).get("vram_limit_mb", 6144)
         assert result == 6144
 
     def test_vram_guardrail_returns_true_when_enough_memory(self):
@@ -114,7 +120,7 @@ class TestVramGuardrailFix:
         from unittest.mock import patch, MagicMock
 
         mock_info = {"gpus": [{"memory_free_mb": 2048}]}
-        with patch('src.monitoring.diagnostics.PerformanceProfiler') as mock_profiler:
+        with patch("src.monitoring.diagnostics.PerformanceProfiler") as mock_profiler:
             mock_instance = MagicMock()
             mock_profiler.return_value = mock_instance
             mock_instance.profile_gpu_fallback.return_value = mock_info
@@ -128,7 +134,7 @@ class TestVramGuardrailFix:
         from unittest.mock import patch, MagicMock
 
         mock_info = {"gpus": [{"memory_free_mb": 256}]}  # Less than required
-        with patch('src.monitoring.diagnostics.PerformanceProfiler') as mock_profiler:
+        with patch("src.monitoring.diagnostics.PerformanceProfiler") as mock_profiler:
             mock_instance = MagicMock()
             mock_profiler.return_value = mock_instance
             mock_instance.profile_gpu_fallback.return_value = mock_info
@@ -141,7 +147,7 @@ class TestVramGuardrailFix:
         from src.core.factory import ToolFactory
         from unittest.mock import patch
 
-        with patch('src.monitoring.diagnostics.PerformanceProfiler') as mock_profiler:
+        with patch("src.monitoring.diagnostics.PerformanceProfiler") as mock_profiler:
             mock_profiler.side_effect = Exception("GPU not available")
 
             result = ToolFactory._check_vram_guardrail(required_mb=1024)
@@ -153,7 +159,7 @@ class TestVramGuardrailFix:
         from unittest.mock import patch, MagicMock
 
         mock_info = {"gpus": []}
-        with patch('src.monitoring.diagnostics.PerformanceProfiler') as mock_profiler:
+        with patch("src.monitoring.diagnostics.PerformanceProfiler") as mock_profiler:
             mock_instance = MagicMock()
             mock_profiler.return_value = mock_instance
             mock_instance.profile_gpu_fallback.return_value = mock_info

@@ -215,7 +215,9 @@ class TestCircuitBreaker:
         with pytest.raises(CircuitBreakerError):
             breaker.call(lambda: "success")
 
-    @pytest.mark.skip(reason="Circuit breaker HALF_OPEN state has timing issues in test environment")
+    @pytest.mark.skip(
+        reason="Circuit breaker HALF_OPEN state has timing issues in test environment"
+    )
     def test_circuit_breaker_recovery(self):
         """Test circuit breaker recovery after timeout."""
         breaker = CircuitBreaker("cb_recovery_6", failure_threshold=0.3, recovery_timeout=1)
@@ -281,6 +283,7 @@ class TestRetryWithBackoff:
 
     def test_retry_exhausts_attempts(self):
         """Test retry decorator exhausts attempts."""
+
         @retry_with_backoff(max_attempts=2, base_delay=0.01)
         def always_fails():
             raise ValueError("always fails")
@@ -387,7 +390,9 @@ class TestIntegration:
         # Use new circuit breaker with short recovery
         executor = ResilientExecutor(
             max_retries=3,
-            circuit_breaker=CircuitBreaker("integration_test_4", recovery_timeout=1, failure_threshold=0.3)
+            circuit_breaker=CircuitBreaker(
+                "integration_test_4", recovery_timeout=1, failure_threshold=0.3
+            ),
         )
         call_count = 0
 

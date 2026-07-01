@@ -37,9 +37,11 @@ def verify_live_triples():
         print("[FAILURE] Data appears simulated or missing.")
         sys.exit(1)
 
+
 def verify_vram_guardrail():
     print("\n[*] Verifying VRAM Guardrail...")
     from src.core.config import Config
+
     Config()
 
     # Temporarily force a low limit in the config object if possible,
@@ -59,8 +61,10 @@ def verify_vram_guardrail():
         print(f"[FAILURE] Unexpected error in ToolFactory: {e}")
         sys.exit(1)
 
+
 if __name__ == "__main__":
     import traceback
+
     try:
         verify_live_triples()
         verify_vram_guardrail()

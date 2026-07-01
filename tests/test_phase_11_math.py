@@ -19,7 +19,7 @@ def test_advanced_math():
 
     similarity = forensic_math.calculate_simhash_similarity(sh1, sh2)
     print(f"[+] SimHash Similarity: {similarity:.4f}")
-    assert similarity >= 0.75 # Should be quite similar
+    assert similarity >= 0.75  # Should be quite similar
 
     # 2. Entropy Divergence (Drift)
     # p = normal, q = uniform (drifted)
@@ -37,11 +37,13 @@ def test_advanced_math():
 
     print("[+] All Phase 11 algorithms verified successfully!")
 
+
 if __name__ == "__main__":
     try:
         test_advanced_math()
     except Exception as e:
         print(f"[-] Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

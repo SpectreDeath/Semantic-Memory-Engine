@@ -3,6 +3,7 @@ import sys
 # Add the directory to path so we can import the logic
 sys.path.append("D:/mcp_servers")
 
+
 def test_file_service():
     print("--- Testing File Service Jail ---")
     from file_service import get_safe_path
@@ -35,6 +36,7 @@ def test_file_service():
     except PermissionError as e:
         print(f"✅ Absolute escape blocked (PASS): {e}")
 
+
 def test_web_search():
     print("\n--- Testing Web Search Logic ---")
     from web_search import search_duckduckgo
@@ -46,6 +48,7 @@ def test_web_search():
         # print(result[:100] + "...")
     except Exception as e:
         print(f"⚠️ Search failed (possibly network): {e}")
+
 
 if __name__ == "__main__":
     test_file_service()

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Statistical Watermark Decoder Extension Plugin
 
 Main plugin entry point that integrates the Statistical Watermark Decoder extension
@@ -121,7 +121,11 @@ class StatisticalWatermarkDecoderPlugin(BasePlugin):
             return False
 
     def get_tools(self) -> list[Callable]:
-        return [self._create_safe_detection_tool() if self.config.get("safe_mode", True) else self._create_direct_detection_tool()]
+        return [
+            self._create_safe_detection_tool()
+            if self.config.get("safe_mode", True)
+            else self._create_direct_detection_tool()
+        ]
 
     def _create_safe_detection_tool(self) -> Callable:
         def safe_detection_tool(text: str) -> str:
@@ -130,7 +134,12 @@ class StatisticalWatermarkDecoderPlugin(BasePlugin):
                 result = safe_detect_watermark_pulse(text, self.governor_integration)
                 return json.dumps(result)
             except Exception as e:
-                return json.dumps(self.error_handler.handle_extension_error(e, "detect_watermark_pulse", {"text_length": len(text) if text else 0}))
+                return json.dumps(
+                    self.error_handler.handle_extension_error(
+                        e, "detect_watermark_pulse", {"text_length": len(text) if text else 0}
+                    )
+                )
+
         return safe_detection_tool
 
     def _create_direct_detection_tool(self) -> Callable:
@@ -140,7 +149,12 @@ class StatisticalWatermarkDecoderPlugin(BasePlugin):
                 result = detect_watermark_pulse(text)
                 return json.dumps(result)
             except Exception as e:
-                return json.dumps(self.error_handler.handle_extension_error(e, "detect_watermark_pulse", {"text_length": len(text) if text else 0}))
+                return json.dumps(
+                    self.error_handler.handle_extension_error(
+                        e, "detect_watermark_pulse", {"text_length": len(text) if text else 0}
+                    )
+                )
+
         return direct_detection_tool
 
     def get_hooks(self) -> dict[str, Callable]:
@@ -186,7 +200,9 @@ class StatisticalWatermarkDecoderPlugin(BasePlugin):
             return {"detection_started": True}
         elif event_name == "detection_completed":
             result = kwargs.get("result", {})
-            logger.info("Watermark detection completed. Status: %s", result.get("status", "unknown"))
+            logger.info(
+                "Watermark detection completed. Status: %s", result.get("status", "unknown")
+            )
             return {"detection_completed": True}
         elif event_name == "watermark_detected":
             watermark_info = kwargs.get("watermark_info", {})
@@ -198,11 +214,15 @@ class StatisticalWatermarkDecoderPlugin(BasePlugin):
         return StatisticalWatermarkDecoder()
 
 
-def get_plugin(manifest: dict[str, Any] | None = None, nexus_api: Any | None = None) -> StatisticalWatermarkDecoderPlugin:
+def get_plugin(
+    manifest: dict[str, Any] | None = None, nexus_api: Any | None = None
+) -> StatisticalWatermarkDecoderPlugin:
     return StatisticalWatermarkDecoderPlugin(manifest or {}, nexus_api)
 
 
-def register_extension(manifest: dict[str, Any], nexus_api: Any) -> StatisticalWatermarkDecoderPlugin:
+def register_extension(
+    manifest: dict[str, Any], nexus_api: Any
+) -> StatisticalWatermarkDecoderPlugin:
     return StatisticalWatermarkDecoderPlugin(manifest, nexus_api)
 
 

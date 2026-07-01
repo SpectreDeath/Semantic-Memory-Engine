@@ -3,6 +3,7 @@ import sys
 # Add path for imports
 sys.path.append("D:/mcp_servers")
 
+
 def test_network_probe():
     print("--- Testing Network Probe Logic ---")
     from network_probe import check_latency, get_network_summary, verify_connectivity
@@ -21,6 +22,7 @@ def test_network_probe():
     print("\nTesting Network Summary...")
     summary = get_network_summary()
     print(f"Result:\n{summary}")
+
 
 if __name__ == "__main__":
     test_network_probe()

@@ -51,8 +51,11 @@ class TestUnifiedForensicReporterFullCoverage:
     def test_analyze_system_health_with_verified(self, reporter):
         entries = [
             ExtensionLogEntry(
-                timestamp=datetime.now(), level="INFO", message="ok",
-                extension="Ext", event_type="MULTIMODAL SYNC VERIFIED"
+                timestamp=datetime.now(),
+                level="INFO",
+                message="ok",
+                extension="Ext",
+                event_type="MULTIMODAL SYNC VERIFIED",
             )
         ]
         summary = reporter.analyze_system_health(entries)
@@ -61,8 +64,11 @@ class TestUnifiedForensicReporterFullCoverage:
     def test_analyze_system_health_fair(self, reporter):
         entries = [
             ExtensionLogEntry(
-                timestamp=datetime.now(), level="WARN", message="issue",
-                extension="Ext", event_type="MULTIMODAL HALLUCINATION DETECTED"
+                timestamp=datetime.now(),
+                level="WARN",
+                message="issue",
+                extension="Ext",
+                event_type="MULTIMODAL HALLUCINATION DETECTED",
             )
             for _ in range(3)
         ]
@@ -72,8 +78,11 @@ class TestUnifiedForensicReporterFullCoverage:
     def test_rnj1_forensic_analysis_with_watermarks(self, reporter):
         entries = [
             ExtensionLogEntry(
-                timestamp=datetime.now(), level="INFO", message="Watermark found",
-                extension="Stetho", event_type="PROVENANCE IDENTIFIED"
+                timestamp=datetime.now(),
+                level="INFO",
+                message="Watermark found",
+                extension="Stetho",
+                event_type="PROVENANCE IDENTIFIED",
             )
         ]
         conclusion = reporter._rnj1_forensic_analysis(
@@ -91,16 +100,25 @@ class TestUnifiedForensicReporterFullCoverage:
     def test_rnj1_forensic_analysis_all_events(self, reporter):
         entries = [
             ExtensionLogEntry(
-                timestamp=datetime.now(), level="WARN", message="Hallucination detected",
-                extension="Cross-Modal", event_type="MULTIMODAL HALLUCINATION DETECTED"
+                timestamp=datetime.now(),
+                level="WARN",
+                message="Hallucination detected",
+                extension="Cross-Modal",
+                event_type="MULTIMODAL HALLUCINATION DETECTED",
             ),
             ExtensionLogEntry(
-                timestamp=datetime.now(), level="ERROR", message="Replication detected",
-                extension="Ghost Trap", event_type="POTENTIAL SELF-REPLICATION EVENT"
+                timestamp=datetime.now(),
+                level="ERROR",
+                message="Replication detected",
+                extension="Ghost Trap",
+                event_type="POTENTIAL SELF-REPLICATION EVENT",
             ),
             ExtensionLogEntry(
-                timestamp=datetime.now(), level="INFO", message="Watermark found",
-                extension="Stetho", event_type="PROVENANCE IDENTIFIED"
+                timestamp=datetime.now(),
+                level="INFO",
+                message="Watermark found",
+                extension="Stetho",
+                event_type="PROVENANCE IDENTIFIED",
             ),
         ]
         conclusion = reporter._rnj1_forensic_analysis(
@@ -186,8 +204,14 @@ class TestForensicIntelligenceReporterFullCoverage:
         yield reporter
 
     def test_analyze_model_signatures_empty(self, reporter):
-        with patch.object(reporter, "_load_model_signatures", return_value={"model_signatures": {}, "metadata": {}}):
-            result = reporter._analyze_model_signatures({"god_term_density": 0.03, "devil_term_density": 0.01, "distance_markers_count": 0})
+        with patch.object(
+            reporter,
+            "_load_model_signatures",
+            return_value={"model_signatures": {}, "metadata": {}},
+        ):
+            result = reporter._analyze_model_signatures(
+                {"god_term_density": 0.03, "devil_term_density": 0.01, "distance_markers_count": 0}
+            )
             assert "Unknown" in result
 
     def test_generate_report_content_with_ghost_trap_override(self, reporter, tmp_path):
@@ -200,7 +224,23 @@ class TestForensicIntelligenceReporterFullCoverage:
             analysis_timestamp=datetime.now(),
             supporting_evidence=["evidence 1"],
             risk_assessment="LOW RISK",
-            source_characteristics={"text_length": 9, "sentiment_volatility": 0.2, "lexical_diversity": 0.8, "emphatic_qualifiers": 0, "non_contracted_denials": 0, "synthetic_repetitiveness": 0.1, "god_term_density": 0.03, "devil_term_density": 0.01, "distance_markers": 0, "anomaly_detected": False, "profile_detected": False},
+            source_characteristics={
+                "text_length": 9,
+                "sentiment_volatility": 0.2,
+                "lexical_diversity": 0.8,
+                "emphatic_qualifiers": 0,
+                "non_contracted_denials": 0,
+                "synthetic_repetitiveness": 0.1,
+                "god_term_density": 0.03,
+                "devil_term_density": 0.01,
+                "distance_markers": 0,
+                "anomaly_detected": False,
+                "profile_detected": False,
+            },
         )
         content = reporter._create_report_content(analysis, "Test Origin", ghost_trap_override=True)
-        assert "CRITICAL" in content or "Ghost-Trap" in content or "CRITICAL SECURITY EVENTS" in content
+        assert (
+            "CRITICAL" in content
+            or "Ghost-Trap" in content
+            or "CRITICAL SECURITY EVENTS" in content
+        )

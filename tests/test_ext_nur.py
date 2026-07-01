@@ -28,10 +28,21 @@ class TestIntelligenceBucket:
     """Tests for IntelligenceBucket enum."""
 
     def test_bucket_values_exist(self):
-        assert IntelligenceBucket.COMMERCIAL_SAFE.value == "Bucket A: Commercial/Safe (OpenAI/Google/Anthropic)"
-        assert IntelligenceBucket.OPEN_SOURCE_UNCONSTRAINED.value == "Bucket B: Open-Source/Unconstrained (Llama/Mistral)"
-        assert IntelligenceBucket.HUMAN_AUTHORED.value == "Bucket C: Human-Authored (High Diversity)"
-        assert IntelligenceBucket.OBFUSCATED_DECEPTIVE.value == "Bucket D: Obfuscated/Deceptive (High Anomaly Score)"
+        assert (
+            IntelligenceBucket.COMMERCIAL_SAFE.value
+            == "Bucket A: Commercial/Safe (OpenAI/Google/Anthropic)"
+        )
+        assert (
+            IntelligenceBucket.OPEN_SOURCE_UNCONSTRAINED.value
+            == "Bucket B: Open-Source/Unconstrained (Llama/Mistral)"
+        )
+        assert (
+            IntelligenceBucket.HUMAN_AUTHORED.value == "Bucket C: Human-Authored (High Diversity)"
+        )
+        assert (
+            IntelligenceBucket.OBFUSCATED_DECEPTIVE.value
+            == "Bucket D: Obfuscated/Deceptive (High Anomaly Score)"
+        )
 
 
 class TestForensicAnalysis:
@@ -61,10 +72,12 @@ class TestForensicIntelligenceReporter:
         with patch.object(
             ForensicIntelligenceReporter,
             "__init__",
-            lambda self: setattr(self, "report_directory", tmp_path)
-                                or setattr(self, "_model_signatures_cache", None)
-                                or setattr(self, "_cache_lock", MagicMock())
-                                or setattr(self, "bucket_thresholds", {}),
+            lambda self: (
+                setattr(self, "report_directory", tmp_path)
+                or setattr(self, "_model_signatures_cache", None)
+                or setattr(self, "_cache_lock", MagicMock())
+                or setattr(self, "bucket_thresholds", {})
+            ),
         ):
             reporter = ForensicIntelligenceReporter.__new__(ForensicIntelligenceReporter)
             reporter.bucket_thresholds = {
@@ -114,16 +127,40 @@ class TestForensicIntelligenceReporter:
             yield reporter
 
     def test_categorize_commercial_safe(self, reporter):
-        behavior = {"sentiment_volatility": 0.2, "lexical_diversity_score": 0.8, "emphatic_qualifiers_count": 0, "non_contracted_denials_count": 0, "synthetic_repetitiveness_score": 0.1}
-        provenance = {"god_term_density": 0.03, "devil_term_density": 0.01, "distance_markers_count": 0}
-        bucket, confidence, evidence = reporter._categorize_intelligence_bucket(behavior, provenance)
+        behavior = {
+            "sentiment_volatility": 0.2,
+            "lexical_diversity_score": 0.8,
+            "emphatic_qualifiers_count": 0,
+            "non_contracted_denials_count": 0,
+            "synthetic_repetitiveness_score": 0.1,
+        }
+        provenance = {
+            "god_term_density": 0.03,
+            "devil_term_density": 0.01,
+            "distance_markers_count": 0,
+        }
+        bucket, confidence, evidence = reporter._categorize_intelligence_bucket(
+            behavior, provenance
+        )
         assert bucket == IntelligenceBucket.COMMERCIAL_SAFE
         assert 0.0 <= confidence <= 1.0
 
     def test_categorize_open_source_unconstrained(self, reporter):
-        behavior = {"sentiment_volatility": 0.5, "lexical_diversity_score": 0.6, "emphatic_qualifiers_count": 2, "non_contracted_denials_count": 2, "synthetic_repetitiveness_score": 0.4}
-        provenance = {"god_term_density": 0.05, "devil_term_density": 0.02, "distance_markers_count": 2}
-        bucket, confidence, evidence = reporter._categorize_intelligence_bucket(behavior, provenance)
+        behavior = {
+            "sentiment_volatility": 0.5,
+            "lexical_diversity_score": 0.6,
+            "emphatic_qualifiers_count": 2,
+            "non_contracted_denials_count": 2,
+            "synthetic_repetitiveness_score": 0.4,
+        }
+        provenance = {
+            "god_term_density": 0.05,
+            "devil_term_density": 0.02,
+            "distance_markers_count": 2,
+        }
+        bucket, confidence, evidence = reporter._categorize_intelligence_bucket(
+            behavior, provenance
+        )
         assert bucket == IntelligenceBucket.OPEN_SOURCE_UNCONSTRAINED
 
     def test_generate_risk_assessment_high(self, reporter):
@@ -136,8 +173,20 @@ class TestForensicIntelligenceReporter:
         assert "LOW" in risk
 
     def test_extract_source_characteristics(self, reporter):
-        behavior = {"sentiment_volatility": 0.3, "lexical_diversity_score": 0.7, "emphatic_qualifiers_count": 1, "non_contracted_denials_count": 0, "synthetic_repetitiveness_score": 0.2, "anomaly_detected": False}
-        provenance = {"god_term_density": 0.04, "devil_term_density": 0.02, "distance_markers_count": 1, "profile_detected": True}
+        behavior = {
+            "sentiment_volatility": 0.3,
+            "lexical_diversity_score": 0.7,
+            "emphatic_qualifiers_count": 1,
+            "non_contracted_denials_count": 0,
+            "synthetic_repetitiveness_score": 0.2,
+            "anomaly_detected": False,
+        }
+        provenance = {
+            "god_term_density": 0.04,
+            "devil_term_density": 0.02,
+            "distance_markers_count": 1,
+            "profile_detected": True,
+        }
         chars = reporter._extract_source_characteristics(behavior, provenance)
         assert "text_length" in chars
         assert chars["sentiment_volatility"] == 0.3
@@ -162,7 +211,9 @@ class TestGenerateForensicIntelligenceSummary:
     """Tests for generate_forensic_intelligence_summary function."""
 
     def test_generate_summary_with_mock_data(self, tmp_path):
-        with patch("extensions.ext_nur.forensic_intelligence_reporter.ForensicIntelligenceReporter") as MockReporter:
+        with patch(
+            "extensions.ext_nur.forensic_intelligence_reporter.ForensicIntelligenceReporter"
+        ) as MockReporter:
             mock_instance = MagicMock()
             mock_instance.generate_forensic_intelligence_summary.return_value = {
                 "intelligence_bucket": "Bucket A: Commercial/Safe",
@@ -247,7 +298,9 @@ class TestUnifiedForensicReporter:
         assert entry is None
 
     def test_classify_event_found(self, reporter):
-        event = reporter._classify_event("POTENTIAL SELF-REPLICATION EVENT detected", ["POTENTIAL SELF-REPLICATION EVENT"])
+        event = reporter._classify_event(
+            "POTENTIAL SELF-REPLICATION EVENT detected", ["POTENTIAL SELF-REPLICATION EVENT"]
+        )
         assert event == "POTENTIAL SELF-REPLICATION EVENT"
 
     def test_classify_event_not_found(self, reporter):
@@ -257,7 +310,11 @@ class TestUnifiedForensicReporter:
     def test_analyze_system_health_excellent(self, reporter):
         entries = [
             ExtensionLogEntry(
-                timestamp=datetime.now(), level="INFO", message="ok", extension="Ext", event_type="GENERAL"
+                timestamp=datetime.now(),
+                level="INFO",
+                message="ok",
+                extension="Ext",
+                event_type="GENERAL",
             )
         ]
         summary = reporter.analyze_system_health(entries)
@@ -267,8 +324,11 @@ class TestUnifiedForensicReporter:
     def test_analyze_system_health_poor(self, reporter):
         entries = [
             ExtensionLogEntry(
-                timestamp=datetime.now(), level="WARN", message="issue", extension="Ext",
-                event_type="POTENTIAL SELF-REPLICATION EVENT"
+                timestamp=datetime.now(),
+                level="WARN",
+                message="issue",
+                extension="Ext",
+                event_type="POTENTIAL SELF-REPLICATION EVENT",
             )
             for _ in range(6)
         ]
@@ -289,7 +349,9 @@ class TestGenerateNexusSummary:
     """Tests for generate_nexus_summary function."""
 
     def test_generate_nexus_summary_success(self, tmp_path):
-        with patch("extensions.ext_nur.unified_forensic_reporter.UnifiedForensicReporter") as MockReporter:
+        with patch(
+            "extensions.ext_nur.unified_forensic_reporter.UnifiedForensicReporter"
+        ) as MockReporter:
             mock_instance = MagicMock()
             mock_instance.read_extension_logs.return_value = []
             mock_instance.generate_nexus_summary.return_value = str(tmp_path / "report.md")
@@ -299,7 +361,9 @@ class TestGenerateNexusSummary:
             assert result["status"] == "SUCCESS"
 
     def test_generate_nexus_summary_failure(self):
-        with patch("extensions.ext_nur.unified_forensic_reporter.UnifiedForensicReporter") as MockReporter:
+        with patch(
+            "extensions.ext_nur.unified_forensic_reporter.UnifiedForensicReporter"
+        ) as MockReporter:
             mock_instance = MagicMock()
             mock_instance.generate_nexus_summary.return_value = ""
             MockReporter.return_value = mock_instance
@@ -334,8 +398,11 @@ class TestUnifiedForensicReporterReportContent:
     def test_rnj1_forensic_analysis_with_hallucinations(self, reporter):
         entries = [
             ExtensionLogEntry(
-                timestamp=datetime.now(), level="WARN", message="Hallucination detected",
-                extension="Cross-Modal", event_type="MULTIMODAL HALLUCINATION DETECTED"
+                timestamp=datetime.now(),
+                level="WARN",
+                message="Hallucination detected",
+                extension="Cross-Modal",
+                event_type="MULTIMODAL HALLUCINATION DETECTED",
             )
         ]
         conclusion = reporter._rnj1_forensic_analysis(
@@ -353,8 +420,11 @@ class TestUnifiedForensicReporterReportContent:
     def test_rnj1_forensic_analysis_with_replication(self, reporter):
         entries = [
             ExtensionLogEntry(
-                timestamp=datetime.now(), level="ERROR", message="Replication detected",
-                extension="Ghost Trap", event_type="POTENTIAL SELF-REPLICATION EVENT"
+                timestamp=datetime.now(),
+                level="ERROR",
+                message="Replication detected",
+                extension="Ghost Trap",
+                event_type="POTENTIAL SELF-REPLICATION EVENT",
             )
         ]
         conclusion = reporter._rnj1_forensic_analysis(
@@ -376,15 +446,22 @@ class TestUnifiedForensicReporterPlugin:
     @pytest.fixture
     def plugin(self):
         from extensions.ext_nur.plugin import UnifiedForensicReporterPlugin
+
         manifest = {"plugin_id": "test_nur", "name": "Test NUR"}
         nexus_api = MagicMock()
-        with patch("extensions.ext_nur.plugin.get_performance_monitor") as mock_perf, \
-             patch("extensions.ext_nur.plugin.ErrorHandler") as mock_err, \
-             patch("extensions.ext_nur.plugin.UnifiedForensicReporter") as mock_reporter, \
-             patch("extensions.ext_nur.plugin.ForensicIntelligenceReporter") as mock_forensic:
+        with (
+            patch("extensions.ext_nur.plugin.get_performance_monitor") as mock_perf,
+            patch("extensions.ext_nur.plugin.ErrorHandler") as mock_err,
+            patch("extensions.ext_nur.plugin.UnifiedForensicReporter") as mock_reporter,
+            patch("extensions.ext_nur.plugin.ForensicIntelligenceReporter") as mock_forensic,
+        ):
             mock_perf.return_value = MagicMock(get_all_stats=MagicMock(return_value={}))
-            mock_err.return_value = MagicMock(handle_tool_error=MagicMock(return_value='{"status": "ok"}'))
-            mock_reporter.return_value = MagicMock(generate_nexus_summary=MagicMock(return_value="/tmp/report.md"))
+            mock_err.return_value = MagicMock(
+                handle_tool_error=MagicMock(return_value='{"status": "ok"}')
+            )
+            mock_reporter.return_value = MagicMock(
+                generate_nexus_summary=MagicMock(return_value="/tmp/report.md")
+            )
             mock_forensic.return_value = MagicMock()
             yield UnifiedForensicReporterPlugin(manifest, nexus_api)
 
@@ -402,24 +479,30 @@ class TestCreatePlugin:
 
     def test_create_plugin(self):
         from extensions.ext_nur.plugin import create_plugin, UnifiedForensicReporterPlugin
+
         manifest = {"plugin_id": "test_plugin", "name": "Test"}
         nexus_api = MagicMock()
-        with patch("extensions.ext_nur.plugin.get_performance_monitor") as mock_perf, \
-             patch("extensions.ext_nur.plugin.ErrorHandler"), \
-             patch("extensions.ext_nur.plugin.UnifiedForensicReporter"), \
-             patch("extensions.ext_nur.plugin.ForensicIntelligenceReporter"):
+        with (
+            patch("extensions.ext_nur.plugin.get_performance_monitor") as mock_perf,
+            patch("extensions.ext_nur.plugin.ErrorHandler"),
+            patch("extensions.ext_nur.plugin.UnifiedForensicReporter"),
+            patch("extensions.ext_nur.plugin.ForensicIntelligenceReporter"),
+        ):
             mock_perf.return_value = MagicMock()
             plugin = create_plugin(manifest, nexus_api)
             assert isinstance(plugin, UnifiedForensicReporterPlugin)
 
     def test_register_extension(self):
         from extensions.ext_nur.plugin import register_extension, UnifiedForensicReporterPlugin
+
         manifest = {"plugin_id": "test_reg", "name": "Test"}
         nexus_api = MagicMock()
-        with patch("extensions.ext_nur.plugin.get_performance_monitor") as mock_perf, \
-             patch("extensions.ext_nur.plugin.ErrorHandler"), \
-             patch("extensions.ext_nur.plugin.UnifiedForensicReporter"), \
-             patch("extensions.ext_nur.plugin.ForensicIntelligenceReporter"):
+        with (
+            patch("extensions.ext_nur.plugin.get_performance_monitor") as mock_perf,
+            patch("extensions.ext_nur.plugin.ErrorHandler"),
+            patch("extensions.ext_nur.plugin.UnifiedForensicReporter"),
+            patch("extensions.ext_nur.plugin.ForensicIntelligenceReporter"),
+        ):
             mock_perf.return_value = MagicMock()
             plugin = register_extension(manifest, nexus_api)
             assert isinstance(plugin, UnifiedForensicReporterPlugin)

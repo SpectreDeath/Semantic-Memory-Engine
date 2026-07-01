@@ -37,7 +37,9 @@ def test_analyze_rolling_delta_returns_errors_for_missing_inputs():
     analyzer = RollingDelta.__new__(RollingDelta)
     analyzer.pystyl = FakePyStyl()
 
-    assert analyzer.analyze_rolling_delta("text", {}, window_size=2) == {"error": "No candidates provided"}
+    assert analyzer.analyze_rolling_delta("text", {}, window_size=2) == {
+        "error": "No candidates provided"
+    }
 
     analyzer.pystyl = None
     assert analyzer.analyze_rolling_delta("text", {"alpha": "alpha"}) == {

@@ -142,6 +142,7 @@ Documentation:
 def show_version() -> None:
     """Display version information."""
     from src.core.constants import SME_NAME, SME_VERSION
+
     print(f"""
 {SME_NAME} v{SME_VERSION}
 Powered by FastMCP, PostgreSQL Nexus, and Modular Extensions
@@ -164,8 +165,8 @@ def show_tool_info(tool_name: str) -> None:
     print(f"Short name:  {tool['short']}")
     print(f"Module:      {tool['class'].__module__}.{tool['class'].__name__}")
     print("\nDocstring:")
-    if tool['class'].__doc__:
-        print(tool['class'].__doc__)
+    if tool["class"].__doc__:
+        print(tool["class"].__doc__)
     else:
         print("  (No documentation available)")
     print()
@@ -177,14 +178,14 @@ def run_tool(tool_name: str, args: list | None = None) -> None:
         print(f"❌ Tool '{tool_name}' not found.")
         return
 
-    tool_class = TOOLS[tool_name]['class']
+    tool_class = TOOLS[tool_name]["class"]
     print(f"🚀 Launching {TOOLS[tool_name]['name']}...")
     print(f"   From: {tool_class.__module__}")
 
     try:
         # Try to instantiate and run if the tool supports it
         instance = tool_class()
-        if hasattr(instance, 'main'):
+        if hasattr(instance, "main"):
             instance.main(args or [])
         else:
             print("   Tool is loaded but requires programmatic usage.")
@@ -239,28 +240,32 @@ def main():
         show_version()
     elif args.command == "dashboard":
         from src.core.dashboard_cmd import main as launch_dashboard
+
         launch_dashboard()
     elif args.command == "graph":
-        if not args.tool: # Reuse tool arg for text in these commands
-             print("❌ Please provide text for graph generation")
+        if not args.tool:  # Reuse tool arg for text in these commands
+            print("❌ Please provide text for graph generation")
         else:
             from src import ToolFactory
+
             kg = ToolFactory.create_knowledge_graph()
             kg.build_from_text(args.tool)
             print(kg.to_mermaid())
     elif args.command == "report":
         if not args.tool:
-             print("❌ Please provide text for report generation")
+            print("❌ Please provide text for report generation")
         else:
             from src import ToolFactory
+
             ir = ToolFactory.create_intelligence_reports()
             report = ir.generate_briefing(args.tool)
             print(ir.to_markdown(report))
     elif args.command == "links":
         if not args.tool:
-             print("❌ Please provide context ID for discovery")
+            print("❌ Please provide context ID for discovery")
         else:
             from src import ToolFactory
+
             od = ToolFactory.create_overlap_discovery()
             links = od.find_connections(args.tool)
             print(f"\n🔍 Found {len(links)} semantic connections for '{args.tool}':")

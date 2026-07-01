@@ -12,6 +12,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
+
 def test_imports():
     """Test that we can import the extension without SME dependencies"""
     print("Testing ScrapeGraphAI extension imports...")
@@ -26,6 +27,7 @@ def test_imports():
             from playwright.async_api import async_playwright
             from scrapegraphai.config import GraphConfig
             from scrapegraphai.graphs import MarkdownifyGraph, SearchGraph, SmartScraperGraph
+
             print("✓ ScrapeGraphAI imports successful")
         except ImportError as e:
             print(f"⚠️  ScrapeGraphAI not available: {e}")
@@ -37,6 +39,7 @@ def test_imports():
             ResearchRequest,
             ScrapeRequest,
         )
+
         print("✓ Extension classes imported successfully")
 
         # Test that we can create request objects
@@ -53,7 +56,7 @@ def test_imports():
             timestamp="2026-02-25T12:00:00Z",
             trust_score=0.8,
             entities=["test", "entity"],
-            relationships=[{"type": "related", "target": "other"}]
+            relationships=[{"type": "related", "target": "other"}],
         )
         print("✓ MemoryNode created successfully")
 
@@ -62,8 +65,10 @@ def test_imports():
     except Exception as e:
         print(f"❌ Import test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 def test_extension_structure():
     """Test that the extension has the expected structure"""
@@ -75,12 +80,12 @@ def test_extension_structure():
 
         # Check that the class has the expected methods
         expected_methods = [
-            'scrape_and_remember',
-            'deep_research',
-            'markdownify',
-            'get_tools',
-            'on_startup',
-            'on_ingestion'
+            "scrape_and_remember",
+            "deep_research",
+            "markdownify",
+            "get_tools",
+            "on_startup",
+            "on_ingestion",
         ]
 
         for method in expected_methods:
@@ -97,6 +102,7 @@ def test_extension_structure():
         print(f"❌ Structure test failed: {e}")
         return False
 
+
 def main():
     """Run all tests"""
     print("=== ScrapeGraphAI Extension Test ===\n")
@@ -110,7 +116,9 @@ def main():
         print("🎉 All tests passed!")
         print("\nThe ScrapeGraphAI extension has been successfully created and can be imported.")
         print("Next steps:")
-        print("1. Install dependencies: pip install -r extensions/ext_scrapegraph_harvester/requirements.txt")
+        print(
+            "1. Install dependencies: pip install -r extensions/ext_scrapegraph_harvester/requirements.txt"
+        )
         print("2. Ensure Ollama is running with required models")
         print("3. Restart SME to auto-load the extension")
         print("4. Test via MCP Gateway or Control Room")
@@ -118,6 +126,7 @@ def main():
         print("❌ Some tests failed. Check the output above for details.")
 
     return success
+
 
 if __name__ == "__main__":
     success = main()

@@ -12,10 +12,10 @@ def test_mode(mode, expected_success=True):
     print(f"\n=== Testing {mode.upper()} Mode ===")
     try:
         result = subprocess.run(
-            [sys.executable, 'gephi_bridge.py', '--mode', mode],
+            [sys.executable, "gephi_bridge.py", "--mode", mode],
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=30,
         )
 
         print(f"Return code: {result.returncode}")
@@ -24,9 +24,17 @@ def test_mode(mode, expected_success=True):
             print(f"STDERR:\n{result.stderr}")
 
         # Check if the mode processed data correctly
-        if (mode == 'trust' and "Loaded 10 trust scores" in result.stdout) or (mode == 'synthetic' and "Loaded 10 synthetic audit records" in result.stdout) or (mode == 'project' and "Found" in result.stdout and "files to process" in result.stdout):
+        if (
+            (mode == "trust" and "Loaded 10 trust scores" in result.stdout)
+            or (mode == "synthetic" and "Loaded 10 synthetic audit records" in result.stdout)
+            or (
+                mode == "project"
+                and "Found" in result.stdout
+                and "files to process" in result.stdout
+            )
+        ):
             return True
-        elif mode == 'knowledge' and "SQLite error" in result.stdout:
+        elif mode == "knowledge" and "SQLite error" in result.stdout:
             return True  # Expected for empty database
         else:
             return False
@@ -38,12 +46,13 @@ def test_mode(mode, expected_success=True):
         print(f"Error testing {mode} mode: {e}")
         return False
 
+
 def main():
     """Run tests for all modes."""
     print("Testing Multi-Mode Gephi Forensic Bridge")
     print("=" * 50)
 
-    modes = ['project', 'trust', 'knowledge', 'synthetic']
+    modes = ["project", "trust", "knowledge", "synthetic"]
     results = {}
 
     for mode in modes:
@@ -67,6 +76,7 @@ def main():
         print("❌ Some tests failed. Please check the output above.")
 
     return 0 if all_passed else 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -43,7 +43,7 @@ class TestJSONFormatter:
             lineno=42,
             msg="Test message",
             args=(),
-            exc_info=None
+            exc_info=None,
         )
 
         result = formatter.format(record)
@@ -64,7 +64,7 @@ class TestJSONFormatter:
             lineno=1,
             msg="Message",
             args=(),
-            exc_info=None
+            exc_info=None,
         )
         record.extra_fields = {"request_id": "123", "user_id": "user-1"}
 
@@ -84,7 +84,7 @@ class TestJSONFormatter:
             lineno=1,
             msg="Message",
             args=(),
-            exc_info=None
+            exc_info=None,
         )
         # Add non-serializable object
         record.extra_fields = {"obj": object()}
@@ -279,7 +279,7 @@ class TestLogManager:
             "level": "WARNING",
             "log_file": "test.log",
             "rotate_size_mb": 50,
-            "backup_count": 3
+            "backup_count": 3,
         }
 
         LogManager.setup(config)
@@ -454,7 +454,7 @@ class TestLogIntegration:
             bool_val=True,
             none_val=None,
             list_val=[1, 2, 3],
-            dict_val={"nested": "value"}
+            dict_val={"nested": "value"},
         )
 
 
@@ -536,7 +536,6 @@ class TestLoggingPerformance:
     def test_context_manager_overhead(self):
         """Test context manager has minimal overhead."""
         import time
-
 
         # Time 10000 context manager creations
         start = time.time()

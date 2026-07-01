@@ -16,10 +16,12 @@ try:
         ScrapeRequest,
     )
     from gateway.extension_manager import DefaultExtensionContext
+
     AVAILABLE = True
 except ImportError as e:
     AVAILABLE = False
     ERROR = str(e)
+
 
 async def test_integration():
     if not AVAILABLE:
@@ -30,7 +32,7 @@ async def test_integration():
     manifest = {
         "plugin_id": "scrapegraph_harvester",
         "name": "ScrapeGraphAI Harvester",
-        "version": "1.0.0"
+        "version": "1.0.0",
     }
     extension = ScrapeGraphHarvester(manifest, DefaultExtensionContext())
 
@@ -56,15 +58,11 @@ async def test_integration():
         print(f"✓ scrape_and_remember: {scrape_result['status']}")
 
         # Test deep_research
-        research_result = await extension.deep_research(
-            ResearchRequest(query="test query")
-        )
+        research_result = await extension.deep_research(ResearchRequest(query="test query"))
         print(f"✓ deep_research: {research_result['status']}")
 
         # Test markdownify
-        markdown_result = await extension.markdownify(
-            MarkdownifyRequest(url="https://example.com")
-        )
+        markdown_result = await extension.markdownify(MarkdownifyRequest(url="https://example.com"))
         print(f"✓ markdownify: {markdown_result['status']}")
 
         print("\n✅ All basic tests passed!")
@@ -74,12 +72,15 @@ async def test_integration():
         print(f"❌ Basic tests failed: {e}")
         return False
 
+
 if __name__ == "__main__":
     if asyncio.run(test_integration()):
         print("\n🎉 ScrapeGraphAI Harvester extension is ready for integration!")
         print("The extension has been successfully created and passes basic tests.")
         print("Next steps:")
-        print("1. Install dependencies: pip install -r extensions/ext_scrapegraph_harvester/requirements.txt")
+        print(
+            "1. Install dependencies: pip install -r extensions/ext_scrapegraph_harvester/requirements.txt"
+        )
         print("2. Ensure Ollama is running with required models")
         print("3. Restart SME to auto-load the extension")
         print("4. Test via MCP Gateway or Control Room")

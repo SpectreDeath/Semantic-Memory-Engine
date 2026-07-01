@@ -16,7 +16,7 @@ def test_significance_math():
     docs = [
         ["the", "hacker", "attacked", "the", "server"],
         ["the", "victim", "reported", "the", "attack"],
-        ["a", "new", "vulnerability", "was", "found"]
+        ["a", "new", "vulnerability", "was", "found"],
     ]
 
     tfidf_matrix, vocab = forensic_math.calculate_tfidf(docs)
@@ -45,11 +45,13 @@ def test_significance_math():
 
     print("[+] All significance algorithms verified successfully!")
 
+
 if __name__ == "__main__":
     try:
         test_significance_math()
     except Exception as e:
         print(f"[-] Test failed: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)

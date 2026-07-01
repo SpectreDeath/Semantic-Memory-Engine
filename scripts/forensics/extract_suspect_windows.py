@@ -6,8 +6,14 @@ import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_TARGET = PROJECT_ROOT / "data/corpus/vought_baseline/project_2025_text/2025_MandateForLeadership_FULL.txt"
-DEFAULT_OUTPUT = PROJECT_ROOT / "data/corpus/vought_baseline/project_2025_text/suspect_windows_18_29_extracted.txt"
+DEFAULT_TARGET = (
+    PROJECT_ROOT
+    / "data/corpus/vought_baseline/project_2025_text/2025_MandateForLeadership_FULL.txt"
+)
+DEFAULT_OUTPUT = (
+    PROJECT_ROOT
+    / "data/corpus/vought_baseline/project_2025_text/suspect_windows_18_29_extracted.txt"
+)
 DEFAULT_START_TOKEN = 9000
 DEFAULT_END_TOKEN = 16000
 WORD_RE = re.compile(r"\b\w+\b")
@@ -23,12 +29,25 @@ SECTION_PREFIXES = (
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Extract suspect rolling-delta windows from Project 2025 text.")
-    parser.add_argument("--target", type=Path, default=DEFAULT_TARGET, help="Full Project 2025 text file.")
+    parser = argparse.ArgumentParser(
+        description="Extract suspect rolling-delta windows from Project 2025 text."
+    )
+    parser.add_argument(
+        "--target", type=Path, default=DEFAULT_TARGET, help="Full Project 2025 text file."
+    )
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT, help="Artifact output path.")
-    parser.add_argument("--start-token", type=int, default=DEFAULT_START_TOKEN, help="Inclusive start word-token index.")
-    parser.add_argument("--end-token", type=int, default=DEFAULT_END_TOKEN, help="Exclusive end word-token index.")
-    parser.add_argument("--print-extracted", action="store_true", help="Print the extracted text block to stdout.")
+    parser.add_argument(
+        "--start-token",
+        type=int,
+        default=DEFAULT_START_TOKEN,
+        help="Inclusive start word-token index.",
+    )
+    parser.add_argument(
+        "--end-token", type=int, default=DEFAULT_END_TOKEN, help="Exclusive end word-token index."
+    )
+    parser.add_argument(
+        "--print-extracted", action="store_true", help="Print the extracted text block to stdout."
+    )
     return parser.parse_args()
 
 
@@ -44,7 +63,9 @@ def token_span(text: str, start_token: int, end_token: int) -> tuple[int, int]:
 
     matches = list(WORD_RE.finditer(text))
     if len(matches) <= end_token:
-        raise ValueError(f"Target text has {len(matches)} tokens; end_token {end_token} is out of range")
+        raise ValueError(
+            f"Target text has {len(matches)} tokens; end_token {end_token} is out of range"
+        )
 
     return matches[start_token].start(), matches[end_token - 1].end()
 

@@ -70,9 +70,7 @@ class PaddleOcrEngine:
                     paddle.device.cuda.init()
                     device_count = paddle.device.cuda.device_count()
                     if device_count > 0:
-                        logger.info(
-                            f"GPU detected: {device_count} CUDA device(s) available"
-                        )
+                        logger.info(f"GPU detected: {device_count} CUDA device(s) available")
                         return True
                 except Exception as e:
                     logger.warning(f"CUDA available but initialization failed: {e}")
@@ -99,25 +97,25 @@ class PaddleOcrEngine:
 
             self._engine = PaddleOCR(
                 use_angle_cls=True,  # Enable direction classification
-                lang='en',          # English language
+                lang="en",  # English language
                 use_gpu=self._use_gpu,
-                show_log=False,     # Reduce log noise
+                show_log=False,  # Reduce log noise
                 # Memory optimization settings
                 det_db_thresh=0.3,
                 det_db_box_thresh=0.5,
-                rec_batch_num=16,   # Batch size for recognition
+                rec_batch_num=16,  # Batch size for recognition
             )
 
             # Get engine version
             try:
                 import paddleocr
+
                 self._engine_version = paddleocr.__version__
             except Exception:
                 self._engine_version = "2.8.x"  # Approximate
 
             logger.info(
-                f"PaddleOCR initialized: GPU={self._use_gpu}, "
-                f"version={self._engine_version}"
+                f"PaddleOCR initialized: GPU={self._use_gpu}, version={self._engine_version}"
             )
 
         except Exception as e:
@@ -148,6 +146,7 @@ class PaddleOcrEngine:
         if self._use_gpu:
             try:
                 import paddle
+
                 paddle.device.cuda.empty_cache()
             except Exception:
                 pass

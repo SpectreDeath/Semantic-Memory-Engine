@@ -91,8 +91,11 @@ class TestVSCodeStatusBarManager:
         callback = MagicMock()
         manager.register_status_bar_update(callback)
         status = ResourceStatus(
-            vram_usage_gb=3.0, vram_threshold_gb=5.8, vram_state=VRAMState.NORMAL,
-            should_delay=False, timestamp=datetime.now()
+            vram_usage_gb=3.0,
+            vram_threshold_gb=5.8,
+            vram_state=VRAMState.NORMAL,
+            should_delay=False,
+            timestamp=datetime.now(),
         )
         manager.update_status_bar(status)
         callback.assert_called_once()
@@ -100,8 +103,11 @@ class TestVSCodeStatusBarManager:
     def test_format_status_text_normal(self):
         manager = VSCodeStatusBarManager()
         status = ResourceStatus(
-            vram_usage_gb=3.0, vram_threshold_gb=5.8, vram_state=VRAMState.NORMAL,
-            should_delay=False, timestamp=datetime.now()
+            vram_usage_gb=3.0,
+            vram_threshold_gb=5.8,
+            vram_state=VRAMState.NORMAL,
+            should_delay=False,
+            timestamp=datetime.now(),
         )
         text = manager._format_status_text(status)
         assert "🟢" in text
@@ -110,8 +116,11 @@ class TestVSCodeStatusBarManager:
     def test_format_status_text_high(self):
         manager = VSCodeStatusBarManager()
         status = ResourceStatus(
-            vram_usage_gb=5.0, vram_threshold_gb=5.8, vram_state=VRAMState.HIGH,
-            should_delay=True, timestamp=datetime.now()
+            vram_usage_gb=5.0,
+            vram_threshold_gb=5.8,
+            vram_state=VRAMState.HIGH,
+            should_delay=True,
+            timestamp=datetime.now(),
         )
         text = manager._format_status_text(status)
         assert "🟡" in text
@@ -120,8 +129,11 @@ class TestVSCodeStatusBarManager:
     def test_format_status_text_critical(self):
         manager = VSCodeStatusBarManager()
         status = ResourceStatus(
-            vram_usage_gb=6.0, vram_threshold_gb=5.8, vram_state=VRAMState.CRITICAL,
-            should_delay=True, timestamp=datetime.now()
+            vram_usage_gb=6.0,
+            vram_threshold_gb=5.8,
+            vram_state=VRAMState.CRITICAL,
+            should_delay=True,
+            timestamp=datetime.now(),
         )
         text = manager._format_status_text(status)
         assert "🔴" in text
@@ -171,8 +183,13 @@ class TestEnhancedResourceMonitor:
 
     def test_get_resource_trends_with_history(self, monitor):
         status = ResourceStatus(
-            vram_usage_gb=4.0, vram_threshold_gb=5.8, vram_state=VRAMState.NORMAL,
-            should_delay=False, timestamp=datetime.now(), cpu_usage_percent=50.0, memory_usage_gb=8.0
+            vram_usage_gb=4.0,
+            vram_threshold_gb=5.8,
+            vram_state=VRAMState.NORMAL,
+            should_delay=False,
+            timestamp=datetime.now(),
+            cpu_usage_percent=50.0,
+            memory_usage_gb=8.0,
         )
         monitor.resource_history = [status]
         trends = monitor.get_resource_trends()
@@ -235,6 +252,7 @@ class TestPluginResourceMonitor:
         monitor = ResourceMonitor(vram_threshold_gb=6.0)
         # Need to use the VRAMState from the same module
         from extensions.ext_governor.plugin import VRAMState as PluginVRAMState
+
         state = monitor.get_vram_state()
         assert state == PluginVRAMState.NORMAL
 

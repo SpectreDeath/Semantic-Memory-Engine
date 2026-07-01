@@ -30,6 +30,7 @@ try:
         VectorStoreType,
         VectorSyncer,
     )
+
     print("✓ All Aether imports successful")
 except ImportError as e:
     print(f"✗ Import failed: {e}")
@@ -39,6 +40,7 @@ except ImportError as e:
 print("\n" + "=" * 60)
 print("Testing VectorSyncer...")
 print("=" * 60)
+
 
 def test_vector_syncer():
     """Test vector syncer functionality."""
@@ -51,7 +53,7 @@ def test_vector_syncer():
             store_type=VectorStoreType.LOCAL,
             local_path=os.path.join(test_dir, "test_vector.db"),
             ipc_path=os.path.join(test_dir, "test_vectors.ipc"),
-            cache_size_mb=64  # Small for testing
+            cache_size_mb=64,  # Small for testing
         )
 
         # Test adding vectors
@@ -61,11 +63,11 @@ def test_vector_syncer():
         vector_id = syncer.add_vector(
             text="This is a test paragraph for rhetorical signature extraction.",
             embedding=test_embedding,
-            metadata={"source": "test", "type": "test_signature"}
+            metadata={"source": "test", "type": "test_signature"},
         )
         add_time = time.time() - start_time
 
-        print(f"✓ Added vector in {add_time*1000:.2f}ms")
+        print(f"✓ Added vector in {add_time * 1000:.2f}ms")
 
         # Verify latency requirement (<1s for single paragraph)
         assert add_time < 1.0, f"Latency too high: {add_time}s"
@@ -77,11 +79,7 @@ def test_vector_syncer():
         print("✓ Vector retrieval successful")
 
         # Test search (from cache)
-        search_results = syncer.search(
-            query_embedding=test_embedding,
-            top_k=5,
-            min_similarity=0.0
-        )
+        search_results = syncer.search(query_embedding=test_embedding, top_k=5, min_similarity=0.0)
         assert len(search_results) > 0, "Search returned no results"
         print(f"✓ Search successful: {len(search_results)} results")
 
@@ -99,6 +97,7 @@ def test_vector_syncer():
     except Exception as e:
         print(f"✗ VectorSyncer test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
     finally:
@@ -110,16 +109,14 @@ print("\n" + "=" * 60)
 print("Testing SignatureLibrary...")
 print("=" * 60)
 
+
 def test_signature_library():
     """Test signature library functionality."""
     test_dir = tempfile.mkdtemp()
 
     try:
         # Initialize library
-        library = SignatureLibrary(
-            node_id="test_node",
-            signatures_dir=test_dir
-        )
+        library = SignatureLibrary(node_id="test_node", signatures_dir=test_dir)
 
         # Create test text
         test_text = """
@@ -133,14 +130,12 @@ def test_signature_library():
 
         # Create signature
         signature = library.create_signature(
-            text=test_text,
-            signature_type="composite",
-            sharing_level=1
+            text=test_text, signature_type="composite", sharing_level=1
         )
 
         creation_time = time.time() - start_time
 
-        print(f"✓ Created signature in {creation_time*1000:.2f}ms")
+        print(f"✓ Created signature in {creation_time * 1000:.2f}ms")
 
         # Verify latency requirement
         assert creation_time < 1.0, f"Latency too high: {creation_time}s"
@@ -155,17 +150,12 @@ def test_signature_library():
         print("✓ Signature retrieval successful")
 
         # Test similar signature search
-        similar = library.find_similar_signatures(
-            text=test_text,
-            threshold=0.5
-        )
+        similar = library.find_similar_signatures(text=test_text, threshold=0.5)
         print(f"✓ Found {len(similar)} similar signatures")
 
         # Test profile creation
         profile = library.create_profile(
-            name="Test Profile",
-            signature_ids=[signature.id],
-            sharing_level=1
+            name="Test Profile", signature_ids=[signature.id], sharing_level=1
         )
         assert profile is not None, "Failed to create profile"
         print(f"✓ Created profile: {profile.name}")
@@ -187,6 +177,7 @@ def test_signature_library():
     except Exception as e:
         print(f"✗ SignatureLibrary test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
     finally:
@@ -198,6 +189,7 @@ print("\n" + "=" * 60)
 print("Testing EpistemicGate...")
 print("=" * 60)
 
+
 def test_epistemic_gate():
     """Test epistemic gate functionality."""
     test_dir = tempfile.mkdtemp()
@@ -207,7 +199,7 @@ def test_epistemic_gate():
         gate = EpistemicGate(
             node_id="test_node",
             auto_train=False,  # Disable auto-train for basic test
-            training_threshold=10
+            training_threshold=10,
         )
 
         # Test text
@@ -226,7 +218,7 @@ def test_epistemic_gate():
 
         eval_time = time.time() - start_time
 
-        print(f"✓ Evaluation completed in {eval_time*1000:.2f}ms")
+        print(f"✓ Evaluation completed in {eval_time * 1000:.2f}ms")
 
         # Verify latency requirement
         assert eval_time < 1.0, f"Latency too high: {eval_time}s"
@@ -245,7 +237,7 @@ def test_epistemic_gate():
             text=test_text,
             original_decision=result["decision"],
             corrected_label="human",  # User corrects to human
-            notes="Test feedback"
+            notes="Test feedback",
         )
         assert feedback_id is not None, "Failed to report feedback"
         print("✓ Feedback reporting successful")
@@ -265,6 +257,7 @@ def test_epistemic_gate():
     except Exception as e:
         print(f"✗ EpistemicGate test failed: {e}")
         import traceback
+
         traceback.print_exc()
         return False
     finally:
@@ -280,7 +273,7 @@ if __name__ == "__main__":
     results = {
         "VectorSyncer": test_vector_syncer(),
         "SignatureLibrary": test_signature_library(),
-        "EpistemicGate": test_epistemic_gate()
+        "EpistemicGate": test_epistemic_gate(),
     }
 
     # Summary

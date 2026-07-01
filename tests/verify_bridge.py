@@ -3,7 +3,8 @@ import subprocess
 import sys
 
 # Add project root to path for main imports
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 
 def test_handshake():
     print("=== SME SIDE-BY-SIDE HEALTH CHECK ===")
@@ -37,6 +38,7 @@ def test_handshake():
     else:
         print(f"[!] HANDSHAKE FAILED: {result}")
         return False
+
 
 if __name__ == "__main__":
     success = test_handshake()

@@ -11,7 +11,7 @@ def validate_tool(tool_name: str, module_name: str) -> bool:
     """Validates a single tool module."""
     try:
         module = __import__(module_name)
-        if hasattr(module, 'mcp'):
+        if hasattr(module, "mcp"):
             print(f"✓ {tool_name:30} - MCP initialized")
             return True
         else:
@@ -21,11 +21,12 @@ def validate_tool(tool_name: str, module_name: str) -> bool:
         print(f"✗ {tool_name:30} - ERROR: {str(e)[:50]}")
         return False
 
+
 def main():
     """Run validation."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("SimpleMem Toolbox Validation")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     tools = {
         "The Loom (Semantic Distillation)": "semantic_loom",
@@ -44,11 +45,11 @@ def main():
         results[category] = validate_tool(module_name, module_name)
 
     # Summary
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     passed = sum(1 for v in results.values() if v)
     total = len(results)
     print(f"Validation Result: {passed}/{total} passed")
-    print("="*70 + "\n")
+    print("=" * 70 + "\n")
 
     if passed == total:
         print("✅ All tools validated successfully!")
@@ -61,6 +62,7 @@ def main():
     else:
         print("⚠️  Some tools need attention. Check errors above.")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

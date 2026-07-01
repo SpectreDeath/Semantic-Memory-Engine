@@ -1,10 +1,9 @@
-
 import os
 import sys
 import unittest
 
 # Add src/gateway to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from gateway.gatekeeper_logic import TrustScorer
 
@@ -43,15 +42,18 @@ class TestReleaseCriteria(unittest.TestCase):
         with open(r"d:\SME\data\grok_vault\pollutant_sample_01.txt") as f:
             vault_content = f.read()
 
-        proximity = TrustScorer.calculate_vault_proximity(vault_content) # Should be 1.0 or high
+        proximity = TrustScorer.calculate_vault_proximity(vault_content)  # Should be 1.0 or high
         score = TrustScorer.calculate_trust_score(
             TrustScorer.calculate_entropy(vault_content),
             TrustScorer.calculate_burstiness(vault_content),
-            proximity
+            proximity,
         )
 
         print(f"Grok Sample Score: {score}")
-        self.assertLess(score['nts'], 40, "Release Blocker: Grok-style sample Trust Score must be < 40")
+        self.assertLess(
+            score["nts"], 40, "Release Blocker: Grok-style sample Trust Score must be < 40"
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

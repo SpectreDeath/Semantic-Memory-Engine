@@ -109,7 +109,9 @@ class WngOpinionIngestor:
             author_url = BASE_URL if page == 1 else f"{BASE_URL}/p{page}"
             html = self.get_html(author_url)
             if self.is_waf_challenge(html):
-                logger_message = f"WNG author page is blocked by WAF; using fallback URL list: {author_url}"
+                logger_message = (
+                    f"WNG author page is blocked by WAF; using fallback URL list: {author_url}"
+                )
                 print(logger_message)
                 return FALLBACK_URLS
             soup = BeautifulSoup(html, "html.parser")
@@ -130,7 +132,16 @@ class WngOpinionIngestor:
         try:
             html = self.get_html(url)
             if self.is_waf_challenge(html):
-                return ArticleResult(url=url, title=self.title_from_url(url), post_date="", author="Russell Vought", output_path="", word_count=0, status="blocked_waf", error="WNG returned an AWS WAF human-verification challenge")
+                return ArticleResult(
+                    url=url,
+                    title=self.title_from_url(url),
+                    post_date="",
+                    author="Russell Vought",
+                    output_path="",
+                    word_count=0,
+                    status="blocked_waf",
+                    error="WNG returned an AWS WAF human-verification challenge",
+                )
             soup = BeautifulSoup(html, "html.parser")
             title = self.extract_title(soup, url)
             post_date = self.extract_post_date(soup)
@@ -149,7 +160,16 @@ class WngOpinionIngestor:
                 status="success",
             )
         except Exception as exc:
-            return ArticleResult(url=url, title=self.title_from_url(url), post_date="", author="Russell Vought", output_path="", word_count=0, status="error", error=str(exc))
+            return ArticleResult(
+                url=url,
+                title=self.title_from_url(url),
+                post_date="",
+                author="Russell Vought",
+                output_path="",
+                word_count=0,
+                status="error",
+                error=str(exc),
+            )
 
     def get_html(self, url: str) -> str:
         response = self.session.get(url, timeout=45)
@@ -189,12 +209,23 @@ class WngOpinionIngestor:
 
     def is_waf_challenge(self, html: str) -> bool:
         marker_text = html[:12000].lower()
-        return any(marker in marker_text for marker in ("human verification", "javascript is disabled", "aws waf", "captcha", "gokuprops"))
+        return any(
+            marker in marker_text
+            for marker in (
+                "human verification",
+                "javascript is disabled",
+                "aws waf",
+                "captcha",
+                "gokuprops",
+            )
+        )
 
     def extract_article_markdown(self, soup: BeautifulSoup, title: str) -> str:
         root = soup.select_one("main") or soup
         self.remove_boilerplate(root)
-        body = self.clean_markdown(md(root, heading_style="ATX", bullets="-", strip=["script", "style", "svg", "iframe"]))
+        body = self.clean_markdown(
+            md(root, heading_style="ATX", bullets="-", strip=["script", "style", "svg", "iframe"])
+        )
         fetched_at = datetime.now(UTC).isoformat()
         frontmatter = [
             "---",
@@ -220,7 +251,14 @@ class WngOpinionIngestor:
         for tag in root.select("script, style, svg, noscript, iframe, form, button, link, meta"):
             tag.decompose()
         for tag in list(root.find_all(True)):
-            haystack = " ".join([tag.name or "", tag.get("id", ""), tag.get("class", []).__str__(), tag.get("aria-label", "")]).lower()
+            haystack = " ".join(
+                [
+                    tag.name or "",
+                    tag.get("id", ""),
+                    tag.get("class", []).__str__(),
+                    tag.get("aria-label", ""),
+                ]
+            ).lower()
             if any(pattern in haystack for pattern in BOILERPLATE_PATTERNS):
                 tag.decompose()
 

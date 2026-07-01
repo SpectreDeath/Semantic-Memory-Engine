@@ -2,7 +2,7 @@ import os
 import sys
 
 # Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from src.ai.agent_logic import generate_forensic_summary
 from src.utils.alerts import check_for_threat_collision
@@ -16,17 +16,15 @@ def run_final_verify():
     osint_path = "data/raw/osint_results.json"
     news_path = "data/raw/forensic_news.json"
 
-    intel_package = {
-        "osint": load_intel_data(osint_path),
-        "news": load_intel_data(news_path)
-    }
+    intel_package = {"osint": load_intel_data(osint_path), "news": load_intel_data(news_path)}
 
     print(f"Loaded {len(intel_package['osint'])} OSINT records")
     print(f"Loaded {len(intel_package['news'])} News records")
 
     # Check if target is present in loaded data
     osint = intel_package.get("osint", [])
-    if isinstance(osint, dict): osint = [osint]
+    if isinstance(osint, dict):
+        osint = [osint]
     usernames = {s.get("username") for s in osint if s.get("username")}
 
     print(f"Usernames found: {usernames}")
@@ -36,6 +34,7 @@ def run_final_verify():
     else:
         print("FAILURE: 'CBRN_Ghost_99' NOT found. Re-injecting...")
         import subprocess
+
         subprocess.run([sys.executable, "tests/inject_mock_threat.py"])
         intel_package["osint"] = load_intel_data(osint_path)
         intel_package["news"] = load_intel_data(news_path)
@@ -55,6 +54,7 @@ def run_final_verify():
         print("Forensic Stack fully operational on 1660 Ti environment.")
     else:
         print("\n❌ MISSION FAILURE: Logic did not trigger correctly.")
+
 
 if __name__ == "__main__":
     run_final_verify()

@@ -7,7 +7,7 @@ print(f"Has Edge: {hasattr(graph, 'Edge')}")
 
 try:
     # Check if the REST and Streamer objects can actually initialize
-    rest = GephiREST('http://localhost:8080', workspace='workspace0')
+    rest = GephiREST("http://localhost:8080", workspace="workspace0")
     s = Streamer(rest)
     print("✅ Gephi Objects initialized successfully.")
 except Exception as e:

@@ -35,6 +35,7 @@ from extensions.ext_social_intel.sentiment_analyzer import (
 # Phase 1: Data classes and simple initialization tests
 # ============================================================
 
+
 class TestPlatformType:
     """Tests for PlatformType enum."""
 
@@ -293,6 +294,7 @@ class TestContentModerator:
 # Phase 2: SocialMediaAPIManager and advanced tests
 # ============================================================
 
+
 @pytest.mark.phase2
 class TestSocialMediaAPIManager:
     """Tests for SocialMediaAPIManager class."""
@@ -363,26 +365,31 @@ class TestContentModeratorAsync:
     @pytest.mark.asyncio
     async def test_moderate_content_hate_speech(self):
         moderator = ContentModerator()
-        result = await moderator.moderate_content({
-            "id": "123",
-            "text": "I hate them and want to kill them",
-            "author_id": "user",
-        })
+        result = await moderator.moderate_content(
+            {
+                "id": "123",
+                "text": "I hate them and want to kill them",
+                "author_id": "user",
+            }
+        )
         assert "hate_speech" in result.detected_issues
 
     @pytest.mark.asyncio
     async def test_moderate_batch(self):
         moderator = ContentModerator()
-        results = await moderator.moderate_batch([
-            {"id": "1", "text": "safe content", "author_id": "user"},
-            {"id": "2", "text": "spam buy now!", "author_id": "user"},
-        ])
+        results = await moderator.moderate_batch(
+            [
+                {"id": "1", "text": "safe content", "author_id": "user"},
+                {"id": "2", "text": "spam buy now!", "author_id": "user"},
+            ]
+        )
         assert len(results) == 2
 
 
 # ============================================================
 # Phase 3: Plugin integration tests
 # ============================================================
+
 
 @pytest.mark.phase3
 class TestSocialIntelligenceCrawler:

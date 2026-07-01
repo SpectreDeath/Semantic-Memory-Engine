@@ -27,6 +27,7 @@ from extensions.ext_stetho_scan.statistical_watermark_decoder import (
 # Phase 1: Data class tests
 # ============================================================
 
+
 @pytest.mark.phase1
 class TestWatermarkDetection:
     """Tests for WatermarkDetection dataclass."""
@@ -48,6 +49,7 @@ class TestWatermarkDetection:
 # ============================================================
 # Phase 1: Governor Integration tests
 # ============================================================
+
 
 @pytest.mark.phase1
 class TestGovernorStatusEnum:
@@ -141,6 +143,7 @@ class TestCreateStethoGovernorHook:
 # ============================================================
 # Phase 1: StatisticalWatermarkDecoder tests
 # ============================================================
+
 
 @pytest.mark.phase1
 class TestStatisticalWatermarkDecoder:
@@ -244,6 +247,7 @@ class TestStatisticalWatermarkDecoder:
 # Phase 1: Main function tests
 # ============================================================
 
+
 @pytest.mark.phase1
 class TestDetectWatermarkPulse:
     """Tests for detect_watermark_pulse function."""
@@ -283,6 +287,7 @@ class TestSafeDetectWatermarkPulse:
 # Phase 2: Integration tests
 # ============================================================
 
+
 @pytest.mark.phase2
 class TestWatermarkIntegration:
     """Integration tests for watermark detection."""
@@ -303,6 +308,7 @@ class TestWatermarkIntegration:
 # ============================================================
 # Phase 2: Plugin tests
 # ============================================================
+
 
 @pytest.mark.phase2
 class TestStatisticalWatermarkDecoderPlugin:
@@ -353,7 +359,9 @@ class TestStatisticalWatermarkDecoderPlugin:
 
     def test_plugin_handle_event_governor_status(self):
         plugin = StatisticalWatermarkDecoderPlugin({}, None)
-        result = plugin.handle_event("governor_status_changed", status="NORMAL", timestamp="2024-01-01")
+        result = plugin.handle_event(
+            "governor_status_changed", status="NORMAL", timestamp="2024-01-01"
+        )
         assert result["status_updated"] is True
 
     def test_plugin_handle_event_cpu_usage(self):
@@ -377,5 +385,6 @@ class TestRegisterExtension:
 
     def test_get_plugin_function(self):
         from extensions.ext_stetho_scan.plugin import get_plugin
+
         plugin = get_plugin({}, None)
         assert isinstance(plugin, StatisticalWatermarkDecoderPlugin)

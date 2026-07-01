@@ -26,9 +26,7 @@ class PdfProcessor:
         """
         self.dpi = dpi
 
-    def pdf_to_images(
-        self, pdf_bytes: bytes
-    ) -> Iterator[tuple[int, io.BytesIO, dict]]:
+    def pdf_to_images(self, pdf_bytes: bytes) -> Iterator[tuple[int, io.BytesIO, dict]]:
         """
         Convert PDF pages to images.
 

@@ -18,6 +18,7 @@ from src.core.events import Event, EventBus, EventHandler, EventType, get_event_
 # EVENT TESTS (5 cases)
 # ============================================================================
 
+
 class TestEvent:
     """Test Event dataclass functionality."""
 
@@ -26,7 +27,7 @@ class TestEvent:
         event = Event(
             type=EventType.SENTIMENT_ANALYZED,
             source="sentiment_analyzer",
-            data={"sentiment": "positive", "score": 0.85}
+            data={"sentiment": "positive", "score": 0.85},
         )
 
         assert event.type == EventType.SENTIMENT_ANALYZED
@@ -42,7 +43,7 @@ class TestEvent:
             type=EventType.QUERY_EXECUTED,
             source="query_engine",
             data={"query": "test"},
-            metadata={"request_id": "123", "user_id": "user456"}
+            metadata={"request_id": "123", "user_id": "user456"},
         )
 
         assert event.metadata["request_id"] == "123"
@@ -51,11 +52,7 @@ class TestEvent:
     def test_event_invalid_source(self):
         """Test event creation fails with empty source."""
         with pytest.raises(ValueError):
-            Event(
-                type=EventType.SENTIMENT_ANALYZED,
-                source="",
-                data={}
-            )
+            Event(type=EventType.SENTIMENT_ANALYZED, source="", data={})
 
     def test_event_invalid_type(self):
         """Test event creation fails with invalid type."""
@@ -63,7 +60,7 @@ class TestEvent:
             Event(
                 type="not_an_enum",  # type: ignore
                 source="test",
-                data={}
+                data={},
             )
 
     def test_event_matches_filter(self):
@@ -72,7 +69,7 @@ class TestEvent:
             type=EventType.SENTIMENT_ANALYZED,
             source="sentiment_analyzer",
             data={"sentiment": "positive", "score": 0.85},
-            metadata={"request_id": "123"}
+            metadata={"request_id": "123"},
         )
 
         # Test exact type match
@@ -91,28 +88,31 @@ class TestEvent:
         assert event.matches_filter({"request_id": "123"})
 
         # Test multi-criteria match
-        assert event.matches_filter({
-            "type": EventType.SENTIMENT_ANALYZED,
-            "source": "sentiment_analyzer",
-            "sentiment": "positive"
-        })
+        assert event.matches_filter(
+            {
+                "type": EventType.SENTIMENT_ANALYZED,
+                "source": "sentiment_analyzer",
+                "sentiment": "positive",
+            }
+        )
 
         # Test multi-criteria non-match
-        assert not event.matches_filter({
-            "type": EventType.SENTIMENT_ANALYZED,
-            "sentiment": "negative"
-        })
+        assert not event.matches_filter(
+            {"type": EventType.SENTIMENT_ANALYZED, "sentiment": "negative"}
+        )
 
 
 # ============================================================================
 # EVENT HANDLER TESTS (3 cases)
 # ============================================================================
 
+
 class TestEventHandler:
     """Test EventHandler functionality."""
 
     def test_sync_handler_creation(self):
         """Test creating sync event handler."""
+
         def handler(event: Event):
             pass
 
@@ -123,6 +123,7 @@ class TestEventHandler:
 
     def test_async_handler_creation(self):
         """Test creating async event handler."""
+
         async def handler(event: Event):
             pass
 
@@ -132,15 +133,12 @@ class TestEventHandler:
     @pytest.mark.asyncio
     async def test_handler_execution_error(self):
         """Test handler catches and logs errors."""
+
         def handler(event: Event):
             raise ValueError("Test error")
 
         eh = EventHandler(handler, "error_handler")
-        event = Event(
-            type=EventType.ERROR_OCCURRED,
-            source="test",
-            data={}
-        )
+        event = Event(type=EventType.ERROR_OCCURRED, source="test", data={})
 
         # Should not raise, error is caught
         await eh.handle(event)
@@ -149,6 +147,7 @@ class TestEventHandler:
 # ============================================================================
 # EVENT BUS TESTS (12 cases)
 # ============================================================================
+
 
 class TestEventBus:
     """Test EventBus core functionality."""
@@ -180,6 +179,7 @@ class TestEventBus:
 
     def test_unsubscribe_handler(self, bus):
         """Test unsubscribing a handler."""
+
         def handler(event: Event):
             pass
 
@@ -196,11 +196,7 @@ class TestEventBus:
 
     def test_publish_event(self, bus):
         """Test publishing an event."""
-        event = Event(
-            type=EventType.SENTIMENT_ANALYZED,
-            source="test",
-            data={"test": "data"}
-        )
+        event = Event(type=EventType.SENTIMENT_ANALYZED, source="test", data={"test": "data"})
 
         bus.publish(event)
 
@@ -216,22 +212,14 @@ class TestEventBus:
         """Test event statistics tracking."""
         assert bus.get_stats()["published"] == 0
 
-        event = Event(
-            type=EventType.SENTIMENT_ANALYZED,
-            source="test",
-            data={}
-        )
+        event = Event(type=EventType.SENTIMENT_ANALYZED, source="test", data={})
         bus.publish(event)
 
         assert bus.get_stats()["published"] == 1
 
     def test_reset_stats(self, bus):
         """Test stats reset."""
-        event = Event(
-            type=EventType.SENTIMENT_ANALYZED,
-            source="test",
-            data={}
-        )
+        event = Event(type=EventType.SENTIMENT_ANALYZED, source="test", data={})
         bus.publish(event)
         assert bus.get_stats()["published"] == 1
 
@@ -267,6 +255,7 @@ class TestEventBus:
 
     def test_multiple_subscribers(self, bus):
         """Test multiple subscribers to same event."""
+
         def handler1(event: Event):
             pass
 
@@ -289,6 +278,7 @@ class TestEventBus:
 # ASYNC EVENT HANDLING TESTS (3 cases)
 # ============================================================================
 
+
 class TestAsyncEventHandling:
     """Test async event processing."""
 
@@ -303,11 +293,7 @@ class TestAsyncEventHandling:
         bus = EventBus()
         bus.subscribe(EventType.SENTIMENT_ANALYZED, handler)
 
-        event = Event(
-            type=EventType.SENTIMENT_ANALYZED,
-            source="test",
-            data={"result": "positive"}
-        )
+        event = Event(type=EventType.SENTIMENT_ANALYZED, source="test", data={"result": "positive"})
 
         # Start bus in background
         task = asyncio.create_task(bus.start())
@@ -339,11 +325,7 @@ class TestAsyncEventHandling:
         bus = EventBus()
         bus.subscribe(EventType.TEXT_SUMMARIZED, handler)
 
-        event = Event(
-            type=EventType.TEXT_SUMMARIZED,
-            source="test",
-            data={"summary": "test"}
-        )
+        event = Event(type=EventType.TEXT_SUMMARIZED, source="test", data={"summary": "test"})
 
         # Start bus
         task = asyncio.create_task(bus.start())
@@ -382,7 +364,7 @@ class TestAsyncEventHandling:
             event = Event(
                 type=EventType.SENTIMENT_ANALYZED if i % 2 == 0 else EventType.TEXT_SUMMARIZED,
                 source="test",
-                data={"index": i}
+                data={"index": i},
             )
             bus.publish(event)
 
@@ -401,6 +383,7 @@ class TestAsyncEventHandling:
 # EVENT FILTERING TESTS (2 cases)
 # ============================================================================
 
+
 class TestEventFiltering:
     """Test event filtering functionality."""
 
@@ -416,9 +399,7 @@ class TestEventFiltering:
 
         # Subscribe with filter: only positive sentiments
         bus.subscribe(
-            EventType.SENTIMENT_ANALYZED,
-            handler,
-            filter_criteria={"sentiment": "positive"}
+            EventType.SENTIMENT_ANALYZED, handler, filter_criteria={"sentiment": "positive"}
         )
 
         # Start bus
@@ -429,7 +410,7 @@ class TestEventFiltering:
         event1 = Event(
             type=EventType.SENTIMENT_ANALYZED,
             source="test",
-            data={"sentiment": "positive", "score": 0.9}
+            data={"sentiment": "positive", "score": 0.9},
         )
         bus.publish(event1)
 
@@ -437,7 +418,7 @@ class TestEventFiltering:
         event2 = Event(
             type=EventType.SENTIMENT_ANALYZED,
             source="test",
-            data={"sentiment": "negative", "score": 0.1}
+            data={"sentiment": "negative", "score": 0.1},
         )
         bus.publish(event2)
 
@@ -459,7 +440,7 @@ class TestEventFiltering:
             type=EventType.SENTIMENT_ANALYZED,
             source="analyzer",
             data={"sentiment": "positive", "score": 0.85},
-            metadata={"user_id": "123"}
+            metadata={"user_id": "123"},
         )
 
         # Test various filter scenarios
@@ -476,6 +457,7 @@ class TestEventFiltering:
 # ============================================================================
 # GLOBAL EVENT BUS TESTS (2 cases)
 # ============================================================================
+
 
 class TestGlobalEventBus:
     """Test global event bus singleton."""
@@ -502,16 +484,14 @@ class TestGlobalEventBus:
 # INTEGRATION TESTS (2 cases)
 # ============================================================================
 
+
 class TestEventBusIntegration:
     """Test Event Bus integration scenarios."""
 
     @pytest.mark.asyncio
     async def test_real_world_scenario(self):
         """Test realistic event flow: sentiment analysis."""
-        results = {
-            "events_received": [],
-            "text_processed": []
-        }
+        results = {"events_received": [], "text_processed": []}
 
         def on_sentiment_analyzed(event: Event):
             results["events_received"].append(event)
@@ -530,13 +510,19 @@ class TestEventBusIntegration:
 
         # Simulate sentiment analysis workflow
         for text in ["Great!", "Not good", "Excellent!"]:
-            sentiment = "positive" if "good" not in text.lower() or "not" not in text.lower() else "negative"
-            sentiment = "positive" if any(word in text for word in ["great", "excellent"]) else sentiment
+            sentiment = (
+                "positive"
+                if "good" not in text.lower() or "not" not in text.lower()
+                else "negative"
+            )
+            sentiment = (
+                "positive" if any(word in text for word in ["great", "excellent"]) else sentiment
+            )
 
             event = Event(
                 type=EventType.SENTIMENT_ANALYZED,
                 source="sentiment_analyzer",
-                data={"text": text, "sentiment": sentiment}
+                data={"text": text, "sentiment": sentiment},
             )
             bus.publish(event)
 
@@ -572,11 +558,7 @@ class TestEventBusIntegration:
         await asyncio.sleep(0.1)
 
         # Publish event
-        event = Event(
-            type=EventType.SENTIMENT_ANALYZED,
-            source="test",
-            data={"test": "data"}
-        )
+        event = Event(type=EventType.SENTIMENT_ANALYZED, source="test", data={"test": "data"})
         bus.publish(event)
         await asyncio.sleep(0.3)
 

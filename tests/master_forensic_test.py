@@ -15,13 +15,7 @@ import time
 def run_command(cmd, timeout=60):
     """Run a command with timeout and capture output."""
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=timeout,
-            shell=True
-        )
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, shell=True)
         return result.returncode, result.stdout, result.stderr
     except subprocess.TimeoutExpired:
         return -1, "", f"Command timed out after {timeout} seconds"
@@ -33,7 +27,10 @@ def test_data_guard_auditor():
     """Test the Data Guard Auditor."""
     print("🔍 Testing Data Guard Auditor...")
     # Test with a sample CSV file or create one for testing
-    returncode, _stdout, stderr = run_command("python src/utils/auditor.py data/results/trust_scores_results.csv --contamination 0.1", timeout=30)
+    returncode, _stdout, stderr = run_command(
+        "python src/utils/auditor.py data/results/trust_scores_results.csv --contamination 0.1",
+        timeout=30,
+    )
 
     if returncode == 0:
         print("✅ Data Guard Auditor: PASSED")
@@ -50,7 +47,9 @@ def test_context_sniffer():
     print("🔍 Testing Context Sniffer...")
     # Test with a sample Python file
     # cSpell:ignore gephi
-    returncode, _stdout, stderr = run_command("python src/utils/context_sniffer.py src/utils/gephi_bridge.py", timeout=30)
+    returncode, _stdout, stderr = run_command(
+        "python src/utils/context_sniffer.py src/utils/gephi_bridge.py", timeout=30
+    )
 
     if returncode == 0:
         print("✅ Context Sniffer: PASSED")
@@ -66,16 +65,23 @@ def test_gephi_bridge_modes():
     """Test all Gephi Bridge modes."""
     print("🔍 Testing Gephi Bridge Modes...")
 
-    modes = ['project', 'trust', 'knowledge', 'synthetic']
+    modes = ["project", "trust", "knowledge", "synthetic"]
     results = {}
 
     for mode in modes:
         print(f"  Testing {mode} mode...")
-        returncode, stdout, _stderr = run_command(f"python src/utils/gephi_bridge.py --mode {mode}", timeout=45)
+        returncode, stdout, _stderr = run_command(
+            f"python src/utils/gephi_bridge.py --mode {mode}", timeout=45
+        )
 
         if returncode == 0:
             # Check for expected output patterns
-            if (mode == 'trust' and "Loaded 10 trust scores" in stdout) or (mode == 'synthetic' and "Loaded 10 synthetic audit records" in stdout) or (mode == 'project' and "Found" in stdout and "files to process" in stdout) or (mode == 'knowledge' and ("SQLite error" in stdout or "Loaded" in stdout)):
+            if (
+                (mode == "trust" and "Loaded 10 trust scores" in stdout)
+                or (mode == "synthetic" and "Loaded 10 synthetic audit records" in stdout)
+                or (mode == "project" and "Found" in stdout and "files to process" in stdout)
+                or (mode == "knowledge" and ("SQLite error" in stdout or "Loaded" in stdout))
+            ):
                 results[mode] = True
             else:
                 results[mode] = False
@@ -98,13 +104,9 @@ def generate_forensic_report():
         "tests": {
             "data_guard_auditor": test_data_guard_auditor(),
             "context_sniffer": test_context_sniffer(),
-            "gephi_bridge": test_gephi_bridge_modes()
+            "gephi_bridge": test_gephi_bridge_modes(),
         },
-        "summary": {
-            "total_tests": 3,
-            "passed_tests": 0,
-            "failed_tests": 0
-        }
+        "summary": {"total_tests": 3, "passed_tests": 0, "failed_tests": 0},
     }
 
     # Count results
@@ -119,9 +121,9 @@ def generate_forensic_report():
 
 def print_report(report):
     """Print the forensic report in a formatted way."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🔍 FORENSIC UTILITY SUITE REPORT")
-    print("="*60)
+    print("=" * 60)
     print(f"Timestamp: {report['timestamp']}")
     print(f"Hardware: {report['hardware']}")
     print()
@@ -139,15 +141,15 @@ def print_report(report):
     print(f"Passed:      {report['summary']['passed_tests']}")
     print(f"Failed:      {report['summary']['failed_tests']}")
 
-    success_rate = (report['summary']['passed_tests'] / report['summary']['total_tests']) * 100
+    success_rate = (report["summary"]["passed_tests"] / report["summary"]["total_tests"]) * 100
     print(f"Success Rate: {success_rate:.1f}%")
 
-    if report['summary']['failed_tests'] == 0:
+    if report["summary"]["failed_tests"] == 0:
         print("\n🎉 ALL TESTS PASSED! Forensic Suite is Enterprise-Ready!")
     else:
         print(f"\n⚠️  {report['summary']['failed_tests']} test(s) failed. Check output above.")
 
-    print("="*60)
+    print("=" * 60)
 
 
 def main():
@@ -169,7 +171,7 @@ def main():
     print("\n📄 Detailed report saved to: data/results/forensic_test_report.json")
 
     # Return exit code based on test results
-    return 0 if report['summary']['failed_tests'] == 0 else 1
+    return 0 if report["summary"]["failed_tests"] == 0 else 1
 
 
 if __name__ == "__main__":

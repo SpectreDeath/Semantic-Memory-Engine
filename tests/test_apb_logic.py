@@ -2,8 +2,13 @@ import os
 import sys
 
 # Add extensions to path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../extensions/ext_adversarial_breaker')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+sys.path.insert(
+    0,
+    os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../extensions/ext_adversarial_breaker")
+    ),
+)
 
 from logic_anomaly_detector import LogicAnomalyDetector
 
@@ -41,22 +46,34 @@ def test_apb_logic():
     print("\n🔍 Analyzing Human Sample:")
     human_result = detector.detect_linguistic_camouflage(human_text)
     print(f"Verdict: {human_result['verdict']}")
-    print(f"Burstiness: {human_result['analysis']['burstiness_smoothing'].get('burstiness_score', 'N/A')}")
-    print(f"Unique Ratio: {human_result['analysis']['pattern_uniformity'].get('type_token_ratio', 'N/A')}")
+    print(
+        f"Burstiness: {human_result['analysis']['burstiness_smoothing'].get('burstiness_score', 'N/A')}"
+    )
+    print(
+        f"Unique Ratio: {human_result['analysis']['pattern_uniformity'].get('type_token_ratio', 'N/A')}"
+    )
 
     print("\n🔍 Analyzing AI-Smoothed Sample:")
     ai_result = detector.detect_linguistic_camouflage(ai_text)
     print(f"Verdict: {ai_result['verdict']}")
-    print(f"Burstiness: {ai_result['analysis']['burstiness_smoothing'].get('burstiness_score', 'N/A')}")
-    print(f"Unique Ratio: {ai_result['analysis']['pattern_uniformity'].get('type_token_ratio', 'N/A')}")
+    print(
+        f"Burstiness: {ai_result['analysis']['burstiness_smoothing'].get('burstiness_score', 'N/A')}"
+    )
+    print(
+        f"Unique Ratio: {ai_result['analysis']['pattern_uniformity'].get('type_token_ratio', 'N/A')}"
+    )
 
     # Check if we triggered the Flatline Effect override
     print(f"\nAI Result Confidence: {ai_result['deception_confidence']}")
 
-    assert ai_result['verdict'] in ["AI_SMOOTHED_DETECTED", "HUMAN_SIGNATURE"] # Let's see results first
+    assert ai_result["verdict"] in [
+        "AI_SMOOTHED_DETECTED",
+        "HUMAN_SIGNATURE",
+    ]  # Let's see results first
     # assert human_result['verdict'] == "HUMAN_SIGNATURE"
 
     print("\n✅ LOGIC TEST FINISHED")
+
 
 if __name__ == "__main__":
     test_apb_logic()

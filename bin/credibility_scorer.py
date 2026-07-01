@@ -22,6 +22,7 @@ class CredibilityScorer:
     Combines multi-phase forensic metrics into a high-fidelity visualization payload.
     Optimized for Goose Auto Visualiser and AionUI.
     """
+
     __slots__ = ()
 
     def get_forensic_report(self, target_text: str) -> dict[str, Any]:
@@ -47,7 +48,7 @@ class CredibilityScorer:
         # 4. Forensic Metrics (Phase 14: Symmetrized KL Divergence)
         # Measures distribution shift against a standard linguistic model
         p_dist = np.array([target_text.count(c) for c in "aeiou"])
-        q_dist = np.array([10, 8, 6, 4, 2]) # Mock reference distribution
+        q_dist = np.array([10, 8, 6, 4, 2])  # Mock reference distribution
         kl_div = forensic_metrics.calculate_symmetrized_kl_divergence(p_dist, q_dist)
 
         # 5. Analyze Obfuscation (Phase 16)
@@ -58,55 +59,56 @@ class CredibilityScorer:
         style_score = max(0, min(100, int(100 * (1.0 - cosine_delta))))
         signal_score = max(0, min(100, int(100 * (1.0 - obf_score))))
         structure_score = int(obf_result.get("hamming_weight", 4.0) / 8.0 * 100)
-        entropy_score = max(0, min(100, int(100 * (1.0 - kl_div / 5.0)))) # Scaled for visualization
+        entropy_score = max(
+            0, min(100, int(100 * (1.0 - kl_div / 5.0)))
+        )  # Scaled for visualization
 
         # Create the Visualiser Payload
         return {
             "summary": f"Forensic analysis complete. SimHash: {simhash_val}. Cosine Delta: {cosine_delta:.4f}",
             "data": {
                 "metrics": [
-                    {
-                        "label": "Phase 11: SimHash",
-                        "value": str(simhash_val),
-                        "status": "info"
-                    },
+                    {"label": "Phase 11: SimHash", "value": str(simhash_val), "status": "info"},
                     {
                         "label": "Phase 12: Cosine Delta",
                         "value": round(cosine_delta, 4),
-                        "status": "success" if cosine_delta < 0.4 else "warning"
+                        "status": "success" if cosine_delta < 0.4 else "warning",
                     },
                     {
                         "label": "Phase 13: Burstiness",
                         "value": round(burstiness, 4),
-                        "status": "low" if burstiness < 0.2 else "high"
+                        "status": "low" if burstiness < 0.2 else "high",
                     },
                     {
                         "label": "Phase 14: KL Divergence",
                         "value": round(kl_div, 6),
-                        "status": "info"
+                        "status": "info",
                     },
                     {
                         "label": "Phase 16: Obfuscation",
                         "value": round(obf_score, 4),
-                        "status": "danger" if obf_score > 0.7 else "success"
-                    }
+                        "status": "danger" if obf_score > 0.7 else "success",
+                    },
                 ],
                 "chart_data": [
                     {"phase": "Style (Cosine Delta)", "score": style_score},
                     {"phase": "Signal (Obfuscation)", "score": signal_score},
                     {"phase": "Structure (Density)", "score": structure_score},
-                    {"phase": "Entropy (KL Div)", "score": entropy_score}
-                ]
-            }
+                    {"phase": "Entropy (KL Div)", "score": entropy_score},
+                ],
+            },
         }
+
 
 def get_forensic_report(target_text: str) -> dict[str, Any]:
     """Standalone wrapper for tool calls."""
     scorer = CredibilityScorer()
     return scorer.get_forensic_report(target_text)
 
+
 if __name__ == "__main__":
     test_text = "This is a normal forensic test string for the credibility scorer bridge."
     report = get_forensic_report(test_text)
     import json
+
     print(json.dumps(report, indent=2))

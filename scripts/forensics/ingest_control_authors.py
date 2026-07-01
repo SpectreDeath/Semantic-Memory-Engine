@@ -211,7 +211,19 @@ def html_to_markdown(html: str) -> str:
         classes = " ".join(attrs.get("class") or [])
         ident = str(attrs.get("id") or "")
         haystack = f"{classes} {ident}".lower()
-        if any(token in haystack for token in ["advert", "sidebar", "newsletter", "related", "comment", "share", "bio", "author"]):
+        if any(
+            token in haystack
+            for token in [
+                "advert",
+                "sidebar",
+                "newsletter",
+                "related",
+                "comment",
+                "share",
+                "bio",
+                "author",
+            ]
+        ):
             if tag.name not in {"article", "main"}:
                 tag.decompose()
     root = soup.find("article") or soup.find("main") or soup.body or soup
@@ -266,7 +278,9 @@ def pdf_to_markdown(pdf_path: Path) -> str:
     return clean_markdown(getattr(result, "text_content", str(result)))
 
 
-def build_front_matter(spec: SourceSpec, retrieved_at: str, raw_path: Path, output_path: Path, word_count: int) -> str:
+def build_front_matter(
+    spec: SourceSpec, retrieved_at: str, raw_path: Path, output_path: Path, word_count: int
+) -> str:
     metadata = {
         "author": spec.author,
         "title": spec.title,
@@ -311,7 +325,9 @@ def process_source(spec: SourceSpec) -> dict[str, object]:
     }
     if output_path.exists():
         words = count_words(output_path.read_text(encoding="utf-8", errors="replace"))
-        record.update({"status": "skipped_existing", "reason": "output already exists", "word_count": words})
+        record.update(
+            {"status": "skipped_existing", "reason": "output already exists", "word_count": words}
+        )
         return record
     if not robots_allowed(spec.url):
         record.update({"status": "skipped_robots", "reason": "robots.txt disallows this URL"})
@@ -329,7 +345,9 @@ def process_source(spec: SourceSpec) -> dict[str, object]:
         body = clean_markdown(body)
         words = re.findall(r"\b\w+\b", body)
         if len(words) < MIN_WORDS:
-            record.update({"status": "skipped_short", "reason": f"only {len(words)} words extracted"})
+            record.update(
+                {"status": "skipped_short", "reason": f"only {len(words)} words extracted"}
+            )
             return record
         front_matter = build_front_matter(spec, retrieved_at, raw_path, output_path, len(words))
         write_atomic(output_path, front_matter + "\n\n" + body)
@@ -360,7 +378,9 @@ def main() -> None:
         print(f"  {record['status']}: {record['reason'] or record['output_path']}")
         time.sleep(1.0)
     write_metadata(records)
-    print(f"\nMetadata written to {METADATA_CSV.relative_to(PROJECT_ROOT)} and {METADATA_JSON.relative_to(PROJECT_ROOT)}")
+    print(
+        f"\nMetadata written to {METADATA_CSV.relative_to(PROJECT_ROOT)} and {METADATA_JSON.relative_to(PROJECT_ROOT)}"
+    )
 
 
 if __name__ == "__main__":

@@ -304,7 +304,9 @@ class TestGhostTrapClient:
     def test_get_alerts_with_severity_filter(self, tmp_path):
         """Test get_alerts filters by severity."""
         alerts_file = tmp_path / "alerts.jsonl"
-        alerts_file.write_text('{"severity": "high", "event": "e1"}\n{"severity": "low", "event": "e2"}\n')
+        alerts_file.write_text(
+            '{"severity": "high", "event": "e1"}\n{"severity": "low", "event": "e2"}\n'
+        )
         client = GhostTrapClient(str(tmp_path))
         alerts = client.get_alerts(hours=24, severity="high")
         assert len(alerts) == 1
@@ -313,7 +315,9 @@ class TestGhostTrapClient:
     def test_get_persistence_events(self, tmp_path):
         """Test get_persistence_events filters correctly."""
         events_file = tmp_path / "events.jsonl"
-        events_file.write_text('{"event_type": "persistence_created"}\n{"event_type": "other_event"}\n')
+        events_file.write_text(
+            '{"event_type": "persistence_created"}\n{"event_type": "other_event"}\n'
+        )
         client = GhostTrapClient(str(tmp_path))
         events = client.get_persistence_events(hours=24)
         assert len(events) == 1

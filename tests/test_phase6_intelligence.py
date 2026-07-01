@@ -63,9 +63,9 @@ class TestPhase6Intelligence:
 
     def test_factory_registry(self):
         """Verify all Phase 6 tools are in the factory."""
-        assert hasattr(ToolFactory, 'create_knowledge_graph')
-        assert hasattr(ToolFactory, 'create_intelligence_reports')
-        assert hasattr(ToolFactory, 'create_overlap_discovery')
+        assert hasattr(ToolFactory, "create_knowledge_graph")
+        assert hasattr(ToolFactory, "create_intelligence_reports")
+        assert hasattr(ToolFactory, "create_overlap_discovery")
 
     def test_graph_export_json(self, sample_text):
         """Test JSON export for D3 integration."""
@@ -75,6 +75,7 @@ class TestPhase6Intelligence:
         js_data = kg.to_json()
         assert '"nodes":' in js_data
         assert '"links":' in js_data
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

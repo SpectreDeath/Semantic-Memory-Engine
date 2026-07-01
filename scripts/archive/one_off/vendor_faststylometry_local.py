@@ -53,24 +53,20 @@ def refactor_imports(content: str, filename: str) -> str:
 
     # Pattern 1: from faststylometry import X -> from . import X
     updated = re.sub(
-        r'from\s+faststylometry\s+import\s+([A-Za-z_][A-Za-z0-9_]*)',
-        r'from . import \1',
-        updated
+        r"from\s+faststylometry\s+import\s+([A-Za-z_][A-Za-z0-9_]*)", r"from . import \1", updated
     )
 
     # Pattern 2: from faststylometry.X import Y -> from .X import Y
     updated = re.sub(
-        r'from\s+faststylometry\.(\w+)\s+import\s+(.+)',
-        r'from .\1 import \2',
-        updated
+        r"from\s+faststylometry\.(\w+)\s+import\s+(.+)", r"from .\1 import \2", updated
     )
 
     # Pattern 3: import faststylometry -> from . import __init__ as faststylometry
     updated = re.sub(
-        r'^import\s+faststylometry\s*$',
-        r'from . import __init__ as faststylometry',
+        r"^import\s+faststylometry\s*$",
+        r"from . import __init__ as faststylometry",
         updated,
-        flags=re.MULTILINE
+        flags=re.MULTILINE,
     )
 
     return updated

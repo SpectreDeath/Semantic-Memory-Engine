@@ -54,7 +54,12 @@ class LocalImportResult:
 
 
 class LocalMarkdownProcessor:
-    def __init__(self, staging_dir: Path = STAGING_DIR, prose_dir: Path = PROSE_DIR, manifest_path: Path = MANIFEST_PATH):
+    def __init__(
+        self,
+        staging_dir: Path = STAGING_DIR,
+        prose_dir: Path = PROSE_DIR,
+        manifest_path: Path = MANIFEST_PATH,
+    ):
         self.staging_dir = staging_dir
         self.prose_dir = prose_dir
         self.manifest_path = manifest_path
@@ -75,13 +80,21 @@ class LocalMarkdownProcessor:
 
     def load_manifest(self) -> dict[str, object]:
         if not self.manifest_path.exists():
-            return {"source": "WORLD Opinions Russell Vought author archive", "seed_url": "https://wng.org/authors/russ-vought", "articles": []}
+            return {
+                "source": "WORLD Opinions Russell Vought author archive",
+                "seed_url": "https://wng.org/authors/russ-vought",
+                "articles": [],
+            }
 
         with self.manifest_path.open("r", encoding="utf-8") as handle:
             manifest = json.load(handle)
 
         if not isinstance(manifest, dict):
-            return {"source": "WORLD Opinions Russell Vought author archive", "seed_url": "https://wng.org/authors/russ-vought", "articles": []}
+            return {
+                "source": "WORLD Opinions Russell Vought author archive",
+                "seed_url": "https://wng.org/authors/russ-vought",
+                "articles": [],
+            }
 
         manifest.setdefault("source", "WORLD Opinions Russell Vought author archive")
         manifest.setdefault("seed_url", "https://wng.org/authors/russ-vought")
@@ -93,7 +106,9 @@ class LocalMarkdownProcessor:
         if isinstance(articles, list):
             manifest["total"] = len(articles)
         manifest["processed_local_markdown_at"] = datetime.now(UTC).isoformat()
-        self.manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
+        self.manifest_path.write_text(
+            json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8"
+        )
 
     def process_file(self, source_path: Path, manifest: dict[str, object]) -> LocalImportResult:
         try:
@@ -124,12 +139,17 @@ class LocalMarkdownProcessor:
 
             raw_source = self.extract_source(raw_text)
             raw_source_url = self.extract_source_url(raw_text)
-            matched_entry = self.match_manifest_entry(source_path, cleaned_body, raw_source_url, manifest)
+            matched_entry = self.match_manifest_entry(
+                source_path, cleaned_body, raw_source_url, manifest
+            )
             source_url = str(matched_entry.get("url", "")) if matched_entry else raw_source_url
             source = str(matched_entry.get("source", raw_source)) if matched_entry else raw_source
             title = self.extract_title(raw_text, source_path, matched_entry)
             target_path = self.prose_dir / self.output_filename(source_path)
-            target_path.write_text(self.build_output_markdown(title, source, source_url, cleaned_body), encoding="utf-8")
+            target_path.write_text(
+                self.build_output_markdown(title, source, source_url, cleaned_body),
+                encoding="utf-8",
+            )
 
             if matched_entry:
                 matched_entry["status"] = "success_local_markdown"
@@ -140,7 +160,9 @@ class LocalMarkdownProcessor:
                 matched_entry["source"] = source
                 matched_entry["error"] = ""
             else:
-                self.add_new_manifest_entry(manifest, title, source, source_url, word_count, target_path)
+                self.add_new_manifest_entry(
+                    manifest, title, source, source_url, word_count, target_path
+                )
 
             return LocalImportResult(
                 source_path=str(source_path),
@@ -164,7 +186,9 @@ class LocalMarkdownProcessor:
     def clean_markdown_content(self, text: str) -> str:
         text = FRONTMATTER_RE.sub("", text)
         text = re.sub(r"^#\s+.+$", "", text, count=1, flags=re.MULTILINE)
-        text = re.sub(r"^\*\*(By|Source|URL|Saved):\*\*\s*.+$", "", text, flags=re.MULTILINE | re.IGNORECASE)
+        text = re.sub(
+            r"^\*\*(By|Source|URL|Saved):\*\*\s*.+$", "", text, flags=re.MULTILINE | re.IGNORECASE
+        )
         text = re.sub(r"^---\s*$", "", text, flags=re.MULTILINE)
         text = re.sub(r"^_Markdown extracted by .*$", "", text, flags=re.MULTILINE | re.IGNORECASE)
         text = MARKDOWN_LINK_RE.sub(r"\1", text)
@@ -178,9 +202,20 @@ class LocalMarkdownProcessor:
 
     def is_waf_challenge(self, text: str) -> bool:
         haystack = text[:12000].lower()
-        return any(marker in haystack for marker in ("human verification", "javascript is disabled", "aws waf", "captcha", "gokuprops"))
+        return any(
+            marker in haystack
+            for marker in (
+                "human verification",
+                "javascript is disabled",
+                "aws waf",
+                "captcha",
+                "gokuprops",
+            )
+        )
 
-    def match_manifest_entry(self, source_path: Path, cleaned_body: str, source_url: str, manifest: dict[str, object]) -> dict[str, object]:
+    def match_manifest_entry(
+        self, source_path: Path, cleaned_body: str, source_url: str, manifest: dict[str, object]
+    ) -> dict[str, object]:
         slug = self.slug(source_path.stem)
         title_guess = self.title_from_filename(source_path)
         candidates = [slug, title_guess.lower(), self.slug(title_guess)]
@@ -203,25 +238,38 @@ class LocalMarkdownProcessor:
                 return entry
         return {}
 
-    def add_new_manifest_entry(self, manifest: dict[str, object], title: str, source: str, source_url: str, word_count: int, target_path: Path) -> None:
+    def add_new_manifest_entry(
+        self,
+        manifest: dict[str, object],
+        title: str,
+        source: str,
+        source_url: str,
+        word_count: int,
+        target_path: Path,
+    ) -> None:
         articles = manifest.setdefault("articles", [])
         if not isinstance(articles, list):
             manifest["articles"] = []
             articles = manifest["articles"]
-        articles.insert(0, {
-            "title": title,
-            "source": source,
-            "url": source_url,
-            "post_date": "",
-            "author": AUTHOR,
-            "local_path": str(target_path),
-            "output_path": str(target_path),
-            "word_count": word_count,
-            "status": "success_local_markdown",
-            "error": "",
-        })
+        articles.insert(
+            0,
+            {
+                "title": title,
+                "source": source,
+                "url": source_url,
+                "post_date": "",
+                "author": AUTHOR,
+                "local_path": str(target_path),
+                "output_path": str(target_path),
+                "word_count": word_count,
+                "status": "success_local_markdown",
+                "error": "",
+            },
+        )
 
-    def build_output_markdown(self, title: str, source: str, source_url: str, cleaned_body: str) -> str:
+    def build_output_markdown(
+        self, title: str, source: str, source_url: str, cleaned_body: str
+    ) -> str:
         frontmatter = [
             "---",
             f"source: {self.escape_yaml(source)}",
@@ -246,7 +294,9 @@ class LocalMarkdownProcessor:
         match = SOURCE_URL_RE.search(raw_text)
         return match.group(1) if match else ""
 
-    def extract_title(self, raw_text: str, source_path: Path, matched_entry: dict[str, object]) -> str:
+    def extract_title(
+        self, raw_text: str, source_path: Path, matched_entry: dict[str, object]
+    ) -> str:
         if matched_entry and matched_entry.get("title"):
             return str(matched_entry["title"])
         heading_match = re.search(r"^#\s+(.+)$", raw_text, flags=re.MULTILINE)

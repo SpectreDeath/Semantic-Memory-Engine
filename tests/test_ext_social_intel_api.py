@@ -33,6 +33,7 @@ class TestRateLimiterFull:
     @pytest.mark.asyncio
     async def test_rate_limiter_clears_old(self):
         import time
+
         limiter = RateLimiter(PlatformType.TWITTER, 10, 1)  # 1 second window
         # Add old request
         limiter.requests.append(time.time() - 2)
@@ -67,10 +68,14 @@ class TestSocialMediaAPIManagerFull:
         manager = SocialMediaAPIManager()
         config = APIConfig(
             platform=PlatformType.TWITTER,
-            api_key=None, api_secret=None,
-            access_token="token123", access_token_secret=None,
-            client_id=None, client_secret=None,
-            rate_limit=100, rate_window=60,
+            api_key=None,
+            api_secret=None,
+            access_token="token123",
+            access_token_secret=None,
+            client_id=None,
+            client_secret=None,
+            rate_limit=100,
+            rate_window=60,
             enabled=True,
         )
         manager.platform_configs[PlatformType.TWITTER] = config
@@ -82,10 +87,14 @@ class TestSocialMediaAPIManagerFull:
         manager = SocialMediaAPIManager()
         config = APIConfig(
             platform=PlatformType.REDDIT,
-            api_key=None, api_secret=None,
-            access_token="token123", access_token_secret=None,
-            client_id=None, client_secret=None,
-            rate_limit=100, rate_window=60,
+            api_key=None,
+            api_secret=None,
+            access_token="token123",
+            access_token_secret=None,
+            client_id=None,
+            client_secret=None,
+            rate_limit=100,
+            rate_window=60,
             enabled=True,
         )
         manager.platform_configs[PlatformType.REDDIT] = config
@@ -142,8 +151,27 @@ class TestSocialMediaAPIManagerFull:
     def test_parse_hashtag_response_twitter(self):
         manager = SocialMediaAPIManager()
         data = {
-            "data": [{"id": "1", "text": "hello", "author_id": "a1", "created_at": "now", "public_metrics": {}, "entities": {"hashtags": []}}],
-            "includes": {"users": [{"id": "a1", "username": "u1", "name": "n1", "verified": False, "public_metrics": {}}]},
+            "data": [
+                {
+                    "id": "1",
+                    "text": "hello",
+                    "author_id": "a1",
+                    "created_at": "now",
+                    "public_metrics": {},
+                    "entities": {"hashtags": []},
+                }
+            ],
+            "includes": {
+                "users": [
+                    {
+                        "id": "a1",
+                        "username": "u1",
+                        "name": "n1",
+                        "verified": False,
+                        "public_metrics": {},
+                    }
+                ]
+            },
         }
         result = manager._parse_hashtag_response(PlatformType.TWITTER, data, "test")
         assert "hashtag" in result
@@ -151,13 +179,25 @@ class TestSocialMediaAPIManagerFull:
 
     def test_parse_hashtag_response_reddit(self):
         manager = SocialMediaAPIManager()
-        data = {"data": {"children": [{"data": {"id": "1", "author": "a1", "created_utc": 1, "score": 10}}]}}
+        data = {
+            "data": {
+                "children": [{"data": {"id": "1", "author": "a1", "created_utc": 1, "score": 10}}]
+            }
+        }
         result = manager._parse_hashtag_response(PlatformType.REDDIT, data, "test")
         assert "hashtag" in result
 
     def test_parse_influencer_response_twitter(self):
         manager = SocialMediaAPIManager()
-        data = {"data": {"id": "1", "name": "name", "username": "u", "verified": True, "public_metrics": {}}}
+        data = {
+            "data": {
+                "id": "1",
+                "name": "name",
+                "username": "u",
+                "verified": True,
+                "public_metrics": {},
+            }
+        }
         result = manager._parse_influencer_response(PlatformType.TWITTER, data, "handle")
         assert "handle" in result
         assert "verified" in result
@@ -191,10 +231,14 @@ class TestSocialMediaAPIManagerFull:
         manager = SocialMediaAPIManager()
         config = APIConfig(
             platform=PlatformType.FACEBOOK,
-            api_key=None, api_secret=None,
-            access_token="fb_token", access_token_secret=None,
-            client_id=None, client_secret=None,
-            rate_limit=100, rate_window=60,
+            api_key=None,
+            api_secret=None,
+            access_token="fb_token",
+            access_token_secret=None,
+            client_id=None,
+            client_secret=None,
+            rate_limit=100,
+            rate_window=60,
             enabled=True,
         )
         manager.platform_configs[PlatformType.FACEBOOK] = config
@@ -205,10 +249,14 @@ class TestSocialMediaAPIManagerFull:
         manager = SocialMediaAPIManager()
         config = APIConfig(
             platform=PlatformType.YOUTUBE,
-            api_key="youtube_key", api_secret=None,
-            access_token=None, access_token_secret=None,
-            client_id=None, client_secret=None,
-            rate_limit=100, rate_window=60,
+            api_key="youtube_key",
+            api_secret=None,
+            access_token=None,
+            access_token_secret=None,
+            client_id=None,
+            client_secret=None,
+            rate_limit=100,
+            rate_window=60,
             enabled=True,
         )
         manager.platform_configs[PlatformType.YOUTUBE] = config
@@ -219,10 +267,14 @@ class TestSocialMediaAPIManagerFull:
         manager = SocialMediaAPIManager()
         config = APIConfig(
             platform=PlatformType.TIKTOK,
-            api_key=None, api_secret=None,
-            access_token="tiktok_token", access_token_secret=None,
-            client_id=None, client_secret=None,
-            rate_limit=100, rate_window=60,
+            api_key=None,
+            api_secret=None,
+            access_token="tiktok_token",
+            access_token_secret=None,
+            client_id=None,
+            client_secret=None,
+            rate_limit=100,
+            rate_window=60,
             enabled=True,
         )
         manager.platform_configs[PlatformType.TIKTOK] = config
@@ -254,7 +306,12 @@ class TestSocialMediaAPIManagerFull:
 
     def test_build_topic_url_all_platforms(self):
         manager = SocialMediaAPIManager()
-        for platform in [PlatformType.REDDIT, PlatformType.FACEBOOK, PlatformType.YOUTUBE, PlatformType.TIKTOK]:
+        for platform in [
+            PlatformType.REDDIT,
+            PlatformType.FACEBOOK,
+            PlatformType.YOUTUBE,
+            PlatformType.TIKTOK,
+        ]:
             url = manager._build_topic_url(platform, "topic", 48)
             assert "topic" in url
 
@@ -277,7 +334,12 @@ class TestSocialMediaAPIManagerFull:
 
     def test_build_geotagged_url_all_platforms(self):
         manager = SocialMediaAPIManager()
-        for platform in [PlatformType.REDDIT, PlatformType.FACEBOOK, PlatformType.YOUTUBE, PlatformType.TIKTOK]:
+        for platform in [
+            PlatformType.REDDIT,
+            PlatformType.FACEBOOK,
+            PlatformType.YOUTUBE,
+            PlatformType.TIKTOK,
+        ]:
             url = manager._build_geotagged_url(platform, "topic")
             assert "topic" in url
 

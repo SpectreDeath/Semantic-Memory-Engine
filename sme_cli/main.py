@@ -10,27 +10,31 @@ from colorama import Fore, init
 init(autoreset=True)
 sys.path.append(os.getcwd())
 
+
 @click.group()
 def cli():
     """SME: Semantic Memory Engine & Forensic Toolkit"""
     pass
 
+
 @cli.command()
 def verify():
     """Forensic Health Check: Data & Hardware."""
-    click.secho("\n🔍 [SME SYSTEM DIAGNOSTICS]", fg='cyan', bold=True)
+    click.secho("\n🔍 [SME SYSTEM DIAGNOSTICS]", fg="cyan", bold=True)
 
     # 1. Hardware Status
     mem = psutil.virtual_memory()
     cpu_load = psutil.cpu_percent()
-    click.echo(f"{Fore.YELLOW}RAM Usage: {Fore.WHITE}{mem.percent}% ({mem.used/1e9:.1f}GB / {mem.total/1e9:.1f}GB)")
+    click.echo(
+        f"{Fore.YELLOW}RAM Usage: {Fore.WHITE}{mem.percent}% ({mem.used / 1e9:.1f}GB / {mem.total / 1e9:.1f}GB)"
+    )
     click.echo(f"{Fore.YELLOW}CPU Load:  {Fore.WHITE}{cpu_load}%")
 
     # 2. Data Integrity
     click.echo(f"\n{Fore.CYAN}--- Data Integrity ---")
     paths = {
         "Knowledge DB": "data/knowledge_core.sqlite",
-        "Assertions": "data/conceptnet-assertions-5.7.0.csv"
+        "Assertions": "data/conceptnet-assertions-5.7.0.csv",
     }
 
     for name, path in paths.items():
@@ -50,8 +54,9 @@ def verify():
         else:
             click.echo(f" ❌ {Fore.RED}{name:.<15} {Fore.WHITE}MISSING")
 
+
 @cli.command()
-@click.option('--force', is_flag=True, help="Force re-indexing even if data is current.")
+@click.option("--force", is_flag=True, help="Force re-indexing even if data is current.")
 def index(force):
     """Execute Smart Indexing with Data Lineage."""
     from src.logic.manifest_manager import ManifestManager
@@ -63,46 +68,60 @@ def index(force):
 
     # Check for file existence first
     if not os.path.exists(csv_path):
-        click.secho(f"❌ Error: {csv_path} not found!", fg='red')
+        click.secho(f"❌ Error: {csv_path} not found!", fg="red")
         return
 
     # Lineage Check (The Colin Philosophy)
     if not mm.is_stale(csv_path) and not force:
-        click.secho("✨ Data lineage is current. Skipping heavy distillation.", fg='green')
+        click.secho("✨ Data lineage is current. Skipping heavy distillation.", fg="green")
         click.echo("Use --force to override.")
         return
 
-    click.secho("🧠 Hash mismatch or --force detected. Starting distillation...", fg='yellow')
+    click.secho("🧠 Hash mismatch or --force detected. Starting distillation...", fg="yellow")
 
     # Run the existing distillation logic
     quantizer.distill_assertions(csv_path)
 
     # Update the manifest so we remember this version
     mm.update_source(csv_path)
-    click.secho("✅ Indexing complete and manifest updated.", fg='green')
+    click.secho("✅ Indexing complete and manifest updated.", fg="green")
+
 
 @cli.command()
-@click.option('--claims', '-c', type=click.Path(exists=True), default=None,
-              help='Path to JSON file with claims. Format: [{"subject": "X", "predicate": "is", "object": "Y"}, ...]')
-@click.option('--inline', '-i', default=None,
-              help='Inline JSON array of claims (alternative to --claims file)')
+@click.option(
+    "--claims",
+    "-c",
+    type=click.Path(exists=True),
+    default=None,
+    help='Path to JSON file with claims. Format: [{"subject": "X", "predicate": "is", "object": "Y"}, ...]',
+)
+@click.option(
+    "--inline",
+    "-i",
+    default=None,
+    help="Inline JSON array of claims (alternative to --claims file)",
+)
 def drift(claims, inline):
     """Compare claims against the HDF5 knowledge core (drift analysis)."""
     import json
+
     try:
         from src.logic.audit_engine import AuditEngine
     except ImportError as e:
-        if 'h5py' in str(e):
-            click.secho("❌ h5py required. Install with: pip install h5py", fg='red')
+        if "h5py" in str(e):
+            click.secho("❌ h5py required. Install with: pip install h5py", fg="red")
         else:
-            click.secho(f"❌ Import error: {e}", fg='red')
+            click.secho(f"❌ Import error: {e}", fg="red")
         return
 
     if claims and inline:
-        click.secho("❌ Use either --claims or --inline, not both.", fg='red')
+        click.secho("❌ Use either --claims or --inline, not both.", fg="red")
         return
     if not claims and not inline:
-        click.secho("Provide claims via --claims path/to.json or --inline '[{\"subject\":\"A\",\"predicate\":\"is\",\"object\":\"B\"}]'", fg='yellow')
+        click.secho(
+            'Provide claims via --claims path/to.json or --inline \'[{"subject":"A","predicate":"is","object":"B"}]\'',
+            fg="yellow",
+        )
         return
 
     try:
@@ -115,8 +134,11 @@ def drift(claims, inline):
         if not isinstance(claims_list, list):
             claims_list = [claims_list]
     except (json.JSONDecodeError, TypeError) as e:
-        click.secho(f"❌ Invalid JSON: {e}", fg='red')
-        click.secho("Example usage: --inline '[{\"subject\":\"FastMCP\",\"predicate\":\"is\",\"object\":\"plumbing\"}]'", fg='yellow')
+        click.secho(f"❌ Invalid JSON: {e}", fg="red")
+        click.secho(
+            'Example usage: --inline \'[{"subject":"FastMCP","predicate":"is","object":"plumbing"}]\'',
+            fg="yellow",
+        )
         return
 
     engine = AuditEngine()
@@ -125,23 +147,30 @@ def drift(claims, inline):
     verified = result["verified"]
     anomalies = result["anomalies"]
 
-    click.secho("\n📊 [DRIFT ANALYSIS]", fg='cyan', bold=True)
-    click.echo(f"  Drift Score: {drift_score:.2%} ({len(anomalies)} anomalies / {len(claims_list)} claims)")
+    click.secho("\n📊 [DRIFT ANALYSIS]", fg="cyan", bold=True)
+    click.echo(
+        f"  Drift Score: {drift_score:.2%} ({len(anomalies)} anomalies / {len(claims_list)} claims)"
+    )
     if verified:
         click.echo(f"\n  ✅ Verified ({len(verified)}):")
         for c in verified[:5]:
-            click.echo(f"     - {c.get('subject', '?')} {c.get('predicate', '?')} {c.get('object', '?')}")
+            click.echo(
+                f"     - {c.get('subject', '?')} {c.get('predicate', '?')} {c.get('object', '?')}"
+            )
         if len(verified) > 5:
             click.echo(f"     ... and {len(verified) - 5} more")
     if anomalies:
         click.echo(f"\n  ⚠️  Anomalies ({len(anomalies)}):")
         for c in anomalies[:5]:
-            click.echo(f"     - {c.get('subject', '?')} {c.get('predicate', '?')} {c.get('object', '?')}")
+            click.echo(
+                f"     - {c.get('subject', '?')} {c.get('predicate', '?')} {c.get('object', '?')}"
+            )
         if len(anomalies) > 5:
             click.echo(f"     ... and {len(anomalies) - 5} more")
     if not verified and not anomalies:
         click.echo("  (No claims processed)")
     click.echo()
+
 
 @cli.command()
 def status():
@@ -157,7 +186,9 @@ def status():
 
     # --- Hardware Telemetry ---
     ram = psutil.virtual_memory()
-    click.secho(f"🖥️  Workstation: 32GB RAM ({ram.percent}% Used) | GTX 1660 Ti", fg='cyan', bold=True)
+    click.secho(
+        f"🖥️  Workstation: 32GB RAM ({ram.percent}% Used) | GTX 1660 Ti", fg="cyan", bold=True
+    )
 
     # --- Lineage Manifest ---
     click.echo("\n📋 Data Lineage:")
@@ -170,13 +201,14 @@ def status():
     # --- HDF5 Index Health ---
     h5_path = "data/knowledge_core.h5"
     if os.path.exists(h5_path):
-        with h5py.File(h5_path, 'r') as f:
+        with h5py.File(h5_path, "r") as f:
             size_gb = os.path.getsize(h5_path) / (1024**3)
             click.echo("\n🧠 Knowledge Core (HDF5):")
             click.echo(f"  - File: {h5_path} ({size_gb:.2f} GB)")
             click.echo(f"  - Keys: {list(f.keys())}")
     else:
-        click.secho("\n⚠️  Knowledge Core (HDF5) not found. Run 'sme index' to build.", fg='yellow')
+        click.secho("\n⚠️  Knowledge Core (HDF5) not found. Run 'sme index' to build.", fg="yellow")
+
 
 if __name__ == "__main__":
     cli()

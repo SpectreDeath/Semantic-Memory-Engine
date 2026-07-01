@@ -21,6 +21,7 @@ from src.utils.gephi_bridge import stream_archival_data
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("WaybackIntegration")
 
+
 async def run_archival_pipeline(url: str):
     print(f"\n🚀 STARTING ARCHIVAL FORENSIC PIPELINE FOR: {url}")
 
@@ -35,9 +36,9 @@ async def run_archival_pipeline(url: str):
         env={**os.environ, "SME_AI_PROVIDER": "mock", "PYTHONPATH": str(PROJECT_ROOT)},
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        text=True
+        text=True,
     )
-    time.sleep(5) # Wait for startup
+    time.sleep(5)  # Wait for startup
 
     try:
         # 2. Scout Archival History
@@ -60,16 +61,24 @@ async def run_archival_pipeline(url: str):
         gatekeeper = EpistemicGatekeeper({"plugin_id": "wayback_nexus"}, None)
 
         for d in divergences:
-            print(f"--- 🔬 Analyzing Divergence: {d['pre_change']['human_date']} -> {d['post_change']['human_date']} ---")
+            print(
+                f"--- 🔬 Analyzing Divergence: {d['pre_change']['human_date']} -> {d['post_change']['human_date']} ---"
+            )
 
             # Fetch content
-            pre_content = await scout.fetch_snapshot_content(d['pre_change']['archive_url'])
-            post_content = await scout.fetch_snapshot_content(d['post_change']['archive_url'])
+            pre_content = await scout.fetch_snapshot_content(d["pre_change"]["archive_url"])
+            post_content = await scout.fetch_snapshot_content(d["post_change"]["archive_url"])
 
             # Extract entities via Sidecar
             async with httpx.AsyncClient() as client:
-                pre_r = await client.post("http://127.0.0.1:8089/forensics/nexus_verify", json={"new_content": pre_content})
-                post_r = await client.post("http://127.0.0.1:8089/forensics/nexus_verify", json={"new_content": post_content})
+                pre_r = await client.post(
+                    "http://127.0.0.1:8089/forensics/nexus_verify",
+                    json={"new_content": pre_content},
+                )
+                post_r = await client.post(
+                    "http://127.0.0.1:8089/forensics/nexus_verify",
+                    json={"new_content": post_content},
+                )
 
                 pre_entities = set(pre_r.json().get("entities_found", []))
                 post_entities = set(post_r.json().get("entities_found", []))
@@ -77,7 +86,7 @@ async def run_archival_pipeline(url: str):
             # Calculate Semantic Drift (Nexus Logic)
             drift_trust = await gatekeeper.semantic_nexus_check(list(post_entities), pre_entities)
             semantic_drift = 1.0 - drift_trust
-            d['semantic_drift'] = semantic_drift
+            d["semantic_drift"] = semantic_drift
 
             print(f"    Semantic Drift detected: {semantic_drift:.2%}")
 
@@ -93,6 +102,7 @@ async def run_archival_pipeline(url: str):
         print("--- 🛰️ Terminating Sidecar ---")
         sidecar_proc.terminate()
 
+
 if __name__ == "__main__":
-    test_url = "example.com" # Using a stable one for demo, but any works
+    test_url = "example.com"  # Using a stable one for demo, but any works
     asyncio.run(run_archival_pipeline(test_url))

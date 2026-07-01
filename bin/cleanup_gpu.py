@@ -11,5 +11,6 @@ def main():
     else:
         print("No CUDA device detected.")
 
+
 if __name__ == "__main__":
     main()

@@ -12,7 +12,6 @@ Test Coverage:
 - Integration (5+ test cases)
 """
 
-
 import pytest
 
 from src.core.document_clusterer import (
@@ -38,6 +37,7 @@ from src.core.text_summarizer import SummarizationType, TextSummarizer
 # ============================================================================
 # SENTIMENT ANALYZER TESTS
 # ============================================================================
+
 
 class TestSentimentAnalyzerBasics:
     """Basic sentiment analyzer functionality."""
@@ -199,6 +199,7 @@ class TestSentimentAnalyzerAdvanced:
 # TEXT SUMMARIZER TESTS
 # ============================================================================
 
+
 class TestTextSummarizerBasics:
     """Basic text summarization tests."""
 
@@ -211,7 +212,9 @@ class TestTextSummarizerBasics:
     def test_extractive_summarization(self):
         """Test extractive summarization."""
         summarizer = TextSummarizer()
-        text = "This is the first sentence. This is the second sentence. This is the third sentence."
+        text = (
+            "This is the first sentence. This is the second sentence. This is the third sentence."
+        )
         summary = summarizer.summarize(text, ratio=0.5)
 
         assert summary.summary_type == SummarizationType.EXTRACTIVE
@@ -244,10 +247,7 @@ class TestTextSummarizerTypes:
         summarizer = TextSummarizer()
         text = "The cat sat on the mat. The dog played in the yard. The cat and dog are friends."
         summary = summarizer.summarize(
-            text,
-            ratio=0.5,
-            summary_type=SummarizationType.QUERY_FOCUSED,
-            query="cat"
+            text, ratio=0.5, summary_type=SummarizationType.QUERY_FOCUSED, query="cat"
         )
 
         assert summary.summary_type == SummarizationType.QUERY_FOCUSED
@@ -257,11 +257,7 @@ class TestTextSummarizerTypes:
         """Test abstractive summarization."""
         summarizer = TextSummarizer()
         text = "This is a test document. It contains important information. The summary should capture the essence."
-        summary = summarizer.summarize(
-            text,
-            ratio=0.5,
-            summary_type=SummarizationType.ABSTRACTIVE
-        )
+        summary = summarizer.summarize(text, ratio=0.5, summary_type=SummarizationType.ABSTRACTIVE)
 
         assert summary.summary_type == SummarizationType.ABSTRACTIVE
         assert len(summary.keywords) > 0
@@ -276,7 +272,7 @@ class TestTextSummarizerMultiDocument:
         docs = [
             "The machine learning algorithm works well.",
             "Deep learning is a subset of machine learning.",
-            "Neural networks are inspired by the human brain."
+            "Neural networks are inspired by the human brain.",
         ]
         result = summarizer.multi_document_summarize(docs, ratio=0.4)
 
@@ -290,7 +286,7 @@ class TestTextSummarizerMultiDocument:
         docs = [
             "Machine learning is powerful.",
             "Deep learning uses machine learning.",
-            "Machine learning algorithms are important."
+            "Machine learning algorithms are important.",
         ]
         result = summarizer.multi_document_summarize(docs)
 
@@ -315,12 +311,16 @@ class TestTextSummarizerQuality:
         summary = summarizer.summarize(text, ratio=0.5)
 
         assert len(summary.keywords) > 0
-        assert "machine" in str(summary.keywords).lower() or "learning" in str(summary.keywords).lower()
+        assert (
+            "machine" in str(summary.keywords).lower()
+            or "learning" in str(summary.keywords).lower()
+        )
 
 
 # ============================================================================
 # ENTITY LINKER TESTS
 # ============================================================================
+
 
 class TestEntityLinkerBasics:
     """Basic entity linking tests."""
@@ -382,7 +382,7 @@ class TestEntityLinkerKnowledgeBase:
             "url": "https://example.com",
             "description": "Test entity",
             "aliases": ["test", "example"],
-            "properties": {"type": "test"}
+            "properties": {"type": "test"},
         }
         linker.update_custom_kb("test_entity", entity_data)
 
@@ -391,7 +391,9 @@ class TestEntityLinkerKnowledgeBase:
     def test_wikipedia_linking(self):
         """Test Wikipedia entity linking."""
         linker = EntityLinker()
-        result = linker.link_entities("Albert Einstein discovered relativity.", kb_type=KnowledgeBase.WIKIPEDIA)
+        result = linker.link_entities(
+            "Albert Einstein discovered relativity.", kb_type=KnowledgeBase.WIKIPEDIA
+        )
 
         assert isinstance(result.linked_entities, list)
 
@@ -399,6 +401,7 @@ class TestEntityLinkerKnowledgeBase:
 # ============================================================================
 # DOCUMENT CLUSTERER TESTS
 # ============================================================================
+
 
 class TestDocumentClustererBasics:
     """Basic document clustering tests."""
@@ -416,7 +419,7 @@ class TestDocumentClustererBasics:
             "The cat sat on the mat.",
             "Dogs play in the park.",
             "Cats are independent animals.",
-            "Parks are good for recreation."
+            "Parks are good for recreation.",
         ]
         result = clusterer.cluster(docs, num_clusters=2)
 
@@ -450,7 +453,7 @@ class TestDocumentClustererAlgorithms:
             "Machine learning is powerful.",
             "Deep learning uses neural networks.",
             "Data science processes information.",
-            "Statistics analyzes data."
+            "Statistics analyzes data.",
         ]
         result = clusterer.cluster(docs, num_clusters=2, algorithm=ClusteringAlgorithm.KMEANS)
 
@@ -460,11 +463,7 @@ class TestDocumentClustererAlgorithms:
     def test_hierarchical_clustering(self):
         """Test hierarchical clustering."""
         clusterer = DocumentClusterer()
-        docs = [
-            "Document about cats.",
-            "Document about dogs.",
-            "Document about birds."
-        ]
+        docs = ["Document about cats.", "Document about dogs.", "Document about birds."]
         result = clusterer.cluster(docs, num_clusters=2, algorithm=ClusteringAlgorithm.HIERARCHICAL)
 
         assert result.algorithm == ClusteringAlgorithm.HIERARCHICAL
@@ -477,12 +476,7 @@ class TestDocumentClustererQuality:
     def test_silhouette_score(self):
         """Test silhouette score calculation."""
         clusterer = DocumentClusterer()
-        docs = [
-            "First document.",
-            "Second document.",
-            "Third document.",
-            "Fourth document."
-        ]
+        docs = ["First document.", "Second document.", "Third document.", "Fourth document."]
         result = clusterer.cluster(docs, num_clusters=2)
 
         assert -1.0 <= result.silhouette_score <= 1.0
@@ -493,7 +487,7 @@ class TestDocumentClustererQuality:
         docs = [
             "Machine learning algorithms.",
             "Deep learning networks.",
-            "Neural network training."
+            "Neural network training.",
         ]
         result = clusterer.cluster(docs, num_clusters=1)
 
@@ -503,10 +497,7 @@ class TestDocumentClustererQuality:
     def test_topic_labels_generation(self):
         """Test topic label generation."""
         clusterer = DocumentClusterer()
-        docs = [
-            "Machine learning and algorithms.",
-            "Data processing systems."
-        ]
+        docs = ["Machine learning and algorithms.", "Data processing systems."]
         result = clusterer.cluster(docs, num_clusters=2)
 
         assert len(result.topic_labels) > 0
@@ -521,7 +512,7 @@ class TestDocumentClustererSimilarity:
         docs = [
             "The cat sat on the mat.",
             "The dog played in the yard.",
-            "The cat was very comfortable."
+            "The cat was very comfortable.",
         ]
         similar = clusterer.get_similar_documents(docs[0], docs, top_n=2)
 
@@ -532,6 +523,7 @@ class TestDocumentClustererSimilarity:
 # ============================================================================
 # INTEGRATION TESTS
 # ============================================================================
+
 
 class TestPhase5Integration:
     """Phase 5 component integration tests."""
@@ -597,6 +589,7 @@ class TestPhase5Integration:
 # EDGE CASE TESTS
 # ============================================================================
 
+
 class TestPhase5EdgeCases:
     """Edge case tests for Phase 5 modules."""
 
@@ -622,7 +615,7 @@ class TestPhase5EdgeCases:
         docs = [
             "Short.",
             "This is a much longer document with more content.",
-            "Medium length text here."
+            "Medium length text here.",
         ]
         result = clusterer.cluster(docs, num_clusters=2)
 
@@ -631,11 +624,7 @@ class TestPhase5EdgeCases:
     def test_duplicate_documents_clustering(self):
         """Test clustering with duplicate documents."""
         clusterer = DocumentClusterer()
-        docs = [
-            "The same document.",
-            "The same document.",
-            "A different document."
-        ]
+        docs = ["The same document.", "The same document.", "A different document."]
         result = clusterer.cluster(docs, num_clusters=2)
 
         assert len(result.clusters) > 0

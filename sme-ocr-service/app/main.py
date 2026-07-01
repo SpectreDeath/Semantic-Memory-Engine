@@ -21,8 +21,7 @@ from app.schemas import (
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -210,9 +209,7 @@ async def ocr_file(file: UploadFile = File(...)):
             pages.append(page)
             page_count = 1
 
-            logger.info(
-                f"Image done: {len(blocks)} blocks, {len(text)} chars"
-            )
+            logger.info(f"Image done: {len(blocks)} blocks, {len(text)} chars")
 
     except Exception as e:
         logger.error(f"OCR processing failed: {e}")
@@ -246,4 +243,5 @@ async def ocr_file(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8080)

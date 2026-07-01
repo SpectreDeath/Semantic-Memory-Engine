@@ -11,11 +11,13 @@ from pathlib import Path
 # Ensure SME src is importable
 sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
 
+
 def test_stylometry():
     """Test faststylometry integration."""
     print("[*] Testing Stylometry Stack...")
     try:
         from src.sme.vendor import faststylometry
+
         print("[+] vendored faststylometry imports successful")
 
         # Test basic functionality - just check if the module is available
@@ -29,16 +31,18 @@ def test_stylometry():
         print(f"[-] faststylometry test failed: {e}")
         return False
 
+
 def test_gephi_components():
     """Test Gephi streaming components."""
     print("\n[*] Testing Gephi Components...")
     try:
         import gephistreamer
         from gephistreamer import GephiREST, Streamer, graph
+
         print("[+] gephistreamer imports successful")
 
         # Test object creation
-        rest = GephiREST('http://localhost:8080', workspace='workspace0')
+        rest = GephiREST("http://localhost:8080", workspace="workspace0")
         Streamer(rest)
         print("[+] Gephi objects initialized successfully")
 
@@ -55,11 +59,13 @@ def test_gephi_components():
         print(f"[-] Gephi component test failed: {e}")
         return False
 
+
 def test_memory_usage():
     """Test memory usage for 1660 Ti constraints."""
     print("\n[*] Testing Memory Constraints...")
     try:
         import psutil
+
         process = psutil.Process()
         memory_mb = process.memory_info().rss / 1024 / 1024
         print(f"[+] Current memory usage: {memory_mb:.2f} MB")
@@ -77,14 +83,15 @@ def test_memory_usage():
         print(f"[-] Memory test failed: {e}")
         return False
 
+
 def test_file_system():
     """Test required files exist."""
     print("\n[*] Testing File System...")
     required_files = [
-        'src/utils/gephi_bridge.py',
-        'src/utils/auditor.py',
-        'src/utils/context_sniffer.py',
-        'tests/master_forensic_test.py'
+        "src/utils/gephi_bridge.py",
+        "src/utils/auditor.py",
+        "src/utils/context_sniffer.py",
+        "tests/master_forensic_test.py",
     ]
 
     all_exist = True
@@ -97,6 +104,7 @@ def test_file_system():
 
     return all_exist
 
+
 def main():
     """Run all verification tests."""
     print("Forensic Stack Verification for 1660 Ti Environment")
@@ -106,7 +114,7 @@ def main():
         ("Stylometry Stack", test_stylometry),
         ("Gephi Components", test_gephi_components),
         ("Memory Constraints", test_memory_usage),
-        ("File System", test_file_system)
+        ("File System", test_file_system),
     ]
 
     results = {}
@@ -140,6 +148,7 @@ def main():
     else:
         print(f"\n[!] {total - passed} test(s) failed. Review issues above.")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

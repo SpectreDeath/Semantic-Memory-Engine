@@ -228,9 +228,9 @@ class TestAdvancedNLPAnalyzer(unittest.TestCase):
 
         self.assertIsInstance(result, dict)
         if result:
-            self.assertIn('characters', result)
-            self.assertIn('events', result)
-            self.assertIn('locations', result)
+            self.assertIn("characters", result)
+            self.assertIn("events", result)
+            self.assertIn("locations", result)
 
     def test_relationship_analysis(self):
         """Test relationship extraction."""
@@ -239,8 +239,8 @@ class TestAdvancedNLPAnalyzer(unittest.TestCase):
 
         self.assertIsInstance(result, dict)
         if result:
-            self.assertIn('dependencies', result)
-            self.assertIn('predicates', result)
+            self.assertIn("dependencies", result)
+            self.assertIn("predicates", result)
 
 
 class TestAdvancedNLPIntegration(unittest.TestCase):
@@ -283,7 +283,9 @@ class TestAdvancedNLPEdgeCases(unittest.TestCase):
         # Should handle gracefully - returns analysis with empty or single empty sentence
         self.assertIsNotNone(result)
         # Either empty list or list with single empty string
-        self.assertTrue(len(result.sentences) == 0 or (len(result.sentences) == 1 and result.sentences[0] == ""))
+        self.assertTrue(
+            len(result.sentences) == 0 or (len(result.sentences) == 1 and result.sentences[0] == "")
+        )
 
     def test_single_word(self):
         """Test single word analysis."""
@@ -330,5 +332,5 @@ class TestFactoryIntegration(unittest.TestCase):
         self.assertIsNot(engine1, engine2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

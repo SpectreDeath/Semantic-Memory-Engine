@@ -102,13 +102,14 @@ observability = [
 
 [project.scripts]
 sme = "sme_cli.main:cli"
+extract-skill = "scripts.extract_skill:main"
 
 # Use find: so setuptools auto-discovers all subpackages (src.ai, src.core, etc.)
 # The old explicit list ["sme_cli", "src", "gateway"] only registered top-level
 # packages and caused ImportErrors for src.ai, src.core, src.api, etc.
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["sme_cli*", "src*", "gateway*"]
+include = ["sme_cli*", "src*", "gateway*", "scripts*"]
 
 [build-system]
 requires = ["setuptools>=61.0"]

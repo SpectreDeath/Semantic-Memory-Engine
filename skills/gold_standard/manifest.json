@@ -1,0 +1,24 @@
+{
+  "gold_standards": [
+    {
+      "file": "analysis-engine.md",
+      "name": "analysis-engine",
+      "domain": "SME_INTEGRATION",
+      "category": "Analysis",
+      "complexity": "Advanced",
+      "description": "Full-featured orchestration skill - shows advanced structure",
+      "use_when": "extracting complex multi-step tools or orchestration systems"
+    },
+    {
+      "file": "text-summarization.md",
+      "name": "text-summarization",
+      "domain": "SME_INTEGRATION",
+      "category": "Analysis",
+      "complexity": "Intermediate",
+      "description": "Simple focused tool - shows minimal viable structure",
+      "use_when": "extracting lightweight single-purpose tools"
+    }
+  ],
+  "max_few_shot": 2,
+  "note": "VRAM constraint: max 2 gold standards injected into prompt to stay within 6GB VRAM budget on GTX 1660 Ti"
+}

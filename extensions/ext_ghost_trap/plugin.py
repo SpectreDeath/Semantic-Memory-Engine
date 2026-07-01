@@ -21,8 +21,8 @@ except ImportError:
     _dir = Path(__file__).resolve().parent
     if str(_dir) not in sys.path:
         sys.path.insert(0, str(_dir))
-    from plugin_base import BasePlugin
     from error_handling import ErrorHandler
+    from plugin_base import BasePlugin
 
 try:
     from .ghost_detector import GhostDetector, GhostFile, scan_for_ghosts
@@ -224,7 +224,9 @@ class GhostTrapPlugin(BasePlugin):
 ghost_trap_plugin = GhostTrapPlugin({}, None)
 
 
-def get_plugin(manifest: dict[str, Any] | None = None, nexus_api: Any | None = None) -> GhostTrapPlugin:
+def get_plugin(
+    manifest: dict[str, Any] | None = None, nexus_api: Any | None = None
+) -> GhostTrapPlugin:
     """Get the global Ghost Trap plugin instance."""
     return GhostTrapPlugin(manifest or {}, nexus_api)
 

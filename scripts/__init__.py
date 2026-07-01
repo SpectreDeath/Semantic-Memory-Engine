@@ -1,0 +1,1 @@
+"""SME terminal scripts package."""

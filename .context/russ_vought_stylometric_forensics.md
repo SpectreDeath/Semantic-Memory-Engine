@@ -1,4 +1,4 @@
-# Russell Vought Stylometric Forensics Context
+# Russ Stylometric Forensics Context
 
 **Saved:** 2026-06-15T19:54:15-04:00  
 **Workspace:** `D:\GitHub\projects\SME`

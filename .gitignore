@@ -87,3 +87,6 @@ extensions/*/export/
 
 # --- Skills Organization ---
 skills/registry.json
+
+# --- Agent Context (local-only) ---
+.context/

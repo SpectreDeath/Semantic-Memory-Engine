@@ -50,6 +50,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -75,7 +76,7 @@ import click
 DEFAULT_GOLD_DIR = str(REPO_ROOT / "skills" / "gold_standard")
 DEFAULT_VAULT_DIR = str(REPO_ROOT / ".kilo" / "vault")
 DEFAULT_TIMEOUT = 120.0
-MAX_GOLD_DEFAULT = 2  # VRAM constraint: GTX 1660 Ti 6GB
+MAX_GOLD_DEFAULT = 2  # VRAM constraint: GTX 1660 Ti 6GB; falls back to 2 when pynvml is missing
 REQUIRED_CLICK_VERSION = "8.0.0"
 
 logger = logging.getLogger("extract_skill")
@@ -147,7 +148,8 @@ def _with_error_handling(f):
         except ProviderError as exc:
             click.echo(
                 f"\n{Fore.RED}Provider Error: {exc}{Style.RESET_ALL}\n"
-                f"{Fore.YELLOW}Hint: Check SME_AI_PROVIDER env var and model path.{Style.RESET_ALL}"
+                f"{Fore.YELLOW}Hint: Set SME_AI_PROVIDER=mock for GPU-less environments, "
+                f"or use --provider mock.{Style.RESET_ALL}"
             )
             sys.exit(3)
         except ValueError as exc:
@@ -1081,6 +1083,39 @@ def _is_plausible_skill_md(text: str) -> bool:
     return "---" in text or "## purpose" in lower or "## description" in lower
 
 
+def _resolve_collision(
+    output_name: str,
+    author: str,
+    target_dir: Path,
+    extractor: Any,
+    on_collision: str,
+) -> tuple[str, bool]:
+    """Resolve filename collisions for vault outputs.
+
+    Returns ``(resolved_name, did_collide)`` where ``resolved_name`` is safe
+    to pass to :py:meth:`SkillExtractor.save(output_name=...)`.
+    """
+    safe = extractor._safe_filename(output_name)
+    candidate = target_dir / f"{safe}.md"
+
+    if not candidate.exists():
+        return output_name, False
+
+    if on_collision == "overwrite":
+        return output_name, True
+
+    if on_collision == "skip":
+        return output_name, True
+
+    author_slug = re.sub(r"[^a-z0-9-]", "-", author.lower())
+    author_slug = re.sub(r"-+", "-", author_slug).strip("-")
+    if not author_slug:
+        author_slug = "unknown"
+
+    suffixed = f"{output_name}--{author_slug}"
+    return suffixed, True
+
+
 # ---------------------------------------------------------------------------
 # Crawl command group
 # ---------------------------------------------------------------------------
@@ -1137,6 +1172,15 @@ def crawl_group():
     help="Skip skills already present in vault.",
 )
 @click.option(
+    "--on-collision",
+    default="author-suffix",
+    show_default=True,
+    type=click.Choice(["overwrite", "skip", "author-suffix"]),
+    help="Strategy when a vault file with the same name already exists: "
+    "'overwrite' replaces it (default), 'skip' leaves it untouched, "
+    "'author-suffix' appends the author handle to the filename.",
+)
+@click.option(
     "--gold-dir",
     default=DEFAULT_GOLD_DIR,
     show_default=True,
@@ -1151,10 +1195,11 @@ def crawl_group():
     "-g",
     default=MAX_GOLD_DEFAULT,
     type=click.IntRange(1, 3),
+    help="Maximum few-shot gold standards to inject (1–3). "
+    "Automatically capped by VRAM when pynvml is available; defaults to 2 on 6GB cards.",
 )
 @click.option(
     "--timeout",
-    "-t",
     default=DEFAULT_TIMEOUT,
     show_default=True,
     type=float,
@@ -1180,6 +1225,7 @@ def crawl_fetch_cmd(
     sort_by,
     min_stars,
     skip_existing,
+    on_collision,
     gold_dir,
     vault_dir,
     max_gold,
@@ -1321,9 +1367,28 @@ def crawl_fetch_cmd(
                 f"({skill.complexity}, {len(skill.workflow)} steps)"
             )
             if not dry_run:
+                resolved_name, did_collide = _resolve_collision(
+                    output_name=name,
+                    author=author,
+                    target_dir=Path(vault_dir),
+                    extractor=run_context.extractor,
+                    on_collision=on_collision,
+                )
+                if did_collide and on_collision == "skip":
+                    click.echo(
+                        f"  {_warn_icon()} Vault file already exists. Skipping per --on-collision=skip."
+                    )
+                    skipped += 1
+                    continue
+                if did_collide and on_collision == "author-suffix":
+                    click.echo(
+                        f"  {_warn_icon()} Filename collision resolved: {name} -> {resolved_name}"
+                    )
                 try:
-                    run_context.extractor.save(skill, output_dir=vault_dir)
-                    click.echo(f"  {_status_icon(True)} Saved to vault: {skill.skill_name}.md")
+                    run_context.extractor.save(
+                        skill, output_dir=vault_dir, output_name=resolved_name
+                    )
+                    click.echo(f"  {_status_icon(True)} Saved to vault: {resolved_name}.md")
                 except (ValidationError, OSError) as exc:
                     click.echo(f"  {_status_icon(False)} Save error: {exc}")
                     failed += 1

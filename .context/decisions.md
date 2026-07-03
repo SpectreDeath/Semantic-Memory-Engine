@@ -72,3 +72,23 @@
 - PowerShell 5.1: no `&&` chaining; use `;` or separate commands.
 - CRLF line endings on Windows cause LF warnings in git.
 **Status**: Active constraints
+
+## 2026-07-02 [subsystem-review, sentinel-fix, collision-resolution, v3.0.1]
+**Decision**: Implement all recommendations from SME subsystem status review.
+**Changes**:
+- `src/ai/providers/sentinel_provider.py`: `run()` now raises `RuntimeError` with actionable message when `self.model` is `None`, instead of returning plain text that gets wrapped into fake success JSON.
+- `scripts/extract_skill.py`: Added `_resolve_collision()` helper and `--on-collision` flag (`overwrite`, `skip`, `author-suffix`, default `author-suffix`). `crawl fetch` now passes `output_name` through collision resolver before `save()`.
+- `scripts/extract_skill.py`: Added `import re` for author-slug sanitization.
+- `scripts/extract_skill.py`: Documented VRAM fallback in `MAX_GOLD_DEFAULT` comment and `--max-gold` help text.
+- `tests/test_skill_extractor_changes.py`: Added 5 new tests for SentinelProvider fail-fast and all 3 collision strategies.
+**Status**: Complete
+
+## 2026-07-02 [sentinel-fail-fast-complete, skip-path, v3.0.1]
+**Decision**: Complete remaining SentinelProvider fail-fast coverage and add explicit GPU-less skip path.
+**Changes**:
+- `src/ai/providers/sentinel_provider.py`: `switch_lens()` and `offload_to_ram()` now raise `RuntimeError` when `self.model` is `None`, matching `run()` behavior.
+- `src/ai/providers/sentinel_provider.py`: Updated all three `RuntimeError` messages to include `or use --provider mock for GPU-less environments` hint.
+- `scripts/extract_skill.py`: Updated `_with_error_handling` ProviderError hint from `Check SME_AI_PROVIDER env var and model path` to `Set SME_AI_PROVIDER=mock for GPU-less environments, or use --provider mock`.
+- `tests/test_skill_extractor_changes.py`: Added 2 new tests for `switch_lens()` and `offload_to_ram()` fail-fast behavior (total 11 tests).
+**Verification**: All 11 tests pass, `ruff check` clean on all changed files.
+**Status**: Complete

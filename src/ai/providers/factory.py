@@ -8,7 +8,7 @@ def get_provider() -> SMEAIProvider:
     Provider Factory: returns the configured AI provider.
     Defaults to Langflow if not specified.
     """
-    provider_type = os.getenv("SME_AI_PROVIDER", "langflow").lower()
+    provider_type = os.getenv("SME_AI_PROVIDER", "sentinel").lower()
 
     if provider_type == "langflow":
         from src.ai.providers.langflow_provider import LangflowProvider

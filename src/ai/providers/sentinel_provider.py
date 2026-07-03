@@ -18,6 +18,7 @@ class SentinelProvider(SMEAIProvider):
         self.config = get_config()
         self.model = None
         self.current_lora = None
+        self._init_error: str | None = None
         self._init_model()
 
     def _init_model(self):
@@ -27,25 +28,30 @@ class SentinelProvider(SMEAIProvider):
 
             model_path = self.config.get_path("hardware.base_model")
             if not model_path.exists():
-                logger.warning(f"Base model not found at {model_path}. sentinel_provider degraded.")
+                msg = f"Base model not found at {model_path}. sentinel_provider degraded."
+                logger.warning(msg)
+                self._init_error = msg
                 return
 
-            # Optimized for 6GB VRAM
-            # n_gpu_layers=-1 attempts to put all on GPU
-            # We'll start aggressive and let Sentinel throttle us if needed.
             self.model = Llama(
                 model_path=str(model_path), n_gpu_layers=32, n_ctx=4096, verbose=False
             )
             logger.info(f"Sentinel (GGUF) initialized with {model_path.name}")
         except Exception as e:
-            logger.exception(f"Failed to load llama-cpp: {e}")
+            msg = f"Failed to load llama-cpp: {e}"
+            logger.exception(msg)
+            self._init_error = msg
 
     def run(self, flow_name: str, input_data: Any) -> str:
         """Execute a forensic tool call using the loaded model."""
         if not self.model:
-            return "Error: Sentinel Model not loaded."
+            raise RuntimeError(
+                "Sentinel model not loaded. "
+                f"Initialization error: {self._init_error or 'unknown'}. "
+                "Install llama-cpp-python, ensure base_model is configured, "
+                "or use --provider mock for GPU-less environments."
+            )
 
-        # Simple completion for now, simulating tool-use
         prompt = f"### System: Forensic Assistant\n### Input: {input_data}\n### Response:"
         output = self.model(prompt, max_tokens=512, stop=["###"], echo=False)
         return output["choices"][0]["text"].strip()
@@ -56,7 +62,11 @@ class SentinelProvider(SMEAIProvider):
         lens_name corresponds to a .bin file in models/adapters/
         """
         if not self.model:
-            return
+            raise RuntimeError(
+                "Sentinel model not loaded. Cannot switch lens. "
+                f"Initialization error: {self._init_error or 'unknown'}. "
+                "Install llama-cpp-python and ensure base_model is configured."
+            )
 
         lora_path = os.path.join(self.config.get("hardware.lora_dir"), f"{lens_name}.bin")
         if not os.path.exists(lora_path):
@@ -91,7 +101,11 @@ class SentinelProvider(SMEAIProvider):
         Moves layers from VRAM to System RAM to prevent CUDA OOM.
         """
         if not self.model:
-            return
+            raise RuntimeError(
+                "Sentinel model not loaded. Cannot offload layers. "
+                f"Initialization error: {self._init_error or 'unknown'}. "
+                "Install llama-cpp-python and ensure base_model is configured."
+            )
 
         logger.warning("Sentinel: Moving model layers to System RAM to preserve VRAM.")
         # Currently, llama-cpp doesn't support live layer shifting without reload.

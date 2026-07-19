@@ -123,6 +123,8 @@ const Dashboard = () => {
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               Overlaps with: firewalls, system_logs, network_topology
             </p>
+          </div>
+        </div>
       </section>
 
       <section className="card glass-panel" style={{ gridColumn: '1 / -1' }} aria-labelledby="mimo-title">

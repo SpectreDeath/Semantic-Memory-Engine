@@ -72,7 +72,7 @@ $StartedProcesses += $opProc
 
 Write-Host "[2/2] Starting Frontend (port 5173)..." -ForegroundColor Green
 # npm run dev usually starts vite
-$frontProc = Start-Process "npm" -ArgumentList "run dev" -Cwd "$SCRIPT_DIR\frontend" -PassThru -NoNewWindow
+$frontProc = Start-Process "npm.cmd" -ArgumentList "run dev" -WorkingDirectory "$SCRIPT_DIR\frontend" -PassThru -NoNewWindow
 $StartedProcesses += $frontProc
 
 Write-Host ""

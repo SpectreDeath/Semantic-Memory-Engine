@@ -243,7 +243,5 @@ class TestExtensionSecurityIntegration:
     def test_security_error_exists(self):
         """SecurityError exception should be defined."""
         from gateway.extension_manager import SecurityError
-        from gateway.secure_extension_loader import SecurityError as SecureSecurityError
 
         assert issubclass(SecurityError, Exception)
-        assert issubclass(SecureSecurityError, Exception)

@@ -93,6 +93,7 @@ def register(
     extension_manager: Any,
     get_hsm: Any,
     get_nexus: Any,
+    sme_core: Any = None,
 ) -> None:
     """Register all system / utility tools with the FastMCP instance."""
 
@@ -217,3 +218,60 @@ def register(
             "registry": tools,
         }
         return json.dumps(serialize_result(manifest), indent=2)
+
+    @mcp.tool()
+    def route_execution(
+        tool_name: str, payload: dict | None = None, mode: str = "auto"
+    ) -> str:
+        """Dynamically route and dispatch tool execution between SME local runtime and em-cubed distributed nodes."""
+        from gateway.traffic_router import TrafficRouter
+
+        router = TrafficRouter()
+        res = router.dispatch_workload(
+            tool_name=tool_name, payload=payload, mode=mode, sme_core=sme_core
+        )
+        return json.dumps(res, indent=2)
+
+    @mcp.tool()
+    def execute_distributed_workflow(
+        workflow_id: str | None = None, tasks_spec: list[dict] | None = None
+    ) -> str:
+        """Execute a multi-step em-cubed distributed workflow DAG across execution pools."""
+        from gateway.em_cubed_bridge import EmCubedWorkflowBridge
+
+        bridge = EmCubedWorkflowBridge()
+        res = bridge.execute_workflow_dag(workflow_id=workflow_id, tasks_spec=tasks_spec)
+        return json.dumps(res, indent=2)
+
+    @mcp.tool()
+    def route_scientific_workflow(
+        prompt: str, target_domain: str = "bioinformatics"
+    ) -> str:
+        """Route and execute multi-modal scientific workflow DAG (ChEMBL, PubChem, PDB, PyMOL)."""
+        from gateway.scientific_router import ScientificDomainRouter
+
+        sci_router = ScientificDomainRouter()
+        res = sci_router.execute_scientific_workflow(prompt=prompt, target_domain=target_domain)
+        return json.dumps(res, indent=2)
+
+    @mcp.tool()
+    def analyze_media_forensics(
+        file_path: str, checks: list[str] | None = None
+    ) -> str:
+        """Analyze media file for EXIF metadata, LSB steganography, and ELA artifacts."""
+        from extensions.ext_forensic_media.plugin import ForensicMediaPlugin
+
+        plugin = ForensicMediaPlugin()
+        res = plugin.analyze_media_forensics(file_path=file_path, checks=checks)
+        return json.dumps(res, indent=2)
+
+    @mcp.tool()
+    def harvest_threat_iocs(
+        raw_text: str, source_id: str = "darkweb_feed"
+    ) -> str:
+        """Extract threat intelligence IOCs (IP, SHA256, BTC wallet) and inject into VIndexOverlay."""
+        from gateway.threat_harvester import ThreatIntelligenceHarvester
+
+        harvester = ThreatIntelligenceHarvester()
+        res = harvester.harvest_threat_iocs(raw_text=raw_text, source_id=source_id)
+        return json.dumps(res, indent=2)

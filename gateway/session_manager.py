@@ -98,9 +98,61 @@ class Session:
             pass
 
     def update_scratchpad(self, key: str, value: Any):
-        """Store info in scratchpad."""
+        """Store info in scratchpad and persist to local SQLite store."""
         self.scratchpad[key] = value
         self.last_accessed = datetime.now()
+        self._save_scratchpad_entry(key, value)
+
+    def _save_scratchpad_entry(self, key: str, value: Any):
+        """Persist scratchpad entry to laboratory.db."""
+        try:
+            os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS session_scratchpad (
+                    session_id TEXT,
+                    key_name TEXT,
+                    value_json TEXT,
+                    updated_at TEXT,
+                    PRIMARY KEY (session_id, key_name)
+                )
+                """
+            )
+            cursor.execute(
+                """
+                INSERT OR REPLACE INTO session_scratchpad (session_id, key_name, value_json, updated_at)
+                VALUES (?, ?, ?, ?)
+                """,
+                (self.session_id, key, json.dumps(value), datetime.now().isoformat()),
+            )
+            conn.commit()
+            conn.close()
+        except Exception:
+            pass
+
+    def load_persisted_scratchpad(self):
+        """Load scratchpad state from SQLite DB if available."""
+        try:
+            if not os.path.exists(DB_PATH):
+                return
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT key_name, value_json FROM session_scratchpad WHERE session_id = ?",
+                (self.session_id,),
+            )
+            rows = cursor.fetchall()
+            for key_name, value_json in rows:
+                if key_name not in self.scratchpad:
+                    try:
+                        self.scratchpad[key_name] = json.loads(value_json)
+                    except Exception:
+                        self.scratchpad[key_name] = value_json
+            conn.close()
+        except Exception:
+            pass
 
     def to_dict(self) -> dict[str, Any]:
         """Convert session to serializable dict."""
@@ -121,11 +173,13 @@ class SessionManager:
         self._sessions: dict[str, Session] = {}
 
     def get_session(self, session_id: str | None = None) -> Session:
-        """Get existing session or create new one."""
+        """Get existing session or create new one with persisted scratchpad loading."""
         if not session_id or session_id not in self._sessions:
             new_id = session_id or str(uuid.uuid4())
-            self._sessions[new_id] = Session(new_id)
-            return self._sessions[new_id]
+            session = Session(new_id)
+            session.load_persisted_scratchpad()
+            self._sessions[new_id] = session
+            return session
 
         session = self._sessions[session_id]
         session.last_accessed = datetime.now()

@@ -136,28 +136,50 @@ class NLPPipeline:
     """
 
     def __init__(self):
-        """Initialize NLP pipeline."""
+        """Initialize NLP pipeline with lazy component loading."""
         if nltk is None:
             logger.error("NLTK not available")
             self._available = False
             return
 
         self._available = True
+        self._data_manager = None
+        self._semantic_graph = None
+        self._lemmatizer = None
+        self._stemmer = None
+        self._chunk_parser = None
 
-        # Initialize components
-        self.data_manager = DataManager()
-        self.semantic_graph = SemanticGraph()
+    @property
+    def data_manager(self) -> DataManager:
+        if self._data_manager is None:
+            self._data_manager = DataManager()
+            if not self._data_manager.ensure_required_data(verbose=False):
+                logger.warning("Some NLTK data not available")
+        return self._data_manager
 
-        # Initialize tools
-        self.lemmatizer = WordNetLemmatizer()
-        self.stemmer = PorterStemmer()
-        self.chunk_parser = RegexpParser(self.CHUNK_GRAMMAR)
+    @property
+    def semantic_graph(self) -> SemanticGraph:
+        if self._semantic_graph is None:
+            self._semantic_graph = SemanticGraph()
+        return self._semantic_graph
 
-        # Ensure required data
-        if not self.data_manager.ensure_required_data(verbose=False):
-            logger.warning("Some NLTK data not available")
+    @property
+    def lemmatizer(self) -> WordNetLemmatizer:
+        if self._lemmatizer is None:
+            self._lemmatizer = WordNetLemmatizer()
+        return self._lemmatizer
 
-        logger.info("NLPPipeline initialized")
+    @property
+    def stemmer(self) -> PorterStemmer:
+        if self._stemmer is None:
+            self._stemmer = PorterStemmer()
+        return self._stemmer
+
+    @property
+    def chunk_parser(self) -> RegexpParser:
+        if self._chunk_parser is None:
+            self._chunk_parser = RegexpParser(self.CHUNK_GRAMMAR)
+        return self._chunk_parser
 
     def is_available(self) -> bool:
         """Check if pipeline is available."""

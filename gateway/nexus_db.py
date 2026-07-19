@@ -40,17 +40,22 @@ class ForensicNexus:
         self.conn = sqlite3.connect(self.primary_path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
 
-        # Enable Write-Ahead Logging for concurrent tool access
+        # Enable Write-Ahead Logging & high-throughput PRAGMAs for 10GB dataset scale
         cursor = self.conn.cursor()
         try:
             cursor.execute("PRAGMA journal_mode=WAL;")
+            cursor.execute("PRAGMA synchronous=NORMAL;")
+            cursor.execute("PRAGMA cache_size=-64000;")  # 64MB memory page cache
+            cursor.execute("PRAGMA temp_store=MEMORY;")
+            cursor.execute("PRAGMA mmap_size=268435456;")  # 256MB mmap space
         except Exception as e:
-            logger.warning(f"Nexus: Failed to enable WAL mode: {e}")
+            logger.warning(f"Nexus: Failed to set performance PRAGMAs: {e}")
         finally:
             cursor.close()
 
         # Attach subordinate databases
         self._attach_subordinates()
+        self._ensure_indexes()
 
     def _attach_subordinates(self):
         databases = {
@@ -82,6 +87,19 @@ class ForensicNexus:
                     cursor.close()
             except Exception as e:
                 logger.warning(f"Nexus: Failed to attach {schema} ({abs_path}): {e}")
+
+    def _ensure_indexes(self):
+        """Create indexes on attached schemas to accelerate cross-database JOINs."""
+        index_queries = [
+            "CREATE INDEX IF NOT EXISTS lab.idx_events_target ON forensic_events(target);",
+            "CREATE INDEX IF NOT EXISTS lab.idx_events_timestamp ON forensic_events(timestamp DESC);",
+            "CREATE INDEX IF NOT EXISTS prov.idx_prov_source ON source_provenance(source_id);",
+        ]
+        for query in index_queries:
+            try:
+                self.execute(query)
+            except Exception:
+                pass
 
     def close(self):
         """Close the database connection."""

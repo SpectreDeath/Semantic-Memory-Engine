@@ -17,11 +17,10 @@ logger = logging.getLogger(__name__)
 # --------------------------------------------------------------------------
 SECRET_KEY = os.environ.get("SME_GATEWAY_SECRET")
 if not SECRET_KEY:
-    logger.critical(
-        "SME_GATEWAY_SECRET is not set. Exiting to prevent running with "
-        "insecure defaults. Set this environment variable before starting."
+    SECRET_KEY = secrets.token_urlsafe(32)
+    logger.warning(
+        "SME_GATEWAY_SECRET is not set in environment. Generating an ephemeral secret key."
     )
-    sys.exit(1)
 
 ALGORITHM = "HS256"
 TOKEN_EXPIRY_HOURS = 24
@@ -35,10 +34,10 @@ class AuthManager:
     def __init__(self, admin_password: str | None = None):
         admin_password = admin_password or os.environ.get("SME_ADMIN_PASSWORD")
         if not admin_password:
-            logger.critical(
-                "SME_ADMIN_PASSWORD is not set. Exiting to prevent running with insecure defaults."
+            admin_password = secrets.token_urlsafe(16)
+            logger.warning(
+                "SME_ADMIN_PASSWORD is not set in environment. Generating an ephemeral admin password."
             )
-            sys.exit(1)
         self.admin_password = admin_password
         logger.info("AuthManager initialized")
 

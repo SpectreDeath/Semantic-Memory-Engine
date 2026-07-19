@@ -2,29 +2,50 @@ import React, { useState, useEffect } from 'react';
 import { Activity, Network } from 'lucide-react';
 import { api, ws } from '../api';
 import { SkeletonCard } from '../components/Skeleton';
+import MimoAnnVisualizer from '../components/MimoAnnVisualizer';
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [feedItems, setFeedItems] = useState([]);
+  const [mimoData, setMimoData] = useState(null);
+  const [annData, setAnnData] = useState(null);
 
   useEffect(() => {
     // Connect to WebSocket for real-time diagnostics
     ws.connect('/ws/diagnostics');
 
+    const unsub = ws.on('diagnostics', (data) => {
+      if (data?.mimo_6d) setMimoData(data.mimo_6d);
+      if (data?.ann_framework) setAnnData(data.ann_framework);
+
+      if (data?.routing) {
+        setFeedItems((prev) => [
+          {
+            type: 'ROUTER',
+            msg: `Traffic Router: Mode=${data.routing.mode}, em-cubed node=${data.routing.em_cubed_node}`,
+            time: 'now',
+          },
+          {
+            type: 'NEXUS',
+            msg: `Forensic Nexus: ${data.nexus?.attached_databases || 0} attached databases`,
+            time: 'now',
+          },
+          ...prev.slice(0, 4),
+        ]);
+      }
+    });
+
     // Try to fetch real data
     const fetchData = async () => {
       try {
-        // Try to get health status
         const health = await api.healthCheck();
         if (health) {
-          // Use real data if available
           setFeedItems([
             { type: 'ENTITY', msg: 'System health check passed', time: 'now' },
             { type: 'KNOWLEDGE', msg: 'Connected to Nexus database', time: 'now' },
           ]);
         }
       } catch {
-        // Use fallback data if API unavailable
         setFeedItems([
           { type: 'ENTITY', msg: 'API server not connected - using demo mode', time: 'now' },
           { type: 'SENTIMENT', msg: 'System ready for analysis', time: '1m' },
@@ -35,6 +56,7 @@ const Dashboard = () => {
     };
 
     fetchData();
+    return () => unsub?.();
   }, []);
 
   if (loading) {
@@ -101,8 +123,10 @@ const Dashboard = () => {
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               Overlaps with: firewalls, system_logs, network_topology
             </p>
-          </div>
-        </div>
+      </section>
+
+      <section className="card glass-panel" style={{ gridColumn: '1 / -1' }} aria-labelledby="mimo-title">
+        <MimoAnnVisualizer mimoData={mimoData} annData={annData} />
       </section>
     </div>
   );

@@ -478,7 +478,7 @@ class TestCreatePlugin:
     """Tests for create_plugin and register_extension functions."""
 
     def test_create_plugin(self):
-        from extensions.ext_nur.plugin import create_plugin, UnifiedForensicReporterPlugin
+        from extensions.ext_nur.plugin import UnifiedForensicReporterPlugin, create_plugin
 
         manifest = {"plugin_id": "test_plugin", "name": "Test"}
         nexus_api = MagicMock()
@@ -493,7 +493,7 @@ class TestCreatePlugin:
             assert isinstance(plugin, UnifiedForensicReporterPlugin)
 
     def test_register_extension(self):
-        from extensions.ext_nur.plugin import register_extension, UnifiedForensicReporterPlugin
+        from extensions.ext_nur.plugin import UnifiedForensicReporterPlugin, register_extension
 
         manifest = {"plugin_id": "test_reg", "name": "Test"}
         nexus_api = MagicMock()

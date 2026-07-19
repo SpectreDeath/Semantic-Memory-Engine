@@ -165,7 +165,7 @@ class AdvancedNLPEngine:
 
     def __init__(self, use_spacy: bool = True):
         """
-        Initialize advanced NLP engine.
+        Initialize advanced NLP engine with lazy spaCy model loading.
 
         Args:
             use_spacy: Try to use spaCy if available (better parsing)
@@ -175,14 +175,8 @@ class AdvancedNLPEngine:
         self.data_manager = data_manager.DataManager()
         self.semantic_graph = semantic_graph.SemanticGraph()
 
-        # Try spacy
-        self.spacy_model = None
-        if use_spacy:
-            try:
-                self.spacy_model = spacy.load("en_core_web_sm")
-                logger.info("spaCy model loaded for advanced parsing")
-            except Exception as e:
-                logger.warning(f"spaCy not available: {e}")
+        self._spacy_model = None
+        self._spacy_loaded = False
 
         # Check availability
         self._available = True
@@ -191,6 +185,19 @@ class AdvancedNLPEngine:
             self._available = False
 
         logger.info("AdvancedNLPEngine initialized")
+
+    @property
+    def spacy_model(self):
+        """Lazy load spaCy model on demand."""
+        if not self._spacy_loaded and self.use_spacy:
+            self._spacy_loaded = True
+            try:
+                self._spacy_model = spacy.load("en_core_web_sm")
+                logger.info("spaCy model lazy-loaded for advanced parsing")
+            except Exception as e:
+                logger.warning(f"spaCy not available: {e}")
+                self._spacy_model = None
+        return self._spacy_model
 
     def is_available(self) -> bool:
         """Check if engine is available."""

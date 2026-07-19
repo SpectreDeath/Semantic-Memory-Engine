@@ -72,4 +72,5 @@ def register_all_routers(
         extension_manager=extension_manager,
         get_hsm=get_hsm,
         get_nexus=get_nexus,
+        sme_core=sme_core,
     )

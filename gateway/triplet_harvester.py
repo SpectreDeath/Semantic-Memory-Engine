@@ -12,8 +12,10 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
-import spacy
-from spacy.tokens import Doc, Span
+try:
+    import spacy
+except (ImportError, Exception):
+    spacy = None
 
 logger = logging.getLogger("lawnmower.triplet_harvester")
 
@@ -78,9 +80,14 @@ class TripletHarvester:
 
     def _load_spacy_model(self, model: str):
         """Load spacy model with fallback."""
+        self.nlp = None
         try:
+            import spacy
+
             self.nlp = spacy.load(model)
             logger.info(f"Loaded spacy model: {model}")
+        except Exception as e:
+            logger.warning(f"spaCy not available for TripletHarvester: {e}")
         except OSError:
             logger.warning(f"Model {model} not found, downloading...")
             from spacy.cli import download
@@ -108,6 +115,9 @@ class TripletHarvester:
         Returns:
             List of EntityTriple objects
         """
+        if not self.nlp:
+            return []
+
         doc = self.nlp(text)
         triplets = []
 
@@ -117,7 +127,7 @@ class TripletHarvester:
 
         return triplets
 
-    def _extract_from_sentence(self, sent: Span) -> list[EntityTriple]:
+    def _extract_from_sentence(self, sent: Any) -> list[EntityTriple]:
         """Extract triples from a single sentence."""
         triplets = []
         sent_text = sent.text
@@ -148,7 +158,7 @@ class TripletHarvester:
 
         return triplets
 
-    def _infer_relation(self, sent: Span, subj: Span, others: list[Span]) -> str:
+    def _infer_relation(self, sent: Any, subj: Any, others: list[Any]) -> str:
         """Infer the relation between entities based on sentence context."""
         sent_text = sent.text.lower()
 
@@ -166,7 +176,7 @@ class TripletHarvester:
 
         return "related_to"
 
-    def _extract_pattern_based_triplets(self, sent: Span) -> list[EntityTriple]:
+    def _extract_pattern_based_triplets(self, sent: Any) -> list[EntityTriple]:
         """Extract additional triples using pattern matching when no NER entities found."""
         triplets = []
         sent_text = sent.text

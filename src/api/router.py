@@ -449,3 +449,111 @@ async def list_generators():
         return {"handlers": handlers}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+class RouteRequest(BaseModel):
+    tool_name: str
+    payload: dict | None = None
+    mode: str = "auto"
+
+
+@router.post("/route")
+async def route_workload(request: RouteRequest):
+    """Dynamically route and dispatch workload between SME and em-cubed nodes."""
+    try:
+        from gateway.traffic_router import TrafficRouter
+
+        router_engine = TrafficRouter()
+        result = router_engine.dispatch_workload(
+            tool_name=request.tool_name, payload=request.payload, mode=request.mode
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class AnnBackpropRequest(BaseModel):
+    layer_index: int = 1
+    trajectory: list[dict] | None = None
+    target_objective: str = "graph_synthesis"
+
+
+@router.post("/ann/backprop")
+async def trigger_ann_backprop(request: AnnBackpropRequest):
+    """Trigger ANN textual backpropagation (∇text), momentum smoothing, and candidate block validation."""
+    try:
+        from gateway.candidate_pool import CandidatePoolStorage
+        from gateway.momentum_buffer import MomentumBuffer, MultiStageValidationFilter
+        from src.logic.textual_gradient import TextualGradientEngine
+
+        traj = request.trajectory or [
+            {"task_id": "step_0", "status": "success"},
+            {"task_id": "step_1", "status": "error", "error": "Schema mismatch"},
+        ]
+
+        engine = TextualGradientEngine()
+        g_global = engine.compute_global_gradient(traj, target_objective=request.target_objective)
+
+        initial_block = {
+            "block_id": f"layer_{request.layer_index}_block_v1",
+            "nodes": {"n1": {"prompt": "Initial prompt instruction"}},
+            "edges": [],
+        }
+
+        g_local = engine.compute_local_gradient(
+            layer_index=request.layer_index,
+            team_block=initial_block,
+            global_gradient=g_global,
+            trajectory=traj,
+        )
+
+        candidate_block = engine.apply_textual_gradient(initial_block, g_local)
+
+        buffer = MomentumBuffer()
+        smoothed_g_local = buffer.apply_momentum(request.layer_index, g_local)
+
+        validator = MultiStageValidationFilter()
+        val_res = validator.validate_candidate_block(candidate_block, baseline_performance=1.0)
+
+        saved = False
+        if val_res["is_valid"]:
+            pool_storage = CandidatePoolStorage()
+            saved = pool_storage.save_block(request.layer_index, candidate_block)
+
+        return {
+            "status": "success",
+            "layer_index": request.layer_index,
+            "global_gradient": g_global.to_dict(),
+            "local_gradient": smoothed_g_local.to_dict(),
+            "validation_result": val_res,
+            "saved_to_pool": saved,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/audit/merkle-root")
+async def get_merkle_root():
+    """Retrieve current node Merkle tree root hash for audit consensus."""
+    try:
+        from src.logic.audit_engine import AuditEngine
+
+        engine = AuditEngine()
+        return {
+            "merkle_root": engine.compute_merkle_root(),
+            "integrity": engine.verify_integrity(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/audit/verify")
+async def verify_merkle_consensus(remote_root: str):
+    """Verify Merkle root consensus against a remote node."""
+    try:
+        from src.logic.audit_engine import AuditEngine
+
+        engine = AuditEngine()
+        return engine.verify_remote_merkle_root(remote_root)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

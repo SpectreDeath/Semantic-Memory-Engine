@@ -62,6 +62,7 @@ class VIndexOverlay:
         self.harvester = triplet_harvester or TripletHarvester()
         self.triple_store: list[VIndexTriple] = []
         self.injection_count = 0
+        self._cache: dict[str, list[VIndexTriple]] = {}
 
     def add_triplets(self, text: str, min_confidence: float = 0.5):
         """Extract and store triples from text."""
@@ -78,7 +79,22 @@ class VIndexOverlay:
                     )
                 )
 
+        self._cache.clear()
         logger.info(f"Added {len(raw_triplets)} triplets to V-Index store")
+
+    def add_direct_triple(
+        self, subject: str, relation: str, target: str, weight: float = 1.0
+    ):
+        """Directly append a VIndexTriple to the store."""
+        self.triple_store.append(
+            VIndexTriple(
+                subject=subject,
+                relation=relation,
+                target=target,
+                weight=weight,
+            )
+        )
+        self._cache.clear()
 
     def build_injection_prompt(self, context: str) -> str:
         """
@@ -109,7 +125,11 @@ class VIndexOverlay:
         return "\n".join(lines)
 
     def _find_relevant_triplets(self, context: str) -> list[VIndexTriple]:
-        """Find triplets relevant to the query context."""
+        """Find triplets relevant to the query context with LRU caching."""
+        cache_key = context.strip().lower()
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
         context_lower = context.lower()
         context_words = set(context_lower.split())
 
@@ -133,7 +153,9 @@ class VIndexOverlay:
 
         scored_triplets.sort(key=lambda x: x[0], reverse=True)
 
-        return [t for _, t in scored_triplets if _ > 0]
+        results = [t for score, t in scored_triplets if score > 0]
+        self._cache[cache_key] = results
+        return results
 
     def patch_prompt(self, original_prompt: str, context_text: str | None = None) -> str:
         """

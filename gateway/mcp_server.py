@@ -95,16 +95,92 @@ def get_extension_manager(nexus_api: Any = None) -> ExtensionManager:
 # =============================================================================
 
 
-class SmeCoreBridge:
-    """
-    Bridges tool classes to the gateway's session and data layers.
+# =============================================================================
+# Component Bridges — Modular interfaces for data, graph, and session layers
+# =============================================================================
 
-    Implements NexusAPI: extensions use ``nexus_api.nexus`` and
-    ``nexus_api.get_hsm()`` instead of importing gateway internals directly.
-    """
+
+class SessionBridge:
+    """Handles session scratchpad access."""
 
     def __init__(self, session_id: str | None = None) -> None:
         self.session_id = session_id
+
+    def get_session_entry(self, key: str) -> Any:
+        """Retrieve data from the current session's scratchpad."""
+        if not self.session_id:
+            return None
+        return session_manager.get_session(self.session_id).scratchpad.get(key)
+
+    def get_session(self) -> Any | None:
+        """Get the full session object."""
+        if not self.session_id:
+            return None
+        return session_manager.get_session(self.session_id)
+
+
+class SemanticGraphBridge:
+    """Handles semantic graph queries and WordNet relationship extraction."""
+
+    @staticmethod
+    def get_ego_triples(entity_name: str) -> list[tuple]:
+        """
+        Live ego-graph discovery from the SemanticGraph (WordNet).
+        Queries real semantic relationships to build the entity's network.
+        """
+        from src.core.factory import ToolFactory
+
+        try:
+            sg = ToolFactory.create_semantic_graph()
+            meaning = sg.explore_meaning(entity_name)
+
+            if not meaning:
+                return [(entity_name, "is_a", "Concept"), (entity_name, "status", "unresolved")]
+
+            triples = []
+            if meaning.definitions:
+                triples.append((entity_name, "definition", meaning.definitions[0]))
+
+            for syn in meaning.synonyms[:3]:
+                triples.append((entity_name, "synonym", syn))
+
+            for hyper in meaning.hypernyms[:2]:
+                triples.append((entity_name, "is_a", hyper))
+
+            for hypo in meaning.hyponyms[:2]:
+                triples.append((hypo, "is_a", entity_name))
+
+            return triples
+
+        except Exception as e:
+            logger.exception(f"Ego-graph discovery error: {e}")
+            return [(entity_name, "error", str(e))]
+
+    def execute_graph_surface(
+        self,
+        entity_name: str,
+        transformation_code: str,
+        schema: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Extract entity ego-triples and execute a graph transformation surface against them.
+        """
+        from gateway.surface_bridge import SurfaceBridge
+
+        triples = self.get_ego_triples(entity_name)
+        surface_bridge = SurfaceBridge()
+        inputs = {"entity": entity_name, "triples": triples}
+        return surface_bridge.execute_surface(
+            code=transformation_code,
+            inputs=inputs,
+            schema=schema,
+        )
+
+
+class NexusDatabaseBridge:
+    """Handles SQLite Nexus database queries, provenance registration, and HSM access."""
+
+    def __init__(self) -> None:
         self._nexus = None
 
     def get_hsm(self):
@@ -120,61 +196,6 @@ class SmeCoreBridge:
 
             self._nexus = _get_nexus()
         return self._nexus
-
-    def __getstate__(self):
-        # Prevent pickling of the sqlite3 connection
-        state = self.__dict__.copy()
-        state["_nexus"] = None
-        return state
-
-    def get_session_entry(self, key: str) -> Any:
-        """Retrieve data from the current session's scratchpad."""
-        if not self.session_id:
-            return None
-        return session_manager.get_session(self.session_id).scratchpad.get(key)
-
-    def get_session(self) -> Any | None:
-        """Get the full session object."""
-        if not self.session_id:
-            return None
-        return session_manager.get_session(self.session_id)
-
-    def get_ego_triples(self, entity_name: str) -> list[tuple]:
-        """
-        Live ego-graph discovery from the SemanticGraph (WordNet).
-        Queries real semantic relationships to build the entity's network.
-        """
-        from src.core.factory import ToolFactory
-
-        try:
-            sg = ToolFactory.create_semantic_graph()
-            meaning = sg.explore_meaning(entity_name)
-
-            if not meaning:
-                return [(entity_name, "is_a", "Concept"), (entity_name, "status", "unresolved")]
-
-            triples = []
-            # Add definition
-            if meaning.definitions:
-                triples.append((entity_name, "definition", meaning.definitions[0]))
-
-            # Add synonyms
-            for syn in meaning.synonyms[:3]:
-                triples.append((entity_name, "synonym", syn))
-
-            # Add hypernyms (broader)
-            for hyper in meaning.hypernyms[:2]:
-                triples.append((entity_name, "is_a", hyper))
-
-            # Add hyponyms (narrower)
-            for hypo in meaning.hyponyms[:2]:
-                triples.append((hypo, "is_a", entity_name))
-
-            return triples
-
-        except Exception as e:
-            logger.exception(f"Ego-graph discovery error: {e}")
-            return [(entity_name, "error", str(e))]
 
     def get_source_reliability(self, source_id: str) -> dict[str, Any]:
         """Query the Nexus core for source provenance reliability."""
@@ -211,6 +232,32 @@ class SmeCoreBridge:
         except Exception as e:
             logger.exception(f"Nexus registration error: {e}")
             return False
+
+
+# =============================================================================
+# SmeCoreBridge — Unified composition bridge for tool and extension execution
+# =============================================================================
+
+
+from gateway.surface_bridge import SurfaceBridge
+
+
+class SmeCoreBridge(SessionBridge, NexusDatabaseBridge, SemanticGraphBridge, SurfaceBridge):
+    """
+    Composes SessionBridge, NexusDatabaseBridge, SemanticGraphBridge, and SurfaceBridge.
+
+    Implements NexusAPI for extensions while decoupling individual functional areas.
+    """
+
+    def __init__(self, session_id: str | None = None) -> None:
+        SessionBridge.__init__(self, session_id=session_id)
+        NexusDatabaseBridge.__init__(self)
+        SurfaceBridge.__init__(self)
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        state["_nexus"] = None
+        return state
 
 
 # =============================================================================

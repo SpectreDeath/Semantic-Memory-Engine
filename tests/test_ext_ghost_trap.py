@@ -11,14 +11,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from extensions.ext_ghost_trap.plugin import GhostTrapPlugin, get_plugin, register_extension
 from extensions.ext_ghost_trap.ghost_detector import GhostDetector, GhostFile, scan_for_ghosts
+from extensions.ext_ghost_trap.ghost_trap_client import GhostTrapClient, get_ghost_trap
 from extensions.ext_ghost_trap.persistence_monitor import (
     GhostTrapMonitor,
     get_monitoring_status,
     ghost_monitor,
 )
-from extensions.ext_ghost_trap.ghost_trap_client import GhostTrapClient, get_ghost_trap
+from extensions.ext_ghost_trap.plugin import GhostTrapPlugin, get_plugin, register_extension
 
 
 class TestGhostTrapPlugin:

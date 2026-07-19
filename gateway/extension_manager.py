@@ -20,6 +20,7 @@ import json
 import logging
 import os
 import sys
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any, ClassVar, Optional
 
@@ -239,6 +240,7 @@ class ExtensionManager:
         self._extension_hashes: dict[str, str] = {}
         self._import_blocker = ImportBlocker(strict_mode)
         self._failed_extensions: dict[str, int] = {}  # Extension failure tracking
+        self._plugin_error_counts: dict[str, int] = {}  # Extension runtime error tracking
         self._circuit_breaker_threshold = 3  # Max failures before disabling
 
         if not os.path.exists(self.extensions_dir):
@@ -455,15 +457,77 @@ class ExtensionManager:
 
     def is_extension_healthy(self, plugin_id: str) -> bool:
         """Check if an extension is healthy (not tripped by circuit breaker)."""
-        return self._failed_extensions.get(plugin_id, 0) < self._circuit_breaker_threshold
+        load_failures = self._failed_extensions.get(plugin_id, 0)
+        runtime_failures = self._plugin_error_counts.get(plugin_id, 0)
+        return (
+            load_failures < self._circuit_breaker_threshold
+            and runtime_failures < self._circuit_breaker_threshold
+        )
 
     def reset_extension_failures(self, plugin_id: str) -> None:
         """Reset the failure counter for an extension."""
         self._failed_extensions.pop(plugin_id, None)
+        self._plugin_error_counts.pop(plugin_id, None)
+
+    def reset_plugin_circuit_breaker(self, plugin_id: str) -> None:
+        """Reset plugin runtime circuit breaker."""
+        self.reset_extension_failures(plugin_id)
+
+    def _wrap_sandboxed_handler(
+        self, plugin_id: str, tool_name: str, handler_fn: Callable
+    ) -> Callable:
+        """Wrap plugin tool handler with circuit breaker and sandboxed error isolation."""
+
+        def sandboxed_handler(*args: Any, **kwargs: Any) -> Any:
+            error_count = self._plugin_error_counts.get(plugin_id, 0)
+            if error_count >= self._circuit_breaker_threshold:
+                logger.warning(
+                    f"ExtensionManager: Tool '{tool_name}' execution blocked — "
+                    f"circuit breaker tripped for plugin '{plugin_id}' ({error_count} failures)"
+                )
+                return {
+                    "status": "circuit_breaker_tripped",
+                    "error": f"Circuit breaker tripped for plugin '{plugin_id}' due to repeated failures.",
+                    "plugin_id": plugin_id,
+                }
+
+            try:
+                if inspect.iscoroutinefunction(handler_fn):
+                    try:
+                        loop = asyncio.get_running_loop()
+                        res = loop.run_until_complete(handler_fn(*args, **kwargs))
+                    except RuntimeError:
+                        res = asyncio.run(handler_fn(*args, **kwargs))
+                else:
+                    res = handler_fn(*args, **kwargs)
+
+                self._plugin_error_counts.pop(plugin_id, None)
+                return res
+
+            except Exception as e:
+                self._plugin_error_counts[plugin_id] = (
+                    self._plugin_error_counts.get(plugin_id, 0) + 1
+                )
+                new_count = self._plugin_error_counts[plugin_id]
+                logger.exception(
+                    f"ExtensionManager: Error in sandboxed tool '{tool_name}' "
+                    f"(Plugin: {plugin_id}, failure {new_count}/{self._circuit_breaker_threshold}): {e}"
+                )
+                return {
+                    "status": "error",
+                    "error": f"Extension Error: {e}",
+                    "plugin_id": plugin_id,
+                    "consecutive_failures": new_count,
+                    "circuit_breaker_tripped": new_count >= self._circuit_breaker_threshold,
+                }
+
+        sandboxed_handler.__name__ = getattr(handler_fn, "__name__", tool_name)
+        sandboxed_handler.__doc__ = getattr(handler_fn, "__doc__", "")
+        return sandboxed_handler
 
     def get_extension_tools(self) -> list[dict[str, Any]]:
         """
-        Aggregate all tools provided by loaded extensions.
+        Aggregate all tools provided by loaded extensions with sandboxed handler isolation.
         """
         all_tools = []
         for plugin_id, ext in self.extensions.items():
@@ -472,22 +536,26 @@ class ExtensionManager:
                 tools = instance.get_tools()
                 if isinstance(tools, dict):
                     for name, tool_func in tools.items():
+                        wrapped = self._wrap_sandboxed_handler(plugin_id, name, tool_func)
                         all_tools.append(
                             {
                                 "name": name,
                                 "description": getattr(tool_func, "__doc__", None)
                                 or "No description provided.",
-                                "handler": tool_func,
+                                "handler": wrapped,
                                 "plugin_id": plugin_id,
                             }
                         )
                 else:
                     for tool_func in tools:
+                        name = getattr(tool_func, "__name__", "unnamed_tool")
+                        wrapped = self._wrap_sandboxed_handler(plugin_id, name, tool_func)
                         all_tools.append(
                             {
-                                "name": tool_func.__name__,
-                                "description": tool_func.__doc__ or "No description provided.",
-                                "handler": tool_func,
+                                "name": name,
+                                "description": getattr(tool_func, "__doc__", None)
+                                or "No description provided.",
+                                "handler": wrapped,
                                 "plugin_id": plugin_id,
                             }
                         )

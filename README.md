@@ -69,22 +69,32 @@ Version 3.0.1 introduces a professional "Glassmorphism" dashboard for managing y
 
 ## 🏗️ Technical Architecture
 
-Lawnmower Man uses a single Python process architecture with embedded AI provider for simplicity and direct GPU access.
+Lawnmower Man uses a single Python process architecture with embedded AI provider, decoupled MCP component bridges, dynamic 6D MIMO control surfaces, self-evolving Agentic Neural Network ($\mathcal{ANN}$) textual backpropagation, and surface execution pools.
 
 ```mermaid
 graph TD
-    Client[AI Agent] <-->|MCP Protocol| Op[SME Operator - Py 3.13]
-    Op <-->|Direct| Provider[AI Provider - Embedded]
-    Op <-->|Websocket| UI[Control Room Dashboard]
+    Client[AI Agent] <-->|MCP Protocol / JSON-RPC| Op[SME Gateway Operator - Py 3.13]
+    Op <-->|Websocket /ws/diagnostics| UI[Control Room Dashboard]
+    Op <--> MIMO[MimoControlBridge - 6D Control Surface D1-D6]
+    MIMO <--> Router[TrafficRouter Load Balancer]
 
-    subgraph Core [Logic Layer]
-        Op <--> Nexus[Postgres Nexus]
-        Op <--> Lab[Centrifuge SQLite]
-        Op <--> Cloud[Cloud Storage]
+    subgraph Bridges [Decoupled Component Bridges]
+        Router <--> Sess[SessionBridge - SQLite WAL]
+        Router <--> Nexus[NexusDB - High Throughput PRAGMAs]
+        Router <--> Graph[SemanticGraphBridge - WordNet]
+        Router <--> Surface[SurfaceBridge - em-cubed AST]
+        Router <--> Workflow[EmCubedWorkflowBridge - Distributed DAG]
     end
 
-    subgraph AI [Inference Layer]
-        Operator <-->|Provider| Model[LLM / Langflow]
+    subgraph SelfEvolving [ANN Self-Evolving Layer]
+        Workflow <--> Pool[CandidatePoolStorage - SQLite WAL F_ℓ]
+        Pool <--> Backprop[TextualGradientEngine - ∇text Backprop]
+        Backprop <--> Filter[MomentumBuffer & MultiStage Validation]
+    end
+
+    subgraph Integrity & Security [Security Layer]
+        Op <--> Extension[ExtensionManager - Circuit Breakers]
+        Op <--> Audit[AuditEngine - SHA256 Merkle Chain]
     end
 ```
 

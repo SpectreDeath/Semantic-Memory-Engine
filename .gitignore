@@ -48,10 +48,12 @@ sme-ide-extension/out/
 # --- SME Specific Data ---
 data/forensic_nexus.db
 data/provenance.db
+data/laboratory.db
 data/storage/
 data/scribe_profiles.sqlite
 data/signatures.json
 data/chroma_db/
+coverage.json
 
 # --- Uppercase SME (duplicate or temp) ---
 SME/

@@ -36,9 +36,7 @@ if ($LASTEXITCODE -ne 0 -or $pythonVersion -lt 13) {
     exit 1
 }
 if ($pythonVersion -gt 13) {
-    Write-Host "Error: Python 3.14 not supported (spacy incompatible)" -ForegroundColor Red
-    Write-Host "Install Python 3.13 or create .venv313." -ForegroundColor Yellow
-    exit 1
+    Write-Host "Warning: Python 3.14+ detected. Lazy NLP fallback active." -ForegroundColor Yellow
 }
 Write-Host "Python version check: OK ($([math]::Floor($pythonVersion/10)).$($pythonVersion%10))" -ForegroundColor Green
 

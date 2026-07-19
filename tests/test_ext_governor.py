@@ -11,20 +11,20 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from extensions.ext_governor.resource_monitor import (
-    VRAMState,
-    ResourceStatus,
-    VSCodeStatusBarManager,
-    EnhancedResourceMonitor,
-    create_enhanced_monitor,
-    get_status_bar_manager,
-)
 from extensions.ext_governor.plugin import (
-    ResourceMonitor,
-    IngestionTask,
     Governor,
+    IngestionTask,
+    ResourceMonitor,
     create_plugin,
     register_extension,
+)
+from extensions.ext_governor.resource_monitor import (
+    EnhancedResourceMonitor,
+    ResourceStatus,
+    VRAMState,
+    VSCodeStatusBarManager,
+    create_enhanced_monitor,
+    get_status_bar_manager,
 )
 
 

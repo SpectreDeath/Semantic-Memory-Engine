@@ -27,6 +27,7 @@ from nltk.tokenize import word_tokenize
 
 from bin import credibility_scorer
 from src.sme.bridge import crawler_sling
+from src.sme.epistemic_validator import EpistemicValidator
 from src.sme.vendor import (
     forensic_behavior,
     forensic_entropy,
@@ -307,6 +308,48 @@ class ToolRegistry:
             factory_method="create_centrifuge",
             category="diagnostics",
             parameters={},
+        ),
+        "execute_surface": ToolDefinition(
+            name="execute_surface",
+            description="Execute code in an em-cubed surface with optional JSON-schema validation",
+            factory_method=None,
+            category="surface",
+            parameters={"code": "str", "inputs": "dict", "schema": "dict"},
+        ),
+        "route_execution": ToolDefinition(
+            name="route_execution",
+            description="Dynamically route and dispatch tool execution between SME local runtime and em-cubed distributed nodes",
+            factory_method=None,
+            category="system",
+            parameters={"tool_name": "str", "payload": "dict", "mode": "str"},
+        ),
+        "execute_distributed_workflow": ToolDefinition(
+            name="execute_distributed_workflow",
+            description="Execute a multi-step em-cubed distributed workflow DAG",
+            factory_method=None,
+            category="workflow",
+            parameters={"workflow_id": "str", "tasks_spec": "list"},
+        ),
+        "route_scientific_workflow": ToolDefinition(
+            name="route_scientific_workflow",
+            description="Route and execute multi-modal scientific workflow DAG (ChEMBL, PubChem, PDB, PyMOL)",
+            factory_method=None,
+            category="science",
+            parameters={"prompt": "str", "target_domain": "str"},
+        ),
+        "analyze_media_forensics": ToolDefinition(
+            name="analyze_media_forensics",
+            description="Analyze media file for EXIF metadata, LSB steganography, and ELA artifacts",
+            factory_method=None,
+            category="forensics",
+            parameters={"file_path": "str", "checks": "list"},
+        ),
+        "harvest_threat_iocs": ToolDefinition(
+            name="harvest_threat_iocs",
+            description="Extract threat intelligence IOCs (IP, SHA256, BTC wallet) and inject into VIndexOverlay",
+            factory_method=None,
+            category="threat_intel",
+            parameters={"raw_text": "str", "source_id": "str"},
         ),
         # ===== TIER 2: Forensic Tools (Sprint 2) =====
         "analyze_authorship": ToolDefinition(

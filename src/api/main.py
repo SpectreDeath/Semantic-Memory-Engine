@@ -38,17 +38,35 @@ app.middleware("http")(limiter.middleware_factory)
 # Broadcaster for real-time diagnostics
 async def broadcast_diagnostics(websocket: WebSocket):
     try:
-        while True:
-            # Gather metrics
-            cpu_usage = psutil.cpu_percent()
-            mem_usage = psutil.virtual_memory().percent
+        from gateway.nexus_db import get_nexus
+        from gateway.traffic_router import NODE_EM_CUBED_DISTRIBUTED, TrafficRouter
 
-            # Measure actual round-trip latency with a lightweight disk stat call
+        traffic_router = TrafficRouter()
+        nexus = get_nexus()
+
+        while True:
+            # Gather system metrics
+            cpu_usage = psutil.cpu_percent() if psutil else 0.0
+            mem_usage = psutil.virtual_memory().percent if psutil else 0.0
+
+            # Measure actual round-trip latency
             _t0 = time.perf_counter()
-            psutil.disk_io_counters()
+            if psutil:
+                psutil.disk_io_counters()
             latency_ms = round((time.perf_counter() - _t0) * 1000, 2)
 
-            # Send payload
+            # Gather sub-system telemetry
+            em_health = traffic_router.probe_node_health(NODE_EM_CUBED_DISTRIBUTED)
+            nexus_status = nexus.get_status()
+
+            from gateway.candidate_pool import CandidatePoolStorage
+            from gateway.mimo_bridge import MimoControlBridge
+
+            mimo_bridge = MimoControlBridge()
+            harness_cfg = mimo_bridge.get_harness_config(task_type="default")
+            pool_storage = CandidatePoolStorage()
+            candidate_count = len(pool_storage.get_pool(layer_index=1))
+
             await websocket.send_json(
                 {
                     "type": "diagnostics",
@@ -57,6 +75,18 @@ async def broadcast_diagnostics(websocket: WebSocket):
                         "memory": mem_usage,
                         "latency_ms": latency_ms,
                         "timestamp": time.time(),
+                        "routing": {
+                            "mode": traffic_router.default_mode,
+                            "em_cubed_node": em_health.get("status", "unknown"),
+                        },
+                        "nexus": {
+                            "attached_databases": len(nexus_status.get("attached", [])),
+                        },
+                        "mimo_6d": harness_cfg.to_dict(),
+                        "ann_framework": {
+                            "candidate_blocks_layer_1": candidate_count,
+                            "optimizer": "TextualBackpropagation",
+                        },
                     },
                 }
             )

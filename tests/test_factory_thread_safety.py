@@ -116,8 +116,9 @@ class TestVramGuardrailFix:
 
     def test_vram_guardrail_returns_true_when_enough_memory(self):
         """VRAM check should pass when enough memory available."""
+        from unittest.mock import MagicMock
+
         from src.core.factory import ToolFactory
-        from unittest.mock import patch, MagicMock
 
         mock_info = {"gpus": [{"memory_free_mb": 2048}]}
         with patch("src.monitoring.diagnostics.PerformanceProfiler") as mock_profiler:
@@ -130,8 +131,9 @@ class TestVramGuardrailFix:
 
     def test_vram_guardrail_returns_false_when_insufficient(self):
         """VRAM check should fail when not enough memory."""
+        from unittest.mock import MagicMock
+
         from src.core.factory import ToolFactory
-        from unittest.mock import patch, MagicMock
 
         mock_info = {"gpus": [{"memory_free_mb": 256}]}  # Less than required
         with patch("src.monitoring.diagnostics.PerformanceProfiler") as mock_profiler:
@@ -145,7 +147,6 @@ class TestVramGuardrailFix:
     def test_vram_guardrail_graceful_degradation(self):
         """VRAM check should default to True if GPU check fails."""
         from src.core.factory import ToolFactory
-        from unittest.mock import patch
 
         with patch("src.monitoring.diagnostics.PerformanceProfiler") as mock_profiler:
             mock_profiler.side_effect = Exception("GPU not available")
@@ -155,8 +156,9 @@ class TestVramGuardrailFix:
 
     def test_vram_guardrail_no_gpus(self):
         """VRAM check should pass when no GPUs reported."""
+        from unittest.mock import MagicMock
+
         from src.core.factory import ToolFactory
-        from unittest.mock import patch, MagicMock
 
         mock_info = {"gpus": []}
         with patch("src.monitoring.diagnostics.PerformanceProfiler") as mock_profiler:

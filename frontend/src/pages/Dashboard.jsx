@@ -3,6 +3,7 @@ import { Activity, Network } from 'lucide-react';
 import { api, ws } from '../api';
 import { SkeletonCard } from '../components/Skeleton';
 import MimoAnnVisualizer from '../components/MimoAnnVisualizer';
+import DagWorkflowVisualizer from '../components/DagWorkflowVisualizer';
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -129,6 +130,10 @@ const Dashboard = () => {
 
       <section className="card glass-panel" style={{ gridColumn: '1 / -1' }} aria-labelledby="mimo-title">
         <MimoAnnVisualizer mimoData={mimoData} annData={annData} />
+      </section>
+
+      <section className="card glass-panel" style={{ gridColumn: '1 / -1' }} aria-labelledby="dag-title">
+        <DagWorkflowVisualizer />
       </section>
     </div>
   );

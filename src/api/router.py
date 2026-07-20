@@ -557,3 +557,27 @@ async def verify_merkle_consensus(remote_root: str):
         return engine.verify_remote_merkle_root(remote_root)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+class ClusterSyncRequest(BaseModel):
+    peers: list[str] | None = None
+
+
+@router.post("/cluster/sync")
+async def sync_cluster_state(request: ClusterSyncRequest | None = None):
+    """Trigger cluster synchronization for candidate pools and Merkle roots."""
+    try:
+        from gateway.cluster_sync import GatewayClusterSync
+
+        peers = request.peers if request else None
+        cluster_sync = GatewayClusterSync(peers=peers)
+        sync_res = cluster_sync.sync_merkle_roots()
+        status = cluster_sync.get_cluster_status()
+
+        return {
+            "status": "success",
+            "sync_details": sync_res,
+            "cluster_status": status,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

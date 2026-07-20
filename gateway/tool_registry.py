@@ -351,6 +351,13 @@ class ToolRegistry:
             category="threat_intel",
             parameters={"raw_text": "str", "source_id": "str"},
         ),
+        "sync_cluster_nodes": ToolDefinition(
+            name="sync_cluster_nodes",
+            description="Synchronize candidate pools and Merkle audit roots across distributed cluster nodes",
+            factory_method=None,
+            category="cluster",
+            parameters={"peers": "list"},
+        ),
         # ===== TIER 2: Forensic Tools (Sprint 2) =====
         "analyze_authorship": ToolDefinition(
             name="analyze_authorship",

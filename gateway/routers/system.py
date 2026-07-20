@@ -275,3 +275,12 @@ def register(
         harvester = ThreatIntelligenceHarvester()
         res = harvester.harvest_threat_iocs(raw_text=raw_text, source_id=source_id)
         return json.dumps(res, indent=2)
+
+    @mcp.tool()
+    def sync_cluster_nodes(peers: list[str] | None = None) -> str:
+        """Synchronize candidate pools and Merkle audit roots across distributed cluster nodes."""
+        from gateway.cluster_sync import GatewayClusterSync
+
+        sync_engine = GatewayClusterSync(peers=peers)
+        res = sync_engine.sync_merkle_roots()
+        return json.dumps(res, indent=2)

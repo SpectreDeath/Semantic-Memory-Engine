@@ -114,3 +114,39 @@ class EmCubedWorkflowBridge:
             "step_results": step_results,
             "final_context": context,
         }
+
+    def elicit_ontology_from_harvester(
+        self,
+        raw_text: str,
+        domain_prompt: str = "Ingested Harvester Content",
+    ) -> dict[str, Any]:
+        """Bridge 1: Route raw Harvester content to Em-Cubed KnowledgeElicitationPipeline.
+
+        Converts raw scraped web/cloud text into formal BFO triples, PMEST facets, and CL echoes.
+        """
+        try:
+            from em_cubed.ontology.elicitation import KnowledgeElicitationPipeline
+
+            pipeline = KnowledgeElicitationPipeline()
+            report = pipeline.execute_pipeline(
+                executive_prompt=domain_prompt,
+                dsq_texts=[f"What operational risks exist in: {raw_text[:100]}...?"],
+                cq_texts=[f"Which entities are referenced in: {raw_text[:100]}...?"],
+            )
+            return {
+                "status": "success",
+                "triples_count": len(report.triples),
+                "triples": [
+                    {
+                        "subject": t.subject,
+                        "predicate": t.predicate,
+                        "object": t.object,
+                        "confidence": t.confidence,
+                    }
+                    for t in report.triples
+                ],
+                "common_logic_echoes_count": len(report.common_logic_echoes),
+            }
+        except Exception as err:
+            logger.exception("Failed to elicit ontology via Em-Cubed bridge: %s", err)
+            return {"status": "error", "error": str(err)}

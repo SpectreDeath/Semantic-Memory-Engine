@@ -193,3 +193,44 @@ class AuditEngine:
             }
             for r in self.audit_records
         ]
+
+    def attach_exact_truthmaker_ground(
+        self,
+        record_index: int,
+        proposition: str,
+    ) -> dict[str, Any]:
+        """Bridge 4: Attach Kit Fine Exact Truthmaker Semantics (s ⊩ A) explanation to Merkle audit record.
+
+        Isolates exact state fragments verifying proposition A.
+        """
+        if record_index < 0 or record_index >= len(self.audit_records):
+            return {"status": "error", "reason": "Invalid record_index"}
+
+        rec = self.audit_records[record_index]
+
+        try:
+            from em_cubed.ontology.schema import OntologyTriple
+            from em_cubed.ontology.truthmaker import ExactTruthmakerClassifier
+
+            triple = OntologyTriple(
+                subject=rec.actor,
+                predicate=rec.event_type,
+                object=str(rec.payload.get("action", "AuditAction")),
+            )
+
+            tm = ExactTruthmakerClassifier.classify_exact_truthmaker(
+                proposition=proposition,
+                state_triples=[triple],
+                relevant_predicates=[rec.event_type],
+            )
+
+            truthmaker_info = {
+                "proposition": proposition,
+                "is_satisfied": tm.is_satisfied,
+                "ground_explanation": tm.ground_explanation,
+            }
+
+            rec.payload["exact_truthmaker"] = truthmaker_info
+            return {"status": "success", "truthmaker": truthmaker_info}
+        except Exception as err:
+            return {"status": "error", "reason": str(err)}

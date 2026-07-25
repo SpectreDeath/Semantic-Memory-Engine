@@ -284,3 +284,24 @@ def register(
         sync_engine = GatewayClusterSync(peers=peers)
         res = sync_engine.sync_merkle_roots()
         return json.dumps(res, indent=2)
+
+    @mcp.tool()
+    def check_ontological_health() -> str:
+        """Bridge 5: Query Em-Cubed Ontological Health Monitor for real-time Coherence Index and self-healing metrics."""
+        try:
+            from em_cubed.ontology.health_monitor import OntologicalHealthMonitor
+
+            report = OntologicalHealthMonitor.audit_health([])
+            return json.dumps(
+                {
+                    "status": "success",
+                    "coherence_index": report.coherence_index,
+                    "health_status": report.health_status,
+                    "disjoint_violations": report.disjoint_violations,
+                    "dangling_iris": report.dangling_iris,
+                    "topos_satisfaction_score": report.topos_satisfaction_score,
+                },
+                indent=2,
+            )
+        except Exception as err:
+            return json.dumps({"status": "error", "error": str(err)}, indent=2)

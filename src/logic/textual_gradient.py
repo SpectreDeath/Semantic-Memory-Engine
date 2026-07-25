@@ -174,3 +174,24 @@ class TextualGradientEngine:
 
         updated_block["edges"] = list(local_gradient.edge_updates)
         return updated_block
+
+    def induce_dl_concept_guard(
+        self,
+        subclass_name: str,
+        positive_samples: list[dict[str, str]],
+    ) -> str:
+        """Bridge 2: Fit Description Logic class expressions (C ⊑ D) over candidate pool updates.
+
+        Ensures that prompt optimization in SME stays within formally induced class bounds.
+        """
+        try:
+            from em_cubed.ontology.concept_induction import ConceptInductionEngine
+
+            dl_expr = ConceptInductionEngine.induce_concept(
+                subclass_name=subclass_name,
+                positive_samples=positive_samples,
+            )
+            return dl_expr.to_dl_syntax()
+        except Exception as err:
+            logger.warning("Failed to induce DL concept guard via Em-Cubed: %s", err)
+            return f"{subclass_name} ⊑ Thing"

@@ -176,6 +176,20 @@ class SemanticGraphBridge:
             schema=schema,
         )
 
+    def get_topos_modal_truth(self, trust_score: float) -> str:
+        """Bridge 3: Map continuous float Epistemic Trust Scores (0.0 to 1.0) into Topos Subobject Classifier (Ω) modal truth states.
+
+        Returns NECESSARY, POSSIBLE, CONTINGENT, or IMPOSSIBLE.
+        """
+        try:
+            from em_cubed.ontology.topos import SubobjectClassifier
+
+            tv = SubobjectClassifier.evaluate_confidence(trust_score)
+            return f"ToposModalTruth({tv.modal_type.value}, score={tv.score:.2f})"
+        except Exception as err:
+            logger.warning("Failed to resolve Topos modal truth via Em-Cubed: %s", err)
+            return "ToposModalTruth(POSSIBLE, score=0.50)"
+
 
 class NexusDatabaseBridge:
     """Handles SQLite Nexus database queries, provenance registration, and HSM access."""

@@ -79,8 +79,12 @@ class TextualGradientEngine:
 
             if status in ("error", "failed") or error:
                 failed_layers.append(idx)
-                suggestions.append(f"Layer {idx} failed during step '{step.get('task_id', idx)}': {error}")
-                flow_updates.append(f"Rewire layer {idx} inputs to isolate failure in '{step.get('skill_id')}'")
+                suggestions.append(
+                    f"Layer {idx} failed during step '{step.get('task_id', idx)}': {error}"
+                )
+                flow_updates.append(
+                    f"Rewire layer {idx} inputs to isolate failure in '{step.get('skill_id')}'"
+                )
 
         loss_score = len(failed_layers) / total_steps if total_steps > 0 else 0.0
 
@@ -156,7 +160,9 @@ class TextualGradientEngine:
         Apply local textual gradient updates to construct a new candidate team block (f'_ℓ).
         """
         updated_block = copy.deepcopy(team_block)
-        updated_block["block_id"] = f"{team_block.get('block_id', 'block')}_v{int(local_gradient.loss_score * 100)}"
+        updated_block["block_id"] = (
+            f"{team_block.get('block_id', 'block')}_v{int(local_gradient.loss_score * 100)}"
+        )
 
         nodes = updated_block.setdefault("nodes", {})
         for node_id, suggestion in local_gradient.prompt_suggestions.items():

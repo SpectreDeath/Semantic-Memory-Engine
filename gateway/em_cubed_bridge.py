@@ -84,7 +84,9 @@ class EmCubedWorkflowBridge:
             pool_storage = CandidatePoolStorage()
             optimal_block = pool_storage.select_optimal_team(idx, task_context=merged_inputs)
             if optimal_block and "nodes" in optimal_block:
-                logger.info(f"EmCubedWorkflowBridge using ANN optimal team block '{optimal_block.get('block_id')}' for layer {idx}")
+                logger.info(
+                    f"EmCubedWorkflowBridge using ANN optimal team block '{optimal_block.get('block_id')}' for layer {idx}"
+                )
 
             if skill_id == "python_surface" or "code" in merged_inputs:
                 from gateway.surface_bridge import SurfaceBridge

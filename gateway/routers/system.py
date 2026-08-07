@@ -220,9 +220,7 @@ def register(
         return json.dumps(serialize_result(manifest), indent=2)
 
     @mcp.tool()
-    def route_execution(
-        tool_name: str, payload: dict | None = None, mode: str = "auto"
-    ) -> str:
+    def route_execution(tool_name: str, payload: dict | None = None, mode: str = "auto") -> str:
         """Dynamically route and dispatch tool execution between SME local runtime and em-cubed distributed nodes."""
         from gateway.traffic_router import TrafficRouter
 
@@ -244,9 +242,7 @@ def register(
         return json.dumps(res, indent=2)
 
     @mcp.tool()
-    def route_scientific_workflow(
-        prompt: str, target_domain: str = "bioinformatics"
-    ) -> str:
+    def route_scientific_workflow(prompt: str, target_domain: str = "bioinformatics") -> str:
         """Route and execute multi-modal scientific workflow DAG (ChEMBL, PubChem, PDB, PyMOL)."""
         from gateway.scientific_router import ScientificDomainRouter
 
@@ -255,9 +251,7 @@ def register(
         return json.dumps(res, indent=2)
 
     @mcp.tool()
-    def analyze_media_forensics(
-        file_path: str, checks: list[str] | None = None
-    ) -> str:
+    def analyze_media_forensics(file_path: str, checks: list[str] | None = None) -> str:
         """Analyze media file for EXIF metadata, LSB steganography, and ELA artifacts."""
         from extensions.ext_forensic_media.plugin import ForensicMediaPlugin
 
@@ -266,9 +260,7 @@ def register(
         return json.dumps(res, indent=2)
 
     @mcp.tool()
-    def harvest_threat_iocs(
-        raw_text: str, source_id: str = "darkweb_feed"
-    ) -> str:
+    def harvest_threat_iocs(raw_text: str, source_id: str = "darkweb_feed") -> str:
         """Extract threat intelligence IOCs (IP, SHA256, BTC wallet) and inject into VIndexOverlay."""
         from gateway.threat_harvester import ThreatIntelligenceHarvester
 

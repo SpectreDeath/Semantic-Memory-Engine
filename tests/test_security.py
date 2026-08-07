@@ -112,7 +112,7 @@ class TestPathTraversalPrevention:
         """Symlinks should be detected and rejected when checking extensions dir."""
         from gateway.extension_manager import ExtensionManager
 
-        with tempfile.TemporaryDirectory() as temp_dir:
+        with tempfile.TemporaryDirectory():
             # Extensions dir is created in the project root by default, but let's verify
             # that the code checks for symlinks by looking at the method behavior
             from pathlib import Path

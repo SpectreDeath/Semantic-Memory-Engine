@@ -24,9 +24,7 @@ class MomentumBuffer:
         self.alpha = alpha
         self._history: dict[int, list[LocalGradient]] = {}
 
-    def apply_momentum(
-        self, layer_index: int, current_gradient: LocalGradient
-    ) -> LocalGradient:
+    def apply_momentum(self, layer_index: int, current_gradient: LocalGradient) -> LocalGradient:
         """
         Apply momentum smoothing: G'_local,ℓ = α G_local,ℓ + (1-α) G^{t-1}_local,ℓ.
         """
@@ -134,6 +132,9 @@ class MultiStageValidationFilter:
     ) -> tuple[bool, str]:
         loss_score = block.get("loss_score", 0.0)
         if loss_score > baseline_performance:
-            return False, f"Performance validation failed: loss score ({loss_score}) higher than baseline ({baseline_performance})"
+            return (
+                False,
+                f"Performance validation failed: loss score ({loss_score}) higher than baseline ({baseline_performance})",
+            )
 
         return True, "Performance validation passed"

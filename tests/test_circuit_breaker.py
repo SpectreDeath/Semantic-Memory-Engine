@@ -41,7 +41,8 @@ def test_success_call():
 
 def test_failure_threshold_opens_circuit():
     cb = CircuitBreaker(name="test", failure_threshold=3)
-    func = lambda: (_ for _ in ()).throw(DummyError("fail"))
+    def func():
+        return (_ for _ in ()).throw(DummyError("fail"))
 
     # Call until threshold
     for _ in range(3):
@@ -63,7 +64,8 @@ def test_failure_threshold_opens_circuit():
 
 def test_half_open_after_timeout(monkeypatch):
     cb = CircuitBreaker(name="test", failure_threshold=2, recovery_timeout=1.0)
-    func = lambda: (_ for _ in ()).throw(DummyError("fail"))
+    def func():
+        return (_ for _ in ()).throw(DummyError("fail"))
 
     # Open the circuit
     cb.call(func, fallback="fb")
@@ -80,8 +82,10 @@ def test_half_open_after_timeout(monkeypatch):
 
 def test_half_open_success_closes_circuit(monkeypatch):
     cb = CircuitBreaker(name="test", failure_threshold=2, recovery_timeout=0.1, success_threshold=2)
-    fail_func = lambda: (_ for _ in ()).throw(DummyError("fail"))
-    success_func = lambda: "ok"
+    def fail_func():
+        return (_ for _ in ()).throw(DummyError("fail"))
+    def success_func():
+        return "ok"
 
     # Open circuit
     for _ in range(2):
@@ -105,7 +109,8 @@ def test_half_open_success_closes_circuit(monkeypatch):
 
 def test_half_open_failure_reopens(monkeypatch):
     cb = CircuitBreaker(name="test", failure_threshold=2, recovery_timeout=0.1, success_threshold=2)
-    fail_func = lambda: (_ for _ in ()).throw(DummyError("fail"))
+    def fail_func():
+        return (_ for _ in ()).throw(DummyError("fail"))
 
     # Open
     for _ in range(2):
@@ -134,7 +139,8 @@ def test_excluded_exceptions_not_counted():
 
 def test_reset():
     cb = CircuitBreaker(name="test", failure_threshold=2)
-    fail_func = lambda: (_ for _ in ()).throw(DummyError("fail"))
+    def fail_func():
+        return (_ for _ in ()).throw(DummyError("fail"))
     for _ in range(2):
         cb.call(fail_func, fallback="fb")
     assert cb.state == CircuitState.OPEN

@@ -245,13 +245,13 @@ class TestAPIKeyEncryption:
         with (
             patch("pathlib.Path.mkdir") as mock_mkdir,
             patch("pathlib.Path.exists", return_value=True) as mock_exists,
-            patch("builtins.open", create=True) as mock_open,
+            patch("builtins.open", create=True),
             patch("json.load", return_value={}),
             patch("json.dump"),
         ):
             from extensions.ext_api_key_manager.plugin import APIKeyManager
 
-            manager = APIKeyManager()
+            APIKeyManager()
 
             # Should have tried to load keys
             assert mock_exists.called or mock_mkdir.called

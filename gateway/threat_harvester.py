@@ -31,9 +31,7 @@ class ThreatIntelligenceHarvester:
     def __init__(self, vindex_overlay: VIndexOverlay | None = None) -> None:
         self.vindex = vindex_overlay or VIndexOverlay()
 
-    def harvest_threat_iocs(
-        self, raw_text: str, source_id: str = "darkweb_feed"
-    ) -> dict[str, Any]:
+    def harvest_threat_iocs(self, raw_text: str, source_id: str = "darkweb_feed") -> dict[str, Any]:
         """
         Parse raw text for IOCs, construct atomic semantic triplets, and inject into VIndexOverlay.
         """

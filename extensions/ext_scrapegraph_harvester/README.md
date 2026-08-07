@@ -12,7 +12,7 @@ Extract forensic evidence from any URL using agentic scraping logic. The tool co
 result = await scrape_and_remember(
     url="https://example.com",
     prompt="Extract all forensic evidence related to cybersecurity",
-    model="ollama/llama3.2"
+    model="ollama/llama3.2",
 )
 ```
 
@@ -22,9 +22,7 @@ Search the web for a topic and synthesize findings from multiple sources into st
 **Usage:**
 ```python
 result = await deep_research(
-    query="latest cybersecurity threats 2024",
-    results_count=10,
-    model="ollama/llama3.2"
+    query="latest cybersecurity threats 2024", results_count=10, model="ollama/llama3.2"
 )
 ```
 
@@ -33,10 +31,7 @@ Convert any URL to clean Markdown format for semantic memory indexing. Optimized
 
 **Usage:**
 ```python
-result = await markdownify(
-    url="https://example.com",
-    model="ollama/llama3.2"
-)
+result = await markdownify(url="https://example.com", model="ollama/llama3.2")
 ```
 
 ## Architecture
@@ -94,7 +89,7 @@ SME_SCRAPEGRAPH_CONCURRENT_REQUESTS = 2
 result = await scrape_and_remember(
     url="https://suspicious-site.com",
     prompt="Extract all forensic evidence including IP addresses, domains, and suspicious content",
-    model="ollama/llama3.2"
+    model="ollama/llama3.2",
 )
 ```
 
@@ -102,19 +97,14 @@ result = await scrape_and_remember(
 ```python
 # Research a topic across multiple sources
 result = await deep_research(
-    query="latest ransomware techniques 2024",
-    results_count=15,
-    model="ollama/llama3.2"
+    query="latest ransomware techniques 2024", results_count=15, model="ollama/llama3.2"
 )
 ```
 
 ### Content Standardization
 ```python
 # Convert any page to clean Markdown
-result = await markdownify(
-    url="https://wikipedia.org",
-    model="ollama/llama3.2"
-)
+result = await markdownify(url="https://wikipedia.org", model="ollama/llama3.2")
 ```
 
 ## Output Structure

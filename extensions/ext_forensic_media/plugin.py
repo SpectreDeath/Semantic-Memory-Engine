@@ -32,7 +32,9 @@ class ForensicMediaPlugin:
         path = Path(file_path)
         requested_checks = checks or ["exif", "steganography", "ela"]
 
-        logger.info(f"ForensicMediaPlugin analyzing file '{path.name}' with checks {requested_checks}")
+        logger.info(
+            f"ForensicMediaPlugin analyzing file '{path.name}' with checks {requested_checks}"
+        )
 
         results: dict[str, Any] = {
             "status": "success",

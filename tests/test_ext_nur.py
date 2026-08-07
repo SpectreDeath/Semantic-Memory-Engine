@@ -139,7 +139,7 @@ class TestForensicIntelligenceReporter:
             "devil_term_density": 0.01,
             "distance_markers_count": 0,
         }
-        bucket, confidence, evidence = reporter._categorize_intelligence_bucket(
+        bucket, confidence, _evidence = reporter._categorize_intelligence_bucket(
             behavior, provenance
         )
         assert bucket == IntelligenceBucket.COMMERCIAL_SAFE
@@ -158,7 +158,7 @@ class TestForensicIntelligenceReporter:
             "devil_term_density": 0.02,
             "distance_markers_count": 2,
         }
-        bucket, confidence, evidence = reporter._categorize_intelligence_bucket(
+        bucket, _confidence, _evidence = reporter._categorize_intelligence_bucket(
             behavior, provenance
         )
         assert bucket == IntelligenceBucket.OPEN_SOURCE_UNCONSTRAINED

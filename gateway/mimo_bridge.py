@@ -89,9 +89,7 @@ class MimoControlBridge:
         logger.info(f"MimoControlBridge synthesized 6D harness tuple for task_type '{task_type}'")
         return config
 
-    def apply_harness(
-        self, config: Mimo6DConfig, payload: dict[str, Any]
-    ) -> dict[str, Any]:
+    def apply_harness(self, config: Mimo6DConfig, payload: dict[str, Any]) -> dict[str, Any]:
         """
         Decorate workload payload with 6D MIMO harness parameters.
         """

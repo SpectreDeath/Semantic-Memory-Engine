@@ -82,9 +82,7 @@ class VIndexOverlay:
         self._cache.clear()
         logger.info(f"Added {len(raw_triplets)} triplets to V-Index store")
 
-    def add_direct_triple(
-        self, subject: str, relation: str, target: str, weight: float = 1.0
-    ):
+    def add_direct_triple(self, subject: str, relation: str, target: str, weight: float = 1.0):
         """Directly append a VIndexTriple to the store."""
         self.triple_store.append(
             VIndexTriple(

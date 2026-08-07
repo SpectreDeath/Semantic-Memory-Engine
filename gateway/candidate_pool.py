@@ -101,7 +101,9 @@ class CandidatePoolStorage:
                 rows = cursor.fetchall()
                 return [json.loads(row["block_json"]) for row in rows]
         except Exception as e:
-            logger.exception(f"CandidatePoolStorage failed to get pool for layer {layer_index}: {e}")
+            logger.exception(
+                f"CandidatePoolStorage failed to get pool for layer {layer_index}: {e}"
+            )
             return []
 
     def select_optimal_team(

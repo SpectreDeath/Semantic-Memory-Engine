@@ -65,7 +65,9 @@ class GatewayClusterSync:
         Broadcast a validated ANN candidate block to registered cluster peers.
         """
         block_id = block.get("block_id", f"layer_{layer_index}_candidate")
-        logger.info(f"Broadcasting ANN candidate block '{block_id}' to {len(self.peers)} cluster peers")
+        logger.info(
+            f"Broadcasting ANN candidate block '{block_id}' to {len(self.peers)} cluster peers"
+        )
 
         broadcast_results: dict[str, str] = dict.fromkeys(self.peers, "synced")
 

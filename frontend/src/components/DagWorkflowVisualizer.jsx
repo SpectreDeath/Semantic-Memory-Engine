@@ -42,6 +42,9 @@ export default function DagWorkflowVisualizer({ onExecuteWorkflow }) {
       });
       const data = await res.json();
       setWorkflowResult(data);
+      if (onExecuteWorkflow) {
+        onExecuteWorkflow(data);
+      }
     } catch (err) {
       setWorkflowResult({ status: 'error', error: err.message });
     } finally {

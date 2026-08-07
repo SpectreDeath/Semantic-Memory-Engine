@@ -111,22 +111,17 @@ crawler = SocialIntelligenceCrawler(manifest, nexus_api)
 
 # Monitor a hashtag campaign
 result = await crawler.monitor_hashtag_campaign(
-    hashtag="climatechange",
-    time_window=24,
-    platforms=["twitter", "reddit"]
+    hashtag="climatechange", time_window=24, platforms=["twitter", "reddit"]
 )
 
 # Analyze sentiment spread
 sentiment_result = await crawler.analyze_sentiment_spread(
-    topic="election2024",
-    platforms=["twitter", "facebook"],
-    time_range=48
+    topic="election2024", platforms=["twitter", "facebook"], time_range=48
 )
 
 # Detect coordinated campaigns
 coordination_result = await crawler.detect_coordinated_campaigns(
-    keywords=["fake news", "conspiracy"],
-    time_window=12
+    keywords=["fake news", "conspiracy"], time_window=12
 )
 ```
 
@@ -153,15 +148,9 @@ Track hashtag usage patterns and bot activity across specified platforms.
     "platforms_monitored": ["twitter", "reddit"],
     "total_posts": 1542,
     "unique_users": 891,
-    "bot_activity_analysis": {
-        "bot_score": 0.34,
-        "suspicious_patterns": [...]
-    },
-    "sentiment_analysis": {
-        "overall_sentiment": 0.23,
-        "sentiment_breakdown": {...}
-    },
-    "status": "active"
+    "bot_activity_analysis": {"bot_score": 0.34, "suspicious_patterns": [...]},
+    "sentiment_analysis": {"overall_sentiment": 0.23, "sentiment_breakdown": {...}},
+    "status": "active",
 }
 ```
 
@@ -182,12 +171,9 @@ Analyze sentiment propagation across platforms for a given topic.
     "topic": "election2024",
     "time_range_hours": 48,
     "platforms_analyzed": ["twitter", "facebook"],
-    "platform_sentiment": {
-        "twitter": {...},
-        "facebook": {...}
-    },
+    "platform_sentiment": {"twitter": {...}, "facebook": {...}},
     "cross_platform_correlation": 0.72,
-    "sentiment_trends": {...}
+    "sentiment_trends": {...},
 }
 ```
 
@@ -206,14 +192,8 @@ Identify coordinated disinformation campaigns using pattern recognition.
 ```python
 {
     "keywords": ["fake news", "conspiracy"],
-    "coordination_analysis": {
-        "coordination_score": 0.85,
-        "detected_campaigns": [...]
-    },
-    "risk_assessment": {
-        "risk_level": "HIGH",
-        "risk_score": 0.78
-    }
+    "coordination_analysis": {"coordination_score": 0.85, "detected_campaigns": [...]},
+    "risk_assessment": {"risk_level": "HIGH", "risk_score": 0.78},
 }
 ```
 
@@ -231,13 +211,8 @@ Track activity and influence patterns of specific accounts.
 ```python
 {
     "influencers_tracked": ["@example_user"],
-    "influencer_data": {
-        "@example_user": {
-            "platform_data": {...},
-            "influence_metrics": {...}
-        }
-    },
-    "cross_platform_analysis": {...}
+    "influencer_data": {"@example_user": {"platform_data": {...}, "influence_metrics": {...}}},
+    "cross_platform_analysis": {...},
 }
 ```
 
@@ -255,11 +230,8 @@ Analyze geographic distribution and patterns of social media activity.
 ```python
 {
     "topic": "protest2024",
-    "geolocation_analysis": {
-        "geographic_distribution": {...},
-        "anomaly_detection": {...}
-    },
-    "geographic_heatmap": {...}
+    "geolocation_analysis": {"geographic_distribution": {...}, "anomaly_detection": {...}},
+    "geographic_heatmap": {...},
 }
 ```
 
@@ -353,11 +325,11 @@ The extension provides comprehensive monitoring capabilities:
 ```python
 # Available metrics
 metrics = [
-    "api_call_count",        # Total API calls made
-    "error_rate",           # Error rate percentage
-    "response_time",        # Average response time
-    "moderation_decisions", # Content moderation decisions
-    "coordination_detections" # Coordinated campaign detections
+    "api_call_count",  # Total API calls made
+    "error_rate",  # Error rate percentage
+    "response_time",  # Average response time
+    "moderation_decisions",  # Content moderation decisions
+    "coordination_detections",  # Coordinated campaign detections
 ]
 ```
 
@@ -369,9 +341,9 @@ Configurable alerts for critical events:
 # Alert types
 alerts = [
     "high_coordination_score",  # High coordination score detected
-    "nsfw_content_detected",    # NSFW content detected
-    "spam_campaign_detected",   # Spam campaign detected
-    "api_rate_limit_exceeded"   # API rate limit exceeded
+    "nsfw_content_detected",  # NSFW content detected
+    "spam_campaign_detected",  # Spam campaign detected
+    "api_rate_limit_exceeded",  # API rate limit exceeded
 ]
 ```
 
@@ -424,6 +396,7 @@ python -c "import os; print('Twitter API Key set:', bool(os.getenv('TWITTER_API_
 ```python
 # Check current rate limit status
 from extensions.ext_social_intel.api_manager import SocialMediaAPIManager
+
 manager = SocialMediaAPIManager()
 print(f"Rate limit status: {manager.rate_limiters}")
 ```

@@ -61,7 +61,7 @@ def test_rate_limiter_thread_safety():
     # Simple stress: call from multiple threads? We'll do basic sequential but check no errors.
     rl = RateLimiter(requests_per_minute=10)
     for i in range(15):
-        allowed, _ = rl.is_allowed("stress")
+        _allowed, _ = rl.is_allowed("stress")
     # After 10, should be disallowed for last 5
     # We can't easily check, but ensure no race exceptions
     assert True

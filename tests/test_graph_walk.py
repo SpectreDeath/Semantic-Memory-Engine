@@ -168,7 +168,7 @@ def test_knn_search_empty_index():
 def test_knn_search_autobuild_index(sample_knn):
     # Build index not called explicitly
     sample_knn._indexed = False
-    results = sample_knn.knn_search("test")
+    sample_knn.knn_search("test")
     assert sample_knn._indexed is True
 
 

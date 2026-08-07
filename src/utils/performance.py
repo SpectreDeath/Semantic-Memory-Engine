@@ -38,7 +38,7 @@ class LRUCache:
         self.hits = 0
         self.misses = 0
 
-    def get(self, key: str) -> None | Any:
+    def get(self, key: str) -> Any | None:
         """Get value from cache if it exists and is not expired."""
         with self.lock:
             if key in self.cache:
@@ -395,7 +395,7 @@ class AsyncBatchProcessor:
         self.semaphore = asyncio.Semaphore(max_concurrent)
 
     async def process_items(
-        self, items: list, process_func: Callable, progress_callback: None | Callable = None
+        self, items: list, process_func: Callable, progress_callback: Callable | None = None
     ) -> list:
         """
         Process items in batches with concurrency control.

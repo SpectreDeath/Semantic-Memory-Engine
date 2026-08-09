@@ -213,9 +213,7 @@ class SessionManager:
                 )
                 """
             )
-            cursor.execute(
-                "SELECT state_json FROM task_tokens WHERE task_token = ?", (task_token,)
-            )
+            cursor.execute("SELECT state_json FROM task_tokens WHERE task_token = ?", (task_token,))
             row = cursor.fetchone()
             conn.close()
             if row:

@@ -754,9 +754,7 @@ class ToolRegistry:
                 handler = definition.handler
                 if handler is not None:
                     return handler
-                logger.error(
-                    f"Tool {tool_name} has no factory_method or instance registered."
-                )
+                logger.error(f"Tool {tool_name} has no factory_method or instance registered.")
                 return None
 
             factory = self._get_factory()

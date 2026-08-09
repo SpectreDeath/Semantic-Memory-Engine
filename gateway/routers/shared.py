@@ -189,9 +189,7 @@ def validate_access(
     Supports MCP 2026-07-28 MCP-Method and MCP-Name header rate-limiting.
     """
     mcp_method, mcp_name = extract_mcp_headers(headers)
-    allowed, _ = rate_limiter.is_allowed(
-        client_id, mcp_method=mcp_method, mcp_name=mcp_name
-    )
+    allowed, _ = rate_limiter.is_allowed(client_id, mcp_method=mcp_method, mcp_name=mcp_name)
     if not allowed:
         return json.dumps({"error": "Rate limit exceeded", "retry_after": "60s"})
     if token:
@@ -199,4 +197,3 @@ def validate_access(
         if not payload:
             return json.dumps({"error": "Invalid or expired token"})
     return None
-

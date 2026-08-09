@@ -77,7 +77,9 @@ def test_mcp_server():
     # Test list_available_tools
     print("\n--- list_available_tools() ---")
     tools = json.loads(list_callable())
-    print(f"   Gateway: {tools.get('codename', 'N/A')} v{tools['version']} (Spec: {tools.get('spec_version')})")
+    print(
+        f"   Gateway: {tools.get('codename', 'N/A')} v{tools['version']} (Spec: {tools.get('spec_version')})"
+    )
     print(f"   Tool count: {tools['total_tools']}")
 
     # Test serverDiscover (MCP 2026-07-28)
@@ -98,7 +100,9 @@ def test_mcp_server():
         mcp_method="tools/call",
         mcp_name="semantic_search",
     )
-    print(f"   Route Target: {route['target_node']} (Method: {route.get('mcp_method')}, Name: {route.get('mcp_name')})")
+    print(
+        f"   Route Target: {route['target_node']} (Method: {route.get('mcp_method')}, Name: {route.get('mcp_name')})"
+    )
 
     return True
 

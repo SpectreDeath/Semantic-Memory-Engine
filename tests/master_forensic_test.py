@@ -25,7 +25,7 @@ def run_command(cmd, timeout=60):
 
 def test_data_guard_auditor():
     """Test the Data Guard Auditor."""
-    print("🔍 Testing Data Guard Auditor...")
+    print("[TEST] Testing Data Guard Auditor...")
     # Test with a sample CSV file or create one for testing
     returncode, _stdout, stderr = run_command(
         "python src/utils/auditor.py data/results/trust_scores_results.csv --contamination 0.1",
@@ -33,10 +33,10 @@ def test_data_guard_auditor():
     )
 
     if returncode == 0:
-        print("✅ Data Guard Auditor: PASSED")
+        print("[OK] Data Guard Auditor: PASSED")
         return True
     else:
-        print(f"❌ Data Guard Auditor: FAILED (code: {returncode})")
+        print(f"[FAIL] Data Guard Auditor: FAILED (code: {returncode})")
         if stderr:
             print(f"Error: {stderr}")
         return False
@@ -44,7 +44,7 @@ def test_data_guard_auditor():
 
 def test_context_sniffer():
     """Test the Context Sniffer."""
-    print("🔍 Testing Context Sniffer...")
+    print("[TEST] Testing Context Sniffer...")
     # Test with a sample Python file
     # cSpell:ignore gephi
     returncode, _stdout, stderr = run_command(
@@ -52,10 +52,10 @@ def test_context_sniffer():
     )
 
     if returncode == 0:
-        print("✅ Context Sniffer: PASSED")
+        print("[OK] Context Sniffer: PASSED")
         return True
     else:
-        print(f"❌ Context Sniffer: FAILED (code: {returncode})")
+        print(f"[FAIL] Context Sniffer: FAILED (code: {returncode})")
         if stderr:
             print(f"Error: {stderr}")
         return False
@@ -63,7 +63,7 @@ def test_context_sniffer():
 
 def test_gephi_bridge_modes():
     """Test all Gephi Bridge modes."""
-    print("🔍 Testing Gephi Bridge Modes...")
+    print("[TEST] Testing Gephi Bridge Modes...")
 
     modes = ["project", "trust", "knowledge", "synthetic"]
     results = {}
@@ -89,9 +89,9 @@ def test_gephi_bridge_modes():
             results[mode] = False
 
         if results[mode]:
-            print(f"    ✅ {mode} mode: PASSED")
+            print(f"    [OK] {mode} mode: PASSED")
         else:
-            print(f"    ❌ {mode} mode: FAILED")
+            print(f"    [FAIL] {mode} mode: FAILED")
 
     return all(results.values())
 
@@ -122,7 +122,7 @@ def generate_forensic_report():
 def print_report(report):
     """Print the forensic report in a formatted way."""
     print("\n" + "=" * 60)
-    print("🔍 FORENSIC UTILITY SUITE REPORT")
+    print("[INFO] FORENSIC UTILITY SUITE REPORT")
     print("=" * 60)
     print(f"Timestamp: {report['timestamp']}")
     print(f"Hardware: {report['hardware']}")
@@ -131,7 +131,7 @@ def print_report(report):
     print("TEST RESULTS:")
     print("-" * 40)
     for test_name, passed in report["tests"].items():
-        status = "✅ PASS" if passed else "❌ FAIL"
+        status = "[OK] PASS" if passed else "[FAIL] FAIL"
         print(f"{test_name.replace('_', ' ').title():25}: {status}")
 
     print()
@@ -145,16 +145,16 @@ def print_report(report):
     print(f"Success Rate: {success_rate:.1f}%")
 
     if report["summary"]["failed_tests"] == 0:
-        print("\n🎉 ALL TESTS PASSED! Forensic Suite is Enterprise-Ready!")
+        print("\n[OK] ALL TESTS PASSED! Forensic Suite is Enterprise-Ready!")
     else:
-        print(f"\n⚠️  {report['summary']['failed_tests']} test(s) failed. Check output above.")
+        print(f"\n[WARN] {report['summary']['failed_tests']} test(s) failed. Check output above.")
 
     print("=" * 60)
 
 
 def main():
     """Main execution function."""
-    print("🚀 Starting Master Forensic Test Suite")
+    print("[INFO] Starting Master Forensic Test Suite")
     print("Optimized for NVIDIA 1660 Ti 6GB VRAM")
     print("-" * 50)
 

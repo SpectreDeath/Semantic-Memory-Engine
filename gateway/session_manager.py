@@ -173,9 +173,13 @@ class SessionManager:
         self._sessions: dict[str, Session] = {}
 
     def get_session(self, session_id: str | None = None) -> Session:
-        """Get existing session or create new one with persisted scratchpad loading."""
+        """
+        Get existing session or create new one statelessly.
+        In MCP 2026-07-28 (stateless MCP), transport handshakes are removed.
+        If session_id is None, an ephemeral stateless session is returned.
+        """
         if not session_id or session_id not in self._sessions:
-            new_id = session_id or str(uuid.uuid4())
+            new_id = session_id or f"stateless_{uuid.uuid4()}"
             session = Session(new_id)
             session.load_persisted_scratchpad()
             self._sessions[new_id] = session
@@ -184,6 +188,41 @@ class SessionManager:
         session = self._sessions[session_id]
         session.last_accessed = datetime.now()
         return session
+
+    def get_stateless_session(self) -> Session:
+        """Create a purely ephemeral stateless session for single tool calls."""
+        session_id = f"stateless_{uuid.uuid4().hex[:12]}"
+        return Session(session_id)
+
+    def get_task_state(self, task_token: str) -> dict[str, Any]:
+        """
+        Retrieve workflow task state from laboratory.db using explicit task token.
+        Supports database-backed task tokens (task/get pattern in MCP 2026-07-28).
+        """
+        try:
+            if not os.path.exists(DB_PATH):
+                return {"task_token": task_token, "status": "not_found"}
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS task_tokens (
+                    task_token TEXT PRIMARY KEY,
+                    state_json TEXT,
+                    created_at TEXT
+                )
+                """
+            )
+            cursor.execute(
+                "SELECT state_json FROM task_tokens WHERE task_token = ?", (task_token,)
+            )
+            row = cursor.fetchone()
+            conn.close()
+            if row:
+                return json.loads(row[0])
+            return {"task_token": task_token, "status": "not_found"}
+        except Exception as e:
+            return {"task_token": task_token, "status": "error", "message": str(e)}
 
     def list_sessions(self) -> list[str]:
         """List all active session IDs."""

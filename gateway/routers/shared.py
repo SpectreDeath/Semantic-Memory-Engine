@@ -142,8 +142,39 @@ def make_safe_tool_call(registry: Any, metrics_manager: Any) -> Callable:
 
 
 # =============================================================================
-# Auth / Rate-limit helper
+# Auth / Rate-limit helper (MCP 2026-07-28 compliant)
 # =============================================================================
+
+
+def extract_mcp_headers(headers: dict[str, Any] | None) -> tuple[str | None, str | None]:
+    """
+    Extract required MCP 2026-07-28 HTTP routing headers from incoming request headers.
+
+    Returns:
+        (mcp_method, mcp_name) tuple
+    """
+    if not headers:
+        return None, None
+
+    normalized = {k.lower(): v for k, v in headers.items() if isinstance(k, str)}
+    mcp_method = normalized.get("mcp-method")
+    mcp_name = normalized.get("mcp-name")
+    return mcp_method, mcp_name
+
+
+def format_input_required_response(
+    prompt: str,
+    input_schema: dict[str, Any] | None = None,
+    continuation_token: str | None = None,
+) -> dict[str, Any]:
+    """Format an input_required response for interactive stateless multi-round-trip user interaction."""
+    return {
+        "status": "input_required",
+        "prompt": prompt,
+        "input_schema": input_schema or {"type": "object", "properties": {}},
+        "continuation_token": continuation_token or f"token_{int(time.time())}",
+        "_meta": {"mcp_spec": "2026-07-28", "interactive": True},
+    }
 
 
 def validate_access(
@@ -151,9 +182,16 @@ def validate_access(
     client_id: str,
     auth_manager: Any,
     rate_limiter: Any,
+    headers: dict[str, Any] | None = None,
 ) -> str | None:
-    """Return a JSON error string if access is denied, else None."""
-    allowed, _ = rate_limiter.is_allowed(client_id)
+    """
+    Return a JSON error string if access is denied, else None.
+    Supports MCP 2026-07-28 MCP-Method and MCP-Name header rate-limiting.
+    """
+    mcp_method, mcp_name = extract_mcp_headers(headers)
+    allowed, _ = rate_limiter.is_allowed(
+        client_id, mcp_method=mcp_method, mcp_name=mcp_name
+    )
     if not allowed:
         return json.dumps({"error": "Rate limit exceeded", "retry_after": "60s"})
     if token:
@@ -161,3 +199,4 @@ def validate_access(
         if not payload:
             return json.dumps({"error": "Invalid or expired token"})
     return None
+

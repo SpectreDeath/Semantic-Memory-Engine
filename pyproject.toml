@@ -24,8 +24,9 @@ dependencies = [
     "psycopg2-binary>=2.9.0",
     # v2.3.0
     "smolagents>=1.0.0",
-    # Gateway / MCP
-    "fastmcp<3.0.0",
+    # Gateway / MCP 2026-07-28
+    "mcp>=2.0.0",
+    "fastmcp>=2.0.0,<3.0.0",
     "cryptography>=46.0.0",
     "PyJWT>=2.0.0",
     # Analysis

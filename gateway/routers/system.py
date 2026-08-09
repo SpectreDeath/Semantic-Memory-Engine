@@ -129,6 +129,12 @@ def register(
         logger.info("verify_system called")
         return json.dumps(_get_system_status(registry), indent=2)
 
+    registry.add_tool(
+        "verify_system",
+        verify_system,
+        description="Verify system health and return hardware telemetry.",
+    )
+
     @mcp.tool()
     def check_health() -> str:
         """
@@ -206,18 +212,64 @@ def register(
         return json.dumps({"error": "Invalid credentials"})
 
     @mcp.tool()
+    def serverDiscover() -> str:
+        """
+        MCP 2026-07-28 Stateless Server Discovery Endpoint.
+
+        Returns server metadata, capabilities, supported spec version, and instructions
+        without requiring prior stateful connection handshakes.
+        """
+        from gateway.routers.shared import serialize_result
+
+        tools = registry.list_tools()
+        info = {
+            "name": "Lawnmower Man Gateway",
+            "version": "3.0.1",
+            "spec_version": "2026-07-28",
+            "stateless": True,
+            "instructions": "MCP gateway to the Semantic Memory Engine forensic toolkit",
+            "capabilities": {
+                "tools": {"total_count": len(tools)},
+                "routing_headers": ["MCP-Method", "MCP-Name"],
+                "stateless_transport": True,
+                "input_required_support": True,
+                "tasks": {"task_get_supported": True},
+            },
+            "tools": tools,
+            "_meta": {
+                "mcp_spec": "2026-07-28",
+                "handshake_required": False,
+                "mcp_session_id_deprecated": True,
+            },
+        }
+        return json.dumps(serialize_result(info), indent=2)
+
+    registry.add_tool(
+        "serverDiscover",
+        serverDiscover,
+        description="MCP 2026-07-28 Stateless Server Discovery Endpoint",
+    )
+
+    @mcp.tool()
     def list_available_tools() -> str:
         """Introspect the ToolRegistry to provide a live manifest of all registered tools."""
         from gateway.routers.shared import serialize_result
 
         tools = registry.list_tools()
         manifest = {
-            "version": "3.0.0",
+            "version": "3.0.1",
             "codename": "Crucible Bridge",
+            "spec_version": "2026-07-28",
             "total_tools": len(tools),
             "registry": tools,
         }
         return json.dumps(serialize_result(manifest), indent=2)
+
+    registry.add_tool(
+        "list_available_tools",
+        list_available_tools,
+        description="Introspect the ToolRegistry to provide a live manifest of all registered tools.",
+    )
 
     @mcp.tool()
     def route_execution(tool_name: str, payload: dict | None = None, mode: str = "auto") -> str:

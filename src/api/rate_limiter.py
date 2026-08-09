@@ -187,18 +187,28 @@ class RateLimiter:
         Returns:
             Response
         """
-        # Get client IP
+        # Get client IP and MCP 2026-07-28 HTTP routing headers
         client_ip = request.client.host if request.client else "unknown"
+        mcp_method = request.headers.get("MCP-Method")
+        mcp_name = request.headers.get("MCP-Name")
+
+        rate_key = client_ip
+        if mcp_method:
+            rate_key += f":{mcp_method}"
+        if mcp_name:
+            rate_key += f":{mcp_name}"
 
         # Check rate limit
-        if not self.is_allowed(client_ip):
-            remaining = self.get_remaining(client_ip)
+        if not self.is_allowed(rate_key):
+            remaining = self.get_remaining(rate_key)
             return JSONResponse(
                 status_code=429,
                 content={
                     "error": "Too many requests",
                     "message": "Rate limit exceeded. Please try again later.",
                     "remaining": remaining,
+                    "mcp_method": mcp_method,
+                    "mcp_name": mcp_name,
                 },
                 headers={"Retry-After": "60", "X-RateLimit-Remaining": str(remaining)},
             )
@@ -207,8 +217,12 @@ class RateLimiter:
         response = await call_next(request)
 
         # Add rate limit headers
-        remaining = self.get_remaining(client_ip)
+        remaining = self.get_remaining(rate_key)
         response.headers["X-RateLimit-Remaining"] = str(remaining)
+        if mcp_method:
+            response.headers["MCP-Method"] = mcp_method
+        if mcp_name:
+            response.headers["MCP-Name"] = mcp_name
 
         return response
 

@@ -749,16 +749,17 @@ class ToolRegistry:
         if tool_name not in self._tool_instances:
             definition = self.TOOL_DEFINITIONS[tool_name]
 
-            if definition.is_manual:
-                # Manual tools must have been injected via add_tool
+            if definition.is_manual or not definition.factory_method:
+                # Manual or function-based tool without a factory method
+                handler = definition.handler
+                if handler is not None:
+                    return handler
                 logger.error(
-                    f"Manual tool {tool_name} not found in instances. Did you call add_tool?"
+                    f"Tool {tool_name} has no factory_method or instance registered."
                 )
                 return None
 
             factory = self._get_factory()
-
-            # Get the factory method by name
             factory_method = getattr(factory, definition.factory_method, None)
             if factory_method is None:
                 logger.error(f"Factory method not found: {definition.factory_method}")

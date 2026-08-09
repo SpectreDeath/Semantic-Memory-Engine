@@ -51,6 +51,8 @@ class TrafficRouter:
         tool_name: str,
         payload: dict[str, Any] | None = None,
         mode: str | None = None,
+        mcp_method: str | None = None,
+        mcp_name: str | None = None,
     ) -> dict[str, Any]:
         """
         Determine target execution node for an incoming request.
@@ -59,11 +61,14 @@ class TrafficRouter:
             tool_name: Name of tool or workflow.
             payload: Request arguments.
             mode: Routing mode override (auto, local_only, em_cubed_workflow).
+            mcp_method: HTTP MCP-Method header (e.g., 'tools/call', 'serverDiscover').
+            mcp_name: HTTP MCP-Name header (e.g., 'semantic_search').
 
         Returns:
             Dict containing target_node, mode, reason, and fallback_node.
         """
         active_mode = mode or self.default_mode
+        target_name = mcp_name or tool_name
 
         if active_mode == RULE_LOCAL_ONLY:
             return {
@@ -71,6 +76,8 @@ class TrafficRouter:
                 "mode": RULE_LOCAL_ONLY,
                 "reason": "Explicit local_only policy enforced.",
                 "fallback_node": None,
+                "mcp_method": mcp_method,
+                "mcp_name": target_name,
             }
 
         if active_mode == RULE_EM_CUBED_WORKFLOW:
@@ -79,21 +86,25 @@ class TrafficRouter:
                 "mode": RULE_EM_CUBED_WORKFLOW,
                 "reason": "Explicit em_cubed_workflow policy enforced.",
                 "fallback_node": NODE_SME_LOCAL,
+                "mcp_method": mcp_method,
+                "mcp_name": target_name,
             }
 
         # Auto-balancing rule
-        if tool_name in WORKFLOW_SURFACE_TOOLS or "workflow" in tool_name:
+        if target_name in WORKFLOW_SURFACE_TOOLS or "workflow" in target_name:
             target = NODE_EM_CUBED_DISTRIBUTED
-            reason = f"Tool '{tool_name}' classified as compute-heavy workflow surface."
+            reason = f"Tool/Name '{target_name}' classified as compute-heavy workflow surface."
         else:
             target = NODE_SME_LOCAL
-            reason = f"Tool '{tool_name}' classified as local forensic query."
+            reason = f"Tool/Name '{target_name}' classified as local forensic query."
 
         return {
             "target_node": target,
             "mode": RULE_AUTO_BALANCE,
             "reason": reason,
             "fallback_node": NODE_SME_LOCAL if target != NODE_SME_LOCAL else None,
+            "mcp_method": mcp_method,
+            "mcp_name": target_name,
         }
 
     def probe_node_health(self, node_id: str = NODE_EM_CUBED_DISTRIBUTED) -> dict[str, Any]:
@@ -128,6 +139,8 @@ class TrafficRouter:
         mode: str | None = None,
         sme_core: Any | None = None,
         mimo_config: Any | None = None,
+        mcp_method: str | None = None,
+        mcp_name: str | None = None,
     ) -> dict[str, Any]:
         """
         Resolve route and dispatch workload to target execution runtime.
@@ -136,7 +149,13 @@ class TrafficRouter:
         if mimo_config and hasattr(mimo_config, "d4_routing_mode"):
             eff_mode = mimo_config.d4_routing_mode
 
-        route = self.resolve_route(tool_name, payload=payload, mode=eff_mode)
+        route = self.resolve_route(
+            tool_name,
+            payload=payload,
+            mode=eff_mode,
+            mcp_method=mcp_method,
+            mcp_name=mcp_name,
+        )
         target = route["target_node"]
         args = payload or {}
 

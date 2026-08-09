@@ -19,7 +19,7 @@ def test_registry() -> bool:
     registry = get_registry()
     tools = registry.list_tools()
 
-    print(f"✅ Tool Registry loaded: {len(tools)} tools")
+    print(f"[OK] Tool Registry loaded: {len(tools)} tools")
     print(f"   Categories: {registry.get_categories()}")
 
     # List tools by category
@@ -41,7 +41,7 @@ def test_mcp_server():
     # Import the module to check it loads
     from gateway import mcp_server
 
-    print("✅ MCP Server imported successfully")
+    print("[OK] MCP Server imported successfully")
 
     # The decorated functions are now FunctionTool objects
     # We need to call their underlying function via .fn
@@ -77,28 +77,48 @@ def test_mcp_server():
     # Test list_available_tools
     print("\n--- list_available_tools() ---")
     tools = json.loads(list_callable())
-    print(f"   Gateway: {tools.get('codename', 'N/A')} v{tools['version']}")
+    print(f"   Gateway: {tools.get('codename', 'N/A')} v{tools['version']} (Spec: {tools.get('spec_version')})")
     print(f"   Tool count: {tools['total_tools']}")
+
+    # Test serverDiscover (MCP 2026-07-28)
+    print("\n--- serverDiscover() [MCP 2026-07-28] ---")
+    discover_fn = mcp_server.serverDiscover
+    discover_callable = discover_fn.fn if hasattr(discover_fn, "fn") else discover_fn
+    disc_res = json.loads(discover_callable())
+    print(f"   Spec Version: {disc_res.get('spec_version')}")
+    print(f"   Stateless Transport: {disc_res.get('stateless')}")
+
+    # Test header-based TrafficRouter routing
+    print("\n--- TrafficRouter [MCP-Method & MCP-Name Headers] ---")
+    from gateway.traffic_router import TrafficRouter
+
+    tr = TrafficRouter()
+    route = tr.resolve_route(
+        tool_name="semantic_search",
+        mcp_method="tools/call",
+        mcp_name="semantic_search",
+    )
+    print(f"   Route Target: {route['target_node']} (Method: {route.get('mcp_method')}, Name: {route.get('mcp_name')})")
 
     return True
 
 
 def main():
     """Run all tests."""
-    print("\n🌿 Lawnmower Man Gateway - Verification Tests\n")
+    print("\n[INFO] Lawnmower Man Gateway - Verification Tests\n")
 
     try:
         test_registry()
         test_mcp_server()
 
         print("\n" + "=" * 50)
-        print("✅ ALL TESTS PASSED")
+        print("[OK] ALL TESTS PASSED")
         print("=" * 50)
         print("\nThe gateway is ready for use!")
         print("Run with: python -m gateway.mcp_server")
 
     except Exception as e:
-        print(f"\n❌ TEST FAILED: {e}")
+        print(f"\n[FAIL] TEST FAILED: {e}")
         import traceback
 
         traceback.print_exc()

@@ -24,19 +24,33 @@ class RateLimiter:
         self.clients: dict[str, deque] = {}
         self._lock = threading.Lock()
 
-    def is_allowed(self, client_id: str) -> tuple[bool, int]:
+    def is_allowed(
+        self,
+        client_id: str,
+        mcp_method: str | None = None,
+        mcp_name: str | None = None,
+    ) -> tuple[bool, int]:
         """
         Check if request is allowed for client_id.
+        Supports MCP 2026-07-28 HTTP routing headers (MCP-Method and MCP-Name).
+
         Returns (is_allowed, remaining_requests).
         Thread-safe via a lock on the shared clients dict.
         """
         now = time.time()
 
-        with self._lock:
-            if client_id not in self.clients:
-                self.clients[client_id] = deque()
+        # Build granular rate limiting key if headers are provided
+        key = client_id
+        if mcp_method:
+            key += f":{mcp_method}"
+        if mcp_name:
+            key += f":{mcp_name}"
 
-            requests = self.clients[client_id]
+        with self._lock:
+            if key not in self.clients:
+                self.clients[key] = deque()
+
+            requests = self.clients[key]
 
             # Remove expired requests outside the sliding window
             while requests and requests[0] < now - self.window:

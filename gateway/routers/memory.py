@@ -149,6 +149,12 @@ def register(
 
         return json.dumps(stats, indent=2)
 
+    registry.add_tool(
+        "get_memory_stats",
+        get_memory_stats,
+        description="Get statistics about the stored knowledge base.",
+    )
+
     # ------------------------------------------------------------------
     # Session tools
     # ------------------------------------------------------------------

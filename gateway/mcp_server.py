@@ -35,10 +35,13 @@ from src.core.constants import (
 src.bootstrap.initialize()
 
 try:
-    from fastmcp import FastMCP
+    from mcp.server.fastmcp import FastMCP
 except ImportError:
-    print("ERROR: FastMCP not installed. Run: pip install fastmcp")
-    sys.exit(1)
+    try:
+        from fastmcp import FastMCP
+    except ImportError:
+        print("ERROR: MCP / FastMCP v2.0+ not installed. Run: pip install mcp fastmcp")
+        sys.exit(1)
 
 from gateway.auth import get_auth_manager
 from gateway.extension_manager import ExtensionManager
@@ -333,6 +336,12 @@ register_all_routers(
     get_hsm=get_hsm,
     get_nexus=get_nexus,
 )
+
+# Exposed tool wrappers for direct module invocation
+serverDiscover = registry.get_tool("serverDiscover")  # noqa: N816
+verify_system = registry.get_tool("verify_system")
+list_available_tools = registry.get_tool("list_available_tools")
+get_memory_stats = registry.get_tool("get_memory_stats")
 
 # =============================================================================
 # Server Entry Point

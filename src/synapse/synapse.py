@@ -149,6 +149,20 @@ class MemoryConsolidator:
             conn.commit()
             conn.close()
 
+            # Push concept to Memtext memory store if memtext package is installed
+            try:
+                from memtext import ingest_sme_atomic_fact
+
+                ingest_sme_atomic_fact(
+                    fact_title=f"Concept: {concept_name}",
+                    fact_content=definition or f"Abstract forensic concept uniting {len(members)} member entries.",
+                    trust_score=0.9,
+                    source="sme_synapse",
+                    tags=["sme_concept", "synapse"],
+                )
+            except Exception:
+                pass
+
             return concept_id
 
         except Exception as e:

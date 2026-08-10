@@ -39,33 +39,18 @@ dependencies = [
     "httpx>=0.24.0",
     # Performance
     "orjson>=3.9.0",
-    # SME Core (from requirements.txt)
-    "numba==0.63.1",
-    "contourpy==1.3.2",
-    "colorama==0.4.6",
-    "cycler==0.12.1",
-    "cymem==2.0.13",
-    "diskcache==5.6.3",
-    "distro==1.9.0",
-    "dnspython==2.8.0",
-    "docstring_parser==0.17.0",
-    "email-validator==2.3.0",
-    "fakeredis==2.33.0",
-    # Pipeline & ML
-    "prefect>=2.14.0",
-    "pyod>=1.0.0",
-    "waybackpy==3.0.6",
+    # SME Core
+    "numba~=0.63",
+    "colorama>=0.4.6",
+    "diskcache>=5.6.3",
+    "email-validator>=2.3.0",
     "networkx>=3.0",
     "croniter>=1.3.0",
-    "web3[tester]>=6.0.0",
-    "dask[complete]>=2024.1.0",
     "matplotlib>=3.8.0",
     "requests>=2.31.0",
     "beautifulsoup4>=4.12.0",
     "markdownify>=0.13.0",
-    "ccxt>=2.0.0",
-    # Testing
-    "pytest-asyncio>=0.21.0",
+    "pyod>=1.0.0",
     # Windows
     'pywin32==311; sys_platform == "win32"',
 ]
@@ -81,6 +66,8 @@ dev = [
     # Testing
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+    "pytest-asyncio>=0.21.0",
+    "fakeredis>=2.0.0",
 ]
 # Install with: pip install -e ".[nlp]"
 nlp = [
@@ -98,8 +85,28 @@ performance = [
 # Install with: pip install -e ".[observability]"
 observability = [
     "structlog>=24.0.0",
-    "memtext>=0.6.0",
+    "memtext @ git+https://github.com/SpectreDeath/Memtext.git",
 ]
+# Install with: pip install -e ".[pipeline]"
+# Heavy workflow orchestration and distributed compute
+pipeline = [
+    "prefect>=2.14.0",
+    "dask[complete]>=2024.1.0",
+]
+# Install with: pip install -e ".[osint]"
+# OSINT / web archiving tools
+osint = [
+    "waybackpy==3.0.6",
+]
+# Install with: pip install -e ".[blockchain]"
+# Blockchain / crypto market data (heavy)
+blockchain = [
+    "web3[tester]>=6.0.0",
+    "ccxt>=2.0.0",
+]
+# Install with: pip install -e ".[full]" for everything
+full = ["sme-forensic-toolkit[dev,nlp,performance,observability,pipeline,osint,blockchain]"]
+
 
 [project.scripts]
 sme = "sme_cli.main:cli"

@@ -1,8 +1,11 @@
 """
 SME (Semantic Memory Engine) CLI Entry Point
 
-Provides a command-line interface to discover and run available tools.
-Usage:
+Primary Entry Points:
+    - API Gateway / Operator: python -m src.api.main
+    - CLI Tool Suite: sme or python -m sme_cli.main
+
+Usage for this tool runner:
     python -m src [command] [options]
     python __main__.py list
     python __main__.py run [tool-name] [args]

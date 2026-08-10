@@ -1,4 +1,4 @@
-# 🌿 Lawnmower Man: Forensic MCP Gateway (v3.0.1)
+# 🌿 SME Forensic Gateway (Lawnmower Man) · v3.0.1
 
 > **The Semantic Memory Engine (SME) Bridge for Agentic AI.**
 > *Now featuring the Interactive Control Room & Unified Ingestion.*
@@ -12,7 +12,7 @@
 
 ## 🚀 Overview
 
-Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents. Version 3.0.1 features an embedded AI provider in the Operator for simpler architecture.
+SME Forensic Gateway (codename *Lawnmower Man*) is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents. Version 3.0.1 features an embedded AI provider in the Operator for simpler architecture.
 
 - **Interactive Control Room**: Real-time monitoring of AI Providers and Databases.
 - **Cloud Storage Integration**: Ingest content from Google Drive, Dropbox, OneDrive, and S3.
@@ -31,11 +31,16 @@ Lawnmower Man is a production-grade **Model Context Protocol (MCP)** Gateway tha
 
 The recommended way to run SME v3.0.1 is native mode with Python 3.13.
 
+### Primary Entry Points
+- **API Gateway / Operator**: `python -m src.api.main` (starts FastAPI / MCP gateway)
+- **CLI Tool Suite**: `sme` or `python -m sme_cli.main`
+- **Legacy CLI Tool Runner**: `python __main__.py [command]`
+
 ```bash
 # 1. Install the project in editable mode
 pip install -e .
 
-# 2. Start the operator
+# 2. Start the API Gateway / Operator
 python -m src.api.main
 
 # 3. In a second terminal, start the frontend

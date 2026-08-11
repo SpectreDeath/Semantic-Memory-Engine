@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ class CloudDocument:
     source_provider: str  # "s3", "dropbox", "onedrive"
     content_type: str
     content: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class S3StorageAdapter:
@@ -32,7 +32,7 @@ class S3StorageAdapter:
         self.bucket_name = bucket_name
         self.region = region
 
-    def list_and_ingest(self, prefix: str = "") -> List[CloudDocument]:
+    def list_and_ingest(self, prefix: str = "") -> list[CloudDocument]:
         """List and convert S3 objects into SME CloudDocument objects."""
         logger.info("Ingesting S3 bucket s3://%s/%s", self.bucket_name, prefix)
         return [
@@ -53,7 +53,7 @@ class DropboxStorageAdapter:
     def __init__(self, access_token: str | None = None):
         self.access_token = access_token
 
-    def ingest_folder(self, folder_path: str = "/forensics") -> List[CloudDocument]:
+    def ingest_folder(self, folder_path: str = "/forensics") -> list[CloudDocument]:
         """Ingest documents from specified Dropbox folder."""
         logger.info("Ingesting Dropbox folder %s", folder_path)
         return [
@@ -74,7 +74,7 @@ class OneDriveStorageAdapter:
     def __init__(self, tenant_id: str | None = None):
         self.tenant_id = tenant_id
 
-    def ingest_drive(self, drive_id: str = "main") -> List[CloudDocument]:
+    def ingest_drive(self, drive_id: str = "main") -> list[CloudDocument]:
         """Ingest documents from Microsoft OneDrive."""
         logger.info("Ingesting OneDrive drive %s", drive_id)
         return [

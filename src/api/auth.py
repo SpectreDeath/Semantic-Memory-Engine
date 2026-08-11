@@ -7,11 +7,10 @@ with clean 401 JSON error payloads.
 from __future__ import annotations
 
 import os
-from typing import Optional
 
+import jwt
 from fastapi import HTTPException, Security, status
 from fastapi.security import APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
-import jwt
 
 # Standard Header Security Definitions
 bearer_scheme = HTTPBearer(auto_error=False)
@@ -22,8 +21,8 @@ API_KEY = os.getenv("SME_API_KEY", "")
 
 
 async def verify_jwt_or_api_key(
-    credentials: Optional[HTTPAuthorizationCredentials] = Security(bearer_scheme),
-    api_key: Optional[str] = Security(api_key_scheme),
+    credentials: HTTPAuthorizationCredentials | None = Security(bearer_scheme),
+    api_key: str | None = Security(api_key_scheme),
 ) -> dict:
     """Verify incoming request using Bearer JWT or X-API-Key.
 

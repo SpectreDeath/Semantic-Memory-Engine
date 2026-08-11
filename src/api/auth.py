@@ -53,7 +53,10 @@ async def verify_jwt_or_api_key(
     if os.getenv("SME_REQUIRE_AUTH", "false").lower() == "true":
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"error": "authentication_required", "message": "Bearer token or X-API-Key header required"},
+            detail={
+                "error": "authentication_required",
+                "message": "Bearer token or X-API-Key header required",
+            },
             headers={"WWW-Authenticate": "Bearer"},
         )
 

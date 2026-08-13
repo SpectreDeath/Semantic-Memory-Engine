@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import pytest
 
-from gateway.mcp_server import SemanticGraphBridge, SmeCoreBridge
+from gateway.bridges import SemanticGraphBridge, SmeCoreBridge
 from gateway.surface_bridge import SurfaceBridge
 
 

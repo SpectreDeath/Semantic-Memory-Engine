@@ -1,3 +1,7 @@
 {
-    "python.defaultInterpreterPath": "C:\\Users\\spectre\\AppData\\Local\\Python\\pythoncore-3.13-64\\python.exe"
+  "github-actions.diagnostics.enable": false,
+  "github-actions.workflows.pinnedVersionWarnings": false,
+  "yaml.schemas": {
+    "https://json.schemastore.org/github-workflow.json": ".github/workflows/*.yml"
+  }
 }

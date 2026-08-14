@@ -142,6 +142,7 @@ def test_postgres_query_interface_without_real_db(db_telemetry_harness):
     mock_cursor.fetchall.return_value = [{"version": "PostgreSQL 16.1"}]
     mock_pool.getconn.return_value = mock_conn
     mock_conn.cursor.return_value = mock_cursor
+    mock_cursor.__enter__.return_value = mock_cursor
 
     nexus = PostgresNexus.__new__(PostgresNexus)
     nexus.pool = mock_pool

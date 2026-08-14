@@ -14,10 +14,13 @@
 
 SME Forensic Gateway (codename *Lawnmower Man*) is a production-grade **Model Context Protocol (MCP)** Gateway that exposes deep forensic capabilities to LLM agents. Version 3.0.1 features an embedded AI provider in the Operator for simpler architecture.
 
+- **Official User Manual**: Detailed guide available in **[docs/USER_MANUAL.md](docs/USER_MANUAL.md)**.
 - **Interactive Control Room**: Real-time monitoring of AI Providers and Databases.
 - **Cloud Storage Integration**: Ingest content from Google Drive, Dropbox, OneDrive, and S3.
-- **Social Intelligence Crawler**: Multi-platform social media monitoring and bot detection.
-- **PostgreSQL Nexus**: Production-grade database layer with connection pooling.
+- **Social Intelligence Crawler**: Multi-platform social media monitoring (Twitter/X, Reddit, Bluesky, Telegram) and bot detection.
+- **PostgreSQL Nexus**: Production-grade database layer with connection pooling & retry handling.
+- **ED25519 Cryptographic Provenance**: Tamper-evident Merkle tree audit records with digital signatures.
+- **Interactive Knowledge Graph**: 2D force-directed topology visualizer in the Control Room.
 - **The Harvester**: One-click web ingestion converting URLs into semantic atomic facts.
 - **Epistemic Trust**: Calculated Trust Scores for all data signals.
 - **Native Operator Process**: Embedded AI provider with direct GPU access.

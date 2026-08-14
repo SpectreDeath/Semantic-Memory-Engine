@@ -165,6 +165,52 @@ class AuditEngine:
             return GENESIS_HASH
         return self._last_hash
 
+    def generate_keypair(self) -> tuple[str, str]:
+        """Generate ED25519 keypair for cryptographic Merkle chain signing (PEM format)."""
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric import ed25519
+
+        private_key = ed25519.Ed25519PrivateKey.generate()
+        public_key = private_key.public_key()
+
+        private_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        ).decode("utf-8")
+
+        public_pem = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        ).decode("utf-8")
+
+        return private_pem, public_pem
+
+    def sign_merkle_root(self, private_key_pem: str) -> str:
+        """Sign current Merkle root hash using ED25519 private key (returns signature hex)."""
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric import ed25519
+
+        private_key = serialization.load_pem_private_key(
+            private_key_pem.encode("utf-8"), password=None
+        )
+        root = self.compute_merkle_root()
+        signature = private_key.sign(root.encode("utf-8"))
+        return signature.hex()
+
+    def verify_merkle_signature(self, public_key_pem: str, signature_hex: str) -> bool:
+        """Verify an ED25519 signature against current Merkle root hash."""
+        from cryptography.hazmat.primitives import serialization
+        from cryptography.hazmat.primitives.asymmetric import ed25519
+
+        try:
+            public_key = serialization.load_pem_public_key(public_key_pem.encode("utf-8"))
+            root = self.compute_merkle_root()
+            public_key.verify(bytes.fromhex(signature_hex), root.encode("utf-8"))
+            return True
+        except Exception:
+            return False
+
     def verify_remote_merkle_root(self, remote_merkle_root: str) -> dict[str, Any]:
         """
         Verify consensus between local Merkle root and a remote node's Merkle root.

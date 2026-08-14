@@ -5,6 +5,8 @@ import { SkeletonCard } from '../components/Skeleton';
 import MimoAnnVisualizer from '../components/MimoAnnVisualizer';
 import DagWorkflowVisualizer from '../components/DagWorkflowVisualizer';
 
+import GraphVisualizer from '../components/GraphVisualizer';
+
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [feedItems, setFeedItems] = useState([]);
@@ -130,6 +132,10 @@ const Dashboard = () => {
 
       <section className="card glass-panel" style={{ gridColumn: '1 / -1' }} aria-labelledby="mimo-title">
         <MimoAnnVisualizer mimoData={mimoData} annData={annData} />
+      </section>
+
+      <section className="card glass-panel" style={{ gridColumn: '1 / -1' }} aria-labelledby="graph-title">
+        <GraphVisualizer />
       </section>
 
       <section className="card glass-panel" style={{ gridColumn: '1 / -1' }} aria-labelledby="dag-title">

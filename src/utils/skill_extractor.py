@@ -720,7 +720,11 @@ class SkillExtractor:
         return errors
 
     def save(
-        self, skill: ExtractedSkill, output_dir: str | None = None, output_name: str | None = None
+        self,
+        skill: ExtractedSkill,
+        output_dir: str | None = None,
+        output_name: str | None = None,
+        as_directory: bool = False,
     ) -> Path:
         """Save an extracted skill as a SKILL.md file.
 
@@ -728,23 +732,35 @@ class SkillExtractor:
         ``os.replace()`` to avoid half-written vault corruption if the
         process crashes between the ``.md`` and ``.metadata.json`` writes.
 
+        If ``as_directory=True``, saves as ``{output_dir}/{safe_name}/SKILL.md``
+        following standard Antigravity/Claude agent skill package structure.
+        Otherwise, saves as ``{output_dir}/{safe_name}.md`` for flat vaults.
+
         Writes two files:
-        - {skill_name}.md  — the SKILL.md specification
+        - SKILL.md or {skill_name}.md — the specification
         - {skill_name}.metadata.json — machine-readable metadata
         """
         errors = self.validate(skill)
         if errors:
             raise ValidationError(f"Cannot save invalid skill: {errors}")
 
-        target_dir = Path(output_dir) if output_dir else self.vault_dir
-        target_dir.mkdir(parents=True, exist_ok=True)
-
+        base_dir = Path(output_dir) if output_dir else self.vault_dir
         safe_name = self._safe_filename(output_name or skill.skill_name)
-        md_path = target_dir / f"{safe_name}.md"
-        meta_path = target_dir / f"{safe_name}.metadata.json"
 
-        tmp_md = target_dir / f".tmp_{safe_name}.md"
-        tmp_meta = target_dir / f".tmp_{safe_name}.metadata.json"
+        if as_directory:
+            target_dir = base_dir / safe_name
+            target_dir.mkdir(parents=True, exist_ok=True)
+            md_path = target_dir / "SKILL.md"
+            meta_path = target_dir / f"{safe_name}.metadata.json"
+            tmp_md = target_dir / ".tmp_SKILL.md"
+            tmp_meta = target_dir / f".tmp_{safe_name}.metadata.json"
+        else:
+            target_dir = base_dir
+            target_dir.mkdir(parents=True, exist_ok=True)
+            md_path = target_dir / f"{safe_name}.md"
+            meta_path = target_dir / f"{safe_name}.metadata.json"
+            tmp_md = target_dir / f".tmp_{safe_name}.md"
+            tmp_meta = target_dir / f".tmp_{safe_name}.metadata.json"
 
         md_content = self._render_skill_md(skill)
         metadata = {
@@ -792,8 +808,21 @@ class SkillExtractor:
         return safe or "unnamed-skill"
 
     def _render_skill_md(self, skill: ExtractedSkill) -> str:
-        """Render an ExtractedSkill as a SKILL.md markdown file."""
+        """Render an ExtractedSkill as a standardized SKILL.md markdown file."""
         lines = ["---"]
+
+        # Ensure valid Antigravity & Agentic standard frontmatter
+        lines.append(f"name: {skill.skill_name}")
+        
+        # Clean description for YAML frontmatter block scalar
+        desc_clean = skill.description.strip().replace("\r\n", "\n").replace("\r", "\n")
+        if "\n" in desc_clean or len(desc_clean) > 80:
+            lines.append("description: >-")
+            for d_line in desc_clean.split("\n"):
+                if d_line.strip():
+                    lines.append(f"  {d_line.strip()}")
+        else:
+            lines.append(f"description: \"{desc_clean}\"")
 
         def _fm(key: str, value: str) -> str:
             return f"{key}: {value}"
@@ -803,13 +832,14 @@ class SkillExtractor:
         lines.append(_fm("Complexity", skill.complexity))
         lines.append(_fm("Type", skill.skill_type))
         lines.append(_fm("Category", skill.category))
-        lines.append(_fm("name", skill.skill_name))
         if skill.source_file:
             lines.append(_fm("Source_File", skill.source_file))
         if skill.source:
             lines.append(_fm("Source", skill.source))
 
         lines.append("---")
+        lines.append("")
+        lines.append(f"# {skill.skill_name}")
         lines.append("")
         lines.append("## Purpose")
         lines.append("")

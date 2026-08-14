@@ -120,28 +120,35 @@ class PostgresNexus:
         finally:
             self.pool.putconn(conn)
 
-    def query(self, sql: str, params: tuple = ()) -> list[dict[str, Any]]:
-        """Run a query and return results as dicts."""
-        try:
-            with self.get_connection() as conn:
-                with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                    cur.execute(sql, params)
-                    rows = cur.fetchall()
-                    return [dict(row) for row in rows]
-        except Exception as e:
-            logger.exception(f"PostgreSQL Query Error: {e}\nSQL: {sql}")
-            return []
+    def query(self, sql: str, params: tuple = (), max_retries: int = 3) -> list[dict[str, Any]]:
+        """Run a query and return results as dicts with automatic retry for transient errors."""
+        for attempt in range(max_retries):
+            try:
+                with self.get_connection() as conn:
+                    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+                        cur.execute(sql, params)
+                        rows = cur.fetchall()
+                        return [dict(row) for row in rows]
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.exception(f"PostgreSQL Query Error after {max_retries} attempts: {e}\nSQL: {sql}")
+                    return []
+                logger.warning(f"PostgreSQL Query retry attempt {attempt + 1}/{max_retries} due to: {e}")
 
-    def execute(self, sql: str, params: tuple = ()):
-        """Execute a write operation."""
-        try:
-            with self.get_connection() as conn:
-                with conn.cursor() as cur:
-                    cur.execute(sql, params)
-                conn.commit()
-        except Exception as e:
-            logger.exception(f"PostgreSQL Execution Error: {e}\nSQL: {sql}")
-            raise
+    def execute(self, sql: str, params: tuple = (), max_retries: int = 3):
+        """Execute a write operation with automatic retry for transient errors."""
+        for attempt in range(max_retries):
+            try:
+                with self.get_connection() as conn:
+                    with conn.cursor() as cur:
+                        cur.execute(sql, params)
+                    conn.commit()
+                    return
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.exception(f"PostgreSQL Execution Error after {max_retries} attempts: {e}\nSQL: {sql}")
+                    raise
+                logger.warning(f"PostgreSQL Execution retry attempt {attempt + 1}/{max_retries} due to: {e}")
 
     def get_unified_forensic_feed(self, limit: int = 10) -> list[dict[str, Any]]:
         """

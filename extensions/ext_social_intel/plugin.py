@@ -43,6 +43,8 @@ class PlatformType(Enum):
     FACEBOOK = "facebook"
     YOUTUBE = "youtube"
     TIKTOK = "tiktok"
+    BLUESKY = "bluesky"
+    TELEGRAM = "telegram"
 
 
 @dataclass

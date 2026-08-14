@@ -1,214 +1,204 @@
-# SME Forensic Gateway (Lawnmower Man) v3.0.1 — User Manual
-> **Production-Grade MCP Forensic Gateway, Social Intelligence Crawler & Control Room UI**
+# 📘 SME Forensic Gateway (Lawnmower Man) — Official User & Operator Manual
+
+Welcome to the **SME Forensic Gateway** User & Operator Manual. This document provides a complete guide to operating, configuring, expanding, and developing against SME v3.0.1+.
 
 ---
 
-## 📋 Table of Contents
-1. [Overview & Architecture](#overview--architecture)
-2. [Installation & Requirements](#installation--requirements)
-3. [Service Startup & Primary Entry Points](#service-startup--primary-entry-points)
-4. [Interactive Control Room UI Guide](#interactive-control-room-ui-guide)
-5. [Social Intelligence & OSINT Crawler](#social-intelligence--osint-crawler)
-6. [Forensic Intelligence Suite](#forensic-intelligence-suite)
-7. [Hot-Swappable Extension Engine](#hot-swappable-extension-engine)
-8. [FastAPI & FastMCP Tool API Reference](#fastapi--fastmcp-tool-api-reference)
-9. [Hardware Optimization (GTX 1660 Ti 6GB VRAM)](#hardware-optimization-gtx-1660-ti-6gb-vram)
-10. [Troubleshooting & Diagnostics](#troubleshooting--diagnostics)
+## 📑 Table of Contents
+1. [System Overview & Architecture](#1-system-overview--architecture)
+2. [Quickstart & Native Launch](#2-quickstart--native-launch)
+3. [The Interactive Control Room UI](#3-the-interactive-control-room-ui)
+4. [Harvester & Cloud Ingestion Engine](#4-harvester--cloud-ingestion-engine)
+5. [Social Intelligence & OSINT Crawlers](#5-social-intelligence--osint-crawlers)
+6. [Model Context Protocol (MCP) & FastMCP Server](#6-model-context-protocol-mcp--fastmcp-server)
+7. [Database Tier (SQLite WAL & PostgreSQL Nexus)](#7-database-tier-sqlite-wal--postgresql-nexus)
+8. [Merkle Audit Engine & Cryptographic Provenance](#8-merkle-audit-engine--cryptographic-provenance)
+9. [Command Line Tool Suite (SME CLI)](#9-command-line-tool-suite-sme-cli)
+10. [Troubleshooting & Diagnostics](#10-troubleshooting--diagnostics)
 
 ---
 
-## 🏛️ Overview & Architecture
+## 1. System Overview & Architecture
 
-**SME Forensic Gateway** (codename *Lawnmower Man*) provides a production-grade Model Context Protocol (MCP) gateway, AI operator bridge, and forensic investigation workbench.
+The **Semantic Memory Engine (SME)** is a production-grade MCP Gateway enabling AI Agents (Claude, GPT-4o, Ollama, LangChain, Smolagents, Pydantic-AI) to perform deep forensic analysis, semantic memory ingestion, claim drift detection, and social media OSINT.
 
-It combines real-time social media intelligence, epistemic trust scoring, watermark/ghost account detection, and web harvesting with an interactive React/Vite Glassmorphism dashboard.
-
-```
- ┌────────────────────────────────────────────────────────────────────────┐
- │                      AI Agent / MCP Client (IDE)                       │
- └───────────────────────────────────┬────────────────────────────────────┘
-                                     │ MCP JSON-RPC
-                                     ▼
- ┌────────────────────────────────────────────────────────────────────────┐
- │                   SME Gateway Operator (Python 3.13)                   │
- ├───────────────────────────────────┬────────────────────────────────────┤
- │      Epistemic Gatekeeper         │      Social Intel Crawler          │
- ├───────────────────────────────────┼────────────────────────────────────┤
- │      Watermark & Ghost Traps      │      6D MIMO Traffic Router        │
- └─────────────────┬─────────────────┴──────────────────┬─────────────────┘
-                   │ WebSocket (/ws/diagnostics)        │ REST / SQL
-                   ▼                                    ▼
- ┌───────────────────────────────────┐    ┌───────────────────────────────┐
- │ Control Room Dashboard (Port 5173)│    │ PostgreSQL Nexus / SQLite DB  │
- └───────────────────────────────────┘    └───────────────────────────────┘
+```mermaid
+graph TD
+    Client[AI Agent / MCP Client] <-->|FastMCP JSON-RPC / SSE| Gateway[SME API Gateway - FastAPI Port 8000]
+    Gateway <--> UI[Control Room Dashboard - Port 5173]
+    Gateway <--> Provider[Unified AI Provider - Local VRAM / Langflow]
+    Gateway <--> Database[ForensicNexus - SQLite WAL / PostgreSQL]
+    Gateway <--> Audit[Merkle Audit Engine - ED25519 Signatures]
 ```
 
+### Key Hardware Optimization
+- **Single-GPU Optimization**: SME runs efficiently on NVIDIA GTX 1660 Ti (6GB VRAM) or equivalent hardware via `pynvml` telemetry and dynamic model quantization swapping.
+
 ---
 
-## ⚡ Installation & Requirements
+## 2. Quickstart & Native Launch
 
 ### System Requirements
-- **Python**: `3.13` (recommended)
-- **Node.js**: `>=18.0` & `npm` (for Control Room UI)
-- **Database**: SQLite WAL or PostgreSQL 15+
-- **GPU (Optional)**: NVIDIA GTX 1660 Ti 6GB VRAM or higher
+- **Python**: `3.13.x` (Python 3.14 is blocked due to `spacy` C-extensions).
+- **Node.js**: `v18.0.0` or higher.
+- **Git & C++ Build Tools** (for local native modules).
 
-### Quick Setup
+### Native Launch (30 Seconds)
+
 ```bash
-# Clone & install Python package in editable mode
-git clone https://github.com/SpectreDeath/SME.git
-cd SME
+# 1. Clone & install workspace in editable mode
+cd D:\GitHub\projects\SME
 pip install -e .
 
-# Install frontend dependencies
-cd frontend
-npm install
-cd ..
-```
-
----
-
-## 🚀 Service Startup & Primary Entry Points
-
-### 1. API Gateway / Operator (Backend)
-```bash
+# 2. Launch the API Gateway / Operator
 python -m src.api.main
-```
-*Launches the FastAPI operator process and MCP gateway on port `8000`.*
 
-### 2. Interactive Control Room UI (Frontend)
-```bash
+# 3. Launch the Control Room Frontend (Terminal 2)
 cd frontend
 npm run dev
 ```
-*Serves the web dashboard on `http://localhost:5173`.*
 
-### 3. SME CLI Tool Suite
-```bash
-# Launch CLI main menu
-sme
+Visit **[http://localhost:5173](http://localhost:5173)** to access the Control Room.
 
-# Direct command execution
-python -m sme_cli.main --help
+---
+
+## 3. The Interactive Control Room UI
+
+The Control Room dashboard is built with React 19, Vite, and modern Glassmorphism aesthetics.
+
+### Key Sections:
+- **Connections Manager**: Dynamic AI strategy switching (Ollama, Langflow, Mock) with live hardware telemetry (VRAM, CPU, RAM).
+- **Live Ingestion Feed**: Real-time streaming log of processed atomic facts, entity markers, and router events.
+- **Interactive Knowledge Graph**: 2D force-directed node visualizer ([GraphVisualizer.jsx](file:///D:/GitHub/projects/SME/frontend/src/components/GraphVisualizer.jsx)) for inspecting memory nodes and Merkle audit chains.
+- **The Harvester Panel**: Web page scraper converting URLs to atomic semantic facts.
+- **API Key Manager**: Create, rotate, and revoke security bearer tokens.
+- **Tool Lab**: Test MCP tools interactively from the browser.
+
+---
+
+## 4. Harvester & Cloud Ingestion Engine
+
+SME includes a multi-provider cloud fetcher ([cloud_fetcher.py](file:///D:/GitHub/projects/SME/src/gathering/cloud_fetcher.py)) supporting automatic URL provider detection:
+
+### Supported Storage Links
+- **Google Drive**: Shared file and folder links.
+- **Dropbox**: Shared public links.
+- **OneDrive**: Sharepoint & OneDrive file links.
+- **Amazon S3**: Presigned GET URLs.
+
+```python
+from src.gathering.cloud_fetcher import CloudFetcher, fetch_sync
+
+# Async Usage
+fetcher = CloudFetcher()
+result = await fetcher.fetch("https://drive.google.com/file/d/...")
+print(result["content"])
+
+# Sync Usage
+result = fetch_sync("https://dropbox.com/s/...")
 ```
 
 ---
 
-## 🕹️ Interactive Control Room UI Guide
+## 5. Social Intelligence & OSINT Crawlers
 
-The Control Room UI (`http://localhost:5173`) features four primary panels:
+The `ext_social_intel` plugin monitors disinformation patterns across major social media networks:
 
-### 1. Connections Manager
-- **Dynamic AI Strategy**: Hot-swap between Langflow, Ollama, OpenAI, or Mock providers.
-- **Hardware Telemetry**: Live meters for GPU VRAM, CPU utilization, and RAM allocation.
-
-### 2. The Harvester Panel
-- **Cloud Ingestion**: Ingest documents directly from Google Drive, Dropbox, OneDrive, and AWS S3.
-- **Semantic Scraper**: Convert arbitrary web URLs into structured markdown facts with JS rendering.
-
-### 3. Social Intelligence Crawler
-- Track target handles across Twitter/X, Reddit, TikTok, and Telegram.
-- Real-time sentiment metrics and automated bot classification.
-
-### 4. Epistemic Trust Map
-- Visualize knowledge graph confidence scores, source provenance, and synthetic data flags.
+- **Supported Platforms**: Twitter/X, Reddit, Facebook, YouTube, TikTok, Bluesky (AT Protocol), Telegram.
+- **Coordinated Botnet Detection**: Pattern recognition analyzing posting intervals, text similarity, and account creation velocities.
+- **Sentiment Analysis**: Multi-lingual sentiment scoring and bias indicator detection.
 
 ---
 
-## 🕵️ Social Intelligence & OSINT Crawler
+## 6. Model Context Protocol (MCP) & FastMCP Server
 
-SME includes a multi-platform crawler capable of detecting automated disinfo campaigns:
+SME exposes 45+ dynamic extension tools via FastMCP.
 
-```bash
-# Run social intelligence audit from CLI
-python -m src.utils.social_crawler --target "@suspect_handle" --depth 2
-```
+### Standard Endpoints:
+- `POST /mcp`: JSON-RPC protocol endpoint.
+- `GET /sse`: Server-Sent Events stream for long-running forensic tasks.
+- `GET /docs`: Interactive Swagger API documentation.
 
-### Metrics Tracked
-- **Epistemic Trust Score ($0.0 - 1.0$)**: Weighted evaluation of source domain authority, historical accuracy, and cross-reference validation.
-- **Bot/Ghost Classification**: Stylometric analysis (`faststylometry`) flagging synthetic text patterns and bot automation artifacts.
+### Connecting Claude Desktop or Cursor:
+Add to your `mcpServers` configuration:
 
----
-
-## 🔬 Forensic Intelligence Suite
-
-SME ships with specialized forensic tools:
-
-### Data Guard Auditor (`src/utils/auditor.py`)
-Uses PyOD Isolation Forest to detect tabular data anomalies:
-```bash
-python src/utils/auditor.py data/results/data.csv --contamination 0.15
-```
-
-### Context Sniffer (`src/utils/context_sniffer.py`)
-Scans repositories for persona footprints, secret keys, and project contexts:
-```bash
-python src/utils/context_sniffer.py target_file.py
-```
-
-### Gephi Knowledge Graph Bridge (`src/utils/gephi_bridge.py`)
-Exports network graphs for Gephi visualization:
-```bash
-python src/utils/gephi_bridge.py --mode trust
+```json
+{
+  "mcpServers": {
+    "sme-gateway": {
+      "command": "python",
+      "args": ["-m", "gateway.mcp_server"]
+    }
+  }
+}
 ```
 
 ---
 
-## 🧩 Hot-Swappable Extension Engine
+## 7. Database Tier (SQLite WAL & PostgreSQL Nexus)
 
-Plugins are located in `extensions/` and dynamically loaded by the gateway at boot:
+SME offers a dual-engine database layer:
 
-### Available Extensions
-- `ext_sample_echo`: TPM cryptographic signature verification.
-- `ext_tactical_forensics`: CBRN/IED tactical intelligence parser.
-- `ext_epistemic_gatekeeper`: Trust Score heatmaps and directory auditing.
-- `ext_synthetic_source_auditor`: Auto-vaulting synthetic content.
+### Switching Engines
+Set the environment variable:
 
-### Creating a New Extension
-1. Create `extensions/ext_my_plugin/`.
-2. Add `manifest.json`:
-   ```json
-   {
-     "id": "ext_my_plugin",
-     "name": "Custom Audit Plugin",
-     "version": "1.0.0",
-     "entry_point": "plugin.py"
-   }
-   ```
-3. Implement `on_startup` and `on_ingestion` hooks in `plugin.py`.
+```bash
+# Enable PostgreSQL Nexus
+export SME_USE_POSTGRES=true
+export POSTGRES_CONNECTION_STRING=postgresql://sme:password@localhost:5432/smedb
+```
+
+### PostgreSQL Nexus Capabilities:
+- Connection pooling with automatic reconnection retries.
+- Production multi-container concurrency support.
+- JSONB indexing for forensic event metadata.
 
 ---
 
-## 📖 FastAPI & FastMCP Tool API Reference
+## 8. Merkle Audit Engine & Cryptographic Provenance
 
-### Health & Telemetry
-- `GET /health`: Overall system health status.
-- `WS /ws/diagnostics`: Live telemetry websocket feed.
+The `AuditEngine` ([audit_engine.py](file:///D:/GitHub/projects/SME/src/logic/audit_engine.py)) maintains a tamper-evident SHA-256 Merkle chain for all forensic operations.
 
-### Harvester REST Endpoints
-- `POST /api/v1/harvester/ingest`: Trigger URL or cloud file ingestion.
-- `GET /api/v1/harvester/jobs/{job_id}`: Fetch status of background ingestion job.
+### ED25519 Cryptographic Signatures
 
-### Exposed FastMCP Tools
-- `ingest_url`: Scrape and atomize web page content.
-- `audit_trust_score`: Calculate epistemic trust for a text payload.
-- `detect_watermarks`: Scan text for invisible zero-width watermarks.
+```python
+from src.logic.audit_engine import AuditEngine
 
----
+engine = AuditEngine()
+engine.log_event("EVIDENCE_INGESTED", actor="agent_alpha", payload={"url": "https://example.com"})
 
-## 🖥️ Hardware Optimization (GTX 1660 Ti 6GB VRAM)
+# Generate keypair & sign Merkle root
+private_key, public_key = engine.generate_keypair()
+signature = engine.sign_merkle_root(private_key)
 
-SME is explicitly optimized to execute within **6GB VRAM** limits:
-- **Streaming Pipeline**: Micro-chunking payloads prevents memory spikes.
-- **Model Offloading**: VRAM allocated only during active inference calls.
-- **Process Isolation**: Prevents memory leaks across prolonged operator sessions.
+# Verify signature
+assert engine.verify_merkle_signature(public_key, signature) is True
+```
 
 ---
 
-## 🔧 Troubleshooting & Diagnostics
+## 9. Command Line Tool Suite (SME CLI)
 
-| Problem | Cause | Solution |
-|---|---|---|
-| `5173 Connection Refused` | Frontend dev server not running | Run `cd frontend && npm run dev` |
-| `PostgreSQL Connection Failed` | DB service down or misconfigured | Fall back to SQLite WAL mode via `.env` setting |
-| `Extension Load Warning` | Invalid `manifest.json` schema | Run `python -m gateway.test_gateway` to pinpoint error |
+SME provides a full-featured CLI accessible via `sme` or `python -m sme_cli.main`.
+
+```bash
+# Check system health & VRAM telemetry
+sme status
+
+# Run web harvester on target URL
+sme harvest https://example.com --output markdown
+
+# Run anomaly audit scanner
+sme audit data/sample.csv
+
+# Inspect Merkle audit chain integrity
+sme verify-audit
+```
+
+---
+
+## 10. Troubleshooting & Diagnostics
+
+- **VRAM Contention**: If VRAM warnings occur, switch AI provider to `Mock` or `Ollama 4-bit` in the Connections Manager.
+- **Port Conflicts**: If port 8000 is occupied, run `uvicorn src.api.main:app --port 8001`.
+- **Database Locks**: If SQLite locks occur under heavy concurrency, ensure WAL mode is enabled or switch to PostgreSQL (`SME_USE_POSTGRES=true`).

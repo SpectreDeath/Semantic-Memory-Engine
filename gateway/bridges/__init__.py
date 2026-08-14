@@ -13,9 +13,9 @@ from gateway.bridges.session import SessionBridge
 from gateway.bridges.surface import SurfaceBridge
 
 __all__ = [
-    "SessionBridge",
-    "SemanticGraphBridge",
     "NexusDatabaseBridge",
-    "SurfaceBridge",
+    "SemanticGraphBridge",
+    "SessionBridge",
     "SmeCoreBridge",
+    "SurfaceBridge",
 ]

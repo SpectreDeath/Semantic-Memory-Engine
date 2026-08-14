@@ -131,9 +131,13 @@ class PostgresNexus:
                         return [dict(row) for row in rows]
             except Exception as e:
                 if attempt == max_retries - 1:
-                    logger.exception(f"PostgreSQL Query Error after {max_retries} attempts: {e}\nSQL: {sql}")
+                    logger.exception(
+                        f"PostgreSQL Query Error after {max_retries} attempts: {e}\nSQL: {sql}"
+                    )
                     return []
-                logger.warning(f"PostgreSQL Query retry attempt {attempt + 1}/{max_retries} due to: {e}")
+                logger.warning(
+                    f"PostgreSQL Query retry attempt {attempt + 1}/{max_retries} due to: {e}"
+                )
 
     def execute(self, sql: str, params: tuple = (), max_retries: int = 3):
         """Execute a write operation with automatic retry for transient errors."""
@@ -146,9 +150,13 @@ class PostgresNexus:
                     return
             except Exception as e:
                 if attempt == max_retries - 1:
-                    logger.exception(f"PostgreSQL Execution Error after {max_retries} attempts: {e}\nSQL: {sql}")
+                    logger.exception(
+                        f"PostgreSQL Execution Error after {max_retries} attempts: {e}\nSQL: {sql}"
+                    )
                     raise
-                logger.warning(f"PostgreSQL Execution retry attempt {attempt + 1}/{max_retries} due to: {e}")
+                logger.warning(
+                    f"PostgreSQL Execution retry attempt {attempt + 1}/{max_retries} due to: {e}"
+                )
 
     def get_unified_forensic_feed(self, limit: int = 10) -> list[dict[str, Any]]:
         """

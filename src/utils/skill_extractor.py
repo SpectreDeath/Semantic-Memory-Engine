@@ -813,7 +813,7 @@ class SkillExtractor:
 
         # Ensure valid Antigravity & Agentic standard frontmatter
         lines.append(f"name: {skill.skill_name}")
-        
+
         # Clean description for YAML frontmatter block scalar
         desc_clean = skill.description.strip().replace("\r\n", "\n").replace("\r", "\n")
         if "\n" in desc_clean or len(desc_clean) > 80:
@@ -822,7 +822,7 @@ class SkillExtractor:
                 if d_line.strip():
                     lines.append(f"  {d_line.strip()}")
         else:
-            lines.append(f"description: \"{desc_clean}\"")
+            lines.append(f'description: "{desc_clean}"')
 
         def _fm(key: str, value: str) -> str:
             return f"{key}: {value}"

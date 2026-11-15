@@ -27,10 +27,22 @@ from typing import Any
 # Core SME dependencies
 from src.core.plugin_base import BasePlugin
 
-from .api_manager import SocialMediaAPIManager
-from .campaign_detector import CampaignDetector
-from .content_moderator import ContentModerator
-from .sentiment_analyzer import SentimentAnalyzer
+try:
+    from .api_manager import SocialMediaAPIManager
+    from .campaign_detector import CampaignDetector
+    from .content_moderator import ContentModerator
+    from .sentiment_analyzer import SentimentAnalyzer
+except ImportError:
+    import sys
+    from pathlib import Path
+
+    _dir = Path(__file__).resolve().parent
+    if str(_dir) not in sys.path:
+        sys.path.insert(0, str(_dir))
+    from api_manager import SocialMediaAPIManager
+    from campaign_detector import CampaignDetector
+    from content_moderator import ContentModerator
+    from sentiment_analyzer import SentimentAnalyzer
 
 logger = logging.getLogger("SME.SocialIntelligence")
 

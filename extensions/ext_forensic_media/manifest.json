@@ -1,0 +1,16 @@
+{
+  "plugin_id": "ext_forensic_media",
+  "name": "Forensic Media & Steganography",
+  "version": "1.0.0",
+  "description": "Media forensic analysis including EXIF metadata extraction, LSB steganography anomaly detection, and Error Level Analysis (ELA).",
+  "entry_point": "plugin.py",
+  "author": "SME",
+  "category": "forensics",
+  "dependencies": [],
+  "tools": [
+    {
+      "name": "analyze_media_forensics",
+      "description": "Analyze media file for EXIF metadata, LSB steganography, and ELA artifacts."
+    }
+  ]
+}

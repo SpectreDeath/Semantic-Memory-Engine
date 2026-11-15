@@ -63,7 +63,10 @@ class AnalysisCoreExtension(BasePlugin):
         self.engine = AnalysisEngine() if AnalysisEngine else None
         self.comparison = DocumentComparison() if DocumentComparison else None
         self.kg = KnowledgeGraphOperations() if KnowledgeGraphOperations else None
-        self.overlap = OverlapDiscovery() if OverlapDiscovery else None
+        try:
+            self.overlap = OverlapDiscovery() if OverlapDiscovery else None
+        except (ImportError, ModuleNotFoundError, RuntimeError):
+            self.overlap = None
         self.correlator = DataCorrelator() if DataCorrelator else None
         self.rhetoric = RhetoricalAnalyzer() if RhetoricalAnalyzer else None
         self.polars = PolarsForensics() if PolarsForensics else None

@@ -17,5 +17,5 @@
       "function": "forensic_intelligence_reporter.py"
     }
   ],
-  "hooks": {}
+  "hooks": []
 }

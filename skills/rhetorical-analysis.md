@@ -1,49 +1,103 @@
 ---
-Domain: SME_INTEGRATION
-Version: 1.0.0
-Complexity: Advanced
-Type: Tool
-Category: Analysis
 name: rhetorical-analysis
-Source: Semantic Memory Engine (SME)
-Source_File: src/analysis/rhetoric.py
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Advanced
+type: Tool
+category: Analysis
+source_file: src/analysis/rhetoric.py
+source: Semantic Memory Engine (SME)
+tags:
+  - rhetorical-analysis
+  - argumentation-mining
+  - fallacies-detection
+  - persuasion-modes
+  - rhetorical-structure
+inputs:
+  argument_text:
+    type: string
+    required: true
+    description: Input text containing discursive, argumentative, or persuasive claims.
+  extract_fallacies:
+    type: boolean
+    required: false
+    description: Whether to scan for logical and rhetorical fallacies (default true).
+outputs:
+  persuasion_triad:
+    type: object
+    description: Estimated proportion of Ethos, Pathos, and Logos appeal modes summing to 1.0.
+  argument_claims:
+    type: array
+    description: Extracted central premises, supporting evidence, and warrant conclusions.
+  detected_fallacies:
+    type: array
+    description: List of flagged informal fallacies (e.g. ad hominem, strawman, false dilemma).
 ---
 
-## Purpose
+# Rhetorical Analysis Engine
 
-Analyzes rhetorical patterns in text including argumentation structures, persuasion techniques, and rhetorical device usage.
+`rhetorical-analysis` performs deep argumentation mining and persuasion mode decomposition. It evaluates **Aristotelian persuasion modes (Ethos, Pathos, Logos) and rhetorical fallacy structures in Python**:
 
-## Description
+$$\mathbf{p}_{\text{triad}} = \langle \text{Ethos}, \text{Pathos}, \text{Logos} \rangle, \quad \sum p_i = 1.0, \quad p_i \ge 0$$
 
-The Rhetorical Analysis module examines text for rhetorical patterns and argumentation structures. It identifies persuasion techniques, logical fallacies, rhetorical devices, and overall rhetorical strategy.
+$$\text{Logos} \propto \frac{\text{Count}(\text{PremiseConnectives})}{\text{Sentences}}, \quad \text{Pathos} \propto \frac{\text{Count}(\text{EmotiveAdjectives})}{\text{Tokens}}$$
 
-## Workflow
+---
 
-1. **Text Processing**: Prepare text for analysis
-2. **Device Detection**: Identify rhetorical devices
-3. **Argument Mapping**: Extract argument structure
-4. **Persuasion Analysis**: Assess persuasion techniques
-5. **Fallacy Detection**: Identify logical issues
-6. **Reporting**: Generate rhetorical profile
+## The 5-Stage Rhetorical Analysis Progression
 
-## Examples
+1. **Discourse Ingest & Segmentation**: Ingest argument text; split into rhetorical discourse units and clause segments.
+2. **Persuasion Appeal Scoring**: Scan lexical cues and syntactic markers to evaluate relative weights of Ethos, Pathos, and Logos.
+3. **The Visual Brief**: Generate interactive HTML ternary triangle plot brief at `%TEMP%\rhetorical-analysis-brief-<timestamp>.html` showing persuasion appeal coordinates.
+4. **Mandatory Checkpoint**: If `extract_fallacies: true`, run pattern matching for circular reasoning, ad hominem, and appeal to authority.
+5. **Argument Synthesis & Output Emission**: Structure claims into premise-conclusion hierarchy and emit full `RhetoricalReport`.
 
-### Example 1: Argument Extraction
-**Input**: Persuasive text
-**Output**: Argument structure with claims/evidence
-**Use Case**: Argument understanding
-
-### Example 2: Rhetorical Device Audit
-**Input**: Speech or article
-**Output**: Devices used with examples
-**Use Case**: Rhetorical awareness
-
-### Example 3: Persuasion Pattern Analysis
-**Input**: Marketing copy
-**Output**: Persuasion techniques identified
-**Use Case**: Content analysis
+---
 
 ## Implementation Notes
 
-- **Focus**: Rhetorical patterns
-- **Location**: `D:/SME/src/analysis/rhetoric.py`
+```python
+from typing import Dict, List, Any
+
+def analyze_rhetorical_structure(
+    argument_text: str,
+    extract_fallacies: bool = True
+) -> Dict[str, Any]:
+    text_lower = argument_text.lower()
+    
+    # Heuristic appeal indicators
+    logos_cues = ["because", "therefore", "thus", "evidence", "data", "consequently"]
+    pathos_cues = ["terrible", "outrageous", "heartbreaking", "urgent", "disaster"]
+    ethos_cues = ["as an expert", "experience", "reputation", "integrity", "trusted"]
+    
+    c_logos = sum(text_lower.count(w) for w in logos_cues) + 1
+    c_pathos = sum(text_lower.count(w) for w in pathos_cues) + 1
+    c_ethos = sum(text_lower.count(w) for w in ethos_cues) + 1
+    
+    total = c_logos + c_pathos + c_ethos
+    triad = {
+        "logos": round(c_logos / total, 3),
+        "pathos": round(c_pathos / total, 3),
+        "ethos": round(c_ethos / total, 3)
+    }
+    
+    fallacies = []
+    if extract_fallacies:
+        if "obviously" in text_lower and "everyone knows" in text_lower:
+            fallacies.append({"fallacy": "bandwagon_appeal", "confidence": 0.85})
+        if "idiot" in text_lower or "corrupt" in text_lower:
+            fallacies.append({"fallacy": "ad_hominem", "confidence": 0.90})
+            
+    return {
+        "persuasion_triad": triad,
+        "argument_claims": [{"claim": argument_text[:80] + "...", "type": "premise"}],
+        "detected_fallacies": fallacies
+    }
+```
+
+---
+
+## Anti-Patterns & Guardrails
+
+- **Subjective Over-Attribution** — Flagging genuine empirical evidence as emotional Pathos due to intense vocabulary.
+- **Isolated Sentence Mining** — Evaluating rhetorical fallacies without checking conversational discourse context.

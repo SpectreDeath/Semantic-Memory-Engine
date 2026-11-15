@@ -28,7 +28,7 @@ from typing import Any
 import polars as pl
 
 # Import existing gatekeeper logic
-from gateway.gatekeeper_logic import (
+from src.core.gatekeeper_logic import (
     analyze_model_origin,
     calculate_burstiness,
     calculate_entropy,

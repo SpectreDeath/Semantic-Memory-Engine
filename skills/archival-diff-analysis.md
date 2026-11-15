@@ -1,55 +1,106 @@
 ---
-Domain: SME_INTEGRATION
-Version: 1.0.0
-Complexity: Intermediate
-Type: Tool
-Category: Analysis
 name: archival-diff-analysis
-Source: Semantic Memory Engine (SME)
-Source_File: extensions/ext_archival_diff/
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Advanced
+type: Tool
+category: Analysis
+source_file: extensions/ext_archival_diff/
+source: Semantic Memory Engine (SME)
+tags:
+  - archival-diff-analysis
+  - document-evolution
+  - text-diffing
+  - semantic-shift
+  - revision-forensics
+inputs:
+  baseline_document:
+    type: string
+    required: true
+    description: Initial historical/baseline text version.
+  revised_document:
+    type: string
+    required: true
+    description: Subsequent revised version of the document.
+  granularity:
+    type: string
+    required: false
+    description: Diff comparison level (`'word'`, `'sentence'`, `'paragraph'`, default `'sentence'`).
+outputs:
+  similarity_ratio:
+    type: number
+    description: Overall text similarity coefficient in [0.0, 1.0].
+  insertions:
+    type: array
+    description: List of added content blocks.
+  deletions:
+    type: array
+    description: List of removed content blocks.
+  semantic_shift_score:
+    type: number
+    description: Quantitative metric measuring semantic divergence between versions.
 ---
 
-## Purpose
+# Archival Diff Analysis Engine
 
-Performs comparative analysis between historical and current data states to identify changes, modifications, and temporal anomalies.
+`archival-diff-analysis` tracks the temporal evolution and modification history of text artifacts. It computes **syntactic diffs (LCS/Levenshtein) and semantic shift vectors in Python**:
 
-## Description
+$$\text{Similarity} = \frac{2 \cdot |\text{LCS}(D_1, D_2)|}{|D_1| + |D_2|}, \quad \text{Semantic Shift} = 1 - \cos(\mathbf{e}(D_1), \mathbf{e}(D_2))$$
 
-The Archival Diff tool compares document versions or data snapshots across time, identifying what has changed, been added, or removed. It maintains historical archives and provides detailed diff reports with change significance scoring.
+---
 
-## Workflow
+## The 5-Stage Archival Diff Progression
 
-1. **Snapshot Capture**: Store current state in historical archive
-2. **Baseline Selection**: Choose reference version for comparison
-3. **Diff Computation**: Calculate text, semantic, and structural differences
-4. **Change Classification**: Categorize as addition, modification, or deletion
-5. **Significance Scoring**: Rate the importance of each change
-6. **Report Generation**: Timeline view with change details
+1. **Document Ingest & Normalization**: Tokenize baseline and revised texts into structured semantic blocks according to `granularity`.
+2. **Longest Common Subsequence (LCS) Alignment**: Compute optimal string alignment to identify exact additions, deletions, and replacements.
+3. **The Visual Brief**: Generate interactive HTML side-by-side diff viewer at `%TEMP%\archival-diff-brief-<timestamp>.html` with green insertion and red deletion highlights.
+4. **Mandatory Checkpoint**: Verify semantic coherence; detect stealth redactions or subtle manipulative wording modifications.
+5. **Report & Shift Metric Emission**: Calculate composite `semantic_shift_score` and emit structured change log.
 
-## Examples
-
-### Example 1: Document Version Comparison
-**Input**: Two versions of a document
-**Output**: Detailed diff with change categories
-**Use Case**: Tracking document evolution
-
-### Example 2: Configuration Drift Detection
-**Input**: Current and baseline system configuration
-**Output**: Changes with security implications
-**Use Case**: Infrastructure compliance monitoring
-
-### Example 3: Knowledge Base Updates
-**Input**: Knowledge graph snapshots over time
-**Output**: Evolution timeline with key changes
-**Use Case**: Understanding knowledge development
+---
 
 ## Implementation Notes
 
-- **Comparison Types**: Text diff, semantic diff, structural diff
-- **Storage**: PostgreSQL Nexus with temporal queries
-- **Extension**: Archival Diff
-- **Location**: `D:/SME/extensions/ext_archival_diff/`
+```python
+import difflib
+from typing import Dict, List, Any
 
-## See Also
+def compute_archival_diff(
+    baseline_document: str,
+    revised_document: str,
+    granularity: str = "sentence"
+) -> Dict[str, Any]:
+    b_lines = [s.strip() for s in baseline_document.splitlines() if s.strip()]
+    r_lines = [s.strip() for s in revised_document.splitlines() if s.strip()]
+    
+    matcher = difflib.SequenceMatcher(None, b_lines, r_lines)
+    sim_ratio = matcher.ratio()
+    
+    insertions = []
+    deletions = []
+    
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag == "insert":
+            insertions.extend(r_lines[j1:j2])
+        elif tag == "delete":
+            deletions.extend(b_lines[i1:i2])
+        elif tag == "replace":
+            deletions.extend(b_lines[i1:i2])
+            insertions.extend(r_lines[j1:j2])
+            
+    semantic_shift = round(1.0 - sim_ratio, 4)
+    
+    return {
+        "similarity_ratio": round(sim_ratio, 4),
+        "insertions": insertions,
+        "deletions": deletions,
+        "semantic_shift_score": semantic_shift
+    }
+```
 
-- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
+---
+
+## Anti-Patterns & Guardrails
+
+- **Character-Level Diff Bloat** — Running character-level diffs on large archival corpora, causing massive output payloads and lost semantic context.
+- **Ignoring Semantic Equivalence** — Flagging superficial whitespace or punctuation formatting adjustments as substantive document revisions.

@@ -7,6 +7,7 @@ from datetime import datetime
 from typing import Any
 
 # NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.ForensicVault")
 
@@ -34,7 +35,7 @@ class MatchResult:
     anomaly_score: float
 
 
-class ForensicVault:
+class ForensicVault(BasePlugin):
     """
     Forensic Vault v1.0
     Manages forensic analysis and suspect ledger for detecting recurring adversarial patterns.
@@ -42,9 +43,7 @@ class ForensicVault:
     """
 
     def __init__(self, manifest: dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
 
         # Configuration
         self.fingerprint_threshold = 0.90  # 90% match threshold

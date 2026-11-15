@@ -1,42 +1,81 @@
 ---
-Domain: SME_INTEGRATION
-Version: 1.0.0
-Complexity: Advanced
-Type: Tool
-Category: OSINT
 name: osint-toolkit
-Source: Semantic Memory Engine (SME)
-Source_File: src/gathering/osint_toolkit.py
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Advanced
+type: Tool
+category: OSINT
+source_file: src/gathering/osint_toolkit.py
+source: Semantic Memory Engine (SME)
+tags:
+  - osint-toolkit
+  - open-source-intelligence
+  - domain-whois
+  - dns-reconnaissance
+  - footprinting
+inputs:
+  target_query:
+    type: string
+    required: true
+    description: Target domain, IP address, username, or organization to investigate.
+  recon_types:
+    type: array
+    required: false
+    description: Reconnaissance tasks `['whois', 'dns', 'subdomains', 'certificates']` (default all).
+outputs:
+  intelligence_report:
+    type: object
+    description: Consolidated OSINT findings including DNS records, registrar data, and associated IP ranges.
+  risk_indicators:
+    type: array
+    description: Flagged security or anonymity anomalies detected during reconnaissance.
+  timestamp:
+    type: string
+    description: ISO timestamp of the reconnaissance scan.
 ---
 
-## Purpose
+# OSINT Toolkit Engine
 
-Provides Open Source Intelligence collection capabilities including source discovery, data gathering, and threat intelligence.
+`osint-toolkit` conducts automated open-source intelligence reconnaissance across DNS records, domain WHOIS data, and SSL certificate chains in Python:
 
-## Description
+$$\text{OSINTReport}(\text{Target}) = \text{DNS}(\text{Target}) \cup \text{WHOIS}(\text{Target}) \cup \text{CertTransparency}(\text{Target})$$
 
-The OSINT Toolkit module provides comprehensive open source intelligence gathering. It discovers sources, collects data from public sources, and provides threat intelligence for security operations.
+---
 
-## Workflow
+## The 5-Stage OSINT Toolkit Progression
 
-1. **Source Discovery**: Find relevant sources
-2. **Data Collection**: Gather from sources
-3. **Processing**: Analyze collected data
-4. **Intelligence Generation**: Create intel reports
+1. **Target Ingest & Scope Confirmation**: Ingest target query; validate domain / IP format.
+2. **Passive Reconnaissance Dispatch**: Query DNS servers (A, MX, TXT, NS) and Certificate Transparency logs.
+3. **The Visual Brief**: Generate interactive HTML threat footprint brief at `%TEMP%\osint-brief-<timestamp>.html`.
+4. **Mandatory Checkpoint**: Assert strictly passive inquiry mode; prevent unauthorized active port scanning.
+5. **Intelligence Synthesis & Emission**: Compile intelligence report and emit structured OSINT record.
 
-## Examples
-
-### Example 1: Source Discovery
-**Input**: Topic or domain
-**Output**: Relevant sources
-**Use Case**: Intelligence gathering
-
-### Example 2: Threat Intel
-**Input**: Threat indicators
-**Output**: Threat assessment
-**Use Case**: Security monitoring
+---
 
 ## Implementation Notes
 
-- **Focus**: OSINT collection
-- **Location**: `D:/SME/src/gathering/osint_toolkit.py`
+```python
+from typing import Dict, List, Any, Optional
+
+def run_osint_recon(
+    target_query: str,
+    recon_types: Optional[List[str]] = None
+) -> Dict[str, Any]:
+    return {
+        "intelligence_report": {
+            "target": target_query,
+            "dns_records": {"A": ["192.0.2.1"], "MX": ["mail.example.com"]},
+            "registrar": "Example Registrar LLC",
+            "country": "US"
+        },
+        "risk_indicators": ["newly_registered_domain"],
+        "timestamp": "2026-08-16T16:00:00Z"
+    }
+```
+
+---
+
+## Anti-Patterns & Guardrails
+
+- **Active Network Probing** — Initiating intrusive network scans or vulnerability exploits outside passive OSINT scope.
+- **Unverified WHOIS Privacy Leaks** — Storing raw WHOIS contacts without redacting personal registrant information.

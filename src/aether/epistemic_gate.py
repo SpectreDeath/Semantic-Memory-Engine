@@ -35,7 +35,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 # Import existing gatekeeper logic
-from gateway.gatekeeper_logic import (
+from src.core.gatekeeper_logic import (
     analyze_model_origin,
     calculate_burstiness,
     calculate_entropy,

@@ -1,56 +1,86 @@
 ---
-Domain: SME_INTEGRATION
-Version: 1.0.0
-Complexity: Advanced
-Type: Tool
-Category: Security
 name: ghost-trap-detection
-Source: Semantic Memory Engine (SME)
-Source_File: extensions/ext_ghost_trap/
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Advanced
+type: Tool
+category: Security
+source_file: extensions/ext_ghost_trap/
+source: Semantic Memory Engine (SME)
+tags:
+  - ghost-trap-detection
+  - honeytoken-monitoring
+  - canary-triggers
+  - breach-detection
+  - tamper-detection
+inputs:
+  system_logs:
+    type: array
+    required: true
+    description: System event logs or database access queries to scan for canary triggers.
+  canary_tokens:
+    type: array
+    required: false
+    description: Known honeytoken strings or canary credentials to monitor.
+outputs:
+  trap_triggered:
+    type: boolean
+    description: True if an unauthorized access attempt touched a canary honeytoken.
+  triggered_traps:
+    type: array
+    description: List of triggered honeytoken records with accessing agent/IP and timestamps.
+  threat_level:
+    type: string
+    description: Threat assessment (`'none'`, `'medium'`, `'critical'`).
 ---
 
-## Purpose
+# Ghost Trap Detection Engine
 
-Identifies stealthy, obfuscated, or hidden processes, signals, and data flows that may indicate covert operations or data exfiltration.
+`ghost-trap-detection` plants and monitors decoy honeytokens (canary keys, fake database tables, simulated endpoints) to detect unauthorized intrusion or rogue agent data exfiltration in Python:
 
-## Description
+$$\text{BreachDetected} \iff \exists e \in \text{AccessLogs} : \text{Target}(e) \in \text{Honeytokens}$$
 
-The Ghost Trap detects hidden or obfuscated activity by analyzing process patterns, network behavior, and data flows. It identifies signatures of stealth techniques including steganography, covert channels, and disguised data transfers.
+---
 
-## Workflow
+## The 5-Stage Ghost Trap Progression
 
-1. **Baseline Establishment**: Create normal behavior baseline
-2. **Anomaly Detection**: Identify deviations from expected patterns
-3. **Steganography Analysis**: Detect hidden data in media files
-4. **Covert Channel Detection**: Identify hidden communication paths
-5. **Obfuscation Analysis**: Detect code or data obfuscation
-6. **Risk Assessment**: Calculate threat level for detected anomalies
-7. **Reporting**: Detailed findings with mitigation recommendations
+1. **Log & Canary Ingest**: Ingest system access logs and registered canary honeytoken definitions.
+2. **Honeytoken Access Matching**: Scan query traces and memory dumps for references to canary strings.
+3. **The Visual Brief**: Generate interactive HTML threat alert card at `%TEMP%\ghost-trap-brief-<timestamp>.html`.
+4. **Mandatory Checkpoint**: If a honeytoken is accessed, automatically escalate `threat_level` to critical.
+5. **Incident Report & Output Emission**: Emit triggered trap array and trigger automated quarantine protocols.
 
-## Examples
-
-### Example 1: Network Traffic Analysis
-**Input**: Network capture data
-**Output**: Suspicious patterns with covert channel indicators
-**Use Case**: Security monitoring
-
-### Example 2: File Steganography Detection
-**Input**: Media files or documents
-**Output**: Hidden data detection results
-**Use Case**: Data leakage investigation
-
-### Example 3: Process Anomaly Detection
-**Input**: System process list and behavior
-**Output**: Hidden or suspicious processes
-**Use Case**: Malware detection
+---
 
 ## Implementation Notes
 
-- **Detection Methods**: Statistical analysis, pattern matching, entropy analysis
-- **Status**: Beta (🟡)
-- **Extension**: Ghost Trap
-- **Location**: `D:/SME/extensions/ext_ghost_trap/`
+```python
+from typing import Dict, List, Any, Optional
 
-## See Also
+def detect_ghost_traps(
+    system_logs: List[Dict[str, Any]],
+    canary_tokens: Optional[List[str]] = None
+) -> Dict[str, Any]:
+    canaries = set(canary_tokens or ["canary_api_key_xyz", "decoy_user_admin", "honey_vault_table"])
+    triggered = []
+    
+    for log in system_logs:
+        log_str = str(log)
+        for c in canaries:
+            if c in log_str:
+                triggered.append({"canary": c, "log_entry": log, "severity": "CRITICAL"})
+                
+    has_trap = len(triggered) > 0
+    return {
+        "trap_triggered": has_trap,
+        "triggered_traps": triggered,
+        "threat_level": "critical" if has_trap else "none"
+    }
+```
 
-- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
+---
+
+## Anti-Patterns & Guardrails
+
+- **Hard-Coded Public Canaries** — Using publicly documented canary token names that attackers can easily identify and bypass.
+- **Missing Automated Quarantines** — Detecting honeytoken breaches without triggering immediate session quarantine.

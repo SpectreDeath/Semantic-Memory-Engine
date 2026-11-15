@@ -1,103 +1,77 @@
 ---
-Domain: API Design
-Version: 1.0.0
-Complexity: Intermediate
-Type: architecture
-Category: api
-name: API Versioning
-Source: SME v3.0.0
-Source_File: gateway/routers/
+name: api-versioning
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Intermediate
+type: Process
+category: Core
+source_file: gateway/routers/
+source: Semantic Memory Engine (SME)
+tags:
+  - api-versioning
+  - semantic-versioning
+  - backward-compatibility
+  - deprecation-lifecycle
+  - schema-evolution
+inputs:
+  endpoint_path:
+    type: string
+    required: true
+    description: API route path (e.g. `'/api/v1/analyze'`, `'/api/v2/analyze'`).
+  client_version:
+    type: string
+    required: false
+    description: Client requested semver string (e.g. `'1.2.0'`).
+outputs:
+  resolved_route:
+    type: string
+    description: Internal route handler mapped to the requested version.
+  is_deprecated:
+    type: boolean
+    description: True if the requested API version is in the deprecation cycle.
+  sunset_date:
+    type: string
+    description: ISO date when the deprecated version will be deactivated.
 ---
 
-# API Versioning Strategy
+# API Versioning Engine
 
-## Purpose
-Manage API evolution and backward compatibility for the SME (Semantic Memory Engine) Gateway using semantic versioning and URL-based versioning.
+`api-versioning` manages backward-compatible API routing, semver negotiation, and deprecation lifecycles across SME gateway endpoints in Python:
 
-## Description
-SME v3.0.0 implements a versioned API strategy to ensure clients can reliably consume endpoints while allowing the system to evolve. All API routes are prefixed with `/api/v1/` to indicate the major version.
+$$\text{Route}(\text{Path}, v_{\text{client}}) = \arg\max_{v \in \mathcal{V}_{\text{supported}}, v \le v_{\text{client}}} \text{Handler}(v)$$
 
-## Architecture
+---
 
-```
-/api/v1/
-├── analysis/          # Analysis endpoints
-│   ├── graph          # Knowledge graph generation
-│   └── report         # Intelligence reports
-├── ingestion/         # Data ingestion
-│   └── crawl          # Web crawling
-├── connections/       # Service management
-│   ├── status         # Health checks
-│   └── ai-provider    # Provider switching
-├── search/            # Semantic search
-└── memory/            # Memory operations
-```
+## The 5-Stage API Versioning Progression
 
-## Workflow
+1. **Request Route Ingestion & Header Parse**: Ingest route path and `X-API-Version` header.
+2. **SemVer Range Matching**: Match client version against registered active and legacy route handlers.
+3. **The Visual Brief**: Generate interactive HTML API lifecycle matrix at `%TEMP%\api-versioning-brief-<timestamp>.html`.
+4. **Mandatory Checkpoint**: Assert that deprecated endpoints emit standard `Sunset` and `Deprecation` HTTP headers.
+5. **Route Resolution & Output Emission**: Dispatch to active handler and emit routing metadata.
 
-### Version Naming Convention
-- **Major** (`v1`, `v2`): Breaking changes, new URL prefix
-- **Minor** (`v1.1`): New features, backward compatible
-- **Patch** (`v1.0.1`): Bug fixes, no API changes
-
-### Adding a New Endpoint
-```python
-# gateway/routers/analysis.py
-from fastapi import APIRouter
-
-router = APIRouter(prefix="/api/v1/analysis", tags=["analysis"])
-
-@router.post("/graph")
-async def generate_graph(request: GraphRequest) -> GraphResponse:
-    """Generate knowledge graph from text."""
-    # Implementation
-    pass
-```
-
-### Deprecating an Endpoint
-```python
-from fastapi import APIRouter
-import warnings
-
-router = APIRouter(prefix="/api/v1", tags=["legacy"])
-
-@router.post("/old-endpoint", deprecated=True)
-async def old_endpoint():
-    """Deprecated: Use /api/v1/new-endpoint instead."""
-    warnings.warn("This endpoint is deprecated", DeprecationWarning)
-    # Redirect or handle
-    pass
-```
-
-## Examples
-
-### Client Usage
-```javascript
-// Frontend API calls
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
-
-// Version 1 endpoints
-const response = await fetch(`${API_URL}/api/v1/analysis/graph`, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ text: 'input data' })
-});
-```
-
-### Version Migration
-When releasing v2:
-1. Create new router prefix `/api/v2/`
-2. Keep v1 endpoints active with deprecation warnings
-3. Update client to use v2 endpoints
-4. Remove v1 after migration period (6 months recommended)
+---
 
 ## Implementation Notes
-- All routers use `APIRouter` from FastAPI
-- Tags group endpoints by domain in OpenAPI docs
-- Version in URL allows parallel deployment of multiple versions
-- Breaking changes require new major version prefix
 
-## Related Skills
-- authentication.md - Securing versioned endpoints
-- error-handling.md - Consistent error responses across versions
-- config-management.md - Environment-specific API URLs
+```python
+from typing import Dict, List, Any, Optional
+
+def resolve_api_version(
+    endpoint_path: str,
+    client_version: Optional[str] = "1.0.0"
+) -> Dict[str, Any]:
+    is_v1 = "/v1/" in endpoint_path or client_version.startswith("1.")
+    return {
+        "resolved_route": endpoint_path if not is_v1 else endpoint_path.replace("/v1/", "/v2/"),
+        "is_deprecated": is_v1,
+        "sunset_date": "2026-12-31" if is_v1 else None
+    }
+```
+
+---
+
+## Anti-Patterns & Guardrails
+
+- **Abrupt Breaking Changes** — Deactivating API routes without a documented deprecation window.
+- **Unpinned Client Calls** — Failing to default unversioned API requests to the oldest supported stable version.

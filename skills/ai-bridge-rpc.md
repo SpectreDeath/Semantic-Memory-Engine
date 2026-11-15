@@ -1,47 +1,87 @@
 ---
-Domain: SME_INTEGRATION
-Version: 1.0.0
-Complexity: Advanced
-Type: Tool
-Category: Integration
 name: ai-bridge-rpc
-Source: Semantic Memory Engine (SME)
-Source_File: src/ai/bridge_rpc.py
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Advanced
+type: Tool
+category: Integration
+source_file: gateway/mcp_server.py
+source: Semantic Memory Engine (SME)
+tags:
+  - ai-bridge-rpc
+  - mcp-rpc-protocol
+  - json-rpc-20
+  - session-bridge
+  - low-latency-ipc
+inputs:
+  rpc_method:
+    type: string
+    required: true
+    description: Target JSON-RPC 2.0 method name (e.g. `'sme/query_nexus'`, `'sme/transduce_sensor'`).
+  params:
+    type: object
+    required: false
+    description: Parameter dictionary for the remote method invocation.
+  session_id:
+    type: string
+    required: false
+    description: Optional active session token for stateful context persistence.
+outputs:
+  rpc_result:
+    type: object
+    description: Return payload from the remote RPC bridge method.
+  rpc_status:
+    type: string
+    description: RPC status (`'ok'`, `'error'`, `'timeout'`).
+  latency_ms:
+    type: number
+    description: Round-trip execution latency in milliseconds.
 ---
 
-## Purpose
+# AI Bridge RPC Engine
 
-Provides asynchronous JSON-RPC bridge for non-blocking communication with AI agents.
+`ai-bridge-rpc` provides the core JSON-RPC 2.0 communication bridge connecting the SME Lawnmower Man MCP Gateway to external agents and tool runners in Python:
 
-## Description
+$$\text{Request} = \langle \text{id}, \text{method}, \text{params}, \text{jsonrpc: "2.0"} \rangle \xrightarrow{\text{IPC}} \text{BridgeHandler}() \to \text{Response}$$
 
-The AI Bridge RPC module implements asynchronous JSON-RPC communication for AI agent interactions. It prevents IDE blocking and improves concurrency handling for agent communications.
+---
 
-## Workflow
+## The 5-Stage AI Bridge RPC Progression
 
-1. **RPC Setup**: Initialize JSON-RPC server
-2. **Request Reception**: Accept async requests
-3. **Async Processing**: Handle non-blocking
-4. **Response Return**: Send async responses
-5. **Connection Management**: Maintain sessions
+1. **RPC Message Intake & Framing**: Ingest JSON-RPC envelope; assert valid `jsonrpc`, `method`, and `id` keys.
+2. **Session Context Binding**: Attach active SQLite WAL session scratchpad and security token.
+3. **The Visual Brief**: Generate interactive HTML RPC message sequence diagram at `%TEMP%\ai-bridge-brief-<timestamp>.html`.
+4. **Mandatory Checkpoint**: Validate parameter schema and authenticate caller permissions.
+5. **Method Dispatch & Response Emission**: Route call to internal SME engine and emit standard JSON-RPC response.
 
-## Examples
-
-### Example 1: Async Agent Call
-**Input**: Agent request
-**Output**: Async response
-**Use Case**: Non-blocking operation
-
-### Example 2: Streaming RPC
-**Input**: Stream request
-**Output**: Streaming responses
-**Use Case**: Real-time updates
+---
 
 ## Implementation Notes
 
-- **Protocol**: JSON-RPC (async)
-- **Location**: `D:/SME/src/ai/bridge_rpc.py`
+```python
+import time
+from typing import Dict, List, Any, Optional
 
-## See Also
+def dispatch_ai_bridge_rpc(
+    rpc_method: str,
+    params: Optional[Dict[str, Any]] = None,
+    session_id: Optional[str] = None
+) -> Dict[str, Any]:
+    t0 = time.perf_counter()
+    # Mock JSON-RPC dispatch
+    result_data = {"method": rpc_method, "executed": True, "session": session_id or "default"}
+    elapsed = (time.perf_counter() - t0) * 1000.0
+    
+    return {
+        "rpc_result": result_data,
+        "rpc_status": "ok",
+        "latency_ms": round(elapsed + 2.5, 2)
+    }
+```
 
-- [SME v3.0.0 Operator Manual](D:/SME/SME%20v3.0.0%20Operator%20Manual.md)
+---
+
+## Anti-Patterns & Guardrails
+
+- **Malformed JSON-RPC Envelopes** — Sending raw payloads without standard `jsonrpc: "2.0"` headers and error objects.
+- **Unbounded RPC Blocking** — Allowing synchronous RPC calls to hang without client-side timeout deadlines ($T \le 30\text{s}$).

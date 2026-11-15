@@ -13,6 +13,8 @@ ALLOWED_TABLES = {
     "source_provenance",
     "financial_transactions",
     "forensic_anomalies",
+    "nexus_adversarial_patterns",
+    "nexus_synthetic_baselines",
 }
 
 

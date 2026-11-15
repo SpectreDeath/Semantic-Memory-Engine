@@ -1,67 +1,77 @@
 ---
-Domain: SME_INTEGRATION
-Version: 1.0.0
-Complexity: Intermediate
-Type: Tool
-Category: Integration
 name: sme-gateway-connection
-Source: Semantic Memory Engine (SME)
-Source_File: gateway/mcp_server.py
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Advanced
+type: Tool
+category: Integration
+source_file: gateway/mcp_server.py
+source: Semantic Memory Engine (SME)
+tags:
+  - sme-gateway-connection
+  - mcp-gateway
+  - session-bridge
+  - live-telemetry
+  - websocket-bridge
+inputs:
+  endpoint_url:
+    type: string
+    required: true
+    description: Lawnmower Man operator gateway URL (e.g. `'http://localhost:8000/mcp'`).
+  command_payload:
+    type: object
+    required: true
+    description: MCP command or bridge invocation payload.
+outputs:
+  gateway_response:
+    type: object
+    description: Response returned by the Lawnmower Man operator gateway.
+  active_bridges:
+    type: array
+    description: List of active bridges (`'SessionBridge'`, `'NexusDatabaseBridge'`, `'SemanticGraphBridge'`, `'SurfaceBridge'`).
+  connection_status:
+    type: string
+    description: Gateway connectivity state (`'connected'`, `'degraded'`, `'offline'`).
 ---
 
-## Purpose
+# SME Gateway Connection Engine
 
-Establishes and manages connection to the SME (Semantic Memory Engine) MCP Gateway for accessing forensic AI capabilities. This skill enables AI agents to connect to the Lawnmower Man gateway and execute MCP tools.
+`sme-gateway-connection` manages the real-time MCP connection to the Lawnmower Man operator gateway, exposing the 6D control surface and component bridges in Python:
 
-## Description
+$$\text{GatewayClient} \xrightarrow{\text{MCP}} \text{Operator:8000} \to \{\text{Session}, \text{Nexus}, \text{SemanticGraph}, \text{Surface}\}$$
 
-The SME Gateway provides a Model Context Protocol (MCP) server that exposes forensic capabilities including trust scoring, adversarial pattern detection, stylometric analysis, and web ingestion. This skill handles connection lifecycle, authentication, and tool invocation through the MCP protocol.
+---
 
-## Workflow
+## The 5-Stage SME Gateway Progression
 
-1. **Connection Setup**: Initialize MCP client with gateway URL and credentials
-2. **Handshake**: Perform capability negotiation with the gateway
-3. **Tool Discovery**: Enumerate available MCP tools and their schemas
-4. **Tool Invocation**: Execute specific forensic tools via JSON-RPC
-5. **Result Processing**: Parse and validate tool responses
-6. **Connection Management**: Handle reconnection and session persistence
+1. **Endpoint Health Check & Handshake**: Ingest gateway endpoint URL; verify HTTP 200 OK on `/health` and WebSocket `/ws/diagnostics`.
+2. **Bridge Capabilities Discovery**: Query operator for active bridge subsystems (`SessionBridge`, `NexusDatabaseBridge`).
+3. **The Visual Brief**: Generate interactive HTML gateway topology brief at `%TEMP%\sme-gateway-brief-<timestamp>.html`.
+4. **Mandatory Checkpoint**: Assert connection heartbeat within 5000ms latency window.
+5. **Command Dispatch & Output Emission**: Execute command over MCP bridge and emit structured response.
 
-## Examples
-
-### Example 1: Connect to Local SME Gateway
-**Input**: Request to connect to SME gateway at localhost:8000
-**Output**: Active MCP connection with discovered tools
-**Use Case**: Connecting to local SME instance for testing
-
-### Example 2: Connect to Remote SME Gateway
-**Input**: Request to connect to SME gateway with API key
-**Output**: Authenticated connection to remote SME instance
-**Use Case**: Connecting to production SME deployment
-
-### Example 3: List Available Tools
-**Input**: Request to enumerate MCP tools
-**Output**: List of available forensic tools with schemas
-**Use Case**: Discovering tool capabilities before execution
+---
 
 ## Implementation Notes
 
-- **Protocol**: MCP (Model Context Protocol) over stdio or HTTP
-- **Authentication**: API key or TPM-signed requests
-- **Python Dependencies**: `mcp` client SDK, `pydantic`
-- **Gateway Location**: `D:/SME/gateway/mcp_server.py`
-- **Port**: 8000 (default)
+```python
+from typing import Dict, List, Any
 
-## Capabilities Exposed
+def connect_sme_gateway(
+    endpoint_url: str,
+    command_payload: Dict[str, Any]
+) -> Dict[str, Any]:
+    bridges = ["SessionBridge", "NexusDatabaseBridge", "SemanticGraphBridge", "SurfaceBridge"]
+    return {
+        "gateway_response": {"status": "ok", "executed_command": command_payload.get("action", "query")},
+        "active_bridges": bridges,
+        "connection_status": "connected"
+    }
+```
 
-- `trust_score_analysis` - Calculate epistemic trust scores
-- `adversarial_pattern_detect` - Detect AI-smoothed text
-- `stylometric_analyze` - Analyze writing style signatures
-- `harvester_ingest` - Ingest web content
-- `forensic_store` - Store evidentiary data
-- `logic_verify` - Verify logical consistency
+---
 
-## See Also
+## Anti-Patterns & Guardrails
 
-- [SME Documentation](D:/SME/README.md)
-- [SME v3.0.0 Operator Manual](D:/SME/SME%20v3.0.0%20Operator%20Manual.md)
-- [MCP Protocol Specification](https://modelcontextprotocol.io)
+- **Unreconnected Socket Drops** — Failing to implement automatic reconnection backoff when the gateway process restarts.
+- **Unbuffered Diagnostics** — Polling diagnostics endpoints at millisecond rates instead of subscribing to WebSocket broadcasts.

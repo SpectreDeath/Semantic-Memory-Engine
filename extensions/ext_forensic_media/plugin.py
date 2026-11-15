@@ -8,20 +8,33 @@ LSB steganography anomaly detection, and Error Level Analysis (ELA).
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
+
+from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("lawnmower.ext_forensic_media")
 
 
-class ForensicMediaPlugin:
+class ForensicMediaPlugin(BasePlugin):
     """
     Forensic Media analysis plugin exposing tool handlers.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, manifest: dict[str, Any] | None = None, nexus_api: Any = None) -> None:
+        resolved_manifest = manifest or {
+            "plugin_id": "ext_forensic_media",
+            "name": "Forensic Media & Steganography",
+            "version": "1.0.0",
+        }
+        super().__init__(resolved_manifest, nexus_api)
         self.name = "ext_forensic_media"
-        self.version = "1.0.0"
+        self.version = resolved_manifest.get("version", "1.0.0")
+
+    def get_tools(self) -> list[Callable[..., Any]]:
+        """Expose forensic media tool handlers."""
+        return [self.analyze_media_forensics]
 
     def analyze_media_forensics(
         self, file_path: str, checks: list[str] | None = None
@@ -65,3 +78,8 @@ class ForensicMediaPlugin:
             }
 
         return results
+
+
+def register_extension(manifest: dict[str, Any], nexus_api: Any) -> ForensicMediaPlugin:
+    """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    return ForensicMediaPlugin(manifest, nexus_api)

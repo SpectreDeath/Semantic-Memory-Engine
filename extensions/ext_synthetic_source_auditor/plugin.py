@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Any
 
 # Import shared logic
-from gateway.gatekeeper_logic import calculate_burstiness, calculate_entropy
+from src.core.gatekeeper_logic import calculate_burstiness, calculate_entropy
 
 # Import SDA engine
 try:
@@ -142,7 +142,7 @@ class AnalyticAuditor(BasePlugin):
 
         # Import Gatekeeper Logic (Dynamic to avoid circular imports during startup if logic not ready)
         try:
-            from gateway.gatekeeper_logic import calculate_trust_score, calculate_vault_proximity
+            from src.core.gatekeeper_logic import calculate_trust_score, calculate_vault_proximity
 
             proximity = calculate_vault_proximity(text)
             trust_data = calculate_trust_score(entropy, burstiness, proximity)

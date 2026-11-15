@@ -69,7 +69,7 @@ The Control Room dashboard is built with React 19, Vite, and modern Glassmorphis
 ### Key Sections:
 - **Connections Manager**: Dynamic AI strategy switching (Ollama, Langflow, Mock) with live hardware telemetry (VRAM, CPU, RAM).
 - **Live Ingestion Feed**: Real-time streaming log of processed atomic facts, entity markers, and router events.
-- **Interactive Knowledge Graph**: 2D force-directed node visualizer ([GraphVisualizer.jsx](file:///D:/GitHub/projects/SME/frontend/src/components/GraphVisualizer.jsx)) for inspecting memory nodes and Merkle audit chains.
+- **Interactive Knowledge Graph**: 2D force-directed node visualizer ([GraphVisualizer.jsx](../frontend/src/components/GraphVisualizer.jsx)) for inspecting memory nodes and Merkle audit chains.
 - **The Harvester Panel**: Web page scraper converting URLs to atomic semantic facts.
 - **API Key Manager**: Create, rotate, and revoke security bearer tokens.
 - **Tool Lab**: Test MCP tools interactively from the browser.
@@ -78,7 +78,7 @@ The Control Room dashboard is built with React 19, Vite, and modern Glassmorphis
 
 ## 4. Harvester & Cloud Ingestion Engine
 
-SME includes a multi-provider cloud fetcher ([cloud_fetcher.py](file:///D:/GitHub/projects/SME/src/gathering/cloud_fetcher.py)) supporting automatic URL provider detection:
+SME includes a multi-provider cloud fetcher ([cloud_fetcher.py](../src/gathering/cloud_fetcher.py)) supporting automatic URL provider detection:
 
 ### Supported Storage Links
 - **Google Drive**: Shared file and folder links.
@@ -157,7 +157,7 @@ export POSTGRES_CONNECTION_STRING=postgresql://sme:password@localhost:5432/smedb
 
 ## 8. Merkle Audit Engine & Cryptographic Provenance
 
-The `AuditEngine` ([audit_engine.py](file:///D:/GitHub/projects/SME/src/logic/audit_engine.py)) maintains a tamper-evident SHA-256 Merkle chain for all forensic operations.
+The `AuditEngine` ([audit_engine.py](../src/logic/audit_engine.py)) maintains a tamper-evident SHA-256 Merkle chain for all forensic operations.
 
 ### ED25519 Cryptographic Signatures
 

@@ -4,8 +4,8 @@ import os
 from datetime import datetime
 from typing import Any
 
-# Import shared trust logic
-from gateway.gatekeeper_logic import (
+# Import shared trust logic from core
+from src.core.gatekeeper_logic import (
     analyze_model_origin,
     calculate_burstiness,
     calculate_entropy,

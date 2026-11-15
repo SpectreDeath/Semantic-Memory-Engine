@@ -4,7 +4,7 @@ Version: 1.0.0
 Complexity: Intermediate
 Type: Tool
 Category: Analysis
-name: text-summarization
+name: gold-standard-text-summarization
 Source: Semantic Memory Engine (SME)
 Source_File: src/core/text_summarizer.py
 ---

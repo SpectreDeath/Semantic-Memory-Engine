@@ -40,8 +40,8 @@ The Gephi Bridge exports SME data to Gephi-compatible formats (GraphML, CSV, etc
 
 - **Node Limit**: 2,000 nodes (hardware constraint)
 - **Modes**: Project, trust, knowledge, synthetic
-- **Location**: `D:/SME/src/utils/gephi_bridge.py`
+- **Location**: `src/utils/gephi_bridge.py`
 
 ## See Also
 
-- [README.md - Gephi Bridge](D:/SME/README.md)
+- [README.md - Gephi Bridge](../README.md)

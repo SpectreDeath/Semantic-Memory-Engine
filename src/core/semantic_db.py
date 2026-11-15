@@ -2,8 +2,12 @@ from __future__ import annotations
 
 import logging
 
-import chromadb
-from chromadb.utils import embedding_functions
+try:
+    import chromadb
+    from chromadb.utils import embedding_functions
+except ImportError:
+    chromadb = None
+    embedding_functions = None
 
 from src.core.semantic_graph import SemanticGraph
 from src.core.tenancy import get_tenant_collection_name
@@ -14,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 class SemanticMemory:
     def __init__(self, collection_name="laboratory_memories"):
+        if chromadb is None or embedding_functions is None:
+            raise RuntimeError("chromadb is required to initialize SemanticMemory")
         self.db_path = get_path("storage", "base_dir") + "/chroma_db"
         self.client = chromadb.PersistentClient(path=self.db_path)
         # Using a default local embedding function

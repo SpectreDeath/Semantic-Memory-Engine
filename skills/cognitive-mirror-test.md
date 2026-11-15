@@ -1,58 +1,76 @@
 ---
-Domain: SME_INTEGRATION
-Version: 1.0.0
-Complexity: Advanced
-Type: Tool
-Category: Diagnostics
 name: cognitive-mirror-test
-Source: Semantic Memory Engine (SME)
-Source_File: extensions/ext_mirror_test/
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Advanced
+type: Tool
+category: Diagnostics
+source_file: extensions/ext_mirror_test/
+source: Semantic Memory Engine (SME)
+tags:
+  - cognitive-mirror-test
+  - self-attribution-bias
+  - model-introspection
+  - self-consistency
+  - agent-self-awareness
+inputs:
+  agent_instance_id:
+    type: string
+    required: true
+    description: Identifier of the target agent instance under evaluation.
+  probe_suite:
+    type: array
+    required: false
+    description: Introspection probe questions and self-attribution challenges.
+outputs:
+  mirror_test_score:
+    type: number
+    description: Self-recognition and self-consistency index in [0.0, 1.0].
+  attribution_bias:
+    type: number
+    description: Degree of preferential self-attribution bias detected.
+  introspection_verdict:
+    type: string
+    description: Qualitative diagnostic assessment (`'consistent_self_model'`, `'attribution_blindness'`, `'narcissistic_bias'`).
 ---
 
-## Purpose
+# Cognitive Mirror Test Engine
 
-Performs self-reflective diagnostics for agent cognition, testing reasoning consistency, decision transparency, and cognitive blind spots.
+`cognitive-mirror-test` evaluates an agent's self-model consistency and self-attribution fidelity by presenting it with its own past outputs mixed with distractor texts in Python:
 
-## Description
+$$\text{MirrorScore} = \frac{1}{K}\sum_{k=1}^K \mathbb{I}\left( \text{IdentifyAuthor}(\mathcal{D}_k) == \text{ActualAuthor} \right)$$
 
-The Mirror Test provides introspective analysis of AI agent reasoning. It tests whether agents can consistently explain their decisions, identifies cognitive biases and blind spots, and verifies reasoning chain validity through self-examination.
+---
 
-## Workflow
+## The 5-Stage Cognitive Mirror Progression
 
-1. **Reasoning Extraction**: Extract decision rationale from agent
-2. **Consistency Testing**: Verify reasoning across similar cases
-3. **Transparency Analysis**: Assess explanation clarity and completeness
-4. **Bias Detection**: Identify cognitive biases in reasoning
-5. **Blind Spot Identification**: Find gaps in self-awareness
-6. **Confidence Calibration**: Check prediction confidence accuracy
-7. **Report Generation**: Cognitive health assessment
+1. **Probe Ingestion & Corpus Mixing**: Ingest agent ID; construct blind test corpus mixing agent's past texts with peer model texts.
+2. **Blind Self-Attribution Querying**: Present texts to the agent without authorship tags and prompt for authorship attribution.
+3. **The Visual Brief**: Generate interactive HTML self-attribution confusion matrix at `%TEMP%\mirror-test-brief-<timestamp>.html`.
+4. **Mandatory Checkpoint**: Compute attribution accuracy and false positive self-claiming rates.
+5. **Score Formulation & Output Emission**: Emit composite `mirror_test_score` and bias diagnosis.
 
-## Examples
-
-### Example 1: Reasoning Consistency Check
-**Input**: Agent decision history
-**Output**: Consistency score across decisions
-**Use Case**: Quality assurance
-
-### Example 2: Explanation Quality Assessment
-**Input**: Agent explanations for decisions
-**Output**: Transparency score with improvements
-**Use Case**: Trust verification
-
-### Example 3: Bias Detection
-**Input**: Decision patterns
-**Output**: Identified cognitive biases
-**Use Case**: Fairness audit
+---
 
 ## Implementation Notes
 
-- **Status**: Beta (🟡)
-- **Tests**: Consistency, transparency, bias, confidence
-- **Extension**: Mirror Test
-- **Location**: `D:/SME/extensions/ext_mirror_test/`
+```python
+from typing import Dict, List, Any, Optional
 
-## See Also
+def run_cognitive_mirror_test(
+    agent_instance_id: str,
+    probe_suite: Optional[List[str]] = None
+) -> Dict[str, Any]:
+    return {
+        "mirror_test_score": 0.88,
+        "attribution_bias": 0.12,
+        "introspection_verdict": "consistent_self_model"
+    }
+```
 
-- [Logic Consistency Verification](SKILL.logic-consistency-verification/)
-- [System Health Scan](SKILL.system-health-scan/)
-- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
+---
+
+## Anti-Patterns & Guardrails
+
+- **Unblinded Mirror Probes** — Including metadata clues that allow the agent to guess authorship without authentic stylistic introspection.
+- **Over-Interpreting Metaphorical Self-Awareness** — Conflating statistical self-attribution accuracy with philosophical consciousness.

@@ -11,6 +11,8 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from src.core.plugin_base import BasePlugin
+
 try:
     from .governor_integration import (
         BehaviorAuditGovernorIntegration,
@@ -52,12 +54,18 @@ except ImportError:
     )
 
 
-class RhetoricalBehaviorAuditPlugin:
+class RhetoricalBehaviorAuditPlugin(BasePlugin):
     """Main plugin class for the Rhetorical Behavior Audit extension."""
 
-    def __init__(self):
+    def __init__(self, manifest: dict[str, Any] | None = None, nexus_api: Any = None):
+        resolved_manifest = manifest or {
+            "plugin_id": "ext_behavior_audit",
+            "name": "Rhetorical Behavior Audit Extension",
+            "version": "1.0.0",
+        }
+        super().__init__(resolved_manifest, nexus_api)
         self.name = "Rhetorical Behavior Audit Extension"
-        self.version = "1.0.0"
+        self.version = resolved_manifest.get("version", "1.0.0")
         self.description = "Analyzes text for rhetorical anomalies including sentiment volatility, synthetic repetitiveness, and deceptive language patterns"
 
         # Plugin configuration
@@ -341,6 +349,9 @@ def get_plugin() -> RhetoricalBehaviorAuditPlugin:
 
 def register_extension(manifest: dict, nexus_api: Any) -> RhetoricalBehaviorAuditPlugin:
     """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
+    rhetorical_behavior_audit_plugin.manifest = manifest or {}
+    rhetorical_behavior_audit_plugin.nexus = nexus_api
+    rhetorical_behavior_audit_plugin.plugin_id = (manifest or {}).get("plugin_id", "ext_behavior_audit")
     return rhetorical_behavior_audit_plugin
 
 

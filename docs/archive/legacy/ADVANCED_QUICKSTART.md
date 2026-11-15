@@ -385,7 +385,7 @@ docker-compose up --build
 ## 📚 Documentation
 
 - [CONTROL_ROOM_OPERATOR.md](CONTROL_ROOM_OPERATOR.md) - Definitive guide for v2.0.0
-- [RELEASE_STRATEGY.md](RELEASE_STRATEGY.md) - Release strategy guide
+- [RELEASE_STRATEGY.md](../RELEASE_STRATEGY.md) - Release strategy guide
 - Inline docstrings: `help(calibrate_signal_term)`, etc.
 
 ---

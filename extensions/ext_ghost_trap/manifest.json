@@ -5,9 +5,9 @@
   "description": "Ghost Trap Extension - Monitors for potential self-replication events and unauthorized file creation",
   "author": "SME",
   "dependencies": [],
-  "hooks": {
-    "governor_task_execution": "persistence_monitor.py"
-  },
+  "hooks": [
+    "governor_task_execution"
+  ],
   "tools": [
     {
       "name": "scan_for_ghosts",

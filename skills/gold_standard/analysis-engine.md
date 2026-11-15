@@ -4,7 +4,7 @@ Version: 1.0.0
 Complexity: Advanced
 Type: Tool
 Category: Analysis
-name: analysis-engine
+name: gold-standard-analysis-engine
 Source: Semantic Memory Engine (SME)
 Source_File: src/analysis/engine.py
 ---

@@ -3,23 +3,44 @@ import logging
 import os
 from typing import Any
 
-from prometheus_client import Counter, Gauge
+from prometheus_client import REGISTRY, Counter, Gauge
 from psycopg2 import pool
 
 logger = logging.getLogger("LawnmowerMan.ArchivalDiff.Exporter")
 
+
+def _get_or_create_metric(factory, name: str, documentation: str, labelnames: list[str]):
+    """Reuse an already-registered Prometheus collector across sandboxed reloads."""
+    names_map = getattr(REGISTRY, "_names_to_collectors", {})
+    existing = names_map.get(name) or names_map.get(name.removesuffix("_total"))
+    if existing is not None:
+        return existing
+    try:
+        return factory(name, documentation, labelnames)
+    except ValueError:
+        existing = names_map.get(name) or names_map.get(name.removesuffix("_total"))
+        if existing is not None:
+            return existing
+        raise
+
+
 # Phase 4: Prometheus Metrics
-SME_ARCHIVAL_CHANGE_DETECTED = Gauge(
+SME_ARCHIVAL_CHANGE_DETECTED = _get_or_create_metric(
+    Gauge,
     "sme_archival_change_detected",
     "Indicates if data scrubbing was detected (1) or not (0)",
     ["url"],
 )
 
-SME_ARCHIVAL_SCRUB_EVENTS_TOTAL = Counter(
-    "sme_archival_scrub_events_total", "Total number of detected archival scrubbing events", ["url"]
+SME_ARCHIVAL_SCRUB_EVENTS_TOTAL = _get_or_create_metric(
+    Counter,
+    "sme_archival_scrub_events_total",
+    "Total number of detected archival scrubbing events",
+    ["url"],
 )
 
-SME_ARCHIVAL_DELETED_PARAGRAPHS_TOTAL = Counter(
+SME_ARCHIVAL_DELETED_PARAGRAPHS_TOTAL = _get_or_create_metric(
+    Counter,
     "sme_archival_deleted_paragraphs_total",
     "Total number of paragraphs detected as scrubbed",
     ["url"],

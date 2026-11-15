@@ -7,20 +7,20 @@ import os
 from typing import Any
 
 # NexusAPI: use self.nexus.nexus and self.nexus.get_hsm() — no gateway imports
+from src.core.plugin_base import BasePlugin
 
 logger = logging.getLogger("LawnmowerMan.SemanticAuditor")
 
 
-class SemanticAuditor:
+class SemanticAuditor(BasePlugin):
     """
     Semantic Auditor v1.0
     Detects semantic drift in model outputs by comparing recent samples against master signatures.
     """
 
     def __init__(self, manifest: dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
-        self.nexus = nexus_api  # SmeCoreBridge
-        self.plugin_id = manifest.get("plugin_id")
+        super().__init__(manifest, nexus_api)
+        # Keep self.nexus as the SmeCoreBridge (already assigned by BasePlugin)
 
         # Dynamic path resolution for portability
         base_dir = os.path.dirname(os.path.abspath(__file__))

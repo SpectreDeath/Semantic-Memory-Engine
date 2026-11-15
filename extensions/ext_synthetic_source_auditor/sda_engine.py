@@ -1,9 +1,12 @@
 import json
+import logging
 import math
 import os
 import re
 from collections import Counter
 from typing import Any
+
+logger = logging.getLogger("LawnmowerMan.SDA")
 
 
 class SourceDeAnonymizationEngine:
@@ -36,15 +39,17 @@ class SourceDeAnonymizationEngine:
         self.signatures = self._load_signatures()
 
     def _load_signatures(self) -> dict[str, Any]:
-        """Load model signatures from JSON file."""
+        """Load model signatures from JSON file, degrading gracefully if absent."""
         if not os.path.exists(self.signatures_path):
-            raise FileNotFoundError(f"Signatures file not found: {self.signatures_path}")
+            logger.warning("Signatures file not found at %s; running with empty signatures.", self.signatures_path)
+            return {}
 
         try:
-            with open(self.signatures_path) as f:
+            with open(self.signatures_path, encoding="utf-8") as f:
                 return json.load(f)
         except Exception as e:
-            raise RuntimeError(f"Failed to load signatures: {e}")
+            logger.warning("Failed to load signatures from %s: %s", self.signatures_path, e)
+            return {}
 
     def _extract_features(self, text: str) -> list[float]:
         """

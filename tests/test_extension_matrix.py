@@ -61,13 +61,8 @@ EXTENSIONS_NO_TOOLS = {
 }
 
 # Extensions that fail to load due to missing dependencies or environment issues
-# These are infrastructure issues, not code bugs
-EXTENSIONS_SKIP_LOAD = {
-    "ext_analysis_core",  # Requires chromadb
-    "ext_gateway",  # Requires fastmcp
-    "ext_mirror_test",  # Dataclass issues with Python 3.14
-    "ext_llm_evaluator",  # Division by zero bug in handler
-}
+# Currently empty: all 44 extensions discover and load cleanly.
+EXTENSIONS_SKIP_LOAD: set[str] = set()
 
 
 # ---------------------------------------------------------------------------
@@ -119,12 +114,8 @@ def test_all_extensions_discovered(extension_manager):
         else set(loaded.get("loaded_extensions", []))
     )
 
-    # Skip background processor extensions and those with missing dependencies
-    expected = [
-        name
-        for name in EXTENSION_NAMES
-        if name not in EXTENSIONS_NO_TOOLS and name not in EXTENSIONS_SKIP_LOAD
-    ]
+    # Discover all non-skipped extensions (including background/event-driven ones)
+    expected = [name for name in EXTENSION_NAMES if name not in EXTENSIONS_SKIP_LOAD]
     missing = [name for name in expected if name not in loaded_ids]
     assert not missing, (
         f"The following extensions were not loaded by ExtensionManager: {missing}\n"
@@ -177,33 +168,38 @@ def test_extension_tool_schema(extension_manager, ext_name):
 @pytest.mark.parametrize("ext_name", EXTENSION_NAMES)
 def test_extension_handler_returns_string(extension_manager, ext_name):
     """
-    Call each tool handler with an empty string and verify it returns a string
-    (or raises a predictable ValueError/TypeError, not an unhandled crash).
+    Call each sandboxed tool handler with an empty string and verify it returns
+    either a string/dict payload or a structured sandboxed error envelope
+    (matching ExtensionManager._wrap_sandboxed_handler & test_extension_sandbox.py).
     """
-    # Skip extensions with missing dependencies
     if ext_name in EXTENSIONS_SKIP_LOAD:
         pytest.skip(f"Extension '{ext_name}' has missing dependencies")
 
     all_tools: list[dict[str, Any]] = extension_manager.get_extension_tools()
     ext_tools = [t for t in all_tools if t.get("plugin_id") == ext_name]
 
-    for tool in ext_tools:
-        handler = tool["handler"]
-        try:
-            if inspect.iscoroutinefunction(handler):
-                result = asyncio.run(handler(""))
-            else:
-                result = handler("")
-            # If it returns something, it must be a string (JSON or plain text)
-            if result is not None:
-                assert isinstance(result, str), (
-                    f"Tool '{tool['name']}' returned {type(result)} instead of str."
+    try:
+        for tool in ext_tools:
+            handler = tool["handler"]
+            try:
+                if inspect.iscoroutinefunction(handler):
+                    result = asyncio.run(handler(""))
+                else:
+                    result = handler("")
+                if result is not None:
+                    assert isinstance(result, str | dict | list), (
+                        f"Tool '{tool['name']}' returned unexpected type {type(result)}."
+                    )
+                    if isinstance(result, dict) and result.get("status") == "error":
+                        assert "error" in result and "plugin_id" in result, (
+                            f"Malformed sandbox error envelope from '{tool['name']}': {result}"
+                        )
+            except (ValueError, TypeError, NotImplementedError):
+                pass
+            except Exception as exc:
+                pytest.fail(
+                    f"Tool '{tool['name']}' from extension '{ext_name}' raised an "
+                    f"unexpected exception when called with an empty string: {exc!r}"
                 )
-        except (ValueError, TypeError, NotImplementedError):
-            # Acceptable — the handler correctly rejects empty/invalid input
-            pass
-        except Exception as exc:
-            pytest.fail(
-                f"Tool '{tool['name']}' from extension '{ext_name}' raised an "
-                f"unexpected exception when called with an empty string: {exc!r}"
-            )
+    finally:
+        extension_manager.reset_extension_failures(ext_name)

@@ -70,4 +70,4 @@ Access specialized forensic utilities in one place.
 
 ---
 
-**Next Steps**: See [ADVANCED_QUICKSTART.md](file:///d:/SME/docs/ADVANCED_QUICKSTART.md) for deeper probe configurations.
+**Next Steps**: See [ADVANCED_QUICKSTART.md](ADVANCED_QUICKSTART.md) for deeper probe configurations.

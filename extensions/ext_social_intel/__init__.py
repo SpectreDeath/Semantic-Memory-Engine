@@ -27,11 +27,18 @@ __version__ = "1.0.0"
 __author__ = "SME Team"
 __description__ = "Social Media Intelligence Crawler for disinformation detection"
 
-from .api_manager import SocialMediaAPIManager
-from .campaign_detector import CampaignDetector
-from .content_moderator import ContentModerator
-from .plugin import SocialIntelligenceCrawler, register_extension
-from .sentiment_analyzer import SentimentAnalyzer
+try:
+    from .api_manager import SocialMediaAPIManager
+    from .campaign_detector import CampaignDetector
+    from .content_moderator import ContentModerator
+    from .plugin import SocialIntelligenceCrawler, register_extension
+    from .sentiment_analyzer import SentimentAnalyzer
+except ImportError:
+    from extensions.ext_social_intel.api_manager import SocialMediaAPIManager
+    from extensions.ext_social_intel.campaign_detector import CampaignDetector
+    from extensions.ext_social_intel.content_moderator import ContentModerator
+    from extensions.ext_social_intel.plugin import SocialIntelligenceCrawler, register_extension
+    from extensions.ext_social_intel.sentiment_analyzer import SentimentAnalyzer
 
 __all__ = [
     "CampaignDetector",

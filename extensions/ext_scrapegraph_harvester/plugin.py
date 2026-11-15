@@ -11,12 +11,12 @@ from urllib import parse
 
 import pydantic
 
-from gateway import hardware_security, nexus_db, session_manager
-
 # Ensure SME is importable
 PROJECT_ROOT = pathlib.Path(__file__).resolve().parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.core.plugin_base import BasePlugin
 
 # Import SME core components
 
@@ -119,18 +119,24 @@ class MemoryNode:
     relationships: list[dict[str, Any]]
 
 
-class ScrapeGraphHarvester:
+class ScrapeGraphHarvester(BasePlugin):
     """
     Main plugin class for ScrapeGraphAI integration with SME.
     Handles agentic scraping, research, and Markdown conversion.
     """
 
     def __init__(self, manifest: dict[str, Any], nexus_api: Any):
-        self.manifest = manifest
+        super().__init__(manifest, nexus_api)
         self.nexus_api = nexus_api
-        self.hsm = hardware_security.get_hsm()
-        self.nexus = nexus_db.get_nexus()
-        self.session_manager = session_manager.get_session_manager()
+        if nexus_api is not None and hasattr(nexus_api, "get_hsm"):
+            self.hsm = nexus_api.get_hsm()
+        else:
+            self.hsm = None
+        if nexus_api is not None and hasattr(nexus_api, "nexus"):
+            self.nexus = nexus_api.nexus
+        else:
+            self.nexus = None
+        self.session_manager = getattr(nexus_api, "session_manager", None) if nexus_api else None
         self.category = "forensics"
 
         # VRAM-optimized model configuration with timeouts

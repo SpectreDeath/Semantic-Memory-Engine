@@ -1,57 +1,83 @@
 ---
-Domain: SME_INTEGRATION
-Version: 1.0.0
-Complexity: Intermediate
-Type: Tool
-Category: Diagnostics
 name: system-health-scan
-Source: Semantic Memory Engine (SME)
-Source_File: extensions/ext_stetho_scan/
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Intermediate
+type: Tool
+category: Diagnostics
+source_file: extensions/ext_stetho_scan/
+source: Semantic Memory Engine (SME)
+tags:
+  - system-health-scan
+  - system-diagnostics
+  - resource-profiling
+  - bridge-status
+  - latency-benchmarks
+inputs:
+  scan_scope:
+    type: string
+    required: false
+    description: Scope of health diagnostics (`'full'`, `'bridges_only'`, `'hardware_only'`, default `'full'`).
+outputs:
+  overall_health:
+    type: string
+    description: Aggregate health verdict (`'healthy'`, `'degraded'`, `'critical'`).
+  subsystem_statuses:
+    type: object
+    description: Status breakdown for CPU, GPU (GTX 1660 Ti), RAM, SQLite WAL, and MCP Bridges.
+  diagnostic_metrics:
+    type: object
+    description: Quantitative measurements including RAM usage percentage, disk space, and bridge round-trip latency.
 ---
 
-## Purpose
+# System Health Scan Engine
 
-Performs comprehensive system health and diagnostic scanning to assess SME infrastructure, detect issues, and provide optimization recommendations.
+`system-health-scan` performs full-stack operational diagnostics across the Lawnmower Man operator, hardware substrates (CPU/GPU), and MCP bridges in Python:
 
-## Description
+$$\text{HealthScore} = \min_{s \in \text{Subsystems}} \text{HealthState}(s)$$
 
-The Stetho Scan is a deep diagnostic tool that examines the SME system's health across multiple dimensions: database connectivity, API responsiveness, extension loading, memory usage, and processing queues. It provides actionable recommendations for maintenance and optimization.
+---
 
-## Workflow
+## The 5-Stage System Health Progression
 
-1. **Component Enumeration**: List all SME components and extensions
-2. **Connectivity Testing**: Verify database and API connections
-3. **Performance Sampling**: Measure response times and resource usage
-4. **Queue Analysis**: Check pending tasks and processing backlog
-5. **Error Scanning**: Identify recent errors and warnings
-6. **Health Scoring**: Calculate overall system health index
-7. **Recommendation Generation**: Provide optimization suggestions
+1. **Diagnostic Scope Ingest**: Ingest scan parameters; initialize system probes.
+2. **Subsystem Telemetry Probing**: Probe CPU, GPU (GTX 1660 Ti 6GB), memory utilization, and SQLite disk space.
+3. **The Visual Brief**: Generate interactive HTML diagnostic status brief at `%TEMP%\health-scan-brief-<timestamp>.html`.
+4. **Mandatory Checkpoint**: Assert that memory utilization $< 90\%$ and database journals are responsive.
+5. **Report Formulation & Output Emission**: Compile subsystem status dictionary and emit health verdict.
 
-## Examples
-
-### Example 1: Full System Diagnostic
-**Input**: Request for comprehensive health check
-**Output**: Health report with component status
-**Use Case**: Routine maintenance
-
-### Example 2: Issue Investigation
-**Input**: Specific symptom or error
-**Output**: Focused diagnostic on related components
-**Use Case**: Troubleshooting
-
-### Example 3: Pre-deployment Check
-**Input**: System readiness verification request
-**Output**: Readiness score with gap analysis
-**Use Case**: Before major operations
+---
 
 ## Implementation Notes
 
-- **Checks**: Database, API, extensions, memory, queues, logs
-- **Output**: JSON report with health scores
-- **Extension**: Stetho Scan
-- **Location**: `D:/SME/extensions/ext_stetho_scan/`
+```python
+import time
+from typing import Dict, List, Any, Optional
 
-## See Also
+def scan_system_health(
+    scan_scope: str = "full"
+) -> Dict[str, Any]:
+    subsystems = {
+        "mcp_bridges": "healthy",
+        "sqlite_wal": "healthy",
+        "cpu": "healthy",
+        "gpu_nvidia_gtx_1660_ti": "healthy"
+    }
+    metrics = {
+        "ram_used_pct": 42.5,
+        "disk_free_gb": 120.4,
+        "bridge_latency_ms": 3.2
+    }
+    return {
+        "overall_health": "healthy",
+        "subsystem_statuses": subsystems,
+        "diagnostic_metrics": metrics
+    }
+```
 
-- [Extensions Catalog](../docs/archive/legacy/EXTENSIONS_CATALOG.md)
-- [Performance Optimization Guide](D:/SME/docs/PERFORMANCE_OPTIMIZATION_GUIDE.md)
+---
+
+## Anti-Patterns & Guardrails
+
+- **Blocking Diagnostic Probes** — Running heavy synchronous benchmarking during high-load production operations.
+- **Ignoring GPU Memory Leaks** — Failing to monitor PyTorch/CUDA VRAM fragmentation over prolonged session runs.

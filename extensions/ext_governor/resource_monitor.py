@@ -182,13 +182,13 @@ class EnhancedResourceMonitor:
             except ImportError:
                 # GPUtil not available, use CPU memory
                 vram_usage_gb = psutil.virtual_memory().used / (1024**3)
-        except:
+        except Exception:
             vram_usage_gb = 0.0
 
         try:
             cpu_usage = psutil.cpu_percent(interval=0.1)
             memory_usage_gb = psutil.virtual_memory().used / (1024**3)
-        except:
+        except Exception:
             cpu_usage = 0.0
             memory_usage_gb = 0.0
 

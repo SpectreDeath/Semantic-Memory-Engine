@@ -173,7 +173,7 @@ The V3.0 "Odyssey" release brings substantial architectural improvements to the 
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
 
 ---
 

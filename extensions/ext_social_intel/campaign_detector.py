@@ -649,6 +649,7 @@ class CampaignDetector:
 
         for user_id, user_post_list in user_posts.items():
             # Calculate posting frequency
+            time_diffs: list[float] | None = None
             if len(user_post_list) > 1:
                 timestamps = [
                     post.get("created_at") for post in user_post_list if post.get("created_at")
@@ -659,7 +660,7 @@ class CampaignDetector:
                         try:
                             time_diff = abs((timestamps[i] - timestamps[i - 1]).total_seconds())
                             time_diffs.append(time_diff)
-                        except:
+                        except (TypeError, AttributeError):
                             pass
 
                     if time_diffs:
@@ -679,7 +680,7 @@ class CampaignDetector:
                 "total_posts": len(user_post_list),
                 "posting_frequency": posting_frequency,
                 "uniform_times": uniform_times,
-                "time_variance": np.var(time_diffs) if "time_diffs" in locals() else 0,
+                "time_variance": np.var(time_diffs) if time_diffs else 0,
             }
 
         return analysis
@@ -1089,7 +1090,7 @@ class CampaignDetector:
             try:
                 diff = abs((timestamps[i] - timestamps[i - 1]).total_seconds())
                 time_diffs.append(diff)
-            except:
+            except (TypeError, AttributeError):
                 pass
 
         if len(time_diffs) < 2:

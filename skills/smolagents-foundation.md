@@ -1,43 +1,78 @@
 ---
-Domain: SME_INTEGRATION
-Version: 1.0.0
-Complexity: Advanced
-Type: Tool
-Category: AI
 name: smolagents-foundation
-Source: Semantic Memory Engine (SME)
-Source_File: src/ai/smolagents_forensics.py
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Advanced
+type: Tool
+category: AI
+source_file: src/ai/smolagents_forensics.py
+source: Semantic Memory Engine (SME)
+tags:
+  - smolagents-foundation
+  - code-agent
+  - python-interpreter
+  - lightweight-agents
+  - direct-tool-calling
+inputs:
+  task_goal:
+    type: string
+    required: true
+    description: Objective prompt for the Smolagents CodeAgent or ToolCallingAgent.
+  agent_type:
+    type: string
+    required: false
+    description: Agent flavor (`'CodeAgent'` or `'ToolCallingAgent'`, default `'CodeAgent'`).
+outputs:
+  agent_output:
+    type: string
+    description: Final result or synthesized response returned by the agent.
+  code_actions:
+    type: array
+    description: List of Python code blocks executed in the local sandbox during reasoning.
+  steps_taken:
+    type: integer
+    description: Number of planning/execution steps taken to complete the task.
 ---
 
-## Purpose
+# Smolagents Foundation Engine
 
-Provides smolagents-based implementation for lightweight, efficient agent operations in forensic contexts.
+`smolagents-foundation` runs lightweight CodeAgents that write and execute self-contained Python code blocks directly to solve complex multi-step data tasks:
 
-## Description
+$$\text{CodeAgent}(\mathcal{G}) \to \text{GeneratePythonCode}() \xrightarrow{\text{Sandbox}} \text{Execute}() \to \text{Observation}$$
 
-The Smolagents Foundation module implements lightweight agent patterns using the smolagents framework. It provides efficient, minimal-overhead agents for forensic analysis tasks.
+---
 
-## Workflow
+## The 5-Stage Smolagents Progression
 
-1. **Agent Creation**: Initialize smolagent
-2. **Task Definition**: Define agent task
-3. **Execution**: Run agent
-4. **Result Collection**: Gather outputs
-5. **Cleanup**: Release resources
+1. **Task Ingestion & Tool Decorator Setup**: Ingest task goal; wrap SME tools with Smolagents `@tool` signatures.
+2. **Code Block Generation**: Prompt model to emit valid executable Python snippet invoking declared tools.
+3. **The Visual Brief**: Generate interactive HTML code execution transcript brief at `%TEMP%\smolagents-brief-<timestamp>.html`.
+4. **Mandatory Checkpoint**: Execute code in restricted sandboxed Python interpreter; prevent unauthorized filesystem writes.
+5. **Result Aggregation & Output Emission**: Capture console outputs and return synthesized solution payload.
 
-## Examples
-
-### Example 1: Lightweight Analysis
-**Input**: Analysis task
-**Output**: Efficient result
-**Use Case**: Resource optimization
-
-### Example 2: Agent Chaining
-**Input**: Multi-step task
-**Output**: Chained results
-**Use Case**: Complex workflows
+---
 
 ## Implementation Notes
 
-- **Framework**: smolagents
-- **Location**: `D:/SME/src/ai/smolagents_forensics.py`
+```python
+from typing import Dict, List, Any
+
+def execute_smolagent(
+    task_goal: str,
+    agent_type: str = "CodeAgent"
+) -> Dict[str, Any]:
+    # Mock Smolagent execution
+    code_block = f"# CodeAgent generated script\nresult = extract_stylometry('{task_goal[:20]}')\nprint(result)"
+    return {
+        "agent_output": f"Smolagents {agent_type} achieved goal: '{task_goal[:50]}...'",
+        "code_actions": [code_block],
+        "steps_taken": 2
+    }
+```
+
+---
+
+## Anti-Patterns & Guardrails
+
+- **Unrestricted Python Execution** — Allowing model-generated Python code to execute outside an isolated sandbox.
+- **Verbose Code Hallucination** — Generating multi-hundred-line code scripts when a simple direct tool call suffices.

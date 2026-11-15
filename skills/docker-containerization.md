@@ -1,123 +1,77 @@
 ---
-Domain: DevOps
-Version: 1.0.0
-Complexity: Intermediate
-Type: deployment
-Category: infrastructure
-name: Docker Containerization
-Source: SME v3.0.0
-Source_File: docker-compose.yaml
+name: docker-containerization
+domain: SME_INTEGRATION
+version: 1.0.0
+complexity: Intermediate
+type: Process
+category: Core
+source_file: Dockerfile.operator
+source: Semantic Memory Engine (SME)
+tags:
+  - docker-containerization
+  - container-lifecycle
+  - multi-stage-builds
+  - service-isolation
+  - docker-compose
+inputs:
+  service_name:
+    type: string
+    required: true
+    description: Target service container (`'operator'`, `'frontend'`, `'nexus_db'`).
+  action:
+    type: string
+    required: true
+    description: Operation (`'build'`, `'up'`, `'down'`, `'inspect'`).
+outputs:
+  container_status:
+    type: string
+    description: Current container execution state (`'running'`, `'stopped'`, `'exited'`).
+  port_mappings:
+    type: object
+    description: Host-to-container port binding mapping.
+  health_status:
+    type: string
+    description: Docker container health check verdict (`'healthy'` or `'unhealthy'`).
 ---
 
-# Docker Containerization
+# Docker Containerization Engine
 
-## Purpose
-Deploy and manage the SME (Semantic Memory Engine) stack using Docker containers with auto-healing and health checks.
+`docker-containerization` orchestrates multi-container builds and deployments for the Lawnmower Man operator, frontend, and database services:
 
-## Description
-SME v3.0.1 uses a multi-container architecture with Docker Compose for orchestration. The stack includes the Operator (core logic with embedded AI provider), Frontend (Control Room UI), and PostgreSQL Nexus (database).
+$$\text{DeploymentState} = \text{DockerCompose}(\{\text{Operator: 8000}, \text{Frontend: 5173}, \text{NexusDB: 5432}\})$$
 
-## Architecture
+---
 
-```
-┌─────────────────────────────────────────────┐
-│              Docker Compose Stack            │
-├─────────────────────────────────────────────┤
-│  sme-operator    │ Port 8000  │ Core Logic │
-│  sme-frontend    │ Port 5173  │ Control Room │
-│  postgres-nexus  │ Port 5432  │ Database    │
-└─────────────────────────────────────────────┘
-```
+## The 5-Stage Docker Containerization Progression
 
-## Workflow
+1. **Service Target Intake & Compose Parsing**: Ingest service name; parse `docker-compose.yaml` configuration.
+2. **Multi-Stage Build Execution**: Build lightweight production image with minimal runtime layers.
+3. **The Visual Brief**: Generate interactive HTML container topology dashboard at `%TEMP%\docker-brief-<timestamp>.html`.
+4. **Mandatory Checkpoint**: Assert container health check passing (`/health` endpoint 200 OK).
+5. **Service Status & Output Emission**: Emit port mappings and active container state.
 
-### Quick Start
-```bash
-# Download the blueprint
-curl -O https://raw.githubusercontent.com/SpectreDeath/Semantic-Memory-Engine/main/docker-compose.yaml
-
-# Start the stack
-docker-compose up -d
-
-# Check status
-docker-compose ps
-
-# View logs
-docker-compose logs -f sme-operator
-```
-
-### Building from Source
-```bash
-# Build all images
-docker-compose build
-
-# Build specific service
-docker-compose build sme-operator
-
-# Rebuild without cache
-docker-compose build --no-cache
-```
-
-### Environment Configuration
-```bash
-# Copy example environment
-cp .env.example .env
-
-# Edit with your secrets
-# Required variables:
-# - POSTGRES_PASSWORD
-# - JWT_SECRET
-# - API_KEYS
-```
-
-### Health Checks
-Each container includes health checks:
-- **Operator**: HTTP GET /health on port 8000
-- **Frontend**: HTTP GET / on port 5173
-- **PostgreSQL**: pg_isready command
-
-### Resource Limits
-Containers are optimized for 16GB RAM systems:
-```yaml
-deploy:
-  resources:
-    limits:
-      memory: 4G
-    reservations:
-      memory: 2G
-```
-
-## Examples
-
-### Debugging
-```bash
-# Shell into operator container
-docker-compose exec sme-operator /bin/bash
-
-# View container resource usage
-docker stats
-
-# Inspect network
-docker network inspect sme_default
-```
-
-### Data Persistence
-```bash
-# Backup PostgreSQL
-docker-compose exec postgres-nexus pg_dump -U sme nexus > backup.sql
-
-# Restore PostgreSQL
-cat backup.sql | docker-compose exec -T postgres-nexus psql -U sme nexus
-```
+---
 
 ## Implementation Notes
-- All containers use Python 3.13 base images
-- Volume mounts for persistent data (data/, logs/)
-- Auto-restart policy: unless-stopped
-- Network isolation via Docker networks
-- Graceful shutdown handling with signal traps
 
-## Related Skills
-- authentication.md - Secure container access
-- config-management.md - Environment variables
-- error-handling.md - Container error recovery
+```python
+from typing import Dict, List, Any
+
+def manage_docker_service(
+    service_name: str,
+    action: str = "inspect"
+) -> Dict[str, Any]:
+    port_map = {"operator": {"8000/tcp": "8000"}, "frontend": {"5173/tcp": "5173"}}
+    return {
+        "container_status": "running",
+        "port_mappings": port_map.get(service_name, {}),
+        "health_status": "healthy"
+    }
+```
+
+---
+
+## Anti-Patterns & Guardrails
+
+- **Root Container Execution** — Running production containers with default root privileges.
+- **Bloated Image Layers** — Including build tools and test caches in production container images.

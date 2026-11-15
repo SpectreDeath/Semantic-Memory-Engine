@@ -238,7 +238,7 @@ class LLMEvaluatorExtension(BasePlugin):
                 }
             )
 
-        avg_total = sum(r["total"] for r in results) / len(results)
+        avg_total = sum(r["total"] for r in results) / len(results) if results else 0.0
 
         return json.dumps(
             {

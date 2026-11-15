@@ -20,6 +20,7 @@ import json
 import logging
 import os
 import sys
+import types
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any, ClassVar, Optional
@@ -370,6 +371,8 @@ class ExtensionManager:
         and the ImportBlocker hook to prevent dangerous imports.
         """
         safe_module_name = f"sme_ext_{plugin_id}"
+        pkg_name = f"{safe_module_name}_pkg"
+        plugin_dir = str(Path(module_path).resolve().parent)
 
         if self.strict_mode:
             self._import_blocker.install()
@@ -379,12 +382,23 @@ class ExtensionManager:
             with open(module_path, "rb") as f:
                 content_hash = hashlib.sha256(f.read()).hexdigest()[:16]
 
-            # Load module directly from file - no sys.path manipulation
-            spec = importlib.util.spec_from_file_location(safe_module_name, module_path)
+            # Register an isolated package namespace per extension so sibling relative
+            # imports stay scoped to plugin_dir and never collide on global sys.modules,
+            # and register the module before exec_module so @dataclass works on Python 3.13+.
+            pkg_mod = types.ModuleType(pkg_name)
+            pkg_mod.__path__ = [plugin_dir]
+            pkg_mod.__package__ = pkg_name
+            sys.modules[pkg_name] = pkg_mod
+
+            full_module_name = f"{pkg_name}.{Path(module_path).stem}"
+            spec = importlib.util.spec_from_file_location(full_module_name, module_path)
             if spec is None or spec.loader is None:
                 raise SecurityError(f"Cannot create module spec for {module_path}")
 
             module = importlib.util.module_from_spec(spec)
+            module.__package__ = pkg_name
+            sys.modules[full_module_name] = module
+            sys.modules[safe_module_name] = module
 
             # Use standard builtins for now to prevent breaking standard library
             # module.__builtins__ manipulation is too brittle and breaks logging/inspect

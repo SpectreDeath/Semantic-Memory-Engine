@@ -41,7 +41,10 @@ class SourceDeAnonymizationEngine:
     def _load_signatures(self) -> dict[str, Any]:
         """Load model signatures from JSON file, degrading gracefully if absent."""
         if not os.path.exists(self.signatures_path):
-            logger.warning("Signatures file not found at %s; running with empty signatures.", self.signatures_path)
+            logger.warning(
+                "Signatures file not found at %s; running with empty signatures.",
+                self.signatures_path,
+            )
             return {}
 
         try:

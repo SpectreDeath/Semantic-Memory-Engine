@@ -194,7 +194,9 @@ class TrustScorer:
 
         vault_penalty = vault_proximity * 60.0
 
-        nts = round(max(0.0, min(100.0 - (entropy_penalty + burstiness_penalty + vault_penalty), 100.0)), 1)
+        nts = round(
+            max(0.0, min(100.0 - (entropy_penalty + burstiness_penalty + vault_penalty), 100.0)), 1
+        )
 
         if nts < 50:
             label = "Synthetic Hazard"

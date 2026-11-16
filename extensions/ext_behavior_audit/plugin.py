@@ -351,7 +351,9 @@ def register_extension(manifest: dict, nexus_api: Any) -> RhetoricalBehaviorAudi
     """Standard Lawnmower Man v1.1.1 extension hook; required by ExtensionManager."""
     rhetorical_behavior_audit_plugin.manifest = manifest or {}
     rhetorical_behavior_audit_plugin.nexus = nexus_api
-    rhetorical_behavior_audit_plugin.plugin_id = (manifest or {}).get("plugin_id", "ext_behavior_audit")
+    rhetorical_behavior_audit_plugin.plugin_id = (manifest or {}).get(
+        "plugin_id", "ext_behavior_audit"
+    )
     return rhetorical_behavior_audit_plugin
 
 
